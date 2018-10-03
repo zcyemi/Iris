@@ -1,16 +1,15 @@
- 
 
-export class ShaderSource{
 
-    public variants: string[] = [];
+export class ShaderSource {
 
-    public static create(code:string){
+    public variants: string[];
 
+    private vs: string;
+    private ps: string;
+
+    public constructor(vs: string, ps?: string,variants?: string[]) {
+        this.variants = variants;
+        this.ps = ps;
+        this.vs = vs;
     }
 }
-
-
-export const Color = ShaderSource.create(`
-
-
-`);

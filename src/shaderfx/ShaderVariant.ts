@@ -1,3 +1,79 @@
+
+
+export type IncludeIndex = {key:string,line:number};
+
+export class ShaderVariant{
+
+    public includes:IncludeIndex[] =[];
+
+    public lines:string[];
+    public variantName:string;
+
+    public linked:boolean = false;
+
+    private m_sources:string;
+
+    public constructor(variantName:string,source:string){
+        this.variantName = variantName;
+        this.process(variantName,source);
+    }
+
+    public get sources():string{
+        return this.m_sources;
+    }
+
+    public link(variances:{[key:string]:ShaderVariant}){
+        if(this.linked) return;
+        let includes = this.includes;
+        if(includes.length == 0){
+            this.linked = true;
+        }
+        else{
+            for(let i=0,len = includes.length;i<len;i++){
+                let inc = includes[i];
+                let lib = variances[inc.key];
+                if(lib == null){
+                    console.error(`can't find variant : [${inc.key}]`);
+                    return;
+                }
+
+                if(!lib.linked){
+                    lib.link(variances);
+                }
+                if(!lib.linked){
+                    console.error(`variance [${lib.variantName}] link: failed`);
+                    return;
+                }
+                this.lines[inc.line] = lib.sources;
+            }
+            this.linked = true;
+        }
+
+        this.m_sources = this.lines.join('\n');
+        console.log(`link success ${this.variantName}`);
+    }
+
+    private process(variantName:string,source:string){
+        source = `
+        #ifndef ${variantName}
+        #define ${variantName}
+        ${source}
+        #endif
+        `;
+        let lines = source.split('\n');
+        for(let i=0,len = lines.length;i<len;i++){
+            let line = lines[i];
+            let matchInc = line.match(/#include ([\w]+)/);
+            if(matchInc != null){
+                this.includes.push({key:matchInc[1],line:i});
+                continue;
+            }
+        }
+        this.lines = lines;
+    }
+}
+
+
 const VARIANTS = `
 
 renderpass:
@@ -31,34 +107,14 @@ const VERTEX_COLOR = VERTEX_BASE+
 in vec4 aColor;
 `;
 
-const UNIFORM_OBJ = `
+const VARIANT_OBJ = `
 uniform UNIFORM_OBJ{
     mat4 _obj2world_;
 }
 #define MATRIX_M _obj2world_
 `;
 
-const UNIFORM_CAM = `
-#require UNIFORM_OBJ
 
-uniform UNIFORM_CAM{
-    mat4 _world2view_;
-    mat4 _view2proj_;
-}
-#define MATRIX_V _world2view_
-#define MATRIX_P _view2proj_
-#define MATRIX_VP MATRIX_P * MATRIX_V
-#define MATRIX_MV MATRIX_V * MATRIX_M
-#define MATRIX_IT_MV transpose(inverse(MATRIX_MV))
-#define MATRIX_MVP MATRIX_P * MATRIX_MV
-#define MATRIX_WORLD2OBJ inverse(MATRIX_M)
-`;
 
-const UNIFORM_LIGHT = `
-#multi_compile LIGHTING LIGHT4 LIGHT8
 
-struct LIGHT_DATA{
-    
-}
 
-`
