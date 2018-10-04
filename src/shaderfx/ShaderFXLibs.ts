@@ -67,7 +67,7 @@ const Shader_Unlit_Color = new ShaderSource(
 
 const Shader_Unlit_Texture = new ShaderSource(
     `#version 300 es
-    precision meduimp float;
+    precision mediump float;
     #include SHADERFX_CAMERA
     in vec4 aPosition;
     in vec2 aUV;
@@ -77,7 +77,7 @@ const Shader_Unlit_Texture = new ShaderSource(
         vUV = aUV;
     }`,
     `#version 300 es
-    precision meduimp float;
+    precision mediump float;
     in vec2 vUV;
     out vec4 fragColor;
     uniform sampler2D uSampler;
@@ -88,7 +88,7 @@ const Shader_Unlit_Texture = new ShaderSource(
 
 const Shader_UV_Value = new ShaderSource(
     `#version 300 es
-    precision meduimp float;
+    precision mediump float;
     #include SHADERFX_CAMERA
     in vec4 aPosition;
     in vec2 aUV;
@@ -99,7 +99,7 @@ const Shader_UV_Value = new ShaderSource(
     }
     `,
     `#version 300 es
-    precision meduimp float;
+    precision mediump float;
     in vec2 vUV;
     out vec4 fragColor;
     void main(){
@@ -110,7 +110,7 @@ const Shader_UV_Value = new ShaderSource(
 
 const Shader_Diffuse = new ShaderSource(
     `#version 300 es
-    precision meduimp float;
+    precision mediump float;
     #include SHADERFX_BASIS
     in vec4 aPosition;
     in vec2 aUV;
@@ -130,18 +130,18 @@ const Shader_Diffuse = new ShaderSource(
     }
     `,
     `#version 300 es
-    precision meduimp float;
+    precision mediump float;
     #include SHADERFX_LIGHT
     #include SHADERFX_LIGHTING
     struct V2F{
         vec3 pos;
         vec3 normal;
-    }
+    };
     in V2F v2f;
     out lowp vec4 fragColor;
     uniform vec4 uColor;
     void main(){
-        vec3 lcolor = LightModel_Lambert(LIGHT_DIR0,LIGHT_COLOR0,v2f.normal,uColor);
+        vec3 lcolor = LightModel_Lambert(LIGHT_DIR0,LIGHT_COLOR0,v2f.normal,uColor.xyz);
         fragColor = vec4(lcolor + 0.1,1.0);
     }
     `
@@ -193,7 +193,7 @@ export class ShaderDataUniformLight extends ShaderDataFloat32Buffer{
 const SHADERFX_OBJ = `
 uniform UNIFORM_OBJ{
     mat4 _obj2world_;
-}
+};
 #define MATRIX_M _obj2world_
 `;
 
@@ -202,7 +202,7 @@ const SHADERFX_CAMERA:string = `
 uniform UNIFORM_CAM{
     mat4 _world2view_;
     mat4 _view2proj_;
-}
+};
 #define MATRIX_V _world2view_
 #define MATRIX_P _view2proj_
 #define MATRIX_VP MATRIX_P * MATRIX_V
@@ -229,19 +229,19 @@ struct LIGHT_DATA{
 uniform LIGHT{
     LIGHT_DATA light_source[4];
     vec4 ambient_color;
-}
+};
 #define LIGHT_COLOR0 light_source[0].col_intensity.xyz
 #define LIGHT_COLOR1 light_source[1].col_intensity.xyz
 #define LIGHT_COLOR2 light_source[2].col_intensity.xyz
 #define LIGHT_COLOR3 light_source[3].col_intensity.xyz
 
 #define LIGHT_INTENSITY0 light_source[0].col_intensity.w
-#define LIGHT_INTENSITY0 light_source[1].col_intensity.w
-#define LIGHT_INTENSITY0 light_source[2].col_intensity.w
-#define LIGHT_INTENSITY0 light_source[3].col_intensity.w
+#define LIGHT_INTENSITY1 light_source[1].col_intensity.w
+#define LIGHT_INTENSITY2 light_source[2].col_intensity.w
+#define LIGHT_INTENSITY3 light_source[3].col_intensity.w
 
-#define LIGHT_DIR0 light_source[0].light_pos_type.xyz
-#define LIGHT_DIR1 light_source[1].light_pos_type.xyz
+#define LIGHT_DIR0 light_source[0].pos_type.xyz
+#define LIGHT_DIR1 light_source[1].pos_type.xyz
 
 `
 
@@ -252,11 +252,11 @@ struct SHADOW_DATA{
 };
 uniform Shadow{
     SHADOW_DATA shadow_data[4];
-}
+};
 `
 
 const SHADERFX_LIGHTING = `
-vec3 LightModel_Lambert(in vec3 lightdir,in vec3 lightColor,in vec3 normal,in vec3 albedo){
+vec3 LightModel_Lambert(vec3 lightdir,vec3 lightColor,vec3 normal,vec3 albedo){
     float diff = max(.0,dot(lightdir,normal));
     return albedo * lightColor * diff;
 }
@@ -264,6 +264,7 @@ vec3 LightModel_Lambert(in vec3 lightdir,in vec3 lightColor,in vec3 normal,in ve
 
 ShaderFX.registVariant(new ShaderVariant('SHADERFX_OBJ',SHADERFX_OBJ));
 ShaderFX.registVariant(new ShaderVariant('SHADERFX_CAMERA',SHADERFX_CAMERA));
+ShaderFX.registVariant(new ShaderVariant('SHADERFX_BASIS',SHADERFX_BASIS))
 ShaderFX.registVariant(new ShaderVariant('SHADERFX_LIGHT',SHADERFX_LIGHT));
 ShaderFX.registVariant(new ShaderVariant('SHADERFX_LIGHTING',SHADERFX_LIGHTING));
 ShaderFX.registVariant(new ShaderVariant('SHADERFX_SHADOWMAP',SHADERFX_SHADOWMAP));

@@ -46,14 +46,16 @@ export class ShaderSource {
             let line = lines[i];
             let matchInc = line.match(/#include ([\w]+)/);
             if (matchInc != null) {
-                let vname = matchInc[i];
+                let vname = matchInc[1];
                 let variant = variants[vname];
-                if (variant == null) throw new Error(`shader variant [${vname}] not found!`);
+                if (variant == null){
+                    throw new Error(`shader variant [${vname}] not found!`);
+                }
                 if (!variant.linked) throw new Error(`shader variant [${vname}] not linked!`);
                 lines[i] = variant.sources;
                 continue;
             }
         }
-        return lines.join('\n');
+        return lines.join('\n').trim();
     }
 }

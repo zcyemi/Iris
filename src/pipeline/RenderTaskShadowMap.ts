@@ -111,7 +111,7 @@ export class RenderTaskShadowMap extends RenderTask{
         if(status != gl.FRAMEBUFFER_COMPLETE){
             console.error('fb status incomplete '+ status.toString(16));
         }
-        gl.bindBuffer(gl.DRAW_FRAMEBUFFER,null);
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
 
         this.m_inited = true;
     }

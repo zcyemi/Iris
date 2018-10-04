@@ -39,6 +39,7 @@ export class ShaderFX{
         source.buildShader(ShaderFX.variants);
         if(!source.isBuilt) return null;
 
+
         let p = glctx.createProgram(source.vertex,source.pixel);
         if(p == null) return null;
 
