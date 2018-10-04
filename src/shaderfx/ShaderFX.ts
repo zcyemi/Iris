@@ -12,6 +12,43 @@ export enum RenderQueue{
     Other
 }
 
+export enum Comparison{
+    NEVER,
+    LESS,
+    EQUAL,
+    LEQUAL,
+    GREATER,
+    NOTEQUAL,
+    GEQUAL,
+    ALWAYS
+}
+
+export enum BlendOperator{
+    ADD,
+    SUBTRACT,
+    RESERVE_SUBSTRACT,
+    MIN,
+    MAX
+}
+
+export enum BlendFactor{
+    ONE,
+    ZERO,
+    SRC_COLOR,
+    ONE_MINUS_SRC_COLOR,
+    DST_COLOR,
+    ONE_MINUS_DST_COLOR,
+    SRC_ALPHA,
+    ONE_MINUS_SRC_ALPHA,
+    DST_ALPHA,
+    ONE_MINUS_DST_ALPHA,
+    CONSTANT_COLOR,
+    ONE_MINUS_CONSTANT_COLOR,
+    CONSTANT_ALPHA,
+    ONE_MINUS_CONSTANT_ALPHA,
+    SRC_ALPHA_SATURATE
+}
+
 export class ShaderFX{
 
     public static variants:{[key:string]:ShaderVariant} = {};
@@ -44,6 +81,7 @@ export class ShaderFX{
         if(p == null) return null;
 
         let shader = new Shader(source,p);
+        shader.tags = source.tags;
 
         return shader;
     }

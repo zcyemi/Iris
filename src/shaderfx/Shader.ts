@@ -1,9 +1,15 @@
 import { ShaderSource } from "./ShaderSource";
 import { GLProgram } from "wglut";
-import { RenderQueue } from "./ShaderFX";
+import { RenderQueue, Comparison, BlendOperator, BlendFactor } from "./ShaderFX";
 
 export class ShaderTags{
-    public queue:RenderQueue;
+    public queue?:RenderQueue;
+    public ztest?:Comparison;
+    public zwrite?:boolean;
+    public blendOp?:BlendOperator;
+    public blendFactorSrc?:BlendFactor;
+    public blendFactorDst?:BlendFactor;
+
 }
 
 export class Shader{

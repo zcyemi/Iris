@@ -16,7 +16,6 @@ export class RenderNodeList{
     }
 
     public pushRenderNode(rnode:MeshRender){
-
         let material = rnode.material;
         let tag = material.shaderTags;
         if(tag == null) return;

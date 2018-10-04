@@ -112,10 +112,12 @@ const Shader_Diffuse = new ShaderSource(
     `#version 300 es
     precision mediump float;
     #include SHADERFX_BASIS
+
+    #queue opaque
+
     in vec4 aPosition;
     in vec2 aUV;
     in vec4 aNormal;
-
     struct V2F{
         vec3 pos;
         vec3 normal;
