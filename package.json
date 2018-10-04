@@ -8,5 +8,11 @@
     "start": "tsc && node ./dist/sampler.js"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "wglut": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/webgl2": "0.0.4"
+  }
 }

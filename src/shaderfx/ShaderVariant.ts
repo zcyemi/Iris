@@ -33,16 +33,13 @@ export class ShaderVariant{
                 let inc = includes[i];
                 let lib = variances[inc.key];
                 if(lib == null){
-                    console.error(`can't find variant : [${inc.key}]`);
-                    return;
+                    throw new Error(`can't find variant : [${inc.key}]`);
                 }
-
                 if(!lib.linked){
                     lib.link(variances);
                 }
                 if(!lib.linked){
-                    console.error(`variance [${lib.variantName}] link: failed`);
-                    return;
+                    throw new Error(`variance [${lib.variantName}] link: failed`);
                 }
                 this.lines[inc.line] = lib.sources;
             }
@@ -75,7 +72,6 @@ export class ShaderVariant{
 
 
 const VARIANTS = `
-
 renderpass:
     shadowMap
 
@@ -113,8 +109,3 @@ uniform UNIFORM_OBJ{
 }
 #define MATRIX_M _obj2world_
 `;
-
-
-
-
-
