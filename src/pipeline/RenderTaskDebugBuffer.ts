@@ -13,6 +13,7 @@ export class RenderTaskDebugBuffer extends RenderTask{
     }
     
     public render(nodelist:RenderNodeList,scene:Scene,glctx:GLContext){
+        return;
         let pipeline = this.pipeline;
         let sm = pipeline.shadowMapInfo[0].texture;
         if(sm == null) return;

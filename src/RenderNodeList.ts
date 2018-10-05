@@ -4,7 +4,6 @@ import { RenderQueue } from "./shaderfx/ShaderFX";
 
 export class RenderNodeList{
 
-    
     public nodeOpaque:MeshRender[] = [];
     public nodeTransparent:MeshRender[] = [];
     public nodeImage:MeshRender[] = [];
