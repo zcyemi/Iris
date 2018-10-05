@@ -147,6 +147,10 @@ export class RenderTaskForwardShading extends RenderTask{
             gl.bufferData(gl.UNIFORM_BUFFER,camobj.rawBuffer,gl.DYNAMIC_DRAW);
         }
 
+        //shadowmap
+        gl.activeTexture(pipeline.utex_sm[0]);
+        gl.bindTexture(gl.TEXTURE_2D,pipeline.shadowMapInfo[0].texture);
+
         //draw
         let len = queue.length;
 
@@ -182,6 +186,14 @@ export class RenderTaskForwardShading extends RenderTask{
                 let indexLight = ublock[ShaderDataUniformLight.LIGHT];
                 if(indexLight != null)gl.uniformBlockBinding(glp,indexLight,pipeline.ubufferIndex_Light);
                 curprogram = program;
+
+                //sm uniform buffer
+                let indexSM = ublock[ShaderFX.UNIFORM_SHADOWMAP];
+                if(indexSM != null){
+                    gl.uniformBlockBinding(glp,indexSM,pipeline.ubufferIndex_ShadowMap);
+                    let loc = program.Uniforms['uShadowMap'];
+                    if(loc != null)gl.uniform1i(loc,pipeline.utex_sm_slot[0]);
+                }
             }
 
             //uniforms

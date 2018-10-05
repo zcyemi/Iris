@@ -110,7 +110,7 @@ export class SampleGame{
         //camera
         let camera = Camera.persepctive(60,400.0/300.0,0.01,20);
         camera.transform.position = glmath.vec3(0,2,5);
-        camera.transform.setLookAt(glmath.vec3(0,0,0));
+        //camera.transform.setLookAt(glmath.vec3(0,0,0));
         camera.transform.setDirty();
         camera.ambientColor = glmath.vec4(1,0.2,0.2,0.2);
         camera.background = glmath.vec4(0,1,0,1);
@@ -120,7 +120,8 @@ export class SampleGame{
         //cube
         let obj1 = new GameObject();
         this.m_obj1 = obj1;
-        obj1.transform.position = glmath.vec3(0,1,-5);
+        obj1.transform.position = glmath.vec3(1,5,-5);
+        obj1.transform.scale = glmath.vec3(2,2,2);
         let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
         matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
         obj1.render = new MeshRender(Mesh.Cube,matDiffuse);

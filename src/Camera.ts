@@ -77,7 +77,7 @@ export class Camera{
         let trs = this.transform;
         if(trs.isDirty){
             trs.setDirty(false);
-            this.m_worldMtx = mat4.coordLHS(trs.position,trs.forward,trs.up);
+            this.m_worldMtx = mat4.coordCvt(trs.position,trs.forward,trs.up);
         }
         return this.m_worldMtx;
     }

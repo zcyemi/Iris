@@ -72,23 +72,39 @@ const Shader_Unlit_Texture = new ShaderSource(
     `#version 300 es
     precision mediump float;
     #include SHADERFX_CAMERA
+    #include SHADERFX_SHADOWMAP
+
     in vec4 aPosition;
     in vec2 aUV;
     out vec2 vUV;
 
+    out vec4 wpos;
+    out vec4 lpos;
+
     #queue opaque
 
     void main(){
-        gl_Position = MATRIX_MVP * aPosition;
+        wpos = MATRIX_M * aPosition;
+        lpos = uLightMtx[0] * wpos;
+        gl_Position = MATRIX_VP * wpos;
         vUV = aUV;
     }`,
     `#version 300 es
     precision mediump float;
+    #include SHADERFX_SHADOWMAP
     in vec2 vUV;
+    in vec4 wpos;
+    in vec4 lpos;
     out vec4 fragColor;
     uniform sampler2D uSampler;
     void main(){
-        fragColor = texture(uSampler,vUV);
+        vec3 projCoord = lpos.xyz / lpos.w;
+        projCoord = projCoord *0.5 + 0.5;
+        
+        float shadowDep = texture(uShadowMap,projCoord.xy).r;
+        float depth = projCoord.z;
+        float shadow = step(depth,shadowDep);
+        fragColor = vec4(shadow,0,0,1);
     }`
 );
 
@@ -196,6 +212,17 @@ export class ShaderDataUniformLight extends ShaderDataFloat32Buffer{
     }
 }
 
+export class ShaderDataUniformShadowMap extends ShaderDataArrayBuffer{
+
+    public constructor(){
+        let buffersize = 16 *4 *4;
+        super(buffersize);
+    }
+    public setLightMtx(mtx:mat4,index:number){
+        this.setMat4(index *16 *4,mtx);
+    }
+}
+
 /** Shader Variants */
 
 const SHADERFX_OBJ = `
@@ -254,13 +281,10 @@ uniform LIGHT{
 `
 
 const SHADERFX_SHADOWMAP = `
-struct SHADOW_DATA{
-    sampler2D uShadowMap;
-    mat4 uLightMtx;
+uniform UNIFORM_SHADOWMAP{
+    mat4 uLightMtx[4];
 };
-uniform Shadow{
-    SHADOW_DATA shadow_data[4];
-};
+uniform sampler2D uShadowMap;
 `
 
 const SHADERFX_LIGHTING = `

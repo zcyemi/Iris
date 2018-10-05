@@ -2,12 +2,12 @@ import { RenderTask } from "../RenderPipeline";
 import { RenderNodeList } from "../RenderNodeList";
 import { Scene } from "../Scene";
 import { Light, LightType } from "../Light";
-import { GLContext, GLProgram, mat4, glmath } from "wglut";
+import { GLContext, GLProgram, mat4, glmath, vec4 } from "wglut";
 import { ShaderFX } from "../shaderfx/ShaderFX";
 import { Camera } from "../Camera";
 import { ShaderSource } from "../shaderfx/ShaderSource";
 import { Shader } from "../shaderfx/Shader";
-import { ShaderDataUniformCam, ShaderDataUniformObj } from "../shaderfx/ShaderFXLibs";
+import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap } from "../shaderfx/ShaderFXLibs";
 
 export class ShadowMapInfo{
     public texture:WebGLTexture;
@@ -33,6 +33,9 @@ export class RenderTaskShadowMap extends RenderTask{
     private m_cambuffer:WebGLBuffer;
     private m_objbuffer:WebGLBuffer;
 
+    private m_smdata: ShaderDataUniformShadowMap;
+    private m_smbuffer:WebGLBuffer;
+
     private m_debugColor:boolean = false;
 
     public m_shadowMapSize:number = 1024;
@@ -48,6 +51,9 @@ export class RenderTaskShadowMap extends RenderTask{
 
         this.m_cambuffer = pipe.sharedBufferPerCam;
         this.m_objbuffer = pipe.sharedBufferPerObj;
+
+        this.m_smdata = new ShaderDataUniformShadowMap();
+        this.m_smbuffer = pipe.sharedBufferShadowMap;
         
 
         //sminfo
@@ -78,7 +84,7 @@ export class RenderTaskShadowMap extends RenderTask{
         gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texStorage2D(gl.TEXTURE_2D,1,gl.DEPTH_COMPONENT16,size,size);
+        gl.texStorage2D(gl.TEXTURE_2D,1,gl.DEPTH_COMPONENT24,size,size);
         gl.bindTexture(gl.TEXTURE_2D,null);
         pipe.shadowMapInfo[0].texture = deptex;
 
@@ -111,6 +117,9 @@ export class RenderTaskShadowMap extends RenderTask{
             console.error('fb status incomplete '+ status.toString(16));
         }
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
+
+        //set to shadowmap uniform buffer
+        let smdata = this.m_smdata;
 
         this.m_inited = true;
     }
@@ -148,15 +157,22 @@ export class RenderTaskShadowMap extends RenderTask{
                 this.renderShadowMap(l,scene,nodelist);
             }
         }
+
+        //update uniformbuffer
+        let gl = this.pipeline.GL;
+        gl.bindBuffer(gl.UNIFORM_BUFFER,this.m_smbuffer);
+        gl.bufferData(gl.UNIFORM_BUFFER,this.m_smdata.rawBuffer,gl.DYNAMIC_DRAW);
     }
 
     private calShadowMapCamMtx(light:Light,camera:Camera):mat4{
         let ctrs = camera.transform;
-        let tarPos = ctrs.position.addToRef(ctrs.forward.normalize().mul(camera.far *0.5));
-        let lightdir = light.direction.mulToRef(-1.0);
-        let lightPos = tarPos.add(lightdir.mulToRef(camera.far));
+        let tarPos = ctrs.position.clone().sub(ctrs.forward.mul(camera.far *0.5));
+
+        let lightdir = light.direction;
+        let lightPos = tarPos.sub(lightdir.mulToRef(camera.far));
+
         //TODO tem fix LightDir parall with ve3.up
-        return mat4.coordLHS(lightPos,lightdir,glmath.vec3(0,1,0.1));
+        return mat4.coordCvt(lightPos,lightdir,glmath.vec3(0,1,0.1));
     }
 
     private renderShadowMap(light:Light,scene:Scene,nodelist:RenderNodeList){
@@ -166,12 +182,14 @@ export class RenderTaskShadowMap extends RenderTask{
         let gl = this.pipeline.GL;
         let pipe = this.pipeline;
 
+        let smdata = this.m_smdata;
+
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,this.m_shadowMapFrameBuffer);
 
         //clear depth
         gl.enable(gl.DEPTH_TEST);
-        gl.depthFunc(gl.ALWAYS);
-        gl.clearDepth(0);
+        gl.depthFunc(gl.LEQUAL);
+        gl.clearDepth(1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         let size = this.m_shadowMapSize;
@@ -190,8 +208,12 @@ export class RenderTaskShadowMap extends RenderTask{
         let camera = scene.camera;
         let f = camera.far;
         let lightworldMtx = this.calShadowMapCamMtx(light,scene.camera);
-        let projMtx = mat4.orthographic(f,f,0.01,f *2.0);
+        let projMtx = mat4.orthographic(f,f,0.1,f *2.0);
+
         let lightMtx = projMtx.mul(lightworldMtx);
+
+        smdata.setLightMtx(lightMtx,0);
+
         this.pipeline.shadowMapInfo[0].lightMtx = lightMtx;
 
         //uniform camera

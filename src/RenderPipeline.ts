@@ -24,15 +24,32 @@ export abstract class RenderPipeline{
     public ubufferIndex_PerObj:number = 0;
     public ubufferIndex_PerCam:number = 1;
     public ubufferIndex_Light:number = 2;
+    public ubufferIndex_ShadowMap:number =3;
+
+
+    public utex_sm:number[];
+    public utex_sm_slot:number[];
 
     protected m_sharedBuffer_PerObj:WebGLBuffer;
     protected m_sharedBuffer_PerCam:WebGLBuffer;
+    protected m_sharedBuffer_ShadowMap:WebGLBuffer;
 
     protected m_taskSetuped:boolean
 
     public constructor(glctx:GLContext){
         this.glctx = glctx;
         this.gl= glctx.gl;
+
+        let gl = this.gl;
+
+        let utex_sm = [];
+        let utex_sm_slot = [15,16,17,18];
+        utex_sm.push(gl.TEXTURE15);
+        utex_sm.push(gl.TEXTURE16);
+        utex_sm.push(gl.TEXTURE17);
+        utex_sm.push(gl.TEXTURE18);
+        this.utex_sm = utex_sm;
+        this.utex_sm_slot = utex_sm_slot;
     }
 
     public get GLCtx():GLContext{
@@ -65,6 +82,20 @@ export abstract class RenderPipeline{
         this.m_sharedBuffer_PerObj = buf;
         return buf;
     }
+
+    public get sharedBufferShadowMap():WebGLBuffer{
+        let buf = this.m_sharedBuffer_ShadowMap;
+        if(buf != null) return buf;
+        
+        let gl =this.gl;
+        buf = gl.createBuffer();
+        gl.bindBuffer(gl.UNIFORM_BUFFER,buf);
+        gl.bindBufferBase(gl.UNIFORM_BUFFER,this.ubufferIndex_ShadowMap,buf);
+        this.m_sharedBuffer_ShadowMap = buf;
+        return buf;
+    }
+
+
 
 
     public registerTask(task:RenderTask){

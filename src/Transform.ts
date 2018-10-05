@@ -63,6 +63,7 @@ export class Transform{
         this.m_forward = target.clone().sub(this.position).normalize();
         this.m_right = vec3.Cross(worldup.normalized(),this.m_forward);
         this.m_up = vec3.Cross(this.m_forward,this.m_right);
+        this.rotation = quat.FromTo(vec3.forward,this.m_forward);
     }
 
     public setLookDir(forward:vec3,worldup:vec3 = vec3.up){

@@ -8,7 +8,7 @@ import { GLContext, glmath } from "wglut";
 export class RenderTaskDebugBuffer extends RenderTask{
     
 
-    private m_vp = glmath.vec4(0,0,100,100);
+    private m_vp = glmath.vec4(0,200,100,100);
 
     public init(){
     }
