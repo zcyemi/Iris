@@ -2,6 +2,7 @@ import { RenderPipeline, RenderTaskOpaqueImageEffect, RenderTaskSkybox, RenderTa
 import { GLContext } from "wglut";
 import { RenderTaskForwardShading } from "./RenderTaskForwardShading";
 import { RenderTaskShadowMap } from "./RenderTaskShadowMap";
+import { RenderTaskDebugBuffer } from "./RenderTaskDebugBuffer";
 
 export class RenderPipelineDefault extends RenderPipeline{
 
@@ -17,6 +18,7 @@ export class RenderPipelineDefault extends RenderPipeline{
         //tasks.push(new RenderTaskDrawCoord(1700,this));
         this.registerTask(new RenderTaskTransparencies(2000, this));
         this.registerTask(new RednerTaskImageEffect(3000, this));
+        this.registerTask(new RenderTaskDebugBuffer(4000,this));
     }
 
 

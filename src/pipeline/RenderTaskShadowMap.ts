@@ -38,7 +38,6 @@ export class RenderTaskShadowMap extends RenderTask{
     public m_shadowMapSize:number = 1024;
 
     public init(){
-        
         let pipe = this.pipeline;
         let gl =pipe.GL;
         let glctx = pipe.GLCtx;
@@ -63,10 +62,10 @@ export class RenderTaskShadowMap extends RenderTask{
         this.m_shadowMapShader = shader;
         this.m_shadowMapProgram = shader.defaultProgram;
 
-        let glp = this.m_shadowMapProgram.Program;
-        this.m_blockIndexPerCam = gl.getUniformBlockIndex(glp,ShaderFX.UNIFORM_CAM);
-        this.m_blockIndexPerObj = gl.getUniformBlockIndex(glp,ShaderFX.UNIFORM_OBJ);
-
+        let program = this.m_shadowMapProgram;
+        let ublocks = program.UniformBlock;
+        this.m_blockIndexPerCam =ublocks[ShaderFX.UNIFORM_CAM];
+        this.m_blockIndexPerObj = ublocks[ShaderFX.UNIFORM_OBJ];
 
         let size =this.m_shadowMapSize;
 

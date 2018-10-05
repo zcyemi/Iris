@@ -40,7 +40,7 @@ export class SampleGame{
         let gl = glctx.gl;
         let grender = new GraphicsRender(glctx);
         let pipeline = new RenderPipelineDefault(glctx);
-        pipeline.registerTask(new RenderTaskDebugBuffer(500,pipeline));
+        
         grender.pipeline= pipeline;
         this.m_graphicsRender = grender;
 
@@ -113,6 +113,7 @@ export class SampleGame{
         camera.transform.setLookAt(glmath.vec3(0,0,0));
         camera.transform.setDirty();
         camera.ambientColor = glmath.vec4(1,0.2,0.2,0.2);
+        camera.background = glmath.vec4(0,1,0,1);
         scene.camera = camera;
         this.m_camera = camera;
 

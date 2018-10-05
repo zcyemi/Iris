@@ -1,30 +1,28 @@
 import { RenderTask } from "../RenderPipeline";
 import { RenderNodeList } from "../RenderNodeList";
 import { Scene } from "../Scene";
-import { GLContext } from "wglut";
+import { GLContext, glmath } from "wglut";
 
 
 
 export class RenderTaskDebugBuffer extends RenderTask{
     
 
-    public init(){
+    private m_vp = glmath.vec4(0,0,100,100);
 
+    public init(){
     }
     
     public render(nodelist:RenderNodeList,scene:Scene,glctx:GLContext){
-        return;
         let pipeline = this.pipeline;
         let sm = pipeline.shadowMapInfo[0].texture;
         if(sm == null) return;
 
         pipeline.bindTargetFrameBuffer();
 
-        glctx.drawTexFullscreen(sm,false,false);
+        glctx.drawTex(sm,false,false,this.m_vp);
     }
-
     public release(glctx:GLContext){
-        
     }
 
 }

@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "wglut": "^0.1.0"
+    "wglut": "file:../wglut"
   },
   "devDependencies": {
     "@types/webgl2": "0.0.4",

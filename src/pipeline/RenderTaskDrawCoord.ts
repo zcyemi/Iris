@@ -39,8 +39,10 @@ export class RenderTaskDrawCoord extends RenderTask{
             this.m_coordProgram = program;
             this.m_coordShader = this.m_coordShader;
 
-            this.m_blockIndexCam = gl.getUniformBlockIndex(program.Program,ShaderFX.UNIFORM_CAM);
-            this.m_blockIndexObj = gl.getUniformBlockIndex(program.Program,ShaderFX.UNIFORM_OBJ);
+            let ublocks = program.UniformBlock;
+
+            this.m_blockIndexCam = ublocks[ShaderFX.UNIFORM_CAM];
+            this.m_blockIndexObj =ublocks[ShaderFX.UNIFORM_OBJ];
         }
 
         this.m_perCamBuffer = pipe.sharedBufferPerCam;

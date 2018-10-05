@@ -133,7 +133,6 @@ export class RenderTaskForwardShading extends RenderTask{
         gl.frontFace(gl.CCW);
         gl.cullFace(gl.BACK);
 
-
         //light uniform buffer
         this.updateLightBufferData(scene,gl);
 
@@ -169,17 +168,19 @@ export class RenderTaskForwardShading extends RenderTask{
                 let glp = program.Program;
                 gl.useProgram(glp);
 
+                let ublock = program.UniformBlock;
+                
                 //cam uniform buffer
-                let indexCam = gl.getUniformBlockIndex(glp,ShaderDataUniformCam.UNIFORM_CAM);
-                if(indexCam<1000) gl.uniformBlockBinding(glp,indexCam,pipeline.ubufferIndex_PerCam);
+                let indexCam = ublock[ShaderDataUniformCam.UNIFORM_CAM];
+                if(indexCam != null)gl.uniformBlockBinding(glp,indexCam,pipeline.ubufferIndex_PerCam);
 
                 //obj uniform buffer
-                let indexObj= gl.getUniformBlockIndex(glp,ShaderDataUniformObj.UNIFORM_OBJ);
-                if(indexObj<1000)gl.uniformBlockBinding(glp,indexObj,pipeline.ubufferIndex_PerObj);
+                let indexObj= ublock[ShaderDataUniformObj.UNIFORM_OBJ];
+                if(indexObj != null)gl.uniformBlockBinding(glp,indexObj,pipeline.ubufferIndex_PerObj);
 
                 //light uniform buffer
-                let indexLight = gl.getUniformBlockIndex(glp,ShaderDataUniformLight.LIGHT);
-                if(indexLight <1000)gl.uniformBlockBinding(glp,indexLight,pipeline.ubufferIndex_Light);
+                let indexLight = ublock[ShaderDataUniformLight.LIGHT];
+                if(indexLight != null)gl.uniformBlockBinding(glp,indexLight,pipeline.ubufferIndex_Light);
                 curprogram = program;
             }
 
