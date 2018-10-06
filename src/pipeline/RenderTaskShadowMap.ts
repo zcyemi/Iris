@@ -75,6 +75,7 @@ export class RenderTaskShadowMap extends RenderTask{
 
         let size =this.m_shadowMapSize;
 
+
         //depth texture
         let deptex = gl.createTexture();
         this.m_shadowMapTex = deptex;
@@ -82,8 +83,8 @@ export class RenderTaskShadowMap extends RenderTask{
         gl.bindTexture(gl.TEXTURE_2D,deptex);
         gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         gl.texStorage2D(gl.TEXTURE_2D,1,gl.DEPTH_COMPONENT24,size,size);
         gl.bindTexture(gl.TEXTURE_2D,null);
         pipe.shadowMapInfo[0].texture = deptex;

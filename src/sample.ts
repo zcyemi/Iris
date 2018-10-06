@@ -127,6 +127,16 @@ export class SampleGame{
         obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
         scene.addChild(obj1);
 
+        //cube2
+        let obj3 = new GameObject();
+        obj3.transform.position = glmath.vec3(-3,3,-3);
+        obj3.transform.scale = glmath.vec3(4,1,1);
+        obj3.transform.rotate(quat.fromEulerDeg(20,45,0));
+        let matColor = new Material(grender.shaderLib.shaderUnlitColor);
+        matColor.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0,0,1,1));
+        obj3.render = new MeshRender(Mesh.Cube,matColor);
+        scene.addChild(obj3);
+
         //plane
         let obj2 = new GameObject();
         this.m_obj2 = obj2;
