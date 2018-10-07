@@ -32,7 +32,7 @@ export class Light extends GameObject{
             return this.m_direction.mulToRef(-1.0);
         }
         else{
-            return this.transform.position;
+            return this.transform.localPosition;
         }
     }
 
@@ -59,7 +59,7 @@ export class Light extends GameObject{
 
     public static createPointLight(range:number = 10,position?:vec3,intensity?:number,color?:vec3){
         let light = new Light(LightType.point,intensity,color);
-        if(position) light.transform.position = position;
+        if(position) light.transform.localPosition = position;
         light.m_range = range;
         return light;
     }

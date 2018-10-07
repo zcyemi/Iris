@@ -185,7 +185,7 @@ export class RenderTaskShadowMap extends RenderTask{
         let fardist = near;
         let neardist = near;
 
-        let campos = ctrs.position;
+        let campos = ctrs.localPosition;
         let camforward = ctrs.forward;
 
         let hCoefficient = Math.tan(camera.fov / 2.0 * glmath.Deg2Rad);
@@ -194,7 +194,7 @@ export class RenderTaskShadowMap extends RenderTask{
         let ldir = light.direction;
         let lup = vec3.up;
         if(Math.abs(vec3.Dot(lup,ldir))>0.99){
-            lup = glmath.vec3(0,1,0.5);
+            lup = glmath.vec3(0,1,0.001);
         }
         
         let ret = [];

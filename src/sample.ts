@@ -112,7 +112,7 @@ export class SampleGame{
 
         //camera
         let camera = Camera.persepctive(60,400.0/300.0,0.5,100);
-        camera.transform.position = glmath.vec3(0,2,5);
+        camera.transform.setPosition(glmath.vec3(0,2,5));
         //camera.transform.setLookAt(glmath.vec3(0,0,0));
         camera.transform.setDirty();
         camera.ambientColor = glmath.vec4(1,0.2,0.2,0.2);
@@ -123,8 +123,8 @@ export class SampleGame{
         //cube
         let obj1 = new GameObject();
         this.m_obj1 = obj1;
-        obj1.transform.position = glmath.vec3(0,5,-5);
-        obj1.transform.scale = glmath.vec3(1,1,1);
+        obj1.transform.localPosition = glmath.vec3(0,5,-5);
+        obj1.transform.localScale = glmath.vec3(1,1,1);
         let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
         matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
         obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
@@ -141,8 +141,8 @@ export class SampleGame{
         // scene.addChild(obj3);
         
         let obj4 = new GameObject();
-        obj4.transform.position =glmath.vec3(20,3,-15);
-        obj4.transform.scale = glmath.vec3(5,5,5);
+        obj4.transform.localPosition =glmath.vec3(20,3,-15);
+        obj4.transform.localScale = glmath.vec3(5,5,5);
         obj4.render = new MeshRender(Mesh.Cube,matColor);
         scene.addChild(obj4);
 
@@ -150,9 +150,9 @@ export class SampleGame{
         //plane
         let obj2 = new GameObject();
         this.m_obj2 = obj2;
-        obj2.transform.position = glmath.vec3(0,0,-5);
-        obj2.transform.scale = glmath.vec3(20,20,1);
-        obj2.transform.rotation = quat.axisRotationDeg(vec3.right,90);
+        obj2.transform.localPosition = glmath.vec3(0,0,-5);
+        obj2.transform.localScale = glmath.vec3(20,20,1);
+        obj2.transform.localRotation = quat.axisRotationDeg(vec3.right,90);
         let obj2mat = new Material(grender.shaderLib.shaderUnlitTexture)
         obj2mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
         obj2mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
@@ -160,7 +160,7 @@ export class SampleGame{
         scene.addChild(obj2);
 
         //directional light
-        let light0 = Light.creatDirctionLight(glmath.vec3(0,-1,0));
+        let light0 = Light.creatDirctionLight(glmath.vec3(0,-1,1));
         light0.lightColor = new vec3([1,1,1]);
         scene.addChild(light0);
 
@@ -168,11 +168,11 @@ export class SampleGame{
     }
 
     private update(scene:Scene){
-        // const rota = quat.fromEulerDeg(1,-1,-2);
-        // let obj1 = this.m_obj1;
-        // let trs = obj1.transform;
-        // trs.rotation.selfRota(rota);
-        // trs.setDirty();
+        const rota = quat.fromEulerDeg(1,-1,-2);
+        let obj1 = this.m_obj1;
+        let trs = obj1.transform;
+        trs.rotate(rota);
+        trs.setDirty();
     }
 }
 
