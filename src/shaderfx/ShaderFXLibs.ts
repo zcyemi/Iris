@@ -98,7 +98,7 @@ const Shader_Unlit_Texture = new ShaderSource(
     out vec4 fragColor;
     uniform sampler2D uSampler;
     void main(){
-        float shadow = computeShadowPoisson(lpos,uShadowMap);
+        float shadow = computeShadow(lpos,uShadowMap);
         fragColor = vec4(1.0) * clamp(shadow +0.2,.0,1.);
     }`
 );
@@ -210,11 +210,19 @@ export class ShaderDataUniformLight extends ShaderDataFloat32Buffer{
 export class ShaderDataUniformShadowMap extends ShaderDataArrayBuffer{
 
     public constructor(){
-        let buffersize = 16 *4 *4;
+        let buffersize = 16 *4 *4 + 4 + 4;
         super(buffersize);
     }
     public setLightMtx(mtx:mat4,index:number){
         this.setMat4(index *16 *4,mtx);
+    }
+    
+    public setShadowDistance(dist:null){
+
+    }
+
+    public setCascadeCount(count:number){
+
     }
 }
 
@@ -278,8 +286,10 @@ uniform LIGHT{
 const SHADERFX_SHADOWMAP = `
 uniform UNIFORM_SHADOWMAP{
     mat4 uLightMtx[4];
+    float uShadowDist;
 };
 uniform sampler2D uShadowMap;
+
 
 float computeShadow(vec4 vLightPos,sampler2D shadowsampler){
     vec3 clipspace = vLightPos.xyz / vLightPos.w;

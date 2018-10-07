@@ -13,7 +13,6 @@ export class Light extends GameObject{
     public lightColor:vec3 = vec3.one;
 
     private m_range:number = 10;
-    private m_direction:vec3;
 
     private m_paramDirty:boolean = true;
 
@@ -23,13 +22,10 @@ export class Light extends GameObject{
         return this.m_range;
     }
 
-    public get direction():vec3{
-        return this.m_direction;
-    }
 
     public get lightPosData():vec3{
         if(this.lightType == LightType.direction){
-            return this.m_direction.mulToRef(-1.0);
+            return this.transform.forward;
         }
         else{
             return this.transform.localPosition;
@@ -64,9 +60,9 @@ export class Light extends GameObject{
         return light;
     }
 
-    public static creatDirctionLight(dir:vec3 = vec3.right,intensity?:number,color?:vec3){
+    public static creatDirctionLight(intensity:number = 1.0,color?:vec3,dir:vec3 = vec3.down){
         let light = new Light(LightType.direction,intensity,color);
-        light.m_direction = dir.normalized();
+        light.transform.forward = dir.normalized();
         light.castShadow = true;
         return light;
     }

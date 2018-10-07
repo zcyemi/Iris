@@ -9,6 +9,7 @@ import { ShaderSource } from "../shaderfx/ShaderSource";
 import { Shader } from "../shaderfx/Shader";
 import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap } from "../shaderfx/ShaderFXLibs";
 import { ShadowConfig, ShadowCascade } from "../render/Shadow";
+import { MeshRender } from "../MeshRender";
 
 export class ShadowMapInfo{
     public texture:WebGLTexture;
@@ -42,6 +43,10 @@ export class RenderTaskShadowMap extends RenderTask{
     public m_shadowMapSize:number = 1024;
 
     private m_shadowConfig:ShadowConfig;
+
+    private m_smWidth:number;
+    private m_smHeight:number;
+
 
     public init(){
         let pipe = this.pipeline;
@@ -79,6 +84,21 @@ export class RenderTaskShadowMap extends RenderTask{
         this.m_blockIndexPerObj = ublocks[ShaderFX.UNIFORM_OBJ];
 
         let size =this.m_shadowMapSize;
+        
+
+        let config = this.m_shadowConfig;
+
+        this.m_smHeight = size;
+
+        let smwidth = size;
+        let smheight =size;
+        if(config.cascade == ShadowCascade.TwoCascade){
+            smwidth *= 2;
+        }
+
+        this.m_smWidth = smwidth;
+        this.m_smHeight = smheight;
+
 
 
         //depth texture
@@ -90,7 +110,10 @@ export class RenderTaskShadowMap extends RenderTask{
         gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texStorage2D(gl.TEXTURE_2D,1,gl.DEPTH_COMPONENT24,size,size);
+        
+        gl.texStorage2D(gl.TEXTURE_2D,1,gl.DEPTH_COMPONENT24,smwidth,smheight);
+
+
         gl.bindTexture(gl.TEXTURE_2D,null);
         pipe.shadowMapInfo[0].texture = deptex;
 
@@ -104,7 +127,7 @@ export class RenderTaskShadowMap extends RenderTask{
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-            gl.texStorage2D(gl.TEXTURE_2D,1,gl.RGBA8,size,size);
+            gl.texStorage2D(gl.TEXTURE_2D,1,gl.RGBA8,smwidth,smheight);
             gl.bindTexture(gl.TEXTURE_2D,null);
 
             this.m_shadowMapTexDebug = debugtex;
@@ -191,7 +214,7 @@ export class RenderTaskShadowMap extends RenderTask{
         let hCoefficient = Math.tan(camera.fov / 2.0 * glmath.Deg2Rad);
         let wCoefficient = hCoefficient * camera.aspect;
 
-        let ldir = light.direction;
+        let ldir = light.lightPosData;
         let lup = vec3.up;
         if(Math.abs(vec3.Dot(lup,ldir))>0.99){
             lup = glmath.vec3(0,1,0.001);
@@ -243,9 +266,7 @@ export class RenderTaskShadowMap extends RenderTask{
         gl.clearDepth(1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        let size = this.m_shadowMapSize;
-
-        gl.viewport(0,0,size,size);
+        gl.viewport(0,0,this.m_smWidth,this.m_smHeight);
 
         let program = this.m_shadowMapProgram;
         let glp = program.Program;
@@ -264,22 +285,46 @@ export class RenderTaskShadowMap extends RenderTask{
 
         let lightMtx = lightProjMtx.mul(lightworldMtx);
         smdata.setLightMtx(lightMtx,0);
-
         this.pipeline.shadowMapInfo[0].lightMtx = lightMtx;
 
-        //uniform camera
+        let cascades = this.m_shadowConfig.cascade;
+
+        let nodequeue = nodelist.nodeOpaque;
+
+        let size = this.m_smHeight;
+        if(cascades == 1){
+            this.renderShadowCascade(glmath.vec4(0,0,size,size),nodequeue,lightMtxs[0]);
+        }
+        else if(cascades == 2){
+            this.renderShadowCascade(glmath.vec4(0,0,size,size),nodequeue,lightMtxs[0]);
+            this.renderShadowCascade(glmath.vec4(size,0,size,size),nodequeue,lightMtxs[1]);
+        }else{
+            this.renderShadowCascade(glmath.vec4(0,0,size,size),nodequeue,lightMtxs[0]);
+            this.renderShadowCascade(glmath.vec4(size,0,size,size),nodequeue,lightMtxs[1]);
+            this.renderShadowCascade(glmath.vec4(0,size,size,size),nodequeue,lightMtxs[2]);
+            this.renderShadowCascade(glmath.vec4(size,size,size,size),nodequeue,lightMtxs[3]);
+        }
+        
+
+
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
+    }
+
+    private renderShadowCascade(viewport:vec4,nodelist:MeshRender[],mtx:[mat4,mat4]){
+        let gl = this.pipeline.GL;
+
         let camData = this.m_camdata;
-        camData.setMtxView(lightworldMtx);
-        camData.setMtxProj(lightProjMtx);
+        camData.setMtxView(mtx[0]);
+        camData.setMtxProj(mtx[1]);
         gl.bindBuffer(gl.UNIFORM_BUFFER,this.m_cambuffer);
         gl.bufferData(gl.UNIFORM_BUFFER,camData.rawBuffer,gl.DYNAMIC_DRAW);
 
+        gl.viewport(viewport.x,viewport.y,viewport.z,viewport.w);
 
-        //uniform obj
-        let objdata =this.m_objdata;
+        let objdata = this.m_objdata;
         gl.bindBuffer(gl.UNIFORM_BUFFER,this.m_objbuffer);
 
-        let queue = nodelist.nodeOpaque;
+        let queue = nodelist;
         let queueLen = queue.length;
         for(let i=0;i<queueLen;i++){
             let node = queue[i];
@@ -305,7 +350,6 @@ export class RenderTaskShadowMap extends RenderTask{
             gl.drawElements(gl.TRIANGLES,drawCount,gl.UNSIGNED_SHORT,0);
             gl.bindVertexArray(null);
         }
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
     }
 
     private static genShaderShadwoMap():ShaderSource{
