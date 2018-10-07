@@ -99,7 +99,7 @@ const Shader_Unlit_Texture = new ShaderSource(
     uniform sampler2D uSampler;
     void main(){
         float shadow = computeShadowPoisson(lpos,uShadowMap);
-        fragColor = texture(uSampler,vUV) * clamp(shadow +0.2,.0,1.);
+        fragColor = vec4(1.0) * clamp(shadow +0.2,.0,1.);
     }`
 );
 

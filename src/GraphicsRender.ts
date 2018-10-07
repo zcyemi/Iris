@@ -2,6 +2,7 @@ import { GLContext, vec4, GLFrameBuffer } from "wglut";
 import { RenderPipeline } from "./RenderPipeline";
 import { Scene } from "./Scene";
 import { ShaderFXLibs } from "./shaderfx/ShaderFXLibs";
+import { ShadowConfig } from "./render/Shadow";
 
 
 export class GraphicsRenderBufferInfo{
@@ -22,12 +23,15 @@ export class GraphicsRender{
 
     private m_shaderFXlib:ShaderFXLibs;
 
+    public shadowConfig:ShadowConfig = new ShadowConfig();
+
 
     public get pipeline():RenderPipeline{
         return this.m_renderPipeline;
     }
     public set pipeline(p:RenderPipeline){
         this.m_renderPipeline = p;
+        p.graphicRender = this;
     }
 
     public get shaderLib():ShaderFXLibs{

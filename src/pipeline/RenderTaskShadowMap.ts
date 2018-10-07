@@ -2,12 +2,13 @@ import { RenderTask } from "../RenderPipeline";
 import { RenderNodeList } from "../RenderNodeList";
 import { Scene } from "../Scene";
 import { Light, LightType } from "../Light";
-import { GLContext, GLProgram, mat4, glmath, vec4 } from "wglut";
+import { GLContext, GLProgram, mat4, glmath, vec4, vec3 } from "wglut";
 import { ShaderFX } from "../shaderfx/ShaderFX";
 import { Camera } from "../Camera";
 import { ShaderSource } from "../shaderfx/ShaderSource";
 import { Shader } from "../shaderfx/Shader";
 import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap } from "../shaderfx/ShaderFXLibs";
+import { ShadowConfig, ShadowCascade } from "../render/Shadow";
 
 export class ShadowMapInfo{
     public texture:WebGLTexture;
@@ -40,10 +41,14 @@ export class RenderTaskShadowMap extends RenderTask{
 
     public m_shadowMapSize:number = 1024;
 
+    private m_shadowConfig:ShadowConfig;
+
     public init(){
         let pipe = this.pipeline;
         let gl =pipe.GL;
         let glctx = pipe.GLCtx;
+
+        this.m_shadowConfig = pipe.graphicRender.shadowConfig;
 
         //uniformbuffer
         this.m_camdata =new ShaderDataUniformCam();
@@ -123,6 +128,7 @@ export class RenderTaskShadowMap extends RenderTask{
         let smdata = this.m_smdata;
 
         this.m_inited = true;
+
     }
 
     public release(glctx:GLContext){
@@ -165,16 +171,60 @@ export class RenderTaskShadowMap extends RenderTask{
         gl.bufferData(gl.UNIFORM_BUFFER,this.m_smdata.rawBuffer,gl.DYNAMIC_DRAW);
     }
 
-    private calShadowMapCamMtx(light:Light,camera:Camera):mat4{
+
+    private calCascadeShadowMapLightMtx(light:Light,camera:Camera,config:ShadowConfig):[mat4,mat4][]{
         let ctrs = camera.transform;
-        let tarPos = ctrs.position.clone().sub(ctrs.forward.mul(camera.far *0.5));
+        let near = camera.near;
+        let far = camera.far;
 
-        let lightdir = light.direction;
-        let lightPos = tarPos.sub(lightdir.mulToRef(camera.far));
+        let camdist = far - near;
+        let shadowDis = Math.min(camdist,config.shadowDistance);
+        let cascades:number = config.cascade;
+        let cascadeSplit:number[] = config.cascadeSplit;
 
-        //TODO tem fix LightDir parall with ve3.up
-        return mat4.coordCvt(lightPos,lightdir,glmath.vec3(0,1,0.1));
+        let fardist = near;
+        let neardist = near;
+
+        let campos = ctrs.position;
+        let camforward = ctrs.forward;
+
+        let hCoefficient = Math.tan(camera.fov / 2.0 * glmath.Deg2Rad);
+        let wCoefficient = hCoefficient * camera.aspect;
+
+        let ldir = light.direction;
+        let lup = vec3.up;
+        if(Math.abs(vec3.Dot(lup,ldir))>0.99){
+            lup = glmath.vec3(0,1,0.5);
+        }
+        
+        let ret = [];
+
+        for(let i=0;i<cascades;i++){
+            let dist = cascadeSplit[i] * shadowDis;
+            fardist += dist;
+
+            let d =dist *0.5;
+
+            let cdist = neardist + d;
+            let cpos = campos.clone().sub(camforward.clone().mul(cdist));
+            let h = fardist * hCoefficient;
+            let w = fardist * wCoefficient;
+
+            let r = Math.sqrt(h *h + d* d + w * w);
+            let lpos = cpos.sub(ldir.mulToRef(r));
+
+            let vmtx = mat4.coordCvt(lpos,ldir,lup);
+            let pmtx = mat4.orthographic(r,r,0.1,r*2.0);
+
+            ret.push([vmtx,pmtx]);
+
+            //next frausta
+            neardist += dist;
+        }
+
+        return ret;
     }
+
 
     private renderShadowMap(light:Light,scene:Scene,nodelist:RenderNodeList){
         //Temp: only support directional light currently.
@@ -208,11 +258,11 @@ export class RenderTaskShadowMap extends RenderTask{
         //light mtx
         let camera = scene.camera;
         let f = camera.far;
-        let lightworldMtx = this.calShadowMapCamMtx(light,scene.camera);
-        let projMtx = mat4.orthographic(f,f,0.1,f *2.0);
+        let lightMtxs = this.calCascadeShadowMapLightMtx(light,camera,this.m_shadowConfig);
 
-        let lightMtx = projMtx.mul(lightworldMtx);
+        let [lightworldMtx,lightProjMtx] = lightMtxs[0];
 
+        let lightMtx = lightProjMtx.mul(lightworldMtx);
         smdata.setLightMtx(lightMtx,0);
 
         this.pipeline.shadowMapInfo[0].lightMtx = lightMtx;
@@ -220,9 +270,9 @@ export class RenderTaskShadowMap extends RenderTask{
         //uniform camera
         let camData = this.m_camdata;
         camData.setMtxView(lightworldMtx);
-        camData.setMtxProj(projMtx);
+        camData.setMtxProj(lightProjMtx);
         gl.bindBuffer(gl.UNIFORM_BUFFER,this.m_cambuffer);
-        gl.bufferData(gl.UNIFORM_BUFFER,camData.rawBuffer,gl.STATIC_DRAW);
+        gl.bufferData(gl.UNIFORM_BUFFER,camData.rawBuffer,gl.DYNAMIC_DRAW);
 
 
         //uniform obj

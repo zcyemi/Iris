@@ -44,6 +44,14 @@ export class Camera{
         return this.m_near;
     }
 
+    public get fov():number{
+        return this.m_fov;
+    }
+
+    public get aspect():number{
+        return this.m_aspectratio;
+    }
+
     public ambientDataDirty:boolean = true;
     public get ambientColor():vec4{
         return this.m_ambientColor;

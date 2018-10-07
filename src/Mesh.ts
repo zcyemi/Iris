@@ -164,7 +164,7 @@ export class Mesh{
             let v2 = new vec3([position[i2v],position[i2v+1],position[i2v+2]]);
             let v3 = new vec3([position[i3v],position[i3v+1],position[i3v+2]]);
 
-            let n = vec3.Cross(v1.sub(v2),v3.sub(v2)).normalize();
+            let n = vec3.Cross(v1.sub(v2),v3.sub(v2)).normalize;
             normalAcc[i1]++;
             if(normalVec[i1] == null)normalVec[i1] = vec3.zero;
             normalVec[i1].add(n);

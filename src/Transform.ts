@@ -18,14 +18,14 @@ export class Transform{
 
     public get forward():vec3{
         if(this.m_forward == null){
-            this.m_forward = this.rotation.rota(vec3.forward).normalize();
+            this.m_forward = this.rotation.rota(vec3.forward).normalize;
         }
         return this.m_forward;
     }
 
     public get up():vec3{
         if(this.m_up == null){
-            this.m_up = vec3.Cross(this.forward,this.right).normalize();
+            this.m_up = vec3.Cross(this.forward,this.right).normalize;
 
         }
         return this.m_up;
@@ -60,7 +60,7 @@ export class Transform{
 
     public setLookAt(target:vec3,worldup:vec3 = vec3.up){
         this.m_dirty= true;
-        this.m_forward = target.clone().sub(this.position).normalize();
+        this.m_forward = target.clone().sub(this.position).normalize;
         this.m_right = vec3.Cross(worldup.normalized(),this.m_forward);
         this.m_up = vec3.Cross(this.m_forward,this.m_right);
         this.rotation = quat.FromTo(vec3.forward,this.m_forward);

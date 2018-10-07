@@ -40,6 +40,9 @@ export class SampleGame{
         let gl = glctx.gl;
         let grender = new GraphicsRender(glctx);
         let pipeline = new RenderPipelineDefault(glctx);
+
+        let sc = grender.shadowConfig;
+        sc.shadowDistance = 20;
         
         grender.pipeline= pipeline;
         this.m_graphicsRender = grender;
@@ -108,7 +111,7 @@ export class SampleGame{
         let tex = await this.glctx.createTextureImageAsync('resource/tex0.png');
 
         //camera
-        let camera = Camera.persepctive(60,400.0/300.0,0.01,20);
+        let camera = Camera.persepctive(60,400.0/300.0,0.5,100);
         camera.transform.position = glmath.vec3(0,2,5);
         //camera.transform.setLookAt(glmath.vec3(0,0,0));
         camera.transform.setDirty();
@@ -120,22 +123,29 @@ export class SampleGame{
         //cube
         let obj1 = new GameObject();
         this.m_obj1 = obj1;
-        obj1.transform.position = glmath.vec3(1,5,-5);
-        obj1.transform.scale = glmath.vec3(2,2,2);
+        obj1.transform.position = glmath.vec3(0,5,-5);
+        obj1.transform.scale = glmath.vec3(1,1,1);
         let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
         matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
         obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
         scene.addChild(obj1);
 
-        //cube2
-        let obj3 = new GameObject();
-        obj3.transform.position = glmath.vec3(-3,3,-3);
-        obj3.transform.scale = glmath.vec3(4,1,1);
-        obj3.transform.rotate(quat.fromEulerDeg(20,45,0));
+        // //cube2
+        // let obj3 = new GameObject();
+        // obj3.transform.position = glmath.vec3(-3,3,-3);
+        // obj3.transform.scale = glmath.vec3(4,1,1);
+        // obj3.transform.rotate(quat.fromEulerDeg(20,45,0));
         let matColor = new Material(grender.shaderLib.shaderUnlitColor);
         matColor.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0,0,1,1));
-        obj3.render = new MeshRender(Mesh.Cube,matColor);
-        scene.addChild(obj3);
+        // obj3.render = new MeshRender(Mesh.Cube,matColor);
+        // scene.addChild(obj3);
+        
+        let obj4 = new GameObject();
+        obj4.transform.position =glmath.vec3(20,3,-15);
+        obj4.transform.scale = glmath.vec3(5,5,5);
+        obj4.render = new MeshRender(Mesh.Cube,matColor);
+        scene.addChild(obj4);
+
 
         //plane
         let obj2 = new GameObject();
@@ -158,11 +168,11 @@ export class SampleGame{
     }
 
     private update(scene:Scene){
-        const rota = quat.fromEulerDeg(1,-1,-2);
-        let obj1 = this.m_obj1;
-        let trs = obj1.transform;
-        trs.rotation.selfRota(rota);
-        trs.setDirty();
+        // const rota = quat.fromEulerDeg(1,-1,-2);
+        // let obj1 = this.m_obj1;
+        // let trs = obj1.transform;
+        // trs.rotation.selfRota(rota);
+        // trs.setDirty();
     }
 }
 

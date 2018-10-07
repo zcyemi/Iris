@@ -5,6 +5,7 @@ import { Scene } from "./Scene";
 import { GameObject } from "./GameObject";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 import { ShadowMapInfo } from "./pipeline/RenderTaskShadowMap";
+import { GraphicsRender } from "./GraphicsRender";
 
 export abstract class RenderPipeline{
 
@@ -34,7 +35,10 @@ export abstract class RenderPipeline{
     protected m_sharedBuffer_PerCam:WebGLBuffer;
     protected m_sharedBuffer_ShadowMap:WebGLBuffer;
 
-    protected m_taskSetuped:boolean
+    protected m_taskSetup:boolean = false;
+
+    public graphicRender:GraphicsRender;
+
 
     public constructor(glctx:GLContext){
         this.glctx = glctx;
@@ -101,9 +105,6 @@ export abstract class RenderPipeline{
     public registerTask(task:RenderTask){
         task.pipeline = this;
         this.tasks.push(task);
-        if(!task.isInited){
-            task.init();
-        }
         this.m_tasksDirty = true;
     }
 
@@ -111,6 +112,17 @@ export abstract class RenderPipeline{
         if(this.m_tasksDirty) return;
         this.tasks.sort((a,b)=>{return a.order - b.order;});
         this.m_tasksDirty =false;
+    }
+
+    private setupTasks(){
+        let tasks = this.tasks;
+        for(let i=0,len = tasks.length;i<len;i++){
+            let t = tasks[i];
+            if(!t.isInited){
+                t.init();
+            }
+        }
+
     }
 
 
@@ -123,6 +135,12 @@ export abstract class RenderPipeline{
 
         //exec task
         this.sortTasks();
+
+        if(!this.m_taskSetup){
+            this.setupTasks();
+            this.m_taskSetup = true;
+        }
+
         let tasks = this.tasks;
 
         for(let i=0,len = tasks.length;i<len;i++){
