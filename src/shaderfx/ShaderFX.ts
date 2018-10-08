@@ -1,4 +1,4 @@
-import { ShaderVariant } from "./ShaderVariant";
+import { ShaderVariant, ShaderOptionsConfig } from "./ShaderVariant";
 import { ShaderSource } from "./ShaderSource";
 import { GLContext } from "wglut";
 import { Shader } from "./Shader";
@@ -39,10 +39,14 @@ export class ShaderFX{
         if(!source.isBuilt) return null;
 
 
-        let p = glctx.createProgram(source.vertex,source.pixel);
+        let optconfig = new ShaderOptionsConfig(source.optionsList);
+
+        let compileFlags = optconfig.compileFlag;
+
+        let p = glctx.createProgram(compileFlags + source.vertex,compileFlags + source.pixel);
         if(p == null) return null;
 
-        let shader = new Shader(source,p);
+        let shader = new Shader(source,p,optconfig,glctx);
         shader.tags = source.tags;
 
         return shader;

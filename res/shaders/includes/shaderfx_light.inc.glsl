@@ -1,4 +1,3 @@
-//#multi_compile LIGHTING LIGHT4 LIGHT8
 struct LIGHT_DATA{
     vec4 pos_type;
     vec4 col_intensity;

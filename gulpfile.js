@@ -10,7 +10,16 @@ gulp.task('build',()=>{
 });
 
 gulp.task('watch',()=>{
+
+    mergeShader();
+    build();
+
     gulp.watch('./src/**/*.ts',null,()=>{
+        mergeShader();
+        build();
+    });
+
+    gulp.watch('./res/shaders/**/*.glsl',null,()=>{
         mergeShader();
         build();
     });
@@ -28,6 +37,7 @@ gulp.task('watch',()=>{
 })
 
 function build(){
+    console.log('[Compile Script]');
     child_process.exec('rollup -c rollup.config.ts',(error,stdout,stderr)=>{
         if(stdout != null && stdout != '') console.log(stdout);
         if(stderr != null && stderr != '') console.log(stderr);
@@ -37,6 +47,8 @@ function build(){
 gulp.task('shader',mergeShader)
 
 function mergeShader(){
+
+    console.log('[Compile Shader]');
     let basepath = './res/shaders/';
 
 

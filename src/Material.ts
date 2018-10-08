@@ -1,5 +1,6 @@
 import { GLProgram, vec4 } from "wglut";
 import { Shader, ShaderTags } from "./shaderfx/Shader";
+import { ShaderOptionsConfig } from "./shaderfx/ShaderVariant";
 
 type MaterialProperty = {key:string,type:number,value:any}
 
@@ -32,10 +33,14 @@ export class MaterialPorpertyBlock{
 export class Material{
     private m_program:GLProgram;
     private m_shader:Shader;
-
     private m_propertyBlock:MaterialPorpertyBlock;
+    private m_optConfig:ShaderOptionsConfig;
+    private m_useVariants:boolean =false;
 
     public get program():GLProgram{
+        if(this.m_program == null){
+            this.m_program = this.m_shader.getVariantProgram(this.m_optConfig);
+        }
         return this.m_program;
     }
     public get shaderTags():ShaderTags{
@@ -52,6 +57,7 @@ export class Material{
         }
         this.m_shader = shader;
         this.m_program = shader.defaultProgram;
+        this.m_optConfig = shader.defaultOptionsConfig;
         this.m_propertyBlock =new MaterialPorpertyBlock(this.m_program);
     }
 
@@ -70,6 +76,19 @@ export class Material{
         let p = this.m_propertyBlock.getUniform(name);
         if(p == null) return;
         p.value = tex;
+    }
+
+    public setFlag(key:string,value:string){
+        let defOptCfg = this.m_shader.defaultOptionsConfig;
+        let verified = this.m_shader.defaultOptionsConfig.verifyFlag(key,value);
+        if(!verified) return;
+        if(!this.m_useVariants){
+            this.m_optConfig = defOptCfg.clone();
+        }
+        if(this.m_optConfig.setFlag(key,value)){
+            this.m_program = null;
+            this.m_useVariants = true;
+        }
     }
 
     public apply(gl:WebGL2RenderingContext){

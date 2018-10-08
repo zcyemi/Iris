@@ -16,8 +16,7 @@ uniform UNIFORM_CAM{
 #define MATRIX_IT_MV transpose(inverse(MATRIX_MV))
 #define MATRIX_MVP MATRIX_P * MATRIX_MV
 #define MATRIX_WORLD2OBJ inverse(MATRIX_M)`;
-	public static readonly SHADERFX_LIGHT:string = `//#multi_compile LIGHTING LIGHT4 LIGHT8
-struct LIGHT_DATA{
+	public static readonly SHADERFX_LIGHT:string = `struct LIGHT_DATA{
     vec4 pos_type;
     vec4 col_intensity;
 };

@@ -1,5 +1,6 @@
 import { ShaderSource } from "./ShaderSource";
-import { GLProgram } from "wglut";
+import { GLProgram, GLContext } from "wglut";
+import { ShaderOptionsConfig } from "./ShaderVariant";
 
 export enum RenderQueue{
     Opaque,
@@ -60,19 +61,46 @@ export class Shader{
     
     private m_source:ShaderSource;
 
-    private m_programDef:GLProgram;
-
+    private m_defaultProgram:GLProgram;
+    
+    private m_compiledPrograms:{[hash:number]:GLProgram} = {};
     public tags:ShaderTags;
 
-    public constructor(source:ShaderSource,program:GLProgram){
+    public defaultOptionsConfig:ShaderOptionsConfig;
+
+    private m_glctx:GLContext;
+
+    public constructor(source:ShaderSource,defaultProgram:GLProgram,defOptConfig:ShaderOptionsConfig,glctx:GLContext){
         this.m_source =source;
-        this.m_programDef = program;
+        this.m_defaultProgram = defaultProgram;
+        this.defaultOptionsConfig = defOptConfig;
+        this.m_compiledPrograms[defOptConfig.hashCode] = defaultProgram;
+        this.m_glctx = glctx;
     }
     public get source():ShaderSource{
         return this.m_source;
     }
     public get defaultProgram():GLProgram{
-        return this.m_programDef;
+        return this.m_defaultProgram;
+    }
+
+    public getVariantProgram(optconfig:ShaderOptionsConfig):GLProgram{
+        if(optconfig == null) throw new Error('optconfig is null');
+        
+        let hash = optconfig.hashCode;
+        let cachedProgram = this.m_compiledPrograms[hash];
+        if(cachedProgram != null){
+            return cachedProgram;
+        }
+        else{
+            let vs = optconfig.compileFlag + this.source.vertex;
+            let ps = optconfig.compileFlag + this.source.pixel;
+        }
+        return null; 
+    }
+
+    public release(){
+        this.m_glctx = null;
     }
 }
 

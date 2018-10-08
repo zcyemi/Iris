@@ -1,4 +1,4 @@
-import { ShaderVariant } from "./ShaderVariant";
+import { ShaderVariant, ShaderOptionsConfig, ShaderOptions } from "./ShaderVariant";
 import { ShaderTags, Comparison, RenderQueue, BlendOperator, BlendFactor } from "./Shader";
 
 type VariantsGroup = { [key: string]: ShaderVariant };
@@ -13,6 +13,8 @@ export class ShaderSource {
 
     private m_shaderTag: ShaderTags = null;
 
+
+    public optionsList:ShaderOptions[] = [];
 
     public constructor(vs: string, ps?: string) {
         this.ps = ps;
@@ -46,18 +48,31 @@ export class ShaderSource {
         return true;
     }
 
-    public addVariant(vname: string) {
+    public addVariant(vname: string):boolean{
         if (this.variants == null) {
             this.variants = [];
             this.variants.push(vname);
-            return;
+            return true;
         }
 
         let variants = this.variants;
         if (variants.indexOf(vname) < 0) {
             variants.push(vname);
+            return true;
+        }
+        return false;
+    }
+
+    private addOptions(variant:ShaderVariant){
+        let options = variant.options;
+        if(options == null) return;
+
+        let optlist = this.optionsList;
+        for(let i=0,len = options.length;i<len;i++){
+            optlist.push(options[i]);
         }
     }
+
 
     public ProcessShader(source: string, variants: VariantsGroup) {
         let lines = source.split('\n');
@@ -73,7 +88,8 @@ export class ShaderSource {
                 if (!variant.linked) throw new Error(`shader variant [${vname}] not linked!`);
                 lines[i] = variant.sources;
 
-                this.addVariant(vname);
+                let added = this.addVariant(vname);
+                if(added) this.addOptions(variant);
                 continue;
             }
 
