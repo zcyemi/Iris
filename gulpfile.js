@@ -5,22 +5,17 @@ const fs = require('fs');
 const browsersync = require('browser-sync');
 
 gulp.task('build',()=>{
-    mergeShader();
     build();
 });
 
 gulp.task('watch',()=>{
-
-    mergeShader();
     build();
 
     gulp.watch('./src/**/*.ts',null,()=>{
-        mergeShader();
         build();
     });
 
     gulp.watch('./res/shaders/**/*.glsl',null,()=>{
-        mergeShader();
         build();
     });
     browsersync.init({
@@ -36,11 +31,18 @@ gulp.task('watch',()=>{
     })
 })
 
+var onBuild =false;
+
 function build(){
+    if(onBuild == true) return;
+    onBuild = true;
+    mergeShader();
     console.log('[Compile Script]');
     child_process.exec('rollup -c rollup.config.ts',(error,stdout,stderr)=>{
         if(stdout != null && stdout != '') console.log(stdout);
         if(stderr != null && stderr != '') console.log(stderr);
+
+        onBuild = false;
     });
 }
 
