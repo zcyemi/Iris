@@ -1,3 +1,4 @@
+import { vec4, glmath } from "wglut";
 
 
 export type MapStr<T> = {[key:string]:T};
@@ -38,6 +39,10 @@ export class Utility {
 			}
 		}
 		return ret;
+	}
+
+	public static randomColor():vec4{
+		return glmath.vec4(Math.random(),Math.random(),Math.random(),1);
 	}
 }
 

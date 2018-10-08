@@ -11,6 +11,8 @@ import { GraphicsRender } from './GraphicsRender';
 import { ShaderFX } from './shaderfx/ShaderFX';
 import { Light } from './Light';
 import { RenderTaskDebugBuffer } from './pipeline/RenderTaskDebugBuffer';
+import { DebugEntry } from './DebugEntry';
+import { Utility } from './Utility';
 
 export class SampleGame{
     
@@ -100,6 +102,7 @@ export class SampleGame{
 
     private m_obj1:GameObject;
     private m_obj2:GameObject;
+    private m_obj3:GameObject;
     private m_camera:Camera;
     private async createScene(scene:Scene){
         let grender = this.m_graphicsRender;
@@ -129,6 +132,7 @@ export class SampleGame{
 
         // //cube2
         let obj3 = new GameObject();
+        this.m_obj3 = obj3;
         obj3.transform.setPosition(glmath.vec3(-3,3,-3));
         obj3.transform.setScale(glmath.vec3(4,1,1));
         obj3.transform.rotate(quat.fromEulerDeg(20,45,0));
@@ -164,6 +168,18 @@ export class SampleGame{
         trs.rotate(rota);
         trs.setDirty();
     }
+
+
+    public static test:SampleGame;
+    @DebugEntry('random.color')
+    public static DebugRandomColor(){
+        let obj3 = SampleGame.test.m_obj3;
+        obj3.render.material.setColor(ShaderFX.UNIFORM_MAIN_COLOR,Utility.randomColor());
+    }
 }
 
 let game = new SampleGame();
+
+SampleGame.test = game;
+
+

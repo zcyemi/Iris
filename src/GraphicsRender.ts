@@ -3,6 +3,7 @@ import { RenderPipeline } from "./RenderPipeline";
 import { Scene } from "./Scene";
 import { ShaderFXLibs } from "./shaderfx/ShaderFXLibs";
 import { ShadowConfig } from "./render/Shadow";
+import { DebugEntry } from "./DebugEntry";
 
 
 export class GraphicsRenderBufferInfo{
@@ -52,6 +53,7 @@ export class GraphicsRender{
         if(p == null) return;
         p.exec(scene);
     }
+
     public renderToCanvas(){
         this.pipeline.onRenderToCanvas();
     }
