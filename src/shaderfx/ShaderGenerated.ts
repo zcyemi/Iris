@@ -44,7 +44,8 @@ uniform LIGHT{
     mat4 _obj2world_;
 };
 #define MATRIX_M _obj2world_`;
-	public static readonly SHADERFX_SHADOWMAP:string = `uniform UNIFORM_SHADOWMAP{
+	public static readonly SHADERFX_SHADOWMAP:string = `#options SMCASCADE NONE TWO FOUR
+uniform UNIFORM_SHADOWMAP{
     mat4 uLightMtx[4];
     float uShadowDist;
 };

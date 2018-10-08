@@ -1,6 +1,7 @@
 import { ShaderSource } from "./ShaderSource";
 import { GLProgram, GLContext } from "wglut";
 import { ShaderOptionsConfig } from "./ShaderVariant";
+import { ShaderFX } from "./ShaderFX";
 
 export enum RenderQueue{
     Opaque,
@@ -93,9 +94,8 @@ export class Shader{
             return cachedProgram;
         }
         else{
-            let vs = optconfig.compileFlag + this.source.vertex;
-            let ps = optconfig.compileFlag + this.source.pixel;
-            
+            let source= this.source;
+            let [vs,ps] =source.injectCompileFlags(optconfig.compileFlag);
             let program = this.m_glctx.createProgram(vs,ps);
             if(program == null) throw new Error(`compile program failed`);
             this.m_compiledPrograms[hash] = program;
@@ -103,6 +103,8 @@ export class Shader{
             return program;
         }
     }
+
+    
 
     public release(){
         this.m_glctx = null;

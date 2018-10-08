@@ -194,4 +194,26 @@ export class ShaderSource {
             }
         }
     }
+
+    public injectCompileFlags(flags:string):[string,string]{
+        const prefix = '#version 300 es';
+        flags = prefix + '\n' + flags;
+        let vs =this.vs;
+        let ps = this.pixel;
+        if(!vs.startsWith(prefix)){
+            vs = flags + vs;
+        }
+        else{
+            vs = flags + vs.slice(15);
+        }
+
+        if(!ps.startsWith(prefix)){
+            ps = flags + ps;
+        }
+        else{
+            ps = flags + ps.slice(15);
+        }
+
+        return [vs,ps];
+    }
 }

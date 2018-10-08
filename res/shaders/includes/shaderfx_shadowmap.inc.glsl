@@ -1,3 +1,4 @@
+#options SMCASCADE NONE TWO FOUR
 uniform UNIFORM_SHADOWMAP{
     mat4 uLightMtx[4];
     float uShadowDist;

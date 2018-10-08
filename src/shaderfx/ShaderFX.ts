@@ -4,7 +4,6 @@ import { GLContext } from "wglut";
 import { Shader } from "./Shader";
 import { ShaderGen } from "./ShaderGenerated";
 
-
 export class ShaderFX{
 
     public static variants:{[key:string]:ShaderVariant} = {};
@@ -40,10 +39,9 @@ export class ShaderFX{
 
 
         let optconfig = new ShaderOptionsConfig(source.optionsList);
-
         let compileFlags = optconfig.compileFlag;
-
-        let p = glctx.createProgram(compileFlags + source.vertex,compileFlags + source.pixel);
+        let [vs,ps] = source.injectCompileFlags(compileFlags);
+        let p = glctx.createProgram(vs,ps);
         if(p == null) return null;
 
         let shader = new Shader(source,p,optconfig,glctx);
@@ -51,6 +49,7 @@ export class ShaderFX{
 
         return shader;
     }
+
 
     public static VARIANT_SHADERFX_OBJ = "SHADERFX_OBJ";
     public static VARIANT_SHADERFX_CAMERA = "SHADERFX_CAMERA";

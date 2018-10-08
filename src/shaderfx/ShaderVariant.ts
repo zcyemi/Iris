@@ -10,7 +10,7 @@ export class ShaderVariant{
     private m_sources:string;
 
 
-    public options:ShaderOptions[];
+    public options:ShaderOptions[] = [];
 
     public constructor(variantName:string,source:string){
         this.variantName = variantName;
