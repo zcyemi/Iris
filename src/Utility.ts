@@ -23,11 +23,19 @@ export class Utility {
 	 * Deep clone map object
 	 * @param map 
 	 */
-	public static cloneMap<T,U extends MapStr<T> | MapNum<T>>(map:U):U{
+	public static cloneMap<T,U extends MapStr<T> | MapNum<T>>(map:U,itemclone?:(t:any)=>any):U{
 		if(map == null) return null;
 		let ret:any = {};
-		for(var key in map){
-			ret[key] = map[key];
+		if(itemclone){
+			for(var key in map){
+				let val:any = map[key];
+				ret[key] =itemclone(val);
+			}
+		}
+		else{
+			for(var key in map){
+				ret[key] = map[key];
+			}
 		}
 		return ret;
 	}

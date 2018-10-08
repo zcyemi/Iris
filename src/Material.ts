@@ -59,7 +59,9 @@ export class MaterialPorpertyBlock{
     public clone():MaterialPorpertyBlock{
         let block =new MaterialPorpertyBlock(null);
         block.m_program = this.m_program;
-        block.uniforms = Utility.cloneMap(this.uniforms);
+        block.uniforms = Utility.cloneMap(this.uniforms,(p:MaterialProperty)=>{
+            return {type:p.type,value:p.value};
+        });
         return block;
     }
 

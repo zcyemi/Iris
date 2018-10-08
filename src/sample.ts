@@ -139,13 +139,6 @@ export class SampleGame{
         matColor.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0,0,1,1));
         obj3.render = new MeshRender(Mesh.Cube,matColor);
         scene.addChild(obj3);
-        
-        let obj4 = new GameObject();
-        obj4.transform.localPosition =glmath.vec3(20,3,-15);
-        obj4.transform.localScale = glmath.vec3(5,5,5);
-        obj4.render = new MeshRender(Mesh.Cube,matColor);
-        scene.addChild(obj4);
-
 
         //plane
         let obj2 = new GameObject();
