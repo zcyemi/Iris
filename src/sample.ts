@@ -38,18 +38,15 @@ export class SampleGame{
 
         this.glctx = glctx;
         let gl = glctx.gl;
-        let grender = new GraphicsRender(glctx);
-        let pipeline = new RenderPipelineDefault(glctx);
 
+        let grender = new GraphicsRender(glctx,new RenderPipelineDefault());
         let sc = grender.shadowConfig;
         sc.shadowDistance = 20;
-        
-        grender.pipeline= pipeline;
+
         this.m_graphicsRender = grender;
 
         this.m_scene = new Scene();
         this.createScene(this.m_scene);
-
         GLUtility.registerOnFrame(this.onFrame.bind(this));
         
         window.addEventListener('keypress',this.onEvtkeyPress.bind(this));

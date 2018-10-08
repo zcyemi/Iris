@@ -6,8 +6,8 @@ import { RenderTaskDebugBuffer } from "./RenderTaskDebugBuffer";
 
 export class RenderPipelineDefault extends RenderPipeline{
 
-    public constructor(glctx:GLContext){
-        super(glctx);
+    public constructor(){
+        super();
 
         let tasks = this.tasks;
 

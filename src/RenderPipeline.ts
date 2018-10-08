@@ -5,7 +5,7 @@ import { Scene } from "./Scene";
 import { GameObject } from "./GameObject";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 import { ShadowMapInfo } from "./pipeline/RenderTaskShadowMap";
-import { GraphicsRender } from "./GraphicsRender";
+import { GraphicsRender, GraphicsRenderBufferInfo } from "./GraphicsRender";
 
 export abstract class RenderPipeline{
 
@@ -16,8 +16,6 @@ export abstract class RenderPipeline{
     protected glctx:GLContext;
     protected gl:WebGL2RenderingContext;
 
-    protected m_targetFrameBuffer:GLFrameBuffer;
-    protected m_targetFrameBufferBinded:boolean= false;
 
     public shadowMapInfo: ShadowMapInfo[];
 
@@ -39,8 +37,17 @@ export abstract class RenderPipeline{
 
     public graphicRender:GraphicsRender;
 
+    private m_mainFrameBuffer:GLFrameBuffer;
+    private m_mainFrameBufferInfo:GraphicsRenderBufferInfo;
+    protected m_mainFrameBufferBinded:boolean= false;
 
-    public constructor(glctx:GLContext){
+
+
+    public constructor(){
+
+    }
+
+    public onInitGL(glctx:GLContext){
         this.glctx = glctx;
         this.gl= glctx.gl;
 
@@ -54,6 +61,32 @@ export abstract class RenderPipeline{
         utex_sm.push(gl.TEXTURE18);
         this.utex_sm = utex_sm;
         this.utex_sm_slot = utex_sm_slot;
+    }
+
+    /**
+     * render setup process, create main framebuffer
+     * custom render can override this function
+     * @param bufferinfo 
+     */
+    public onSetupRender(bufferinfo:GraphicsRenderBufferInfo){
+
+        if(bufferinfo == null) bufferinfo = new GraphicsRenderBufferInfo();
+        this.m_mainFrameBufferInfo = bufferinfo;
+
+        let fb = this.glctx.createFrameBuffer(true,bufferinfo.colorFormat,bufferinfo.depthFormat);
+        this.m_mainFrameBuffer = fb;
+
+        let gl = this.glctx.gl;
+        gl.depthMask(true);
+        gl.depthFunc(gl.LEQUAL);
+        gl.enable(gl.DEPTH_TEST);
+    }
+
+    /**
+     * draw main framebuffer to canvas buffer
+     */
+    public onRenderToCanvas(){
+        this.glctx.drawTexFullscreen(this.m_mainFrameBuffer.colorTex0,false,false);
     }
 
     public get GLCtx():GLContext{
@@ -100,8 +133,6 @@ export abstract class RenderPipeline{
     }
 
 
-
-
     public registerTask(task:RenderTask){
         task.pipeline = this;
         this.tasks.push(task);
@@ -125,11 +156,9 @@ export abstract class RenderPipeline{
 
     }
 
-
-
-    public exec(scene:Scene,glctx:GLContext,glfb:GLFrameBuffer){
-        this.m_targetFrameBuffer = glfb;
-        this.m_targetFrameBufferBinded = false;
+    public exec(scene:Scene){
+        let glctx = this.glctx;
+        this.m_mainFrameBufferBinded = false;
 
         let nodeList = this.generateDrawList(scene);
 
@@ -149,7 +178,6 @@ export abstract class RenderPipeline{
         }
 
         this.UnBindTargetFrameBuffer();
-        this.m_targetFrameBuffer = null;
     }
 
     public release(){
@@ -163,20 +191,20 @@ export abstract class RenderPipeline{
     }
 
     public bindTargetFrameBuffer(){
-        if(this.m_targetFrameBufferBinded) return;
-        this.m_targetFrameBuffer.bind(this.gl);
-        this.m_targetFrameBufferBinded = true;
+        if(this.m_mainFrameBufferBinded) return;
+        this.m_mainFrameBuffer.bind(this.gl);
+        this.m_mainFrameBufferBinded = true;
 
         //TODO
         this.gl.viewport(0,0,400,300);
     }
 
     public UnBindTargetFrameBuffer(){
-        if(!this.m_targetFrameBufferBinded) return;
+        if(!this.m_mainFrameBufferBinded) return;
 
         let gl = this.gl;
         gl.bindFramebuffer(gl.FRAMEBUFFER,null);
-        this.m_targetFrameBufferBinded = false;
+        this.m_mainFrameBufferBinded = false;
     }
 
     private m_nodelist:RenderNodeList[] = [new RenderNodeList(),new RenderNodeList()];
