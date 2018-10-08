@@ -1,32 +1,75 @@
 import { GLProgram, vec4 } from "wglut";
 import { Shader, ShaderTags } from "./shaderfx/Shader";
 import { ShaderOptionsConfig } from "./shaderfx/ShaderVariant";
+import { Utility } from "./Utility";
 
-type MaterialProperty = {key:string,type:number,value:any}
+type MaterialProperty = {type:number,value:any}
 
 export class MaterialPorpertyBlock{
-    public uniforms:MaterialProperty[] = [];
+    public uniforms:{[key:string]:MaterialProperty};
+    private m_program:GLProgram;
 
-    public constructor(program:GLProgram){
-        let uinfo = program.UniformsInfo;
+    public constructor(program?:GLProgram){
+        if(program == null) return;
         let selfu =this.uniforms;
-        for(let uname in uinfo){
-            let info = uinfo[uname];
-            selfu.push({
-                key:uname,
-                type:info.type,
-                value:null
-            });
+        if(selfu == null){
+            selfu = {}
+            this.uniforms = selfu;
+        }
+        this.setProgram(program);
+    }
+    
+    public setProgram(program:GLProgram){
+        if(program == this.m_program) return;
+
+        if(this.m_program == null){
+            let uinfo = program.UniformsInfo;
+            let selfu =this.uniforms;
+            for(let uname in uinfo){
+                let info = uinfo[uname];
+                selfu[uname] = {type:info.type,value:null};
+            }
+            this.m_program = program;
+            return;
+        }
+
+        this.m_program = program;
+        let uinfo = program.UniformsInfo;
+        let selfu = this.uniforms;
+        for(var key in selfu){
+            if(uinfo[key] == null){
+                delete selfu[key];
+            }
+        }
+        for(var key in uinfo){
+            let u = selfu[key];
+            let up = uinfo[key];
+            if(u == null){
+                selfu[key] = {type:up.type,value:null};
+            }
+            else{
+                if(u.type != up.type){
+                    u.type = up.type;
+                    u.value = null;
+                }
+            }
         }
     }
 
+    public clone():MaterialPorpertyBlock{
+        let block =new MaterialPorpertyBlock(null);
+        block.m_program = this.m_program;
+        block.uniforms = Utility.cloneMap(this.uniforms);
+        return block;
+    }
+
     public getUniform(name:string): MaterialProperty{
-        let us = this.uniforms;
-        for(let i=0,len=us.length;i<len;i++){
-            let u = us[i];
-            if(u.key == name) return u;
-        }
-        return null;
+        return this.uniforms[name];
+    }
+
+    public release(){
+        this.m_program = null;
+        this.uniforms = null;
     }
 }
 
@@ -39,7 +82,9 @@ export class Material{
 
     public get program():GLProgram{
         if(this.m_program == null){
-            this.m_program = this.m_shader.getVariantProgram(this.m_optConfig);
+            let newprogram = this.m_shader.getVariantProgram(this.m_optConfig);
+            this.m_propertyBlock.setProgram(newprogram);
+            this.m_program = newprogram;
         }
         return this.m_program;
     }
@@ -51,9 +96,9 @@ export class Material{
         return this.m_propertyBlock;
     }
 
-    public constructor(shader:Shader){
+    public constructor(shader?:Shader){
         if(shader == null){
-            throw new Error('shader is null!');
+            return;
         }
         this.m_shader = shader;
         this.m_program = shader.defaultProgram;
@@ -62,7 +107,12 @@ export class Material{
     }
 
     public clone():Material{
-        let mat = new Material(this.m_shader);
+        let mat = new Material();
+        mat.m_shader = this.m_shader;
+        mat.m_program = this.program;
+        mat.m_propertyBlock = this.m_propertyBlock.clone();
+        mat.m_useVariants = this.m_useVariants;
+        mat.m_optConfig = this.m_optConfig.clone();
         return mat;
     }
 
@@ -92,14 +142,20 @@ export class Material{
     }
 
     public apply(gl:WebGL2RenderingContext){
+        let program = this.program;
         let pu = this.m_propertyBlock.uniforms;
-        for(let i=0,len = pu.length;i<len;i++){
-            let u = pu[i];
-            this.setUniform(gl,this.program.Uniforms[u.key],u.type,u.value);
+        for(var key in pu){
+            let u = pu[key];
+            this.setUniform(gl,program.Uniforms[key],u.type,u.value);
         }
     }
     
 
+    /**
+     * TODO clean apply process
+     * especially for binded texture
+     * @param gl 
+     */
     public clean(gl:WebGL2RenderingContext){
         // let pu = this.m_propertyBlock.uniforms;
         // for(let i=0,len = pu.length;i<len;i++){

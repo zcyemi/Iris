@@ -1,6 +1,14 @@
+
+
+export type MapStr<T> = {[key:string]:T};
+export type MapNum<T> = {[key:number]:T};
+
 export class Utility {
 
-
+	/**
+	 * Simple hash function
+	 * @param str 
+	 */
 	public static Hashfnv32a(str: string): number {
 		var FNV1_32A_INIT = 0x811c9dc5;
 		var hval = FNV1_32A_INIT;
@@ -10,4 +18,19 @@ export class Utility {
 		}
 		return hval >>> 0;
 	}
+
+	/**
+	 * Deep clone map object
+	 * @param map 
+	 */
+	public static cloneMap<T,U extends MapStr<T> | MapNum<T>>(map:U):U{
+		if(map == null) return null;
+		let ret:any = {};
+		for(var key in map){
+			ret[key] = map[key];
+		}
+		return ret;
+	}
 }
+
+

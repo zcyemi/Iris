@@ -124,14 +124,15 @@ export class ShaderOptionsConfig{
 
     private m_compileFlags:string;
 
-    public constructor(opts:ShaderOptions[]){
+    public constructor(opts?:ShaderOptions[]){
+        if(opts == null) return;
+
         this.m_options = opts;
         let optmap = this.m_optmap;
         for(let i=0,len = opts.length;i<len;i++){
             let opt = opts[i];
-            this.m_optmap[opt.flag] = opt.default;
+            optmap[opt.flag] = opt.default;
         }
-
         this.compileOptions();
     }
     
@@ -204,8 +205,17 @@ export class ShaderOptionsConfig{
         return this.m_compileFlags;
     }
 
+    /**
+     * Deep Clone
+     */
     public clone():ShaderOptionsConfig{
-        return null;
+        let optconfig = new ShaderOptionsConfig();
+        optconfig.m_hashCode = this.m_hashCode;
+        optconfig.m_dirty =this.m_dirty;
+        optconfig.m_options = this.m_options;
+        optconfig.m_compileFlags = this.m_compileFlags;
+        optconfig.m_optmap = Utility.cloneMap(this.m_optmap);
+        return optconfig;
     }
 
 }

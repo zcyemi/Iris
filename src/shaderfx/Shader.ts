@@ -95,8 +95,13 @@ export class Shader{
         else{
             let vs = optconfig.compileFlag + this.source.vertex;
             let ps = optconfig.compileFlag + this.source.pixel;
+            
+            let program = this.m_glctx.createProgram(vs,ps);
+            if(program == null) throw new Error(`compile program failed`);
+            this.m_compiledPrograms[hash] = program;
+            console.log(`program hash ${hash}`);
+            return program;
         }
-        return null; 
     }
 
     public release(){
