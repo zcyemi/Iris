@@ -1,6 +1,50 @@
 import { ShaderSource } from "./ShaderSource";
 import { GLProgram } from "wglut";
-import { RenderQueue, Comparison, BlendOperator, BlendFactor } from "./ShaderFX";
+
+export enum RenderQueue{
+    Opaque,
+    Transparent,
+    Skybox,
+    Image,
+    Other
+}
+
+export enum Comparison{
+    NEVER,
+    LESS,
+    EQUAL,
+    LEQUAL,
+    GREATER,
+    NOTEQUAL,
+    GEQUAL,
+    ALWAYS
+}
+
+export enum BlendOperator{
+    ADD,
+    SUBTRACT,
+    RESERVE_SUBSTRACT,
+    MIN,
+    MAX
+}
+
+export enum BlendFactor{
+    ONE,
+    ZERO,
+    SRC_COLOR,
+    ONE_MINUS_SRC_COLOR,
+    DST_COLOR,
+    ONE_MINUS_DST_COLOR,
+    SRC_ALPHA,
+    ONE_MINUS_SRC_ALPHA,
+    DST_ALPHA,
+    ONE_MINUS_DST_ALPHA,
+    CONSTANT_COLOR,
+    ONE_MINUS_CONSTANT_COLOR,
+    CONSTANT_ALPHA,
+    ONE_MINUS_CONSTANT_ALPHA,
+    SRC_ALPHA_SATURATE
+}
 
 export class ShaderTags{
     public queue?:RenderQueue;
@@ -31,3 +75,5 @@ export class Shader{
         return this.m_programDef;
     }
 }
+
+

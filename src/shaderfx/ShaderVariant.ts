@@ -1,16 +1,9 @@
-
-
 export type IncludeIndex = {key:string,line:number};
-
 export class ShaderVariant{
-
     public includes:IncludeIndex[] =[];
-
     public lines:string[];
     public variantName:string;
-
     public linked:boolean = false;
-
     private m_sources:string;
 
     public constructor(variantName:string,source:string){
@@ -45,7 +38,6 @@ export class ShaderVariant{
             }
             this.linked = true;
         }
-
         this.m_sources = this.lines.join('\n');
         console.log(`link success ${this.variantName}`);
     }
@@ -69,43 +61,3 @@ export class ShaderVariant{
         this.lines = lines;
     }
 }
-
-
-const VARIANTS = `
-renderpass:
-    shadowMap
-
-lighting:
-    brdf
-
-scenegraph:
-    per-obj
-    per-camera
-
-basis:
-    per-shader
-    vs-attrs
-    varying-v2f
-    ps
-
-
-`;
-
-
-const VERTEX_BASE = `
-in vec4 aPosition;
-in vec2 aUV;
-in vec2 aNormal;
-`
-
-const VERTEX_COLOR = VERTEX_BASE+
-`
-in vec4 aColor;
-`;
-
-const VARIANT_OBJ = `
-uniform UNIFORM_OBJ{
-    mat4 _obj2world_;
-}
-#define MATRIX_M _obj2world_
-`;

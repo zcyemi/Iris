@@ -1,5 +1,5 @@
 import { MeshRender } from "./MeshRender";
-import { RenderQueue } from "./shaderfx/ShaderFX";
+import { RenderQueue } from "./shaderfx/Shader";
 
 
 export class RenderNodeList{

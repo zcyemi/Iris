@@ -13,6 +13,7 @@
     "wglut": "file:../wglut"
   },
   "devDependencies": {
+    "@types/node": "^10.11.4",
     "@types/webgl2": "0.0.4",
     "browser-sync": "^2.24.7",
     "gulp": "^3.9.1",

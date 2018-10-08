@@ -108,7 +108,7 @@ export class SampleGame{
         let grender = this.m_graphicsRender;
 
         //texture
-        let tex = await this.glctx.createTextureImageAsync('resource/tex0.png');
+        let tex = await this.glctx.createTextureImageAsync('res/images/tex0.png');
 
         //camera
         let camera = Camera.persepctive(60,400.0/300.0,0.5,100);

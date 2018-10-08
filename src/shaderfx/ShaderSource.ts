@@ -1,10 +1,7 @@
 import { ShaderVariant } from "./ShaderVariant";
-import { ShaderTags } from "./Shader";
-import { Comparison, RenderQueue, BlendFactor, BlendOperator } from "./ShaderFX";
-import { EROFS } from "constants";
+import { ShaderTags, Comparison, RenderQueue, BlendOperator, BlendFactor } from "./Shader";
 
 type VariantsGroup = { [key: string]: ShaderVariant };
-
 export class ShaderSource {
 
     public variants: string[];
@@ -87,11 +84,8 @@ export class ShaderSource {
 
     private processShaderTag(line: string): string {
         line = line.trim();
-
         let tags = this.m_shaderTag;
-
         const regex2 = /#(ztest|zwrite|queue) ([\w]+)/;
-
         let match = line.match(regex2);
         if (match != null) {
             if(tags == null){
@@ -184,6 +178,4 @@ export class ShaderSource {
             }
         }
     }
-
-
 }
