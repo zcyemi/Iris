@@ -4,6 +4,51 @@ import { vec4, glmath } from "wglut";
 export type MapStr<T> = {[key:string]:T};
 export type MapNum<T> = {[key:number]:T};
 
+export class Delayter{
+	
+	private m_newEmit:boolean = false;
+	private m_ondelay:boolean = false;
+
+	private m_f:()=>void;
+	private m_time:number = 300;
+
+	public constructor(time:number = 300){
+		this.m_time;
+	}
+
+	public set delaytime(t:number){
+		this.m_time= t;
+	}
+
+	public emit(f:()=>void){
+		if(f == null) return;
+		this.m_f = f;
+
+		if(this.m_ondelay == true){
+			this.m_newEmit = true;
+		}
+		else{
+			this.m_newEmit = false;
+			this.m_ondelay = true;
+			this.delayExec();
+		}
+	}
+
+	private delayExec(){
+		var self =this;
+		setTimeout(() => {
+			if(self.m_newEmit){
+				self.m_newEmit = false;
+				self.delayExec();
+			}
+			else{
+				self.m_f();
+				self.m_ondelay = false;
+			}
+		},this.m_time);
+	}
+}
+
 export class Utility {
 
 	/**
