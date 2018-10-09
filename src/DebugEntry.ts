@@ -15,7 +15,7 @@ export function DebugEntry(cmd:string){
 export function DebugCmd(cmd:string,obj?:any){
     let func = debugRegister[cmd];
     if(func == null) {
-        console.warn(`[DebugEntry] not cmd found: ${cmd}`);
+        console.warn(`[DebugEntry] no cmd found: ${cmd}`);
         return;
     }
     func(obj);

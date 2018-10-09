@@ -18,31 +18,15 @@ import { Input } from './Input';
 export class SampleGame{
     
     private m_canvas:HTMLCanvasElement;
-    private glctx:GLContext;
+    private m_glctx:GLContext;
 
     private m_graphicsRender:GraphicsRender;
     private m_scene:Scene;
     private m_sceneInited:boolean = false;
 
-    public constructor(){
-        let canvas = <HTMLCanvasElement>document.createElement('canvas');
-        canvas.width = 400;
-        canvas.height = 300;
-        canvas.style.backgroundColor = '#222';
-        document.body.appendChild(canvas);
+    public constructor(canvas:HTMLCanvasElement){
         this.m_canvas = canvas;
-
-        var glctx = <GLContext>GLContext.createFromCanvas(canvas, {
-            antialias: true,
-            alpha: false,
-            depth: false,
-            stencil:false
-        });
-
-        this.glctx = glctx;
-        let gl = glctx.gl;
-
-        let grender = new GraphicsRender(glctx,new RenderPipelineDefault());
+        let grender = new GraphicsRender(canvas,new RenderPipelineDefault());
         let sc = grender.shadowConfig;
         sc.shadowDistance = 20;
 
@@ -52,11 +36,13 @@ export class SampleGame{
         Input.init(canvas);
 
         this.m_scene = new Scene();
-        this.createScene(this.m_scene);
+        this.createScene(this.m_scene,grender.glctx);
         GLUtility.registerOnFrame(this.onFrame.bind(this));
         
-        //window.addEventListener('keypress',this.onEvtkeyPress.bind(this));
-        //canvas.addEventListener('mousewheel',this.onEvtMouseWheel.bind(this));
+    }
+
+    public resizeCanvas(w:number,h:number){
+        this.m_graphicsRender.resizeCanvas(w,h);
     }
 
     public onFrame(ts:number){
@@ -77,11 +63,11 @@ export class SampleGame{
     private m_obj2:GameObject;
     private m_obj3:GameObject;
     private m_camera:Camera;
-    private async createScene(scene:Scene){
+    private async createScene(scene:Scene,glctx:GLContext){
         let grender = this.m_graphicsRender;
 
         //texture
-        let tex = await this.glctx.createTextureImageAsync('res/images/tex0.png');
+        let tex = await glctx.createTextureImageAsync('res/images/tex0.png');
 
         //camera
         let camera = Camera.persepctive(60,400.0/300.0,0.5,100);
@@ -171,18 +157,6 @@ export class SampleGame{
             c.transform.rotate(Input.getMouseWheelDelta() > 0? q: p);
         }
     }
-
-
-    public static test:SampleGame;
-    @DebugEntry('random.color')
-    public static DebugRandomColor(){
-        let obj3 = SampleGame.test.m_obj3;
-        obj3.render.material.setColor(ShaderFX.UNIFORM_MAIN_COLOR,Utility.randomColor());
-    }
 }
 
-let game = new SampleGame();
-
-SampleGame.test = game;
-
-
+window['SampleGame'] = SampleGame;

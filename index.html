@@ -1,11 +1,70 @@
 <html>
-    <header>
+<header>
+    <style>
+        body,
+        html {
+            padding: 0;
+            margin: 0;
+            border: 0;
+        }
 
-    </header>
-    <body>
-        <script src="./dist/sample.js" type="module"></script>
-        <div>
-            <button onclick="DebugCmd('random.color')">changeColor</button>
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .side {
+            width: 200px;
+            line-height: 10px;
+        }
+
+        .render {
+            flex: 1;
+            background-color: #333333;
+        }
+
+        .side button {
+            color: aliceblue;
+            border: 0 none;
+            padding: 3px;
+            background-color: #333333;
+            margin: 0 3 0 3;
+        }
+
+        #rendercanvas{
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+
+    <script src="./dist/sample.js"></script>
+</header>
+
+<body>
+    <div class="container">
+        <div class="side">
+            <h3>Rendering Engine</h3>
+            <p>
+                <button onclick="">reload</button>
+            </p>
+            <button onclick="DebugCmd('random.color')">change color</button>
         </div>
-    </body>
+        <div class="render">
+            <canvas width="400" height="300" id="rendercanvas"></canvas>
+
+            <script>
+                var canvas = document.getElementById('rendercanvas');
+                var sampler = new SampleGame(canvas);
+                window.addEventListener('resize',()=>{
+                    sampler.resizeCanvas(canvas.clientWidth,canvas.clientHeight)
+                });
+                sampler.resizeCanvas(canvas.clientWidth,canvas.clientHeight)
+                
+            </script>
+        </div>
+    </div>
+</body>
+
 </html>

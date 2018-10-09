@@ -5,7 +5,7 @@ import { Scene } from "./Scene";
 import { GameObject } from "./GameObject";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 import { ShadowMapInfo } from "./pipeline/RenderTaskShadowMap";
-import { GraphicsRender, GraphicsRenderBufferInfo } from "./GraphicsRender";
+import { GraphicsRender, GraphicsRenderCreateInfo } from "./GraphicsRender";
 
 export abstract class RenderPipeline{
 
@@ -38,7 +38,7 @@ export abstract class RenderPipeline{
     public graphicRender:GraphicsRender;
 
     private m_mainFrameBuffer:GLFrameBuffer;
-    private m_mainFrameBufferInfo:GraphicsRenderBufferInfo;
+    private m_mainFrameBufferInfo:GraphicsRenderCreateInfo;
     protected m_mainFrameBufferBinded:boolean= false;
 
 
@@ -68,9 +68,7 @@ export abstract class RenderPipeline{
      * custom render can override this function
      * @param bufferinfo 
      */
-    public onSetupRender(bufferinfo:GraphicsRenderBufferInfo){
-
-        if(bufferinfo == null) bufferinfo = new GraphicsRenderBufferInfo();
+    public onSetupRender(bufferinfo:GraphicsRenderCreateInfo){
         this.m_mainFrameBufferInfo = bufferinfo;
 
         let fb = this.glctx.createFrameBuffer(true,bufferinfo.colorFormat,bufferinfo.depthFormat);
@@ -154,6 +152,9 @@ export abstract class RenderPipeline{
             }
         }
 
+    }
+
+    public resizeFrameBuffer(width:number,height:number){
     }
 
     public exec(scene:Scene){

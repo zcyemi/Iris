@@ -6,9 +6,9 @@ import process from 'process';
 
 
 export default{
-    input: `src/sample.ts`,
+    input: `src/index.ts`,
     output: [
-        {file: 'dist/sample.js', name: 'sample', format: 'es',sourcemap: false}
+        {file: 'dist/sample.js', name: 'sample', format: 'iife',sourcemap: false}
     ],
     external: [],
     plugins: [
