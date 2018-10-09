@@ -168,7 +168,7 @@ export class Transform{
         this.localRotation.selfRota(q);
         this.m_forward.mul(q);
         this.m_up.mul(q);
-        this.m_forward.mul(q);
+        this.m_right.mul(q);
         this.setDirty();
     }
     

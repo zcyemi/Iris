@@ -147,18 +147,19 @@ export class SampleGame{
         let ct = this.m_camera.transform;
 
         if(Input.getKey('w')){
-            ct.translate(ct.forward.mulToRef(0.3));
+            ct.translate(ct.forward.mulToRef(-0.3));
         }
         
         if(Input.getKey('s')){
-            ct.translate(ct.forward.mulToRef(-0.3))
+            ct.translate(ct.forward.mulToRef(0.3))
         }
 
         if(Input.getKey('d')){
-            ct.translate(ct.right.mulToRef(0.3));
+            let right = ct.right;
+            ct.translate(right.mulToRef(-0.3));
         }
         else if(Input.getKey('a')){
-            ct.translate(ct.right.mulToRef(-0.3));
+            ct.translate(ct.right.mulToRef(0.3));
         }
 
         //mousewheel
