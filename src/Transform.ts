@@ -161,6 +161,7 @@ export class Transform{
 
     public translate(offset:vec3){
         this.localPosition.add(offset);
+        this.setDirty();
     }
 
     public rotate(q:quat){
@@ -171,7 +172,7 @@ export class Transform{
         this.setDirty();
     }
     
-    public (scale:vec3){
+    public scale(scale:vec3){
         this.m_scale.mul(scale);
         this.setDirty();
     }

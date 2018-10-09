@@ -13,6 +13,7 @@ import { Light } from './Light';
 import { RenderTaskDebugBuffer } from './pipeline/RenderTaskDebugBuffer';
 import { DebugEntry } from './DebugEntry';
 import { Utility } from './Utility';
+import { Input } from './Input';
 
 export class SampleGame{
     
@@ -47,16 +48,21 @@ export class SampleGame{
 
         this.m_graphicsRender = grender;
 
+
+        Input.init(canvas);
+
         this.m_scene = new Scene();
         this.createScene(this.m_scene);
         GLUtility.registerOnFrame(this.onFrame.bind(this));
         
-        window.addEventListener('keypress',this.onEvtkeyPress.bind(this));
-        canvas.addEventListener('mousewheel',this.onEvtMouseWheel.bind(this));
+        //window.addEventListener('keypress',this.onEvtkeyPress.bind(this));
+        //canvas.addEventListener('mousewheel',this.onEvtMouseWheel.bind(this));
     }
 
     public onFrame(ts:number){
         if(!this.m_sceneInited) return;
+
+        Input.onFrame();
 
         let scene = this.m_scene;
         this.update(scene);
@@ -65,39 +71,6 @@ export class SampleGame{
         gredner.render(scene,ts);
         gredner.renderToCanvas();
 
-    }
-
-    private onEvtkeyPress(ev:KeyboardEvent){
-        let key =ev.key;
-
-        let c= this.m_camera;
-        let ct = this.m_camera.transform;
-        switch(key){
-            case "a":
-                ct.translate(ct.right.mulToRef(0.3));
-            break;
-            case "d":
-                ct.translate(ct.right.mulToRef(-0.3));
-            break;
-            case "w":
-                ct.translate(ct.forward.mulToRef(-0.3));
-            break;
-            case "s":
-                ct.translate(ct.forward.mulToRef(0.3));
-            break;
-            default:
-                return;
-        }
-        ct.setDirty();
-        ev.preventDefault();
-    }
-    
-    private onEvtMouseWheel(ev:WheelEvent){
-        let c= this.m_camera;
-        const q= quat.fromEulerDeg(0,3,0);
-        const p = q.conjugate();
-        c.transform.rotate(ev.deltaY > 0? q: p);
-        c.transform.setDirty();
     }
 
     private m_obj1:GameObject;
@@ -166,7 +139,36 @@ export class SampleGame{
         let obj1 = this.m_obj1;
         let trs = obj1.transform;
         trs.rotate(rota);
-        trs.setDirty();
+
+
+        //keyboard move
+
+        let c= this.m_camera;
+        let ct = this.m_camera.transform;
+
+        if(Input.getKey('w')){
+            ct.translate(ct.forward.mulToRef(0.3));
+        }
+        
+        if(Input.getKey('s')){
+            ct.translate(ct.forward.mulToRef(-0.3))
+        }
+
+        if(Input.getKey('d')){
+            ct.translate(ct.right.mulToRef(0.3));
+        }
+        else if(Input.getKey('a')){
+            ct.translate(ct.right.mulToRef(-0.3));
+        }
+
+        //mousewheel
+
+        if(Input.isMouseWheel()){
+            let c= this.m_camera;
+            const q= quat.fromEulerDeg(0,3,0);
+            const p = q.conjugate();
+            c.transform.rotate(Input.getMouseWheelDelta() > 0? q: p);
+        }
     }
 
 
