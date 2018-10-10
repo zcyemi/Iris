@@ -49,6 +49,7 @@ export class RenderTaskShadowMap extends RenderTask{
 
 
     public init(){
+        if(this.m_inited) return;
         let pipe = this.pipeline;
         let gl =pipe.GL;
         let glctx = pipe.GLCtx;
@@ -56,13 +57,13 @@ export class RenderTaskShadowMap extends RenderTask{
         this.m_shadowConfig = pipe.graphicRender.shadowConfig;
 
         //uniformbuffer
-        this.m_camdata =new ShaderDataUniformCam();
-        this.m_objdata = new ShaderDataUniformObj();
+        if(this.m_camdata == null) this.m_camdata =new ShaderDataUniformCam();
+        if(this.m_objdata == null) this.m_objdata = new ShaderDataUniformObj();
 
         this.m_cambuffer = pipe.sharedBufferPerCam;
         this.m_objbuffer = pipe.sharedBufferPerObj;
 
-        this.m_smdata = new ShaderDataUniformShadowMap();
+        if(this.m_smdata == null) this.m_smdata = new ShaderDataUniformShadowMap();
         this.m_smbuffer = pipe.sharedBufferShadowMap;
         
 
@@ -84,10 +85,7 @@ export class RenderTaskShadowMap extends RenderTask{
         this.m_blockIndexPerObj = ublocks[ShaderFX.UNIFORM_OBJ];
 
         let size =this.m_shadowMapSize;
-        
-
         let config = this.m_shadowConfig;
-
         this.m_smHeight = size;
 
         let smwidth = size;
@@ -98,8 +96,6 @@ export class RenderTaskShadowMap extends RenderTask{
 
         this.m_smWidth = smwidth;
         this.m_smHeight = smheight;
-
-
 
         //depth texture
         let deptex = gl.createTexture();
@@ -112,7 +108,6 @@ export class RenderTaskShadowMap extends RenderTask{
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         
         gl.texStorage2D(gl.TEXTURE_2D,1,gl.DEPTH_COMPONENT24,smwidth,smheight);
-
 
         gl.bindTexture(gl.TEXTURE_2D,null);
         pipe.shadowMapInfo[0].texture = deptex;
@@ -146,19 +141,39 @@ export class RenderTaskShadowMap extends RenderTask{
             console.error('fb status incomplete '+ status.toString(16));
         }
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
-
-        //set to shadowmap uniform buffer
-        let smdata = this.m_smdata;
-
         this.m_inited = true;
-
     }
 
     public release(glctx:GLContext){
- 
         let pipeline = this.pipeline;
         let gl = pipeline.GL;
+
+        this.m_shadowConfig= null;
+
+        //shader buffers
+        this.m_camdata = null;
+        this.m_objdata = null;
         
+        this.m_cambuffer = null;
+        this.m_objbuffer = null;
+
+        this.m_smdata =null;
+        this.m_smbuffer = null;
+
+        //sminfo
+        pipeline.shadowMapInfo = null;
+
+        //shaders
+        this.m_shadowMapShader.release();
+
+        let program = this.m_shadowMapProgram;
+        gl.deleteProgram(program.Program);
+        this.m_shadowMapProgram = null;
+
+        this.m_blockIndexPerCam = null;
+        this.m_blockIndexPerObj= null;
+
+        //framebuffers
         if(this.m_shadowMapFrameBuffer != null){
             gl.deleteFramebuffer(this.m_shadowMapFrameBuffer);
             this.m_shadowMapFrameBuffer= null;
@@ -177,7 +192,10 @@ export class RenderTaskShadowMap extends RenderTask{
     }
 
     public reload(glctx:GLContext){
-        
+        this.release(glctx);
+        this.init();
+
+        console.log('[reload RenderTaskShadowMap done!]');
     }
 
     public render(nodelist:RenderNodeList,scene:Scene,glctx:GLContext){

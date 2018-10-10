@@ -41,6 +41,13 @@ export abstract class RenderPipeline{
     private m_mainFrameBufferInfo:GraphicsRenderCreateInfo;
     protected m_mainFrameBufferBinded:boolean= false;
 
+    public get mainFrameBufferWidth():number{
+        return this.m_mainFrameBuffer.width;
+    }
+    public get mainFrameBufferHeight():number{
+        return this.m_mainFrameBuffer.height;
+    }
+
 
 
     public constructor(){
@@ -79,6 +86,13 @@ export abstract class RenderPipeline{
         gl.depthFunc(gl.LEQUAL);
         gl.enable(gl.DEPTH_TEST);
     }
+
+    public resizeFrameBuffer(width:number,height:number){
+        let bufferInfo = this.m_mainFrameBufferInfo;
+        this.m_mainFrameBuffer = this.glctx.createFrameBuffer(false,bufferInfo.colorFormat,bufferInfo.depthFormat,width,height,this.m_mainFrameBuffer);
+        console.log('resize framebuffer');
+    }
+
 
     /**
      * draw main framebuffer to canvas buffer
@@ -154,8 +168,6 @@ export abstract class RenderPipeline{
 
     }
 
-    public resizeFrameBuffer(width:number,height:number){
-    }
 
     public exec(scene:Scene){
         let glctx = this.glctx;
@@ -202,11 +214,12 @@ export abstract class RenderPipeline{
 
     public bindTargetFrameBuffer(){
         if(this.m_mainFrameBufferBinded) return;
-        this.m_mainFrameBuffer.bind(this.gl);
+        let mainfb = this.m_mainFrameBuffer;
+        mainfb.bind(this.gl);
         this.m_mainFrameBufferBinded = true;
 
         //TODO
-        this.gl.viewport(0,0,400,300);
+        this.gl.viewport(0,0,mainfb.width,mainfb.height);
     }
 
     public UnBindTargetFrameBuffer(){
