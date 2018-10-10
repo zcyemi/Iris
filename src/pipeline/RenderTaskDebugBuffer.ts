@@ -25,4 +25,8 @@ export class RenderTaskDebugBuffer extends RenderTask{
     public release(glctx:GLContext){
     }
 
+    public reload(glctx:GLContext){
+        
+    }
+
 }

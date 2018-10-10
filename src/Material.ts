@@ -104,7 +104,7 @@ export class Material{
         }
         this.m_shader = shader;
         this.m_program = shader.defaultProgram;
-        this.m_optConfig = shader.defaultOptionsConfig;
+        this.m_optConfig = shader.m_defaultOptionsConfig;
         this.m_propertyBlock =new MaterialPorpertyBlock(this.m_program);
     }
 
@@ -131,8 +131,8 @@ export class Material{
     }
 
     public setFlag(key:string,value:string){
-        let defOptCfg = this.m_shader.defaultOptionsConfig;
-        let verified = this.m_shader.defaultOptionsConfig.verifyFlag(key,value);
+        let defOptCfg = this.m_shader.m_defaultOptionsConfig;
+        let verified = this.m_shader.m_defaultOptionsConfig.verifyFlag(key,value);
         if(!verified) return;
         if(!this.m_useVariants){
             this.m_optConfig = defOptCfg.clone();

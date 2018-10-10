@@ -58,6 +58,12 @@ export class GraphicsRender{
         pipeline.onSetupRender(creationInfo);
     }
 
+    public reload(){
+        //TODO
+        //this.m_shaderFXlib.reload();
+        this.m_renderPipeline.reload();
+    }
+
     private m_resizeDelayter: Delayter = new Delayter();
     public resizeCanvas(w:number,h:number){
         let canvas = this.canvas;

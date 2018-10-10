@@ -17,53 +17,68 @@ export class ShaderFXLibs{
     private m_diffuse:Shader;
 
     @ShaderFile("UnlitColor")
-    public SH_unitColor:ShaderSource;
+    public static SH_unitColor:ShaderSource;
     @ShaderFile("UnlitTexture")
-    public SH_unlitTexture:ShaderSource;
+    public static SH_unlitTexture:ShaderSource;
     @ShaderFile("uvValue")
-    public SH_uvValue:ShaderSource;
+    public static SH_uvValue:ShaderSource;
     @ShaderFile("diffuse")
-    public SH_diffuse:ShaderSource;
+    public static SH_diffuse:ShaderSource;
 
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_OBJ)
-    public SHADERFX_OBJ:ShaderVariant;
+    public static SHADERFX_OBJ:ShaderVariant;
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_CAMERA)
-    public SHADERFX_CAMERA:ShaderVariant;
+    public static SHADERFX_CAMERA:ShaderVariant;
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_BASIS)
-    public SHADERFX_BASIS:ShaderVariant;
+    public static SHADERFX_BASIS:ShaderVariant;
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_LIGHT)
-    public SHADERFX_LIGHT:ShaderVariant;
+    public static SHADERFX_LIGHT:ShaderVariant;
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_LIGHTING)
-    public SHADERFX_LIGHTING:ShaderVariant;
+    public static SHADERFX_LIGHTING:ShaderVariant;
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_SHADOWMAP)
-    public SHADERFX_SHADOWMAP:ShaderVariant;
+    public static SHADERFX_SHADOWMAP:ShaderVariant;
 
     public get shaderUnlitColor():Shader{
         if(this.m_unlitColor == null){
-            this.m_unlitColor = ShaderFX.compileShaders(this.glctx,this.SH_unitColor);
+            this.m_unlitColor = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_unitColor);
         }
         return this.m_unlitColor;
     }
 
     public get shaderUnlitTexture():Shader{
         if(this.m_unlitTexture == null){
-            this.m_unlitTexture = ShaderFX.compileShaders(this.glctx,this.SH_unlitTexture);
+            this.m_unlitTexture = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_unlitTexture);
         }
         return this.m_unlitTexture;
     }
 
     public get shaderUVvalue():Shader{
         if(this.m_uvValue == null){
-            this.m_uvValue = ShaderFX.compileShaders(this.glctx,this.SH_uvValue);
+            this.m_uvValue = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_uvValue);
         }
         return this.m_uvValue;
     }
 
     public get shaderDiffuse():Shader{
         if(this.m_diffuse == null){
-            this.m_diffuse = ShaderFX.compileShaders(this.glctx,this.SH_diffuse);
+            this.m_diffuse = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_diffuse);
         }
         return this.m_diffuse;
+    }
+
+    public release(){
+
+    }
+
+    public reload(){
+        // for(let key in this){
+        //     let shader = this[key];
+        //     if(shader == null) continue;
+        //     if(shader instanceof Shader){
+        //         shader.release();
+        //         this[key] = null;
+        //     }
+        // }
     }
 }
 

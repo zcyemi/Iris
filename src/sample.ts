@@ -157,6 +157,11 @@ export class SampleGame{
             c.transform.rotate(Input.getMouseWheelDelta() > 0? q: p);
         }
     }
+
+    @DebugEntry('cmd.reload')
+    public static cmdReload(target:SampleGame){
+        if(target != null) target.m_graphicsRender.reload();
+    }
 }
 
 window['SampleGame'] = SampleGame;

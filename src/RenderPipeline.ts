@@ -191,6 +191,15 @@ export abstract class RenderPipeline{
         task = [];
     }
 
+    public reload(){
+        let glctx = this.glctx;
+        let task = this.tasks;
+        for(let i=0,len = task.length;i<len;i++){
+            let t = task[i];
+            t.reload(glctx);
+        }
+    }
+
     public bindTargetFrameBuffer(){
         if(this.m_mainFrameBufferBinded) return;
         this.m_mainFrameBuffer.bind(this.gl);
@@ -337,7 +346,6 @@ export abstract class RenderTask{
         return this.m_inited;
     }
 
-
     public constructor(o:number,pipeline:RenderPipeline){
         this.order = o;
         this.pipeline = pipeline;
@@ -348,89 +356,8 @@ export abstract class RenderTask{
     }
 
     public abstract render(nodelist:RenderNodeList,scene:Scene,glctx:GLContext):void;
-
     public abstract release(glctx:GLContext):void;
-}
-
-
-
-export class RenderTaskDeferredShading extends RenderTask{
-
-    public init(){
-    }
-
-    public render(nodelist:RenderNodeList,scene:Scene){
-
-    }
-
-    public release(glctx:GLContext){
-
-    }
-}
-
-
-
-export class RenderTaskOpaqueImageEffect extends RenderTask{
-
-    public init(){
-
-    }
-
-    public render(nodelist:RenderNodeList,scene:Scene){
-
-    }
-
-    public release(glctx:GLContext){
-        
-    }
-}
-
-export class RenderTaskSkybox extends RenderTask{
-
-    public init(){
-        
-    }
-
-
-    public render(nodelist:RenderNodeList,scene:Scene){
-
-    }
-
-    public release(glctx:GLContext){
-        
-    }
-}
-
-export class RenderTaskTransparencies extends RenderTask{
-
-    public init(){
-        
-    }
-
-
-    public render(nodelist:RenderNodeList,scene:Scene){
-
-    }
-
-    public release(glctx:GLContext){
-        
-    }
-}
-
-export class RednerTaskImageEffect extends RenderTask{
-
-    public init(){
-        
-    }
-
-
-    public render(nodelist:RenderNodeList,scene:Scene){
-
-    }
-
-    public release(glctx:GLContext){
-        
-    }
+    public abstract reload(glctx:GLContext):void;
 }
 
 

@@ -176,6 +176,10 @@ export class RenderTaskShadowMap extends RenderTask{
         this.m_inited = false;
     }
 
+    public reload(glctx:GLContext){
+        
+    }
+
     public render(nodelist:RenderNodeList,scene:Scene,glctx:GLContext){
         let camera = scene.camera;
         if(camera == null) return;

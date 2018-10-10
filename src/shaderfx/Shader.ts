@@ -67,14 +67,14 @@ export class Shader{
     private m_compiledPrograms:{[hash:number]:GLProgram} = {};
     public tags:ShaderTags;
 
-    public defaultOptionsConfig:ShaderOptionsConfig;
+    public m_defaultOptionsConfig:ShaderOptionsConfig;
 
     private m_glctx:GLContext;
 
     public constructor(source:ShaderSource,defaultProgram:GLProgram,defOptConfig:ShaderOptionsConfig,glctx:GLContext){
         this.m_source =source;
         this.m_defaultProgram = defaultProgram;
-        this.defaultOptionsConfig = defOptConfig;
+        this.m_defaultOptionsConfig = defOptConfig;
         this.m_compiledPrograms[defOptConfig.hashCode] = defaultProgram;
         this.m_glctx = glctx;
     }
