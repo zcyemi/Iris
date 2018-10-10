@@ -32,4 +32,6 @@ export class Scene extends GameObject{
         }
         return true;
     }
+
+   
 }

@@ -101,7 +101,6 @@ export abstract class RenderPipeline{
         this.m_mainFrameBufferAspect = width/ height;
     }
 
-
     /**
      * draw main framebuffer to canvas buffer
      */

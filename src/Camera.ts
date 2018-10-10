@@ -37,7 +37,6 @@ export class Camera{
     private m_ambientColor:vec4 = glmath.vec4(0.1,0.1,0.1,1.0);
     private m_ambientType:AmbientType = AmbientType.AmbientColor;
 
-
     public get far():number{
         return this.m_far;
     }

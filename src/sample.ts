@@ -14,6 +14,8 @@ import { RenderTaskDebugBuffer } from './pipeline/RenderTaskDebugBuffer';
 import { DebugEntry } from './DebugEntry';
 import { Utility } from './Utility';
 import { Input } from './Input';
+import { SceneManager } from './SceneManager';
+import { Component} from './Component';
 
 export class SampleGame{
     
@@ -21,12 +23,14 @@ export class SampleGame{
     private m_glctx:GLContext;
 
     private m_graphicsRender:GraphicsRender;
+    private m_sceneMgr:SceneManager;
     private m_scene:Scene;
     private m_sceneInited:boolean = false;
 
     public constructor(canvas:HTMLCanvasElement){
         this.m_canvas = canvas;
         let grender = new GraphicsRender(canvas,new RenderPipelineDefault());
+        this.m_sceneMgr = new SceneManager();
         let sc = grender.shadowConfig;
         sc.shadowDistance = 20;
 
@@ -52,6 +56,7 @@ export class SampleGame{
 
         let scene = this.m_scene;
         this.update(scene);
+        this.m_sceneMgr.onFrame(scene);
 
         let gredner =this.m_graphicsRender;
         gredner.render(scene,ts);
@@ -87,6 +92,13 @@ export class SampleGame{
         let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
         matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
         obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
+        obj1.addComponent(<Component>{
+            onUpdate:function(){
+                const rota = quat.fromEulerDeg(1,-1,-2);
+                let trs = this.gameobject.transform;
+                trs.rotate(rota);
+            }
+        })
         scene.addChild(obj1);
 
         // //cube2
@@ -121,13 +133,7 @@ export class SampleGame{
     }
 
     private update(scene:Scene){
-        const rota = quat.fromEulerDeg(1,-1,-2);
-        let obj1 = this.m_obj1;
-        let trs = obj1.transform;
-        trs.rotate(rota);
 
-
-        //keyboard move
 
         let c= this.m_camera;
         let ct = this.m_camera.transform;
