@@ -16,6 +16,7 @@ import { Utility } from './Utility';
 import { Input } from './Input';
 import { SceneManager } from './SceneManager';
 import { Component} from './Component';
+import { CameraFreeFly } from './CameraUtility';
 
 export class SampleGame{
     
@@ -55,7 +56,6 @@ export class SampleGame{
         Input.onFrame();
 
         let scene = this.m_scene;
-        this.update(scene);
         this.m_sceneMgr.onFrame(scene);
 
         let gredner =this.m_graphicsRender;
@@ -82,6 +82,7 @@ export class SampleGame{
         camera.ambientColor = glmath.vec4(1,0.2,0.2,0.2);
         camera.background = glmath.vec4(0,1,0,1);
         scene.camera = camera;
+        camera.addComponent(new CameraFreeFly());
         this.m_camera = camera;
 
         //cube
@@ -132,37 +133,6 @@ export class SampleGame{
         this.m_sceneInited = true;
     }
 
-    private update(scene:Scene){
-
-
-        let c= this.m_camera;
-        let ct = this.m_camera.transform;
-
-        if(Input.getKey('w')){
-            ct.translate(ct.forward.mulToRef(-0.3));
-        }
-        
-        if(Input.getKey('s')){
-            ct.translate(ct.forward.mulToRef(0.3))
-        }
-
-        if(Input.getKey('d')){
-            let right = ct.right;
-            ct.translate(right.mulToRef(-0.3));
-        }
-        else if(Input.getKey('a')){
-            ct.translate(ct.right.mulToRef(0.3));
-        }
-
-        //mousewheel
-
-        if(Input.isMouseWheel()){
-            let c= this.m_camera;
-            const q= quat.fromEulerDeg(0,3,0);
-            const p = q.conjugate();
-            c.transform.rotate(Input.getMouseWheelDelta() > 0? q: p);
-        }
-    }
 
     @DebugEntry('cmd.reload')
     public static cmdReload(target:SampleGame){

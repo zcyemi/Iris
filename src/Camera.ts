@@ -1,5 +1,6 @@
 import { Transform } from "./Transform";
 import { mat4, vec3, vec4, glmath } from "wglut";
+import { GameObject } from "./GameObject";
 
 
 export enum AmbientType{
@@ -13,12 +14,10 @@ export enum ProjectionType{
     orthographic,
 }
 
-export class Camera{
+export class Camera extends GameObject{
 
     public enabled:boolean = true;
     public order:number = 0;
-
-    public transform:Transform;
 
     private m_fov:number = 60;
     private m_aspectratio:number;
@@ -117,7 +116,7 @@ export class Camera{
     }
 
     public constructor(){
-        this.transform= new Transform();
+        super();
         this.m_projMtx = mat4.perspectiveFoV(60,1,0.01,100);
         this.m_projectionType = ProjectionType.perspective;
     }

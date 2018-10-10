@@ -73,6 +73,7 @@ export class GameObject{
             this.components = comps;
         }
         c.gameobject = this;
+        if(c.onStart != null) c.onStart();
         comps.push(c);
     }
 
