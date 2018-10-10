@@ -13,6 +13,7 @@ class InputSnapShot{
 
     public mousewheel:boolean = false;
     public mousewheelDelta:number = 0;
+    public mouseMove:boolean = false;
 }
 
 class InputCache{
@@ -32,6 +33,7 @@ class InputCache{
 
     private m_keydirty:boolean = false;
     private m_mousedirty:boolean = false;
+    private m_mousePosDirty:boolean = false;
 
     public setKeyDown(e:KeyboardEvent){
         let kp = this.keyPress;
@@ -63,6 +65,7 @@ class InputCache{
         let mp = this.mousepos;
         mp.x = e.offsetX;
         mp.y = e.offsetY;
+        this.m_mousePosDirty = true;
     }
 
     public setButtonDown(e:MouseEvent){
@@ -111,7 +114,14 @@ class InputCache{
     private m_shotMouseDownFalse:boolean = false;
     private m_shotMouseUpFalse:boolean = false;
     public applytoSnapShot(shot:InputSnapShot){
-        shot.mousepos.set(this.mousepos);
+
+        let mousePosDirty = this.m_mousePosDirty;
+        shot.mouseMove = mousePosDirty;
+        if(mousePosDirty){
+            this.m_mousePosDirty= false;
+            let shotmousepos = shot.mousepos;
+            shotmousepos.set(this.mousepos);
+        }
 
         shot.mousewheelDelta = this.mousewheelDelta;
         shot.mousewheel= this.mousewheelDelta != 0 && this.mousewheel;
@@ -272,5 +282,9 @@ export class Input{
     }
     public static getMouseWheelDelta():number{
         return Input.s_snapshot.mousewheelDelta;
+    }
+
+    public static isMouseMove():boolean{
+        return Input.s_snapshot.mouseMove;
     }
 }

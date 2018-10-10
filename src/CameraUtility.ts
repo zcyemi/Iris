@@ -1,11 +1,12 @@
 import { Component } from "./Component";
 import { Transform } from "./Transform";
 import { Input } from "./Input";
-import { quat } from "wglut";
+import { quat, vec3 } from "wglut";
 
 
 export class CameraFreeFly extends Component{
     private m_trs:Transform;
+    private m_lastPos:vec3;
     public onStart(){
         this.m_trs = this.gameobject.transform;
     }
@@ -31,5 +32,10 @@ export class CameraFreeFly extends Component{
             const p = q.conjugate();
             trs.rotate(Input.getMouseWheelDelta() > 0? q: p);
         }
+
+
+        if(Input.isMouseMove()){
+        }
+
     }
 }

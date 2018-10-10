@@ -57,7 +57,6 @@ export class SampleGame{
 
         let scene = this.m_scene;
         this.m_sceneMgr.onFrame(scene);
-
         let gredner =this.m_graphicsRender;
         gredner.render(scene,ts);
         gredner.renderToCanvas();
