@@ -201,6 +201,8 @@ export class RenderTaskShadowMap extends RenderTask{
     public render(nodelist:RenderNodeList,scene:Scene,glctx:GLContext){
         let camera = scene.camera;
         if(camera == null) return;
+
+        camera.aspect = this.pipeline.mainFrameBufferAspect;
         let lights = scene.lights;
         let lcount = lights.length;
         for(let i=0;i<lcount;i++){

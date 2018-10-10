@@ -24,6 +24,7 @@ export class Camera{
     private m_aspectratio:number;
     private m_near:number;
     private m_far:number;
+    private m_projDirty:boolean = false;
 
     public orthosize:number = 10.0;
     public m_projectionType:ProjectionType;
@@ -40,16 +41,34 @@ export class Camera{
     public get far():number{
         return this.m_far;
     }
+    public set far(v:number){
+        if(this.m_far == v) return;
+        this.m_far = v;
+        this.m_projDirty = true;
+    }
     public get near():number{
         return this.m_near;
     }
-
+    public set near(v:number){
+        if(this.m_near == v) return;
+        this.m_near = v;
+        this.m_projDirty =true;
+    }
     public get fov():number{
         return this.m_fov;
     }
-
+    public set fov(v:number){
+        if(this.m_fov == v) return;
+        this.m_fov = v;
+        this.m_projDirty = true;
+    }
     public get aspect():number{
         return this.m_aspectratio;
+    }
+    public set aspect(v:number){
+        if(v == this.m_aspectratio) return;
+        this.m_aspectratio = v;
+        this.m_projDirty = true;
     }
 
     public ambientDataDirty:boolean = true;
@@ -91,6 +110,10 @@ export class Camera{
     }
 
     public get ProjMatrix():mat4{
+        if(this.m_projDirty){
+            this.m_projMtx = mat4.perspectiveFoV(this.m_fov,this.m_aspectratio,this.m_near,this.m_far);
+            this.m_projDirty= false;
+        }
         return this.m_projMtx;
     }
 

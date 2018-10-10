@@ -42,13 +42,19 @@ export abstract class RenderPipeline{
     protected m_mainFrameBufferBinded:boolean= false;
 
     public get mainFrameBufferWidth():number{
-        return this.m_mainFrameBuffer.width;
+        return this.m_mainFrameBufferWidth;
+
     }
     public get mainFrameBufferHeight():number{
-        return this.m_mainFrameBuffer.height;
+        return this.m_mainFrameBufferHeight;
+    }
+    public get mainFrameBufferAspect():number{
+        return this.m_mainFrameBufferAspect;
     }
 
-
+    private m_mainFrameBufferAspect:number = 1.0;
+    private m_mainFrameBufferWidth:number = 0;
+    private m_mainFrameBufferHeight:number = 0;
 
     public constructor(){
 
@@ -90,7 +96,9 @@ export abstract class RenderPipeline{
     public resizeFrameBuffer(width:number,height:number){
         let bufferInfo = this.m_mainFrameBufferInfo;
         this.m_mainFrameBuffer = this.glctx.createFrameBuffer(false,bufferInfo.colorFormat,bufferInfo.depthFormat,width,height,this.m_mainFrameBuffer);
-        console.log('resize framebuffer');
+        this.m_mainFrameBufferWidth =width;
+        this.m_mainFrameBufferHeight = height;
+        this.m_mainFrameBufferAspect = width/ height;
     }
 
 

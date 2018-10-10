@@ -119,6 +119,7 @@ export class RenderTaskForwardShading extends RenderTask {
 
         let camera = scene.camera;
         if (camera == null) return;
+        camera.aspect = this.pipeline.mainFrameBufferAspect;
 
         let queue = nodelist.nodeOpaque;
         if (queue.length == 0) return;
