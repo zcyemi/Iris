@@ -53,7 +53,7 @@ export class GameObject{
             for(let i=0,len = comp.length;i<len;i++){
                 let c = comp[i];
                 if(c.onUpdate !=null){
-                    c.onUpdate.call(c);
+                    c.onUpdate();
                 }
             }
         }

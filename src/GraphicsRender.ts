@@ -89,7 +89,7 @@ export class GraphicsRender{
     }
 
 
-    public render(scene:Scene,ts:number){
+    public render(scene:Scene){
         let gl =this.m_glctx.gl;
 
         gl.clearColor(0,0,0,1);

@@ -17,6 +17,7 @@ import { Input } from './Input';
 import { SceneManager } from './SceneManager';
 import { Component} from './Component';
 import { CameraFreeFly } from './CameraUtility';
+import { FrameTimer } from './FrameTimer';
 
 export class SampleGame{
     
@@ -27,6 +28,8 @@ export class SampleGame{
     private m_sceneMgr:SceneManager;
     private m_scene:Scene;
     private m_sceneInited:boolean = false;
+    private m_timer:FrameTimer = new FrameTimer(true);
+
 
     public constructor(canvas:HTMLCanvasElement){
         this.m_canvas = canvas;
@@ -36,31 +39,31 @@ export class SampleGame{
         sc.shadowDistance = 20;
 
         this.m_graphicsRender = grender;
-
-
         Input.init(canvas);
 
         this.m_scene = new Scene();
         this.createScene(this.m_scene,grender.glctx);
+
+        GLUtility.setTargetFPS(30);
         GLUtility.registerOnFrame(this.onFrame.bind(this));
-        
     }
 
     public resizeCanvas(w:number,h:number){
         this.m_graphicsRender.resizeCanvas(w,h);
     }
 
+
     public onFrame(ts:number){
         if(!this.m_sceneInited) return;
 
-        Input.onFrame();
-
+        let delta = this.m_timer.tick(ts);
+        Input.onFrame(delta/1000);
         let scene = this.m_scene;
         this.m_sceneMgr.onFrame(scene);
-        let gredner =this.m_graphicsRender;
-        gredner.render(scene,ts);
-        gredner.renderToCanvas();
 
+        let gredner = this.m_graphicsRender;
+        gredner.render(scene);
+        gredner.renderToCanvas();
     }
 
     private m_obj1:GameObject;
@@ -94,7 +97,10 @@ export class SampleGame{
         obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
         obj1.addComponent(<Component>{
             onUpdate:function(){
-                const rota = quat.fromEulerDeg(1,-1,-2);
+
+                let dt = Input.getDeltaTime();
+                dt *= 30.0;
+                const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
                 let trs = this.gameobject.transform;
                 trs.rotate(rota);
             }

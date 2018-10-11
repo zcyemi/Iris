@@ -14,6 +14,8 @@ class InputSnapShot{
     public mousewheel:boolean = false;
     public mousewheelDelta:number = 0;
     public mouseMove:boolean = false;
+
+    public deltaTime:number = 0;
 }
 
 class InputCache{
@@ -245,8 +247,10 @@ export class Input{
         c.setMouseWheel(e.deltaY);
     }
 
-    public static onFrame(){
+    public static onFrame(dt:number){
         let c = Input.s_cache;
+        let snpashot = Input.s_snapshot;
+        snpashot.deltaTime =dt;
         c.applytoSnapShot(Input.s_snapshot);
         c.reset();
     }
@@ -286,5 +290,9 @@ export class Input{
 
     public static isMouseMove():boolean{
         return Input.s_snapshot.mouseMove;
+    }
+
+    public static getDeltaTime():number{
+        return Input.s_snapshot.deltaTime;
     }
 }
