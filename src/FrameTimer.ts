@@ -23,22 +23,22 @@ export class FrameTimer{
     }
 
     public tick(ts:number):number{
-
-
         let delta = ts - this.m_ts;
         this.m_delta = delta;
-        this.m_deltaaccu += this.m_delta;
         this.m_ts = ts;
 
-        let accuc = this.m_accuCount;
-        accuc ++;
-        if(accuc >=FRAME_INTERVAL){
-            this.m_fps = FRAME_INTERVAL_P / this.m_deltaaccu;
-            this.m_deltaaccu = 0;
-            accuc = 0;
-            console.log(`FPS ${this.m_fps}`);
+        if(this.m_printfps){
+            this.m_deltaaccu += this.m_delta;
+            let accuc = this.m_accuCount;
+            accuc ++;
+            if(accuc >=FRAME_INTERVAL){
+                this.m_fps = FRAME_INTERVAL_P / this.m_deltaaccu;
+                this.m_deltaaccu = 0;
+                accuc = 0;
+                console.log(`FPS ${this.m_fps}`);
+            }
+            this.m_accuCount = accuc;
         }
-        this.m_accuCount = accuc;
 
         return delta;
     }

@@ -5,10 +5,12 @@ const fs = require('fs');
 const browsersync = require('browser-sync');
 
 gulp.task('build',()=>{
+    mergeShader();
     build();
 });
 
 gulp.task('watch',()=>{
+    mergeShader();
     build();
 
     gulp.watch('./src/**/*.ts',null,()=>{
@@ -16,7 +18,7 @@ gulp.task('watch',()=>{
     });
 
     gulp.watch('./res/shaders/**/*.glsl',null,()=>{
-        build();
+        mergeShader();
     });
     browsersync.init({
         server: {
@@ -36,7 +38,6 @@ var onBuild =false;
 function build(){
     if(onBuild == true) return;
     onBuild = true;
-    mergeShader();
     console.log('[Compile Script]');
     child_process.exec('rollup -c rollup.config.ts',(error,stdout,stderr)=>{
         if(stdout != null && stdout != '') console.log(stdout);
@@ -49,11 +50,8 @@ function build(){
 gulp.task('shader',mergeShader)
 
 function mergeShader(){
-
     console.log('[Compile Shader]');
     let basepath = './res/shaders/';
-
-
     let files =  fs.readdirSync(basepath);
     let sources = {};
     files.forEach(f=>{
@@ -67,7 +65,6 @@ function mergeShader(){
             sources[fname] =src;
         }
     })
-
     let includepath = basepath +'includes/';
     let fileIncludes = fs.readdirSync(includepath);
     let includes = {};
@@ -84,15 +81,12 @@ function mergeShader(){
     })
 
     let shadergen = 'export class ShaderGen{ \n';
-
     for(k in includes){
         shadergen += `\tpublic static readonly ${k}:string = \`${includes[k]}\`;\n`;
     }
     for(k in sources){
         shadergen += `\tpublic static readonly ${k}:string = \`${sources[k]}\`;\n`;
     }
-
     shadergen += '}'
-
     fs.writeFileSync('src/shaderfx/ShaderGenerated.ts',shadergen);
 }

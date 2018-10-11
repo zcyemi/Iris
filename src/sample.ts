@@ -28,7 +28,7 @@ export class SampleGame{
     private m_sceneMgr:SceneManager;
     private m_scene:Scene;
     private m_sceneInited:boolean = false;
-    private m_timer:FrameTimer = new FrameTimer(true);
+    private m_timer:FrameTimer = new FrameTimer(false);
 
 
     public constructor(canvas:HTMLCanvasElement){
@@ -44,7 +44,7 @@ export class SampleGame{
         this.m_scene = new Scene();
         this.createScene(this.m_scene,grender.glctx);
 
-        GLUtility.setTargetFPS(30);
+        GLUtility.setTargetFPS(60);
         GLUtility.registerOnFrame(this.onFrame.bind(this));
     }
 
@@ -98,7 +98,7 @@ export class SampleGame{
         obj1.addComponent(<Component>{
             onUpdate:function(){
 
-                let dt = Input.getDeltaTime();
+                let dt = Input.snapshot.deltaTime;
                 dt *= 30.0;
                 const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
                 let trs = this.gameobject.transform;
