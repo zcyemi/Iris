@@ -21,4 +21,5 @@ export function DebugCmd(cmd:string,obj?:any){
     func(obj);
 }
 
+
 window['DebugCmd'] = DebugCmd;

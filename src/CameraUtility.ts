@@ -51,10 +51,7 @@ export class CameraFreeFly extends Component{
                     let q = quat.fromEulerDeg(-deltay,deltax,0);
                     trs.setRotation(q.mul(this.m_startq));
                 }
-
-
             }
         }
-
     }
 }
