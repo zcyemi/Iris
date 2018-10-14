@@ -1,7 +1,7 @@
 import { Mesh } from "./Mesh";
 import { Material } from "./Material";
 import { GameObject } from "./GameObject";
-import { GLContext } from "wglut";
+import { GLContext, GLProgram } from "wglut";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 
 export class MeshRender{
@@ -30,28 +30,34 @@ export class MeshRender{
     }
     
     public refershVertexArray(glctx:GLContext){
-        let mesh =this.mesh;
-        if(!mesh.bufferInited){
-            mesh.refreshMeshBuffer(glctx);
-        }
 
         let vao = this.m_vao;
         if(vao != null) return;
 
+        let mesh =this.mesh;
         let mat = this.material;
-        if(mat == null) throw new Error("material is null");
+        if(mat == null || mat.program == null){
+            throw new Error("material or program is null");
+        }
 
-        let program = mat.program;
+        this.m_vao = MeshRender.CreateVertexArrayObj(glctx,mesh,mat.program);
+    }
+
+    public static CreateVertexArrayObj(glctx:GLContext,mesh:Mesh,program:GLProgram):WebGLVertexArrayObject{
+        
+        if(!mesh.bufferInited){
+            mesh.refreshMeshBuffer(glctx);
+        }
+
         if(program == null) throw new Error("program is null"); 
-
         let attrs = program.Attributes;
-
-        let vertdesc = this.mesh.vertexDesc;
-
+        let vertdesc = mesh.vertexDesc;
         let gl = glctx.gl;
-        vao = gl.createVertexArray();
+        let vao = gl.createVertexArray();
         gl.bindVertexArray(vao);
 
+
+        gl.bindBuffer(gl.ARRAY_BUFFER,mesh.m_bufferVertices);
         if(vertdesc.position !=null){
             let aPos = attrs[ShaderFX.ATTR_aPosition];
             if(aPos !=null){
@@ -79,9 +85,9 @@ export class MeshRender{
 
         //indices
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.m_bufferIndices);
-        
         gl.bindVertexArray(null);
-        this.m_vao= vao;
+
+        return vao;
     }
 }
 

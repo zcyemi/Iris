@@ -51,6 +51,8 @@ export class Mesh{
     public m_vao:WebGLVertexArrayObject;
     private m_bufferInited:boolean =false;
 
+    private m_desc:string;
+
     public readonly vertexDesc:MeshVertexDesc = new MeshVertexDesc();
 
 
@@ -61,7 +63,6 @@ export class Mesh{
     public static get Quad():Mesh{
 
         if(Mesh.s_quad != null) return Mesh.s_quad;
-        
         let quad = new Mesh();
         Mesh.s_quad =quad;
 
@@ -88,10 +89,13 @@ export class Mesh{
         quad.m_dataUV = dataUV;
         quad.m_dataIndices = dataIndices;
 
-        quad.vertexDesc.position= new MeshVertexAttrDesc(GL.Float,4,dataPosition.length*4);
-        quad.vertexDesc.uv = new MeshVertexAttrDesc(GL.Float,2,dataUV.length*4)
+        quad.m_desc = "quad";
 
+        let vertexdesc = quad.vertexDesc;
+        vertexdesc.position= new MeshVertexAttrDesc(GL.Float,4,dataPosition.length*4);
+        vertexdesc.uv = new MeshVertexAttrDesc(GL.Float,2,dataUV.length*4)
         quad.calculateNormal();
+
         return quad;
     }
 
@@ -148,6 +152,8 @@ export class Mesh{
         cube.m_dataPosition = dataPosition;
         cube.m_dataUV =dataUV;
         cube.m_dateVerticesLen = dataPosition.length + dataUV.length;
+
+        cube.m_desc="cube";
 
         let vertexdesc = cube.vertexDesc;
         vertexdesc.position = new MeshVertexAttrDesc(GL.Float,4,dataPosition.length *4);
@@ -225,8 +231,9 @@ export class Mesh{
     }
 
     public refreshMeshBuffer(glctx:GLContext){
-        let gl = glctx.gl;
+        if(this.m_bufferInited) return;
 
+        let gl = glctx.gl;
         let buffervert = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER,buffervert);
         this.m_bufferVertices = buffervert;
@@ -259,27 +266,33 @@ export class Mesh{
             offset += this.m_dataNormal.length;
         }
         gl.bufferData(gl.ARRAY_BUFFER,totalData,gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER,null);
 
         //refresh desc;
         let vertexDesc = this.vertexDesc;
+
+        let index = 0;
         if(hasPosition){
-            vertexDesc.position.offset = 0;
+            vertexDesc.position.offset = offsetAry[index]*4;
+            index++;
         }
         if(hasUV){
-            vertexDesc.uv.offset = offsetAry[1]*4;
+            vertexDesc.uv.offset = offsetAry[index]*4;
+            index++;
         }
         if(hasNormal){
-            vertexDesc.normal.offset = offsetAry[2]*4;
+            vertexDesc.normal.offset = offsetAry[index]*4;
+            index++;
         }
-
         //Indices
-
         let dataIndices = this.m_dataIndices;
         let hasIndices = dataIndices != null && dataIndices.length !=0;
         if(hasIndices){
             let bufferIndices = gl.createBuffer();
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,bufferIndices);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,dataIndices,gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,null);
+
             this.m_bufferIndices = bufferIndices;
         }
 

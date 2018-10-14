@@ -149,7 +149,7 @@ uniform samplerCube uSampler;
 out lowp vec4 fragColor;
 void main(){
     vec3 dir = vWorldDir.xyz / vWorldDir.w;
-    fragColor = texture(uSampler,dir);
+    fragColor = vec4(0,0,0,1);
 }`;
 	public static readonly skybox_vs:string = `#version 300 es\nprecision mediump float;
 

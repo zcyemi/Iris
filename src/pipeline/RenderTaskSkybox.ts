@@ -5,6 +5,7 @@ import { Scene } from "../Scene";
 import { ClearType } from "../Camera";
 import { Mesh } from "../Mesh";
 import { Shader } from "../shaderfx/Shader";
+import { MeshRender } from "../MeshRender";
 
 
 export class RenderTaskSkybox extends RenderTask{
@@ -14,13 +15,18 @@ export class RenderTaskSkybox extends RenderTask{
     private m_shSkybox:Shader;
     private m_shProgram:GLProgram;
 
+    private m_vao:WebGLVertexArrayObject;
+
     public init(){
         console.log('init skybox');
         let mesh = Mesh.Quad;
         this.m_fullquad =mesh;
         this.m_shSkybox = this.pipeline.graphicRender.shaderLib.shaderSkybox;
-        this.m_shProgram = this.m_shSkybox.defaultProgram;
+        let program = this.m_shSkybox.defaultProgram;
+        this.m_shProgram = program;
 
+        let glctx =this.pipeline.GLCtx;
+        this.m_vao = MeshRender.CreateVertexArrayObj(glctx,mesh,program);
     }
 
 
@@ -31,18 +37,17 @@ export class RenderTaskSkybox extends RenderTask{
         //draw skybox
 
         // let texskybox = camera.skybox;
-
         // let program =this.m_shProgram;
-
         // let gl =glctx.gl;
-
         // gl.useProgram(program.Program);
-
-
         // gl.activeTexture(gl.TEXTURE16);
         // gl.bindTexture(gl.TEXTURE_CUBE_MAP,texskybox);
 
-        
+        // gl.bindVertexArray(this.m_vao);
+
+        // const indices = this.m_fullquad.m_indicesCount;
+        // gl.drawElements(gl.TRIANGLES,indices,gl.UNSIGNED_SHORT,0);
+        // gl.bindVertexArray(null);
         
 
     }
