@@ -1,13 +1,15 @@
 import { Component } from "./Component";
 import { Transform } from "./Transform";
 import { Input } from "./Input";
-import { quat, vec3 } from "wglut";
+import { quat, vec3, glmath } from "wglut";
 
 
 export class CameraFreeFly extends Component{
     private m_trs:Transform;
     private m_startpos:vec3 = vec3.zero;
-    private m_startq: quat = quat.Identity;
+    
+    private m_rotay:number= 0;
+    private m_rotax:number = 0;
     public onStart(){
         this.m_trs = this.gameobject.transform;
     }
@@ -31,15 +33,17 @@ export class CameraFreeFly extends Component{
         }
 
         if(snapshot.mousewheel){
-            const q= quat.fromEulerDeg(0,3,0);
-            const p = q.conjugate();
-            trs.rotate(snapshot.mousewheelDelta > 0? q: p);
+            let offset = trs.forward.mulNumToRef(snapshot.mousewheelDelta *0.05);
+            trs.translate(offset);
         }
 
         if(snapshot.getMouseBtn(0)){
             if(snapshot.getMouseDown(0)){
                 this.m_startpos.set(snapshot.mousepos);
-                this.m_startq.set(trs.localRotation);
+                let q = trs.localRotation;
+                let e = q.toEuler();
+                this.m_rotax = e.x;
+                this.m_rotay =e.y;
             }
             else{
                 let mpos = snapshot.mousepos;
@@ -48,8 +52,11 @@ export class CameraFreeFly extends Component{
                 let deltay = mpos.y - spos.y;
 
                 if(deltax != 0 && deltay != 0){
-                    let q = quat.fromEulerDeg(-deltay,deltax,0);
-                    trs.setRotation(q.mul(this.m_startq));
+                    const deg2rad = glmath.Deg2Rad;
+                    let rotax = this.m_rotax - deltay * deg2rad *0.3;
+                    let rotay = this.m_rotay + deltax * deg2rad *0.3;
+                    
+                    trs.setRotation(quat.fromEuler(rotax,rotay,0));
                 }
             }
         }
