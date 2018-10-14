@@ -6,6 +6,7 @@ import { ClearType } from "../Camera";
 import { Mesh } from "../Mesh";
 import { Shader } from "../shaderfx/Shader";
 import { MeshRender } from "../MeshRender";
+import { ShaderDataUniformCam } from "../shaderfx/ShaderFXLibs";
 
 
 export class RenderTaskSkybox extends RenderTask{
@@ -17,6 +18,9 @@ export class RenderTaskSkybox extends RenderTask{
 
     private m_vao:WebGLVertexArrayObject;
 
+
+    private m_blockIndexCam:number;
+
     public init(){
         console.log('init skybox');
         let mesh = Mesh.Quad;
@@ -27,6 +31,8 @@ export class RenderTaskSkybox extends RenderTask{
 
         let glctx =this.pipeline.GLCtx;
         this.m_vao = MeshRender.CreateVertexArrayObj(glctx,mesh,program);
+
+        this.m_blockIndexCam = program.UniformBlock[ShaderDataUniformCam.UNIFORM_CAM];
     }
 
 
@@ -36,19 +42,25 @@ export class RenderTaskSkybox extends RenderTask{
 
         //draw skybox
 
-        // let texskybox = camera.skybox;
-        // let program =this.m_shProgram;
-        // let gl =glctx.gl;
-        // gl.useProgram(program.Program);
-        // gl.activeTexture(gl.TEXTURE16);
-        // gl.bindTexture(gl.TEXTURE_CUBE_MAP,texskybox);
+        let texskybox = camera.skybox;
+        let program =this.m_shProgram;
+        let gl =glctx.gl;
+        gl.useProgram(program.Program);
 
-        // gl.bindVertexArray(this.m_vao);
+        const indexCam = this.m_blockIndexCam;
+        if(indexCam != null){
+            gl.uniformBlockBinding(program.Program,indexCam,this.pipeline.ubufferIndex_PerCam);
+        }
 
-        // const indices = this.m_fullquad.m_indicesCount;
-        // gl.drawElements(gl.TRIANGLES,indices,gl.UNSIGNED_SHORT,0);
-        // gl.bindVertexArray(null);
-        
+
+        gl.activeTexture(gl.TEXTURE16);
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP,texskybox.gltex);
+
+        gl.bindVertexArray(this.m_vao);
+
+        const indices = this.m_fullquad.m_indicesCount;
+        gl.drawElements(gl.TRIANGLES,indices,gl.UNSIGNED_SHORT,0);
+        gl.bindVertexArray(null);
 
     }
     public release(glctx:GLContext){

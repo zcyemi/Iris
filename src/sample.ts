@@ -6,7 +6,7 @@ import { GameObject } from './GameObject';
 import { MeshRender } from './MeshRender';
 import { Material } from './Material';
 import { Mesh } from './Mesh';
-import { Camera, AmbientType } from './Camera';
+import { Camera, AmbientType, ClearType } from './Camera';
 import { GraphicsRender } from './GraphicsRender';
 import { ShaderFX } from './shaderfx/ShaderFX';
 import { Light } from './Light';
@@ -75,10 +75,16 @@ export class SampleGame{
         let grender = this.m_graphicsRender;
 
         //texture
-        let tex = await glctx.createTextureImageAsync('resource/tex0.png');
+        let tex = await glctx.createTextureImageAsync('res/images/tex0.png');
 
-        let cubepaths:string[] = [];
-        for(let i=0;i<6;i++) cubepaths.push('resource/cubemap/cube_face.png');
+        let cubepaths:string[] = [
+            "res/envmap/peak/peaks_ft.jpg",
+            "res/envmap/peak/peaks_bk.jpg",
+            "res/envmap/peak/peaks_up.jpg",
+            "res/envmap/peak/peaks_dn.jpg",
+            "res/envmap/peak/peaks_rt.jpg",
+            "res/envmap/peak/peaks_lf.jpg",
+        ];
         let texcube = await TextureCubeMap.loadCubeMap(cubepaths,glctx);
 
         //camera
@@ -87,6 +93,8 @@ export class SampleGame{
         //camera.transform.setLookAt(glmath.vec3(0,0,0));
         camera.transform.setDirty();
         camera.ambientColor = glmath.vec4(1,0.2,0.2,0.2);
+        camera.clearType = ClearType.Skybox;
+        camera.skybox = texcube;
         camera.background = glmath.vec4(0,1,0,1);
         scene.camera = camera;
         camera.addComponent(new CameraFreeFly());
@@ -139,7 +147,6 @@ export class SampleGame{
         let light0 = Light.creatDirctionLight(1.0,glmath.vec3(0,-1,1));
         light0.lightColor = new vec3([1,1,1]);
         scene.addChild(light0);
-
         this.m_sceneInited = true;
     }
 

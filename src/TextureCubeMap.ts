@@ -20,6 +20,11 @@ export class TextureCubeMap{
         return;
     }
 
+    /**
+     * 
+     * @param urls [Front,Back,Up,Down,Right,Left]
+     * @param glctx 
+     */
     public static async loadCubeMap(urls:string[],glctx:GLContext):Promise<TextureCubeMap>{
         if(urls == null || urls.length != 6) return null;
         return new Promise<TextureCubeMap>(async(res,rej)=>{

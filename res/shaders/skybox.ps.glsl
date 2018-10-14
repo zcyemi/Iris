@@ -6,5 +6,5 @@ uniform samplerCube uSampler;
 out lowp vec4 fragColor;
 void main(){
     vec3 dir = vWorldDir.xyz / vWorldDir.w;
-    fragColor = vec4(0,0,0,1);
+    fragColor = texture(uSampler,dir);
 }

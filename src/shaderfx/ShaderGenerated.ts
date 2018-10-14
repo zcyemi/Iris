@@ -149,16 +149,22 @@ uniform samplerCube uSampler;
 out lowp vec4 fragColor;
 void main(){
     vec3 dir = vWorldDir.xyz / vWorldDir.w;
-    fragColor = vec4(0,0,0,1);
+    fragColor = texture(uSampler,dir);
 }`;
 	public static readonly skybox_vs:string = `#version 300 es\nprecision mediump float;
+#include SHADERFX_BASIS
 
 #queue skybox
 
+in vec4 aPosition;
+
 out vec4 vWorldDir;
 void main(){
-    gl_Position = vec4(0);
-    vWorldDir = vec4(0);
+    vec4 pos = aPosition;
+    pos.xy*=2.0;
+    pos.z = 1.0;
+    gl_Position = pos;
+    vWorldDir = inverse(MATRIX_VP) * pos;
 }`;
 	public static readonly UnlitColor_ps:string = `#version 300 es\nprecision mediump float;
 uniform vec4 uColor;
