@@ -7,6 +7,7 @@ import { ShaderFX } from "../shaderfx/ShaderFX";
 import { ShaderSource } from "../shaderfx/ShaderSource";
 import { ShaderDataUniformCam, ShaderDataUniformObj } from "../shaderfx/ShaderFXLibs";
 import { Shader } from "../shaderfx/Shader";
+import { MeshRender } from "../MeshRender";
 
 export class RenderTaskDrawCoord extends RenderTask{
     private static s_coordMesh:Mesh;
@@ -15,6 +16,8 @@ export class RenderTaskDrawCoord extends RenderTask{
     private m_coordProgram:GLProgram;
     private m_coordShader:Shader;
 
+    private m_corrdMeshRender:MeshRender;
+
     private m_blockIndexCam:number;
     private m_blockIndexObj:number;
 
@@ -22,6 +25,7 @@ export class RenderTaskDrawCoord extends RenderTask{
     private m_perObjShaderData:ShaderDataUniformObj;
     private m_perCamBuffer:WebGLBuffer;
     private m_perObjBuffer:WebGLBuffer;
+
 
     public init(){
 
@@ -72,9 +76,11 @@ export class RenderTaskDrawCoord extends RenderTask{
 
         let program = this.m_coordProgram;
         let meshcoord = RenderTaskDrawCoord.s_coordMesh;
-        if(!meshcoord.m_bufferInited){
-            this.pipeline.refreshMeshBuffer(meshcoord,program);
-        }
+
+        //TODO
+        // if(!meshcoord.m_bufferInited){
+        //     this.pipeline.refreshMeshBuffer(meshcoord,program);
+        // }
 
         let gl = glctx.gl;
         let glp = program.Program;

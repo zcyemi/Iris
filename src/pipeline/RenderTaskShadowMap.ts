@@ -328,14 +328,13 @@ export class RenderTaskShadowMap extends RenderTask{
             this.renderShadowCascade(glmath.vec4(0,size,size,size),nodequeue,lightMtxs[2]);
             this.renderShadowCascade(glmath.vec4(size,size,size,size),nodequeue,lightMtxs[3]);
         }
-        
-
 
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
     }
 
     private renderShadowCascade(viewport:vec4,nodelist:MeshRender[],mtx:[mat4,mat4]){
-        let gl = this.pipeline.GL;
+        let glctx = this.pipeline.GLCtx;
+        let gl = glctx.gl;
 
         let camData = this.m_camdata;
         camData.setMtxView(mtx[0]);
@@ -359,9 +358,7 @@ export class RenderTaskShadowMap extends RenderTask{
             let mesh = node.mesh;
             if(mat == null || mesh == null || mat.program == null) continue;
 
-            if(!mesh.m_bufferInited){
-                this.pipeline.refreshMeshBuffer(mesh,mat.program);
-            }
+            node.refershVertexArray(glctx);
 
             let trs = node.object.transform;
 
@@ -369,7 +366,7 @@ export class RenderTaskShadowMap extends RenderTask{
             objdata.setMtxModel(trs.ObjMatrix);
             gl.bufferData(gl.UNIFORM_BUFFER,objdata.rawBuffer,gl.DYNAMIC_DRAW);
 
-            gl.bindVertexArray(mesh.m_vao);
+            gl.bindVertexArray(node.vertexArrayObj);
             let drawCount = mesh.m_indicesCount;
             gl.drawElements(gl.TRIANGLES,drawCount,gl.UNSIGNED_SHORT,0);
             gl.bindVertexArray(null);

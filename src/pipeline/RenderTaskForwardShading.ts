@@ -168,10 +168,10 @@ export class RenderTaskForwardShading extends RenderTask {
             let mat = node.material;
             let mesh = node.mesh;
             let program = mat.program;
+
             //mesh
-            if (!mesh.m_bufferInited) {
-                this.pipeline.refreshMeshBuffer(mesh, program);
-            }
+
+            node.refershVertexArray(glctx);
 
             //program
             if (program != curprogram) {
@@ -215,7 +215,7 @@ export class RenderTaskForwardShading extends RenderTask {
                 gl.bufferData(gl.UNIFORM_BUFFER, objdata.rawBuffer, gl.DYNAMIC_DRAW);
             }
 
-            gl.bindVertexArray(mesh.m_vao);
+            gl.bindVertexArray(node.vertexArrayObj);
             let drawCount = mesh.m_indicesCount;
             gl.drawElements(gl.TRIANGLES, drawCount, gl.UNSIGNED_SHORT, 0);
             gl.bindVertexArray(null);

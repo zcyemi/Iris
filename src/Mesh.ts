@@ -1,4 +1,5 @@
-import { vec3, vec4 } from "wglut";
+import { vec3, vec4, GLContext } from "wglut";
+import { GL } from "./GL";
 
 export enum MeshTopology{
     Triangles,
@@ -8,6 +9,26 @@ export enum MeshTopology{
     Lines,
     LineStrip,
     LineLoop
+}
+
+export class MeshVertexAttrDesc{
+    public type:number;
+    public size:number;
+    public totalbytes:number;
+    public offset:number;
+
+    public constructor(type:number,size:number,bytes:number,offset:number = 0){
+        this.type = type;
+        this.size = size;
+        this.totalbytes = bytes;
+        this.offset= 0;
+    }
+}
+
+export class MeshVertexDesc{
+    public position : MeshVertexAttrDesc;
+    public uv: MeshVertexAttrDesc;
+    public normal: MeshVertexAttrDesc;
 }
 
 export class Mesh{
@@ -28,7 +49,14 @@ export class Mesh{
     public m_bufferVertices:WebGLBuffer;
     public m_bufferIndices:WebGLBuffer;
     public m_vao:WebGLVertexArrayObject;
-    public m_bufferInited:boolean =false;
+    private m_bufferInited:boolean =false;
+
+    public readonly vertexDesc:MeshVertexDesc = new MeshVertexDesc();
+
+
+    public get bufferInited():boolean{
+        return this.m_bufferInited;
+    }
 
     public static get Quad():Mesh{
 
@@ -59,6 +87,9 @@ export class Mesh{
         quad.m_dataPosition = dataPosition;
         quad.m_dataUV = dataUV;
         quad.m_dataIndices = dataIndices;
+
+        quad.vertexDesc.position= new MeshVertexAttrDesc(GL.Float,4,dataPosition.length*4);
+        quad.vertexDesc.uv = new MeshVertexAttrDesc(GL.Float,2,dataUV.length*4)
 
         quad.calculateNormal();
         return quad;
@@ -117,6 +148,10 @@ export class Mesh{
         cube.m_dataPosition = dataPosition;
         cube.m_dataUV =dataUV;
         cube.m_dateVerticesLen = dataPosition.length + dataUV.length;
+
+        let vertexdesc = cube.vertexDesc;
+        vertexdesc.position = new MeshVertexAttrDesc(GL.Float,4,dataPosition.length *4);
+        vertexdesc.uv = new MeshVertexAttrDesc(GL.Float,2,dataUV.length*4);
 
         cube.calculateNormal();
 
@@ -185,5 +220,69 @@ export class Mesh{
 
         this.m_dataNormal = normaldata;
         this.m_dateVerticesLen += normaldata.length;
+
+        this.vertexDesc.normal = new MeshVertexAttrDesc(GL.Float,4,normaldata.length *4);
+    }
+
+    public refreshMeshBuffer(glctx:GLContext){
+        let gl = glctx.gl;
+
+        let buffervert = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER,buffervert);
+        this.m_bufferVertices = buffervert;
+
+        let totalData = new Float32Array(this.m_dateVerticesLen);
+        let offset = 0;
+        let offsetAry:number[] = [];
+
+        //Vertices
+        let hasPosition: boolean = false;
+        let hasUV: boolean = false;
+        let hasNormal: boolean = false;
+
+        if (this.m_dataPosition != null) {
+            totalData.set(this.m_dataPosition, offset);
+            hasPosition = true;
+            offsetAry.push(offset);
+            offset += this.m_dataPosition.length;
+        }
+        if (this.m_dataUV != null) {
+            totalData.set(this.m_dataUV, offset);
+            hasUV = true;
+            offsetAry.push(offset);
+            offset += this.m_dataUV.length;
+        }
+        if (this.m_dataNormal != null) {
+            totalData.set(this.m_dataNormal, offset);
+            hasNormal = true;
+            offsetAry.push(offset);
+            offset += this.m_dataNormal.length;
+        }
+        gl.bufferData(gl.ARRAY_BUFFER,totalData,gl.STATIC_DRAW);
+
+        //refresh desc;
+        let vertexDesc = this.vertexDesc;
+        if(hasPosition){
+            vertexDesc.position.offset = 0;
+        }
+        if(hasUV){
+            vertexDesc.uv.offset = offsetAry[1]*4;
+        }
+        if(hasNormal){
+            vertexDesc.normal.offset = offsetAry[2]*4;
+        }
+
+        //Indices
+
+        let dataIndices = this.m_dataIndices;
+        let hasIndices = dataIndices != null && dataIndices.length !=0;
+        if(hasIndices){
+            let bufferIndices = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,bufferIndices);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,dataIndices,gl.STATIC_DRAW);
+            this.m_bufferIndices = bufferIndices;
+        }
+
+        this.m_bufferInited = true;
     }
 }
