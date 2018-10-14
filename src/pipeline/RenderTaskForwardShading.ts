@@ -151,6 +151,7 @@ export class RenderTaskForwardShading extends RenderTask {
             let camobj = this.m_perCamShaderData;
             camobj.setMtxView(mtxv);
             camobj.setMtxProj(mtxp);
+            camobj.setCameraPos(camera.transform.localPosition);
             gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_perCamUniformBuffer);
             gl.bufferData(gl.UNIFORM_BUFFER, camobj.rawBuffer, gl.DYNAMIC_DRAW);
         }

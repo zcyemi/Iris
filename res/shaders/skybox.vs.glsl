@@ -13,7 +13,7 @@ out vec4 vWorldDir;
 #endif
 
 #ifdef ENVMAP_TYPE_TEX
-out vec4 vWorldDir;
+out vec3 vWorldDir;
 #endif
 
 void main(){
@@ -23,12 +23,13 @@ void main(){
     gl_Position = pos;
 
     vec4 wpos =  inverse(MATRIX_VP) * pos;
+    wpos.xyz = wpos.xyz / wpos.w - CAMERA_POS.xyz;
     #ifdef ENVMAP_TYPE_CUBE
     vWorldDir = wpos;
     #endif
 
     #ifdef ENVMAP_TYPE_TEX
-    vWorldDir = wpos;
+    vWorldDir = wpos.xyz;
     #endif
     
 }

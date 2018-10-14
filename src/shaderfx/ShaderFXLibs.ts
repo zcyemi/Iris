@@ -1,7 +1,7 @@
 import { ShaderSource } from "./ShaderSource";
 import { ShaderFX, ShaderFile, ShaderInc } from "./ShaderFX";
 import { ShaderVariant } from "./ShaderVariant";
-import { mat4, GLContext } from "wglut";
+import { mat4, GLContext, vec4, vec3 } from "wglut";
 import { ShaderDataArrayBuffer, ShaderDataFloat32Buffer } from "./ShaderBuffer";
 import { Shader } from "./Shader";
 
@@ -113,7 +113,7 @@ export class ShaderDataUniformCam extends ShaderDataFloat32Buffer{
 
 
     public constructor(){
-        let buffersize = 16*4 *2;
+        let buffersize = 16*4 *2 + 16;
         super(buffersize);
     }
 
@@ -123,6 +123,11 @@ export class ShaderDataUniformCam extends ShaderDataFloat32Buffer{
     public setMtxProj(mtx:mat4){
         this.setMat4(16,mtx);
     }
+
+    public setCameraPos(pos:vec3){
+        this.setVec4(32,pos.vec4(1));
+    }
+    
 }
 
 export class ShaderDataUniformLight extends ShaderDataFloat32Buffer{

@@ -1,5 +1,7 @@
 export class ShaderGen{ 
 	public static readonly SHADERFX_BASIS:string = `#define PI 3.1415926
+#define PI_2 6.2831852
+#define PI_HALF 1.5707963
 
 #include SHADERFX_OBJ
 #include SHADERFX_CAMERA
@@ -10,6 +12,7 @@ vec3 ObjToWorldDir(in vec3 dir){
 uniform UNIFORM_CAM{
     mat4 _world2view_;
     mat4 _view2proj_;
+    vec4 _camerapos_;
 };
 #define MATRIX_V _world2view_
 #define MATRIX_P _view2proj_
@@ -17,7 +20,8 @@ uniform UNIFORM_CAM{
 #define MATRIX_MV MATRIX_V * MATRIX_M
 #define MATRIX_IT_MV transpose(inverse(MATRIX_MV))
 #define MATRIX_MVP MATRIX_P * MATRIX_MV
-#define MATRIX_WORLD2OBJ inverse(MATRIX_M)`;
+#define MATRIX_WORLD2OBJ inverse(MATRIX_M)
+#define CAMERA_POS _camerapos_`;
 	public static readonly SHADERFX_LIGHT:string = `struct LIGHT_DATA{
     vec4 pos_type;
     vec4 col_intensity;
@@ -153,21 +157,21 @@ in vec4 vWorldDir;
 uniform samplerCube uSampler;
 #endif
 #ifdef ENVMAP_TYPE_TEX
-in vec4 vWorldDir;
+in vec3 vWorldDir;
 uniform sampler2D uSampler;
 #endif
 
 
 out lowp vec4 fragColor;
 void main(){
-    vec3 dir = vWorldDir.xyz / vWorldDir.w;
+    vec3 dir = vWorldDir.xyz;
     #ifdef ENVMAP_TYPE_CUBE
     fragColor = texture(uSampler,dir);
     #endif
     #ifdef ENVMAP_TYPE_TEX
     dir = normalize(dir);
     float y = 1.0 - 0.5 *(1.0 + dir.y);
-    float x = atan(dir.z,dir.x) / PI /2.0 + 0.5;
+    float x = atan(dir.z,dir.x) / PI_2 + 0.5;
     fragColor = texture(uSampler,vec2(x,y));
     #endif
 }`;
@@ -185,7 +189,7 @@ out vec4 vWorldDir;
 #endif
 
 #ifdef ENVMAP_TYPE_TEX
-out vec4 vWorldDir;
+out vec3 vWorldDir;
 #endif
 
 void main(){
@@ -195,12 +199,13 @@ void main(){
     gl_Position = pos;
 
     vec4 wpos =  inverse(MATRIX_VP) * pos;
+    wpos.xyz = wpos.xyz / wpos.w - CAMERA_POS.xyz;
     #ifdef ENVMAP_TYPE_CUBE
     vWorldDir = wpos;
     #endif
 
     #ifdef ENVMAP_TYPE_TEX
-    vWorldDir = wpos;
+    vWorldDir = wpos.xyz;
     #endif
     
 }`;
