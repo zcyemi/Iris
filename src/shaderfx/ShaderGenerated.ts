@@ -142,6 +142,24 @@ void main(){
     gl_Position = pos;
     v2f.normal = ObjToWorldDir(aNormal.xyz);
 }`;
+	public static readonly skybox_ps:string = `#version 300 es\nprecision mediump float;
+
+in vec4 vWorldDir;
+uniform samplerCube uSampler;
+out lowp vec4 fragColor;
+void main(){
+    vec3 dir = vWorldDir.xyz / vWorldDir.w;
+    fragColor = texture(uSampler,dir);
+}`;
+	public static readonly skybox_vs:string = `#version 300 es\nprecision mediump float;
+
+#queue skybox
+
+out vec4 vWorldDir;
+void main(){
+    gl_Position = vec4(0);
+    vWorldDir = vec4(0);
+}`;
 	public static readonly UnlitColor_ps:string = `#version 300 es\nprecision mediump float;
 uniform vec4 uColor;
 out vec4 fragColor;

@@ -18,6 +18,7 @@ import { SceneManager } from './SceneManager';
 import { Component} from './Component';
 import { CameraFreeFly } from './CameraUtility';
 import { FrameTimer } from './FrameTimer';
+import { TextureCubeMap } from './TextureCubeMap';
 
 export class SampleGame{
     
@@ -74,7 +75,11 @@ export class SampleGame{
         let grender = this.m_graphicsRender;
 
         //texture
-        let tex = await glctx.createTextureImageAsync('res/images/tex0.png');
+        let tex = await glctx.createTextureImageAsync('resource/tex0.png');
+
+        let cubepaths:string[] = [];
+        for(let i=0;i<6;i++) cubepaths.push('resource/cubemap/cube_face.png');
+        let texcube = await TextureCubeMap.loadCubeMap(cubepaths,glctx);
 
         //camera
         let camera = Camera.persepctive(60,400.0/300.0,0.5,100);

@@ -1,6 +1,7 @@
 import { Transform } from "./Transform";
 import { mat4, vec3, vec4, glmath } from "wglut";
 import { GameObject } from "./GameObject";
+import { TextureCubeMap } from "./TextureCubeMap";
 
 
 export enum AmbientType{
@@ -8,6 +9,10 @@ export enum AmbientType{
     AmbientColor
 }
 
+export enum ClearType{
+    Background,
+    Skybox,
+}
 
 export enum ProjectionType{
     perspective,
@@ -35,6 +40,9 @@ export class Camera extends GameObject{
     private m_background:vec4 = vec4.zero;
     private m_ambientColor:vec4 = glmath.vec4(0.1,0.1,0.1,1.0);
     private m_ambientType:AmbientType = AmbientType.AmbientColor;
+    private m_clearType:ClearType = ClearType.Background;
+
+    private m_skybox:TextureCubeMap;
 
     public get far():number{
         return this.m_far;
@@ -86,6 +94,22 @@ export class Camera extends GameObject{
             this.ambientDataDirty = true;
         }
     }
+
+    public get skybox():TextureCubeMap{
+        return this.m_skybox;
+    }
+    public set skybox(tex:TextureCubeMap){
+        this.m_skybox = tex;
+    }
+
+    public get clearType():ClearType{
+        return  this.m_clearType;
+    }
+
+    public set clearType(t:ClearType){
+        this.m_clearType = t;
+    }
+
     public get ambientType():AmbientType{
         return this.m_ambientType;
     }

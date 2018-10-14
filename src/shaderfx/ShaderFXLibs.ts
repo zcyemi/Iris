@@ -15,6 +15,7 @@ export class ShaderFXLibs{
     private m_unlitTexture:Shader;
     private m_uvValue:Shader;
     private m_diffuse:Shader;
+    private m_skybox:Shader;
 
     @ShaderFile("UnlitColor")
     public static SH_unitColor:ShaderSource;
@@ -24,6 +25,9 @@ export class ShaderFXLibs{
     public static SH_uvValue:ShaderSource;
     @ShaderFile("diffuse")
     public static SH_diffuse:ShaderSource;
+
+    @ShaderFile("skybox")
+    public static SH_skybox:ShaderSource;
 
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_OBJ)
     public static SHADERFX_OBJ:ShaderVariant;
@@ -64,6 +68,13 @@ export class ShaderFXLibs{
             this.m_diffuse = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_diffuse);
         }
         return this.m_diffuse;
+    }
+
+    public get shaderSkybox():Shader{
+        if(this.m_skybox == null){
+            this.m_skybox = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_skybox);
+        }
+        return this.m_skybox;
     }
 
     public release(){
