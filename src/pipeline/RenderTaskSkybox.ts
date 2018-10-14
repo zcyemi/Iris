@@ -7,13 +7,16 @@ import { Mesh } from "../Mesh";
 import { Shader } from "../shaderfx/Shader";
 import { MeshRender } from "../MeshRender";
 import { ShaderDataUniformCam } from "../shaderfx/ShaderFXLibs";
+import { Material } from "../Material";
+import { CubeMapType } from "../TextureCubeMap";
+import { ShaderFX } from "../shaderfx/ShaderFX";
 
 
 export class RenderTaskSkybox extends RenderTask{
 
 
     private m_fullquad:Mesh;
-    private m_shSkybox:Shader;
+    private m_material:Material;
     private m_shProgram:GLProgram;
 
     private m_vao:WebGLVertexArrayObject;
@@ -21,18 +24,27 @@ export class RenderTaskSkybox extends RenderTask{
 
     private m_blockIndexCam:number;
 
+    private m_lastCubeType:CubeMapType = CubeMapType.Cube;
+
+    private m_texuniform:WebGLUniformLocation;
+
     public init(){
         console.log('init skybox');
         let mesh = Mesh.Quad;
         this.m_fullquad =mesh;
-        this.m_shSkybox = this.pipeline.graphicRender.shaderLib.shaderSkybox;
-        let program = this.m_shSkybox.defaultProgram;
+        let mat = new Material(this.pipeline.graphicRender.shaderLib.shaderSkybox);
+        this.m_material = mat;
+        mat.setFlag("ENVMAP_TYPE","CUBE");
+
+        let program = mat.program;
         this.m_shProgram = program;
 
         let glctx =this.pipeline.GLCtx;
         this.m_vao = MeshRender.CreateVertexArrayObj(glctx,mesh,program);
 
         this.m_blockIndexCam = program.UniformBlock[ShaderDataUniformCam.UNIFORM_CAM];
+
+        this.m_texuniform = program.Uniforms[ShaderFX.UNIFORM_MAIN_TEXTURE];
     }
 
 
@@ -42,7 +54,20 @@ export class RenderTaskSkybox extends RenderTask{
 
         //draw skybox
 
+
         let texskybox = camera.skybox;
+
+        if(texskybox.cubemapType != this.m_lastCubeType){
+            let newtype = texskybox.cubemapType;
+            console.log("switch textype:" + newtype);
+
+            this.m_material.setFlag("ENVMAP_TYPE",newtype == CubeMapType.Cube? "CUBE":"TEX");
+            this.m_lastCubeType = newtype;
+            let program = this.m_material.program;
+            this.m_shProgram = program;
+            this.m_texuniform = program.Uniforms[ShaderFX.UNIFORM_MAIN_TEXTURE];
+        }
+
         let program =this.m_shProgram;
         let gl =glctx.gl;
         gl.useProgram(program.Program);
@@ -54,7 +79,15 @@ export class RenderTaskSkybox extends RenderTask{
 
 
         gl.activeTexture(gl.TEXTURE16);
-        gl.bindTexture(gl.TEXTURE_CUBE_MAP,texskybox.gltex);
+
+        let cubetype = this.m_lastCubeType;
+        if(cubetype == CubeMapType.Cube){
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP,texskybox.gltex);
+        }
+        else{
+            gl.bindTexture(gl.TEXTURE_2D,texskybox.gltex);
+        }
+        gl.uniform1i(this.m_texuniform,16);
 
         gl.bindVertexArray(this.m_vao);
 

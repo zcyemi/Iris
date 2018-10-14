@@ -1,5 +1,6 @@
 import { int } from "wglut";
 import { Utility } from "../Utility";
+import { ShaderPreprocessor } from "./ShaderPreprocessor";
 
 export type IncludeIndex = {key:string,line:number};
 export class ShaderVariant{
@@ -58,54 +59,21 @@ export class ShaderVariant{
         let lines = source.split('\n');
         for(let i=0,len = lines.length;i<len;i++){
             let line = lines[i];
-            let matchInc = line.match(/#include ([\w]+)/);
-            if(matchInc != null){
-                this.includes.push({key:matchInc[1],line:i});
+
+            let pinclude = ShaderPreprocessor.processVariantInclude(line,i);
+            if(pinclude !=null){
+                this.includes.push(pinclude);
                 continue;
             }
 
-            if(line.match(/^[\s]*#options/)){
-                lines[i] = this.processMultiCompileOptions(line);
+            let poptions = ShaderPreprocessor.processOptions(line);
+            if(poptions !=null){
+                lines[i] = poptions[0];
+                this.options.push(poptions[1]);
+                continue;
             }
         }
         this.lines = lines;
-    }
-
-    private processMultiCompileOptions(line:string):string{
-        let linet = line.trim();
-        let options = linet.substr(8);
-        let parts = options.split(' ');
-        if(parts == null || parts.length == 0) throw new Error(`invalid #options ${line}`);
-
-        let validopts:string[] = [];
-        for(let i=0,len = parts.length;i<len;i++){
-            let item = parts[i].trim();
-            if(item == '') continue;
-            validopts.push(item);
-        }
-
-        let validlen = validopts.length;
-
-        if(validlen ==0 || validlen == 1) throw new Error(`invalid #options ${line}`);
-
-        if(validlen == 2){
-            let val = validopts[1];
-            if(val != 'ON' && val != 'OFF') throw new Error(`invalid #options ${line}`);
-            let opt = new ShaderOptions();
-            opt.flag = validopts[0];
-            opt.default = val;
-            opt.values = ['ON','OFF'];
-            this.options.push(opt);
-            return '//'+line;
-        }
-        else{
-            let opt = new ShaderOptions();
-            opt.flag = validopts[0];
-            opt.default = validopts[1];
-            opt.values = validopts.splice(0,1);
-            this.options.push(opt);
-            return '//'+line;
-        }        
     }
 }
 
@@ -143,6 +111,7 @@ export class ShaderOptionsConfig{
             return false;
         }
         let options = this.m_options;
+        console.log(options);
         for(let i=0,len = options.length;i<len;i++){
             let opt = options[i];
             if(opt.flag === key){
@@ -163,9 +132,11 @@ export class ShaderOptionsConfig{
             console.warn(`invalid shader option flag: [${key}]`);
             return false;
         }
+        
         if(curval === value) return false;
         this.m_optmap[key] = value;
         this.m_dirty= true;
+        return true;
     }
 
     public get hashCode():int{

@@ -1,5 +1,7 @@
 export class ShaderGen{ 
-	public static readonly SHADERFX_BASIS:string = `#include SHADERFX_OBJ
+	public static readonly SHADERFX_BASIS:string = `#define PI 3.1415926
+
+#include SHADERFX_OBJ
 #include SHADERFX_CAMERA
 vec3 ObjToWorldDir(in vec3 dir){
     return normalize(dir * mat3(MATRIX_WORLD2OBJ));
@@ -144,27 +146,63 @@ void main(){
 }`;
 	public static readonly skybox_ps:string = `#version 300 es\nprecision mediump float;
 
+#include SHADERFX_BASIS
+
+#ifdef ENVMAP_TYPE_CUBE
 in vec4 vWorldDir;
 uniform samplerCube uSampler;
+#endif
+#ifdef ENVMAP_TYPE_TEX
+in vec4 vWorldDir;
+uniform sampler2D uSampler;
+#endif
+
+
 out lowp vec4 fragColor;
 void main(){
     vec3 dir = vWorldDir.xyz / vWorldDir.w;
+    #ifdef ENVMAP_TYPE_CUBE
     fragColor = texture(uSampler,dir);
+    #endif
+    #ifdef ENVMAP_TYPE_TEX
+    dir = normalize(dir);
+    float y = 1.0 - 0.5 *(1.0 + dir.y);
+    float x = atan(dir.z,dir.x) / PI /2.0 + 0.5;
+    fragColor = texture(uSampler,vec2(x,y));
+    #endif
 }`;
 	public static readonly skybox_vs:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
+
+#options ENVMAP_TYPE CUBE TEX 
 
 #queue skybox
 
 in vec4 aPosition;
 
+#ifdef ENVMAP_TYPE_CUBE
 out vec4 vWorldDir;
+#endif
+
+#ifdef ENVMAP_TYPE_TEX
+out vec4 vWorldDir;
+#endif
+
 void main(){
     vec4 pos = aPosition;
     pos.xy*=2.0;
     pos.z = 1.0;
     gl_Position = pos;
-    vWorldDir = inverse(MATRIX_VP) * pos;
+
+    vec4 wpos =  inverse(MATRIX_VP) * pos;
+    #ifdef ENVMAP_TYPE_CUBE
+    vWorldDir = wpos;
+    #endif
+
+    #ifdef ENVMAP_TYPE_TEX
+    vWorldDir = wpos;
+    #endif
+    
 }`;
 	public static readonly UnlitColor_ps:string = `#version 300 es\nprecision mediump float;
 uniform vec4 uColor;

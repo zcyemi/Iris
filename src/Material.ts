@@ -133,7 +133,10 @@ export class Material{
     public setFlag(key:string,value:string){
         let defOptCfg = this.m_shader.m_defaultOptionsConfig;
         let verified = this.m_shader.m_defaultOptionsConfig.verifyFlag(key,value);
-        if(!verified) return;
+        if(!verified){
+            console.warn(`set shader flag verify failed: ${key}:${value}`);
+            return;
+        }
         if(!this.m_useVariants){
             this.m_optConfig = defOptCfg.clone();
         }
@@ -141,7 +144,11 @@ export class Material{
             this.m_program = null;
             this.m_useVariants = true;
         }
+        else{
+            console.warn("set shader flag: value not changed");
+        }
     }
+
 
     public apply(gl:WebGL2RenderingContext){
         let program = this.program;

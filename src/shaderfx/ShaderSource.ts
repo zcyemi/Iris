@@ -1,7 +1,8 @@
 import { ShaderVariant, ShaderOptionsConfig, ShaderOptions } from "./ShaderVariant";
 import { ShaderTags, Comparison, RenderQueue, BlendOperator, BlendFactor } from "./Shader";
+import { ShaderPreprocessor } from "./ShaderPreprocessor";
 
-type VariantsGroup = { [key: string]: ShaderVariant };
+export type VariantsGroup = { [key: string]: ShaderVariant };
 export class ShaderSource {
 
     public variants: string[];
@@ -78,20 +79,24 @@ export class ShaderSource {
         let lines = source.split('\n');
         for (let i = 0, len = lines.length; i < len; i++) {
             let line = lines[i];
-            let matchInc = line.match(/#include ([\w]+)/);
-            if (matchInc != null) {
-                let vname = matchInc[1];
-                let variant = variants[vname];
-                if (variant == null) {
-                    throw new Error(`shader variant [${vname}] not found!`);
-                }
-                if (!variant.linked) throw new Error(`shader variant [${vname}] not linked!`);
-                lines[i] = variant.sources;
+            
 
+            let pinclude = ShaderPreprocessor.processSourceInclude(line,variants);
+            if(pinclude!=null){
+                lines[i] = pinclude[0];
+                let vname = pinclude[1];
                 let added = this.addVariant(vname);
-                if(added) this.addOptions(variant);
+                if(added) this.addOptions(variants[vname]);
                 continue;
             }
+
+            let poptions = ShaderPreprocessor.processOptions(line);
+            if(poptions != null){
+                lines[i] = poptions[0];
+                this.optionsList.push(poptions[1]);
+                continue;
+            }
+
 
             lines[i] = this.processShaderTag(line);
         }

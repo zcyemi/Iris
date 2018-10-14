@@ -1,15 +1,26 @@
 import {GLContext, GLUtility } from 'wglut';
 
+
+export enum CubeMapType{
+    Cube,
+    Texture360
+}
+
 export class TextureCubeMap{
     
     private m_rawTex:WebGLTexture;
+    private m_type:CubeMapType;
 
     public get gltex():WebGLTexture{
         return this.m_rawTex;
     }
 
-    private constructor(){
+    public get cubemapType():CubeMapType{
+        return this.m_type;
+    }
 
+    private constructor(type:CubeMapType){
+        this.m_type = type;
     }
 
     public release(glctx:GLContext){
@@ -18,6 +29,41 @@ export class TextureCubeMap{
             this.m_rawTex = null;
         }
         return;
+    }
+
+    public static loadCubeMapTex(url:string,glctx:GLContext):Promise<TextureCubeMap>{
+        if(url == null) return null;
+        return new Promise<TextureCubeMap>(async (res,rej)=>{
+            let img = await GLUtility.loadImage(url);
+            if(img == null){
+                rej('load image failed!');
+                return;
+            }
+
+            let texcube:TextureCubeMap = null;
+
+            try{
+                let gl = glctx.gl;
+                let gltex2d = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D,gltex2d);
+    
+                gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
+                gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    
+                texcube = new TextureCubeMap(CubeMapType.Texture360);
+                texcube.m_rawTex = gltex2d;
+            }
+            catch(e){
+                rej(e);
+            }
+
+            res(texcube);
+            return;
+
+        });
     }
 
     /**
@@ -58,7 +104,7 @@ export class TextureCubeMap{
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_R,gl.CLAMP_TO_EDGE);
     
-                texcube = new TextureCubeMap();
+                texcube = new TextureCubeMap(CubeMapType.Cube);
                 texcube.m_rawTex = gltexcube;
             }
             catch(e){

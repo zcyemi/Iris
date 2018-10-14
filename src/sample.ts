@@ -77,15 +77,19 @@ export class SampleGame{
         //texture
         let tex = await glctx.createTextureImageAsync('res/images/tex0.png');
 
-        let cubepaths:string[] = [
-            "res/envmap/peak/peaks_ft.jpg",
-            "res/envmap/peak/peaks_bk.jpg",
-            "res/envmap/peak/peaks_up.jpg",
-            "res/envmap/peak/peaks_dn.jpg",
-            "res/envmap/peak/peaks_rt.jpg",
-            "res/envmap/peak/peaks_lf.jpg",
-        ];
-        let texcube = await TextureCubeMap.loadCubeMap(cubepaths,glctx);
+        // let cubepaths:string[] = [
+        //     "res/envmap/peak/peaks_ft.jpg",
+        //     "res/envmap/peak/peaks_bk.jpg",
+        //     "res/envmap/peak/peaks_up.jpg",
+        //     "res/envmap/peak/peaks_dn.jpg",
+        //     "res/envmap/peak/peaks_rt.jpg",
+        //     "res/envmap/peak/peaks_lf.jpg",
+        // ];
+        // let texcube = await TextureCubeMap.loadCubeMap(cubepaths,glctx);
+
+        let texcube = await TextureCubeMap.loadCubeMapTex('res/envmap/day360.jpg',glctx);
+
+        console.log(texcube);
 
         //camera
         let camera = Camera.persepctive(60,400.0/300.0,0.5,100);
