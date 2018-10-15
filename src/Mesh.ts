@@ -3,13 +3,13 @@ import { GL, GLDataType, GLConst } from "./GL";
 import { type } from "os";
 
 export enum MeshTopology{
-    Triangles,
-    TriangleFan,
-    TriangleStrip,
-    Points,
-    Lines,
-    LineStrip,
-    LineLoop
+    Triangles = 4,
+    TriangleFan = 6,
+    TriangleStrip = 5,
+    Points = 0,
+    Lines = 1,
+    LineStrip = 3,
+    LineLoop = 2
 }
 
 export class MeshVertexAttrDesc{
@@ -75,6 +75,28 @@ export class Mesh{
 
     public get bufferInited():boolean{
         return this.m_bufferInited;
+    }
+
+    public setNormal(data:MeshDataBuffer,type:GLDataType,size:number){
+        this.m_dataNormal = data;
+        this.vertexDesc.normal = new MeshVertexAttrDesc(type,size,data.byteLength);
+    }
+
+    public setUV(data:MeshDataBuffer,type:GLDataType,size:number){
+        this.m_dataUV = data;
+        this.vertexDesc.uv = new MeshVertexAttrDesc(type,size,data.byteLength);
+    }
+
+    public setPosition(data:MeshDataBuffer,type:GLDataType,size:number){
+        this.m_dataPosition = data;
+        this.vertexDesc.position = new MeshVertexAttrDesc(type,size,data.byteLength);
+    }
+
+    public setIndices(data:MeshDataBufferIndices,type:GLDataType,mode:MeshTopology){
+        this.m_dataIndices = data;
+        this.indiceDesc.indiceCount =data.length;
+        this.indiceDesc.topology = mode;
+        this.indiceDesc.indices = new MeshVertexAttrDesc(type,1,data.byteLength,0);
     }
 
     public static get Quad():Mesh{

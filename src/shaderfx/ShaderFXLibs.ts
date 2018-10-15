@@ -17,6 +17,8 @@ export class ShaderFXLibs{
     private m_diffuse:Shader;
     private m_skybox:Shader;
 
+    private m_pbrMetallicRoughness:Shader;
+
     @ShaderFile("UnlitColor")
     public static SH_unitColor:ShaderSource;
     @ShaderFile("UnlitTexture")
@@ -25,9 +27,10 @@ export class ShaderFXLibs{
     public static SH_uvValue:ShaderSource;
     @ShaderFile("diffuse")
     public static SH_diffuse:ShaderSource;
-
     @ShaderFile("skybox")
     public static SH_skybox:ShaderSource;
+    @ShaderFile("pbrMetallicRoughness")
+    public static SH_pbrMetallicRoughness:ShaderSource;
 
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_OBJ)
     public static SHADERFX_OBJ:ShaderVariant;
@@ -77,6 +80,13 @@ export class ShaderFXLibs{
         return this.m_skybox;
     }
 
+    public get shaderPbrMetallicRoughness():Shader{
+        if(this.m_pbrMetallicRoughness == null){
+            this.m_pbrMetallicRoughness = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_pbrMetallicRoughness);
+        }
+        return this.m_pbrMetallicRoughness;
+    }
+
     public release(){
 
     }
@@ -91,6 +101,17 @@ export class ShaderFXLibs{
         //     }
         // }
     }
+
+
+    public static readonly SH_PBR_BaseColorFactor:string = "uColor";
+    public static readonly SH_PBR_BaseColorTexture:string = "uSampler";
+    public static readonly SH_PBR_MetallicFactor:string = "uMetallic";
+    public static readonly SH_PBR_RoughnessFactor:string = "uRoughness";
+    public static readonly SH_PBR_MetallicRoughnessTexture:string = "uTexMetallicRoughness";
+
+    public static readonly SH_PBR_EmissiveFactor:string = "uEmissive";
+    public static readonly SH_PBR_EmissiveTexture:string = "uTexEmissive";
+    
 }
 
 /** Shader DataBuffer */

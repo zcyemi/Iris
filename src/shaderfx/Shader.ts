@@ -48,6 +48,12 @@ export enum BlendFactor{
     SRC_ALPHA_SATURATE
 }
 
+export enum CullingMode{
+    Front,
+    Back,
+    None,
+}
+
 export class ShaderTags{
     public queue?:RenderQueue;
     public ztest?:Comparison;
@@ -55,7 +61,7 @@ export class ShaderTags{
     public blendOp?:BlendOperator;
     public blendFactorSrc?:BlendFactor;
     public blendFactorDst?:BlendFactor;
-
+    public culling?:CullingMode;
 }
 
 export class Shader{

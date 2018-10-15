@@ -255,6 +255,7 @@ export abstract class RenderPipeline{
     }
     private traversalRenderNode(drawlist:RenderNodeList,obj:GameObject){
         let children = obj.children;
+        if(children == null) return;
         for(let i=0,len = children.length;i< len;i++){
             let c = children[i];
 
@@ -264,11 +265,7 @@ export abstract class RenderPipeline{
             if(crender != null && crender.mesh !=null){
                 drawlist.pushRenderNode(crender);
             }
-            
-            let cc = c.children;
-            if(cc != null && cc.length != 0){
-                this.traversalRenderNode(drawlist,obj);
-            }
+            this.traversalRenderNode(drawlist,c);
         }
     }
 }

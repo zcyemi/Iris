@@ -137,7 +137,7 @@ export class RenderTaskForwardShading extends RenderTask {
 
         //setup draw state
         gl.depthFunc(gl.LEQUAL);
-        gl.enable(gl.CULL_FACE);
+        //gl.enable(gl.CULL_FACE);
         gl.frontFace(gl.CCW);
         gl.cullFace(gl.BACK);
 
@@ -217,8 +217,9 @@ export class RenderTaskForwardShading extends RenderTask {
             }
 
             gl.bindVertexArray(node.vertexArrayObj);
-            let drawCount = mesh.indiceDesc.indiceCount;
-            gl.drawElements(gl.TRIANGLES, drawCount, gl.UNSIGNED_SHORT, 0);
+
+            let indicedesc = mesh.indiceDesc;
+            gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.indices.type, 0);
             gl.bindVertexArray(null);
 
             mat.clean(gl);

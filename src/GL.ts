@@ -11,6 +11,10 @@ export enum GLConst {
     FLOAT = 5126,
 }
 
+export class TT{
+
+}
+
 
 
 export type GLDataType = GLConst.BYTE | GLConst.UNSIGNED_BYTE | GLConst.SHORT | GLConst.FLOAT | GLConst.UNSIGNED_BYTE | GLConst.UNSIGNED_INT | GLConst.UNSIGNED_SHORT;

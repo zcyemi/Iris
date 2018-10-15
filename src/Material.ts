@@ -2,6 +2,7 @@ import { GLProgram, vec4 } from "wglut";
 import { Shader, ShaderTags } from "./shaderfx/Shader";
 import { ShaderOptionsConfig } from "./shaderfx/ShaderVariant";
 import { Utility } from "./Utility";
+import { Texture } from "./Texture";
 
 type MaterialProperty = {type:number,value:any}
 
@@ -82,6 +83,10 @@ export class Material{
     private m_optConfig:ShaderOptionsConfig;
     private m_useVariants:boolean =false;
 
+    public name:string;
+
+    private m_shadertags:ShaderTags = null;
+
     public get program():GLProgram{
         if(this.m_program == null){
             let newprogram = this.m_shader.getVariantProgram(this.m_optConfig);
@@ -91,7 +96,12 @@ export class Material{
         return this.m_program;
     }
     public get shaderTags():ShaderTags{
-        return this.m_shader.tags;
+        if(this.m_shadertags == null) return this.m_shader.tags;
+        return this.m_shadertags;
+    }
+
+    public set shaderTags(tags:ShaderTags){
+        this.m_shadertags = tags;
     }
 
     public get propertyBlock():MaterialPorpertyBlock{
@@ -124,10 +134,16 @@ export class Material{
         p.value = color;
     }
 
-    public setTexture(name:string,tex:WebGLTexture){
+    public setTexture(name:string,tex:WebGLTexture | Texture){
         let p = this.m_propertyBlock.getUniform(name);
         if(p == null) return;
         p.value = tex;
+    }
+
+    public setFloat(name:string,val:number){
+        let p = this.m_propertyBlock.getUniform(name);
+        if(p == null) return;
+        p.value = val;
     }
 
     public setFlag(key:string,value:string){
@@ -194,7 +210,18 @@ export class Material{
             case gl.SAMPLER_2D:
                 if(val != null){
                     gl.activeTexture(gl.TEXTURE2);
-                    gl.bindTexture(gl.TEXTURE_2D,val);
+
+                    let tex:WebGLTexture = null;
+                    if(val instanceof Texture){
+                        tex = val.rawtexture;
+                    }
+                    else if(val instanceof WebGLTexture){
+                        tex=  val;
+                    }
+                    else{
+                        return;
+                    }
+                    gl.bindTexture(gl.TEXTURE_2D,tex);
                     gl.uniform1i(loc,2);
                 }
                 else{

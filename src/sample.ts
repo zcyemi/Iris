@@ -19,6 +19,7 @@ import { Component} from './Component';
 import { CameraFreeFly } from './CameraUtility';
 import { FrameTimer } from './FrameTimer';
 import { TextureCubeMap } from './TextureCubeMap';
+import { SceneBuilder } from './SceneBuilder';
 
 export class SampleGame{
     
@@ -42,8 +43,7 @@ export class SampleGame{
         this.m_graphicsRender = grender;
         Input.init(canvas);
 
-        this.m_scene = new Scene();
-        this.createScene(this.m_scene,grender.glctx);
+        this.createScene(grender.glctx);
 
         GLUtility.setTargetFPS(60);
         GLUtility.registerOnFrame(this.onFrame.bind(this));
@@ -71,7 +71,7 @@ export class SampleGame{
     private m_obj2:GameObject;
     private m_obj3:GameObject;
     private m_camera:Camera;
-    private async createScene(scene:Scene,glctx:GLContext){
+    private async createScene(glctx:GLContext){
         let grender = this.m_graphicsRender;
 
         //texture
@@ -90,14 +90,16 @@ export class SampleGame{
         let texcube = await TextureCubeMap.loadCubeMapTex('res/envmap/day360.jpg',glctx);
 
 
-        let gltf = await GLTFtool.LoadGLTFBinary('res/gltf/tiki_treasure.glb');
-        console.log(gltf);
+        let gltf = await GLTFtool.LoadGLTFBinary('res/gltf/scene.glb');
+        let sceneBuilder = new SceneBuilder(gltf,glctx,this.m_graphicsRender.shaderLib);
 
+        let scene = sceneBuilder.createScene();
+        this.m_scene = scene;
+        console.log(scene);
 
-        console.log(texcube);
 
         //camera
-        let camera = Camera.persepctive(60,400.0/300.0,0.5,100);
+        let camera = Camera.persepctive(60,400.0/300.0,0.5,1000);
         camera.transform.setPosition(glmath.vec3(0,2,5));
         //camera.transform.setLookAt(glmath.vec3(0,0,0));
         camera.transform.setDirty();
@@ -109,48 +111,48 @@ export class SampleGame{
         camera.addComponent(new CameraFreeFly());
         this.m_camera = camera;
 
-        //cube
-        let obj1 = new GameObject();
-        this.m_obj1 = obj1;
-        obj1.transform.localPosition = glmath.vec3(0,5,-5);
-        obj1.transform.localScale = glmath.vec3(1,1,1);
-        let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
-        matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
-        obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
-        obj1.addComponent(<Component>{
-            onUpdate:function(){
+        // //cube
+        // let obj1 = new GameObject();
+        // this.m_obj1 = obj1;
+        // obj1.transform.localPosition = glmath.vec3(0,5,-5);
+        // obj1.transform.localScale = glmath.vec3(1,1,1);
+        // let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
+        // matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
+        // obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
+        // obj1.addComponent(<Component>{
+        //     onUpdate:function(){
 
-                let dt = Input.snapshot.deltaTime;
-                dt *= 30.0;
-                const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
-                let trs = this.gameobject.transform;
-                trs.rotate(rota);
-            }
-        })
-        scene.addChild(obj1);
+        //         let dt = Input.snapshot.deltaTime;
+        //         dt *= 30.0;
+        //         const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
+        //         let trs = this.gameobject.transform;
+        //         trs.rotate(rota);
+        //     }
+        // })
+        // scene.addChild(obj1);
 
-        // //cube2
-        let obj3 = new GameObject();
-        this.m_obj3 = obj3;
-        obj3.transform.setPosition(glmath.vec3(-3,3,-3));
-        obj3.transform.setScale(glmath.vec3(4,1,1));
-        obj3.transform.rotate(quat.fromEulerDeg(20,45,0));
-        let matColor = new Material(grender.shaderLib.shaderUnlitColor);
-        matColor.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0,0,1,1));
-        obj3.render = new MeshRender(Mesh.Cube,matColor);
-        scene.addChild(obj3);
+        // // //cube2
+        // let obj3 = new GameObject();
+        // this.m_obj3 = obj3;
+        // obj3.transform.setPosition(glmath.vec3(-3,3,-3));
+        // obj3.transform.setScale(glmath.vec3(4,1,1));
+        // obj3.transform.rotate(quat.fromEulerDeg(20,45,0));
+        // let matColor = new Material(grender.shaderLib.shaderUnlitColor);
+        // matColor.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0,0,1,1));
+        // obj3.render = new MeshRender(Mesh.Cube,matColor);
+        // scene.addChild(obj3);
 
-        //plane
-        let obj2 = new GameObject();
-        this.m_obj2 = obj2;
-        obj2.transform.localPosition = glmath.vec3(0,0,-5);
-        obj2.transform.localScale = glmath.vec3(20,20,1);
-        obj2.transform.localRotation = quat.axisRotationDeg(vec3.right,90);
-        let obj2mat = new Material(grender.shaderLib.shaderUnlitTexture)
-        obj2mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
-        obj2mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
-        obj2.render = new MeshRender(Mesh.Quad, obj2mat);
-        scene.addChild(obj2);
+        // //plane
+        // let obj2 = new GameObject();
+        // this.m_obj2 = obj2;
+        // obj2.transform.localPosition = glmath.vec3(0,0,-5);
+        // obj2.transform.localScale = glmath.vec3(20,20,1);
+        // obj2.transform.localRotation = quat.axisRotationDeg(vec3.right,90);
+        // let obj2mat = new Material(grender.shaderLib.shaderUnlitTexture)
+        // obj2mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
+        // obj2mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
+        // obj2.render = new MeshRender(Mesh.Quad, obj2mat);
+        // scene.addChild(obj2);
 
         //directional light
         let light0 = Light.creatDirctionLight(1.0,glmath.vec3(0,-1,1));

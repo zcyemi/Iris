@@ -22,6 +22,9 @@ export class GraphicsRender{
     private m_shaderFXlib:ShaderFXLibs;
     public shadowConfig:ShadowConfig = new ShadowConfig();
 
+    public pause:boolean = false;
+    private m_frameBufferInvalid:boolean = false;
+
     public get pipeline():RenderPipeline{
         return this.m_renderPipeline;
     }
@@ -66,9 +69,19 @@ export class GraphicsRender{
 
     private m_resizeDelayter: Delayter = new Delayter();
     public resizeCanvas(w:number,h:number){
+
         let canvas = this.canvas;
 
         if(canvas.width == w && canvas.width == h) return;
+
+        
+        if(w <=0 || h <=0){
+            this.m_frameBufferInvalid = true
+            return;
+        }
+        else{
+            this.m_frameBufferInvalid = false;
+        }
         
         let delay = this.m_creationInfo.frameBufferResizeDelay;
         if(delay == 0){
@@ -90,6 +103,7 @@ export class GraphicsRender{
 
 
     public render(scene:Scene){
+        if(this.pause || this.m_frameBufferInvalid) return;
         let gl =this.m_glctx.gl;
 
         gl.clearColor(0,0,0,1);
