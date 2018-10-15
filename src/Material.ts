@@ -150,6 +150,13 @@ export class Material{
     }
 
 
+    public getFlag(key:string):string{
+        let optCfg = this.m_useVariants ? this.m_shader.m_defaultOptionsConfig : this.m_optConfig;
+        return optCfg.getFlag(key);
+    }
+    
+
+
     public apply(gl:WebGL2RenderingContext){
         let program = this.program;
         let pu = this.m_propertyBlock.uniforms;

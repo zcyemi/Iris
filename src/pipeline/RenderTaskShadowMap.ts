@@ -367,7 +367,7 @@ export class RenderTaskShadowMap extends RenderTask{
             gl.bufferData(gl.UNIFORM_BUFFER,objdata.rawBuffer,gl.DYNAMIC_DRAW);
 
             gl.bindVertexArray(node.vertexArrayObj);
-            let drawCount = mesh.m_indicesCount;
+            let drawCount = mesh.indiceDesc.indiceCount;
             gl.drawElements(gl.TRIANGLES,drawCount,gl.UNSIGNED_SHORT,0);
             gl.bindVertexArray(null);
         }

@@ -4,6 +4,7 @@ import { Component } from "./Component";
 
 export class GameObject{
 
+    public name:string;
     public transform:Transform;
     public children: GameObject[];
 

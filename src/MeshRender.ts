@@ -57,7 +57,7 @@ export class MeshRender{
         gl.bindVertexArray(vao);
 
 
-        gl.bindBuffer(gl.ARRAY_BUFFER,mesh.m_bufferVertices);
+        gl.bindBuffer(gl.ARRAY_BUFFER,mesh.bufferVertices);
         if(vertdesc.position !=null){
             let aPos = attrs[ShaderFX.ATTR_aPosition];
             if(aPos !=null){
@@ -84,7 +84,7 @@ export class MeshRender{
         }
 
         //indices
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.m_bufferIndices);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.bufferIndices);
         gl.bindVertexArray(null);
 
         return vao;

@@ -1,12 +1,19 @@
 
 
-export interface GLInterface{
 
-    readonly Float:number;
+
+export enum GLConst {
+    BYTE = 5120,
+    UNSIGNED_BYTE = 5121,
+    SHORT = 5122,
+    UNSIGNED_SHORT = 5123,
+    UNSIGNED_INT = 5125,
+    FLOAT = 5126,
 }
 
-class GLImpl implements GLInterface{
-    public readonly Float:number = 10;
-}
 
-export const GL = new GLImpl();
+
+export type GLDataType = GLConst.BYTE | GLConst.UNSIGNED_BYTE | GLConst.SHORT | GLConst.FLOAT | GLConst.UNSIGNED_BYTE | GLConst.UNSIGNED_INT | GLConst.UNSIGNED_SHORT;
+
+
+export const GL = GLConst;

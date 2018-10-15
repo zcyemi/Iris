@@ -108,7 +108,7 @@ export class RenderTaskDrawCoord extends RenderTask{
         gl.uniformBlockBinding(glp,this.m_blockIndexCam,pipe.ubufferIndex_PerCam);
         gl.uniformBlockBinding(glp,this.m_blockIndexObj,pipe.ubufferIndex_PerObj);
 
-        gl.bindVertexArray(meshcoord.m_vao);
+        //gl.bindVertexArray(meshcoord.m_vao);
         gl.drawArrays(gl.LINES,0,6);
         gl.bindVertexArray(null);
     }
@@ -126,9 +126,9 @@ export class RenderTaskDrawCoord extends RenderTask{
             0,0,0,1,0,1,0,1,
             0,0,0,1,0,0,1,1
         ]);
-        glmesh.m_dataPosition = dataposition;
-        glmesh.m_indicesCount = 6;
-        glmesh.m_dateVerticesLen = dataposition.length;
+        // glmesh.m_dataPosition = dataposition;
+        // glmesh.m_indicesCount = 6;
+        // glmesh.m_dateVerticesLen = dataposition.length;
         RenderTaskDrawCoord.s_coordMesh = glmesh;
     }
     private static genShader():ShaderSource{

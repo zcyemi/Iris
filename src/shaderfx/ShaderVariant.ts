@@ -103,6 +103,10 @@ export class ShaderOptionsConfig{
         }
         this.compileOptions();
     }
+
+    public getFlag(key:string):string{
+        return this.m_optmap[key];
+    }
     
     public verifyFlag(key:string,value:string):boolean{
         let curval = this.m_optmap[key];

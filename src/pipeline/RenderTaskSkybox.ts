@@ -91,7 +91,7 @@ export class RenderTaskSkybox extends RenderTask{
 
         gl.bindVertexArray(this.m_vao);
 
-        const indices = this.m_fullquad.m_indicesCount;
+        const indices = this.m_fullquad.indiceDesc.indiceCount;
         gl.drawElements(gl.TRIANGLES,indices,gl.UNSIGNED_SHORT,0);
         gl.bindVertexArray(null);
 

@@ -217,7 +217,7 @@ export class RenderTaskForwardShading extends RenderTask {
             }
 
             gl.bindVertexArray(node.vertexArrayObj);
-            let drawCount = mesh.m_indicesCount;
+            let drawCount = mesh.indiceDesc.indiceCount;
             gl.drawElements(gl.TRIANGLES, drawCount, gl.UNSIGNED_SHORT, 0);
             gl.bindVertexArray(null);
 
