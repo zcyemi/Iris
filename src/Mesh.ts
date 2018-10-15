@@ -69,7 +69,7 @@ export class Mesh{
     private m_dataPosition:MeshDataBuffer;
     private m_dataUV:MeshDataBuffer;
     private m_dataNormal:MeshDataBuffer;
-    private m_dataIndices:Uint16Array;
+    private m_dataIndices:MeshDataBufferIndices;
 
     private m_bufferInited:boolean =false;
 

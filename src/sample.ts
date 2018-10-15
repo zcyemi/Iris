@@ -89,6 +89,11 @@ export class SampleGame{
 
         let texcube = await TextureCubeMap.loadCubeMapTex('res/envmap/day360.jpg',glctx);
 
+
+        let gltf = await GLTFtool.LoadGLTFBinary('res/gltf/tiki_treasure.glb');
+        console.log(gltf);
+
+
         console.log(texcube);
 
         //camera
