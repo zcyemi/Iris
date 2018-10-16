@@ -51,6 +51,10 @@ uniform LIGHT{
 };
 #define MATRIX_M _obj2world_`;
 	public static readonly SHADERFX_SHADOWMAP:string = `#options SMCASCADE NONE TWO FOUR
+#options SHADOW ON OFF
+
+#ifdef SHADOW_ON
+
 uniform UNIFORM_SHADOWMAP{
     mat4 uLightMtx[4];
     float uShadowDist;
@@ -113,8 +117,10 @@ float computeShadowPCF3(vec4 vLightPos,sampler2DShadow shadowsampler){
     shadow += uvw1.x * uvw1.y * texture(shadowsampler, vec3(base_uv.xy + vec2(u[1], v[1]), curdepth));
     shadow = shadow / 16.;
     return shadow;
-}`;
-	public static readonly diffuse_ps:string = `#version 300 es\nprecision mediump float;
+}
+
+#endif`;
+	public static readonly diffuse_ps:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_LIGHT
 #include SHADERFX_LIGHTING
 struct V2F{
@@ -128,7 +134,7 @@ void main(){
     vec3 lcolor = LightModel_Lambert(LIGHT_DIR0,LIGHT_COLOR0,v2f.normal,uColor.xyz);
     fragColor = vec4(lcolor + 0.1,1.0);
 }`;
-	public static readonly diffuse_vs:string = `#version 300 es\nprecision mediump float;
+	public static readonly diffuse_vs:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 
 #queue opaque
@@ -240,7 +246,7 @@ out vec4 fragColor;
 void main(){
     fragColor = uColor;
 }`;
-	public static readonly UnlitColor_vs:string = `#version 300 es\nprecision mediump float;
+	public static readonly UnlitColor_vs:string = `#version 300 es\nprecision mediump float;
 
 #include SHADERFX_BASIS
 #queue opaque
@@ -251,14 +257,21 @@ void main(){
 }`;
 	public static readonly UnlitTexture_ps:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_SHADOWMAP
+
 in vec2 vUV;
+#ifdef SHADOW_ON
 in vec4 wpos;
 in vec4 lpos;
+#endif
 out vec4 fragColor;
 uniform sampler2D uSampler;
 void main(){
+    #ifdef SHADOW_ON
     float shadow = computeShadow(lpos,uShadowMap);
-    fragColor = texture(uSampler,vUV);// + vec4(1.0) * clamp(shadow +0.2,.0,1.);
+    fragColor = texture(uSampler,vUV) * clamp(shadow +0.2,.0,1.);
+    #else
+    fragColor = texture(uSampler,vUV);
+    #endif
 }`;
 	public static readonly UnlitTexture_vs:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_CAMERA
@@ -268,24 +281,30 @@ in vec4 aPosition;
 in vec2 aUV;
 out vec2 vUV;
 
+#ifdef SHADOW_ON
 out vec4 wpos;
 out vec4 lpos;
+#endif
 
 #queue opaque
 
 void main(){
+    #ifdef SHADOW_ON
     wpos = MATRIX_M * aPosition;
     lpos = uLightMtx[0] * wpos;
     gl_Position = MATRIX_VP * wpos;
+    #else
+    gl_Position = MATRIX_MVP * aPosition;
+    #endif
     vUV = aUV;
 }`;
-	public static readonly uvValue_ps:string = `#version 300 es\nprecision mediump float;
+	public static readonly uvValue_ps:string = `#version 300 es\nprecision mediump float;
 in vec2 vUV;
 out vec4 fragColor;
 void main(){
     fragColor = vec4(vUV,0,1.0);
 }`;
-	public static readonly uvValue_vs:string = `#version 300 es\nprecision mediump float;
+	public static readonly uvValue_vs:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_CAMERA
 in vec4 aPosition;
 in vec2 aUV;

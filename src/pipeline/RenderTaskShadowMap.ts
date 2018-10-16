@@ -55,6 +55,7 @@ export class RenderTaskShadowMap extends RenderTask{
         let glctx = pipe.GLCtx;
 
         this.m_shadowConfig = pipe.graphicRender.shadowConfig;
+        pipe.shadowMapEnabled = true;
 
         //uniformbuffer
         if(this.m_camdata == null) this.m_camdata =new ShaderDataUniformCam();
@@ -145,6 +146,8 @@ export class RenderTaskShadowMap extends RenderTask{
     }
 
     public release(glctx:GLContext){
+
+
         let pipeline = this.pipeline;
         let gl = pipeline.GL;
 
@@ -198,7 +201,9 @@ export class RenderTaskShadowMap extends RenderTask{
         console.log('[reload RenderTaskShadowMap done!]');
     }
 
+
     public render(nodelist:RenderNodeList,scene:Scene,glctx:GLContext){
+
         let camera = scene.camera;
         if(camera == null) return;
 
@@ -217,7 +222,6 @@ export class RenderTaskShadowMap extends RenderTask{
         gl.bindBuffer(gl.UNIFORM_BUFFER,this.m_smbuffer);
         gl.bufferData(gl.UNIFORM_BUFFER,this.m_smdata.rawBuffer,gl.DYNAMIC_DRAW);
     }
-
 
     private calCascadeShadowMapLightMtx(light:Light,camera:Camera,config:ShadowConfig):[mat4,mat4][]{
         let ctrs = camera.transform;
@@ -268,7 +272,6 @@ export class RenderTaskShadowMap extends RenderTask{
             //next frausta
             neardist += dist;
         }
-
         return ret;
     }
 

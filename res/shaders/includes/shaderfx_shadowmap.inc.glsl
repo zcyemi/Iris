@@ -1,4 +1,8 @@
 #options SMCASCADE NONE TWO FOUR
+#options SHADOW ON OFF
+
+#ifdef SHADOW_ON
+
 uniform UNIFORM_SHADOWMAP{
     mat4 uLightMtx[4];
     float uShadowDist;
@@ -62,3 +66,5 @@ float computeShadowPCF3(vec4 vLightPos,sampler2DShadow shadowsampler){
     shadow = shadow / 16.;
     return shadow;
 }
+
+#endif

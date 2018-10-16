@@ -58,6 +58,10 @@ export class ShaderFX{
     public static VARIANT_SHADERFX_SHADOWMAP = "SHADERFX_SHADOWMAP";
     public static VARIANT_SHADERFX_LIGHTING = "SHADERFX_LIGHTING";
 
+    public static OPT_SHADOWMAP_SHADOW = "SHADOW";
+    public static OPT_SHADOWMAP_SHADOW_ON = "ON";
+    public static OPT_SHADOWMAP_SHADOW_OFF = "OFF";
+
 
     public static ATTR_aPosition = "aPosition";
     public static ATTR_aUV = "aUV";

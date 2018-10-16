@@ -6,6 +6,7 @@ import { GameObject } from "./GameObject";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 import { ShadowMapInfo } from "./pipeline/RenderTaskShadowMap";
 import { GraphicsRender, GraphicsRenderCreateInfo } from "./GraphicsRender";
+import { ShaderDataUniformShadowMap } from "./shaderfx/ShaderFXLibs";
 
 export abstract class RenderPipeline{
 
@@ -18,6 +19,7 @@ export abstract class RenderPipeline{
 
 
     public shadowMapInfo: ShadowMapInfo[];
+    public shadowMapEnabled:boolean = false;
 
 
     public ubufferIndex_PerObj:number = 0;
@@ -146,6 +148,7 @@ export abstract class RenderPipeline{
         let gl =this.gl;
         buf = gl.createBuffer();
         gl.bindBuffer(gl.UNIFORM_BUFFER,buf);
+        gl.bufferData(gl.UNIFORM_BUFFER,new ShaderDataUniformShadowMap().rawBuffer,gl.DYNAMIC_DRAW);
         gl.bindBufferBase(gl.UNIFORM_BUFFER,this.ubufferIndex_ShadowMap,buf);
         this.m_sharedBuffer_ShadowMap = buf;
         return buf;

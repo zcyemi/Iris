@@ -81,6 +81,11 @@ export class ShaderOptions{
     public flag:string;
     public values:string[];
     public default:string;
+
+    public constructor(flag?:string,val?:string){
+        this.flag = flag;
+        this.default = val;
+    }
 }
 
 export class ShaderOptionsConfig{
@@ -107,6 +112,7 @@ export class ShaderOptionsConfig{
     public getFlag(key:string):string{
         return this.m_optmap[key];
     }
+
     
     public verifyFlag(key:string,value:string):boolean{
         let curval = this.m_optmap[key];
@@ -130,13 +136,6 @@ export class ShaderOptionsConfig{
     }
 
     public setFlag(key:string,value:string):boolean{
-        let curval = this.m_optmap[key];
-        if(curval == null){
-            console.warn(`invalid shader option flag: [${key}]`);
-            return false;
-        }
-        
-        if(curval === value) return false;
         this.m_optmap[key] = value;
         this.m_dirty= true;
         return true;

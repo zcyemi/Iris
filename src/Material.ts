@@ -1,6 +1,6 @@
 import { GLProgram, vec4 } from "wglut";
 import { Shader, ShaderTags } from "./shaderfx/Shader";
-import { ShaderOptionsConfig } from "./shaderfx/ShaderVariant";
+import { ShaderOptionsConfig, ShaderOptions } from "./shaderfx/ShaderVariant";
 import { Utility } from "./Utility";
 import { Texture } from "./Texture";
 
@@ -163,6 +163,22 @@ export class Material{
         else{
             console.warn("set shader flag: value not changed");
         }
+    }
+
+    public setFlagNoVerify(options:ShaderOptions){
+        let useVariants = this.m_useVariants;
+
+        let cfg = useVariants? this.m_optConfig : this.m_shader.m_defaultOptionsConfig;
+        let val = cfg.getFlag(options.flag);
+        if(val == null) return;
+        if(val == options.default) return;
+        
+        if(!useVariants){
+            this.m_optConfig = cfg.clone();
+            this.m_useVariants = true;
+        }
+        this.m_optConfig.setFlag(options.flag,options.default);
+        this.m_program = null;
     }
 
 

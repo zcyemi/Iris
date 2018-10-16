@@ -6,6 +6,7 @@ import { ShaderFX } from "../shaderfx/ShaderFX";
 import { Light } from "../Light";
 import { AmbientType } from "../Camera";
 import { ShaderDataUniformLight, ShaderDataUniformObj, ShaderDataUniformCam } from "../shaderfx/ShaderFXLibs";
+import { ShaderOptions } from "../shaderfx/ShaderVariant";
 
 export class RenderTaskForwardShading extends RenderTask {
     private m_lightUniformBuffer: WebGLBuffer;
@@ -16,6 +17,9 @@ export class RenderTaskForwardShading extends RenderTask {
     private m_perCamShaderData: ShaderDataUniformCam;
 
     private m_forceLightDataUpdate:boolean = false;
+
+    private m_shadowOptions:ShaderOptions;
+    private m_shdaowEnabled:boolean = true;
 
     public init() {
         if(this.m_inited) return;
@@ -45,6 +49,12 @@ export class RenderTaskForwardShading extends RenderTask {
 
         gl.bindBuffer(gl.UNIFORM_BUFFER, null);
         console.log("[init RenderTaskForwardShading done!]");
+
+        //touch uniform shadowmap to create.
+        //TODO
+        let smbuffer = this.pipeline.sharedBufferShadowMap;
+        this.m_shadowOptions = new ShaderOptions(ShaderFX.OPT_SHADOWMAP_SHADOW,ShaderFX.OPT_SHADOWMAP_SHADOW_ON);
+
         this.m_inited = true;
     }
 
@@ -116,7 +126,6 @@ export class RenderTaskForwardShading extends RenderTask {
     }
 
     public render(nodelist: RenderNodeList, scene: Scene, glctx: GLContext) {
-
         let camera = scene.camera;
         if (camera == null) return;
         camera.aspect = this.pipeline.mainFrameBufferAspect;
@@ -156,9 +165,24 @@ export class RenderTaskForwardShading extends RenderTask {
             gl.bufferData(gl.UNIFORM_BUFFER, camobj.rawBuffer, gl.DYNAMIC_DRAW);
         }
 
+
         //shadowmap
-        gl.activeTexture(pipeline.utex_sm[0]);
-        gl.bindTexture(gl.TEXTURE_2D, pipeline.shadowMapInfo[0].texture);
+
+        var shadowmapEnabled = pipeline.shadowMapEnabled;
+        
+        if(shadowmapEnabled){
+            gl.activeTexture(pipeline.utex_sm[0]);
+            gl.bindTexture(gl.TEXTURE_2D, pipeline.shadowMapInfo[0].texture);
+        }
+
+        let shadowOptions:ShaderOptions = null;
+
+        if(shadowmapEnabled != this.m_shdaowEnabled){
+            shadowOptions = this.m_shadowOptions;
+            shadowOptions.default = shadowmapEnabled ? ShaderFX.OPT_SHADOWMAP_SHADOW_ON : ShaderFX.OPT_SHADOWMAP_SHADOW_OFF;
+            this.m_shdaowEnabled = shadowmapEnabled;
+        }
+
 
         //draw
         let len = queue.length;
@@ -168,10 +192,14 @@ export class RenderTaskForwardShading extends RenderTask {
             let node = queue[i];
             let mat = node.material;
             let mesh = node.mesh;
+
+            if(shadowOptions !=null){
+                mat.setFlagNoVerify(shadowOptions);
+            }
+
             let program = mat.program;
 
             //mesh
-
             node.refershVertexArray(glctx);
 
             //program
@@ -196,11 +224,13 @@ export class RenderTaskForwardShading extends RenderTask {
                 curprogram = program;
 
                 //sm uniform buffer
-                let indexSM = ublock[ShaderFX.UNIFORM_SHADOWMAP];
-                if (indexSM != null) {
-                    gl.uniformBlockBinding(glp, indexSM, pipeline.ubufferIndex_ShadowMap);
-                    let loc = program.Uniforms['uShadowMap'];
-                    if (loc != null) gl.uniform1i(loc, pipeline.utex_sm_slot[0]);
+                if(shadowmapEnabled){
+                    let indexSM = ublock[ShaderFX.UNIFORM_SHADOWMAP];
+                    if (indexSM != null) {
+                        gl.uniformBlockBinding(glp, indexSM, pipeline.ubufferIndex_ShadowMap);
+                        let loc = program.Uniforms['uShadowMap'];
+                        if (loc != null) gl.uniform1i(loc, pipeline.utex_sm_slot[0]);
+                    }
                 }
             }
 

@@ -15,6 +15,9 @@ export class RenderTaskDebugBuffer extends RenderTask{
     
     public render(nodelist:RenderNodeList,scene:Scene,glctx:GLContext){
         let pipeline = this.pipeline;
+
+        if(!pipeline.shadowMapEnabled) return;
+
         let sm = pipeline.shadowMapInfo[0].texture;
         if(sm == null) return;
 

@@ -115,36 +115,36 @@ export class SampleGame{
         camera.addComponent(new CameraFreeFly());
         this.m_camera = camera;
 
-        // //cube
-        // let obj1 = new GameObject();
-        // this.m_obj1 = obj1;
-        // obj1.transform.localPosition = glmath.vec3(0,5,-5);
-        // obj1.transform.localScale = glmath.vec3(1,1,1);
-        // let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
-        // matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
-        // obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
-        // obj1.addComponent(<Component>{
-        //     onUpdate:function(){
+        //cube
+        let obj1 = new GameObject();
+        this.m_obj1 = obj1;
+        obj1.transform.localPosition = glmath.vec3(0,5,-5);
+        obj1.transform.localScale = glmath.vec3(1,1,1);
+        let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
+        matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
+        obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
+        obj1.addComponent(<Component>{
+            onUpdate:function(){
 
-        //         let dt = Input.snapshot.deltaTime;
-        //         dt *= 30.0;
-        //         const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
-        //         let trs = this.gameobject.transform;
-        //         trs.rotate(rota);
-        //     }
-        // })
-        // scene.addChild(obj1);
+                let dt = Input.snapshot.deltaTime;
+                dt *= 30.0;
+                const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
+                let trs = this.gameobject.transform;
+                trs.rotate(rota);
+            }
+        })
+        scene.addChild(obj1);
 
-        // // //cube2
-        // let obj3 = new GameObject();
-        // this.m_obj3 = obj3;
-        // obj3.transform.setPosition(glmath.vec3(-3,3,-3));
-        // obj3.transform.setScale(glmath.vec3(4,1,1));
-        // obj3.transform.rotate(quat.fromEulerDeg(20,45,0));
-        // let matColor = new Material(grender.shaderLib.shaderUnlitColor);
-        // matColor.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0,0,1,1));
-        // obj3.render = new MeshRender(Mesh.Cube,matColor);
-        // scene.addChild(obj3);
+        // //cube2
+        let obj3 = new GameObject();
+        this.m_obj3 = obj3;
+        obj3.transform.setPosition(glmath.vec3(-3,3,-3));
+        obj3.transform.setScale(glmath.vec3(4,1,1));
+        obj3.transform.rotate(quat.fromEulerDeg(20,45,0));
+        let matColor = new Material(grender.shaderLib.shaderUnlitColor);
+        matColor.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0,0,1,1));
+        obj3.render = new MeshRender(Mesh.Cube,matColor);
+        scene.addChild(obj3);
 
         //plane
         let obj2 = new GameObject();
@@ -164,7 +164,6 @@ export class SampleGame{
         scene.addChild(light0);
         this.m_sceneInited = true;
     }
-
 
     @DebugEntry('cmd.reload')
     public static cmdReload(target:SampleGame){

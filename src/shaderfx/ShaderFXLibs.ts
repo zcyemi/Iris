@@ -163,7 +163,7 @@ export class ShaderDataUniformLight extends ShaderDataFloat32Buffer{
 export class ShaderDataUniformShadowMap extends ShaderDataArrayBuffer{
 
     public constructor(){
-        let buffersize = 16 *4 *4 + 4 + 4;
+        let buffersize = 16 *4 *4 + 4;
         super(buffersize);
     }
     public setLightMtx(mtx:mat4,index:number){
