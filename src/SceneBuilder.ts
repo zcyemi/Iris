@@ -304,7 +304,7 @@ export class SceneBuilder{
         return mat;
     }
 
-    private async getImage(index:number){
+    public async getImage(index:number){
         let img = this.images[index];
         if(img != null){
             return img;

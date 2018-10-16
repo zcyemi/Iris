@@ -258,7 +258,7 @@ out vec4 fragColor;
 uniform sampler2D uSampler;
 void main(){
     float shadow = computeShadow(lpos,uShadowMap);
-    fragColor = vec4(1.0) * clamp(shadow +0.2,.0,1.);
+    fragColor = texture(uSampler,vUV);// + vec4(1.0) * clamp(shadow +0.2,.0,1.);
 }`;
 	public static readonly UnlitTexture_vs:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_CAMERA

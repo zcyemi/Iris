@@ -115,7 +115,6 @@ export class ShaderOptionsConfig{
             return false;
         }
         let options = this.m_options;
-        console.log(options);
         for(let i=0,len = options.length;i<len;i++){
             let opt = options[i];
             if(opt.flag === key){

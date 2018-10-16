@@ -93,10 +93,14 @@ export class SampleGame{
         let gltf = await GLTFtool.LoadGLTFBinary('res/gltf/scene.glb');
         let sceneBuilder = new SceneBuilder(gltf,glctx,this.m_graphicsRender.shaderLib);
 
-        let scene = sceneBuilder.createScene();
-        this.m_scene = scene;
-        console.log(scene);
+        //let tex = (await sceneBuilder.getImage(1));
 
+        //let scene = sceneBuilder.createScene();
+        //this.m_scene = scene;
+        //console.log(scene);
+
+        this.m_scene = new Scene();
+        let scene = this.m_scene;
 
         //camera
         let camera = Camera.persepctive(60,400.0/300.0,0.5,1000);
@@ -142,17 +146,17 @@ export class SampleGame{
         // obj3.render = new MeshRender(Mesh.Cube,matColor);
         // scene.addChild(obj3);
 
-        // //plane
-        // let obj2 = new GameObject();
-        // this.m_obj2 = obj2;
-        // obj2.transform.localPosition = glmath.vec3(0,0,-5);
-        // obj2.transform.localScale = glmath.vec3(20,20,1);
-        // obj2.transform.localRotation = quat.axisRotationDeg(vec3.right,90);
-        // let obj2mat = new Material(grender.shaderLib.shaderUnlitTexture)
-        // obj2mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
-        // obj2mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
-        // obj2.render = new MeshRender(Mesh.Quad, obj2mat);
-        // scene.addChild(obj2);
+        //plane
+        let obj2 = new GameObject();
+        this.m_obj2 = obj2;
+        obj2.transform.localPosition = glmath.vec3(0,0,-5);
+        obj2.transform.localScale = glmath.vec3(20,20,1);
+        obj2.transform.localRotation = quat.axisRotationDeg(vec3.right,90);
+        let obj2mat = new Material(grender.shaderLib.shaderUnlitTexture)
+        obj2mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
+        obj2mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
+        obj2.render = new MeshRender(Mesh.Quad, obj2mat);
+        scene.addChild(obj2);
 
         //directional light
         let light0 = Light.creatDirctionLight(1.0,glmath.vec3(0,-1,1));
