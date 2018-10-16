@@ -74,6 +74,7 @@ export class MeshRender{
                 gl.enableVertexAttribArray(aUV);
             }
         }
+
         if(vertdesc.normal){
             let aNorm = attrs[ShaderFX.ATTR_aNormal];
             if(aNorm !=null){
@@ -86,6 +87,7 @@ export class MeshRender{
         //indices
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.bufferIndices);
         gl.bindVertexArray(null);
+
 
         return vao;
     }

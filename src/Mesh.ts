@@ -14,6 +14,7 @@ export enum MeshTopology{
 
 export class MeshVertexAttrDesc{
     public type:GLDataType;
+    /** Component size [1,2,3,4] */
     public size:number;
     public totalbytes:number;
     public offset:number;
@@ -43,7 +44,14 @@ export class MeshVertexDesc{
     public uv: MeshVertexAttrDesc;
     public normal: MeshVertexAttrDesc;
     public get totalByteSize(){
-        return this.position.totalbytes + this.uv.totalbytes + this.normal.totalbytes;
+        let bytes = this.position.totalbytes;
+        if(this.uv != null){
+            bytes += this.uv.totalbytes;
+        }
+        if(this.normal != null){
+            bytes += this.normal.totalbytes;
+        }
+        return bytes;
     }
 }
 
@@ -287,14 +295,17 @@ export class Mesh{
         if (this.m_dataPosition != null) {
             vertexDesc.position.offset = offset;
             offset = MeshBufferUtility.copyBuffer(totalDataView,this.m_dataPosition,offset);
+            offset = Math.ceil(offset/4.0)*4;
         }
         if (this.m_dataUV != null) {
             vertexDesc.uv.offset = offset;
             offset = MeshBufferUtility.copyBuffer(totalDataView,this.m_dataUV,offset);
+            offset = Math.ceil(offset/4.0)*4;
         }
         if (this.m_dataNormal != null) {
             vertexDesc.normal.offset= offset;
             offset = MeshBufferUtility.copyBuffer(totalDataView,this.m_dataNormal,offset);
+            offset = Math.ceil(offset/4.0)*4;
         }
         gl.bufferData(gl.ARRAY_BUFFER,totalData,gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER,null);
@@ -315,7 +326,7 @@ export class Mesh{
 }
 
 
-class MeshBufferUtility{
+export class MeshBufferUtility{
     /**
      * 
      * @param target 

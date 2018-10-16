@@ -1,9 +1,9 @@
-import { GLTFdata, GLContext, GLTFnode, quat, GLTFfile, vec4, glmath } from "wglut";
+import { GLTFdata, GLContext, GLTFnode, quat, GLTFfile, vec4, glmath, vec3 } from "wglut";
 import { Scene } from "./Scene";
 import { GameObject } from "./GameObject";
-import { Mesh, MeshDataBuffer, MeshVertexAttrDesc, MeshDataBufferIndices } from "./Mesh";
+import { Mesh, MeshDataBuffer, MeshVertexAttrDesc, MeshDataBufferIndices, MeshBufferUtility } from "./Mesh";
 import { MeshRender } from "./MeshRender";
-import { GL } from "./GL";
+import { GL, GLDataType } from "./GL";
 import { Material } from "./Material";
 import { ShaderFXLibs } from "./shaderfx/ShaderFXLibs";
 import { Shader, ShaderTags, CullingMode, BlendFactor, BlendOperator } from "./shaderfx/Shader";
@@ -79,8 +79,10 @@ export class SceneBuilder{
         else if(_node.matrix){
             //Set matrix
             //TODO
-            gobj.transform.ObjMatrix.raw = _node.matrix.slice(0);
+            //gobj.transform.ObjMatrix.raw = _node.matrix.slice(0);
         }
+
+        gobj.transform.localScale = glmath.vec3(0.001,0.001,0.001);
 
         if(_node.mesh){
             let meshrender = this.getMesh(_node.mesh);
@@ -102,8 +104,9 @@ export class SceneBuilder{
         return gobj;
     }
 
-    private getMesh(meshid:number):MeshRender{
+    public getMesh(meshid:number):MeshRender{
 
+        if(meshid == 15) return null;
         let _meshes = this.gltf.meshes;
         if(_meshes == null) return null;
 
@@ -199,21 +202,28 @@ export class SceneBuilder{
         let sizeType = _accessor.type;
         let size = this.getSize(sizeType);
 
+        let componentLength = _accessor.count * size;
 
         if(dataType == GL.FLOAT){
-            dataBuffer = new Float32Array(rawBuffer,dataBufferOffset,_accessor.count);
+            dataBuffer = new Float32Array(rawBuffer,dataBufferOffset,componentLength);
         }else if(dataType == GL.UNSIGNED_INT){
-            dataBuffer = new Uint32Array(rawBuffer,dataBufferOffset,_accessor.count);
+            dataBuffer = new Uint32Array(rawBuffer,dataBufferOffset,componentLength);
+        }
+        else if(dataType == GL.UNSIGNED_SHORT){
+            dataBuffer = new Uint16Array(rawBuffer,dataBufferOffset,componentLength);
         }
         else{
-            throw new Error("buffer datatype not supported.");
+            throw new Error("buffer datatype not supported." + dataType);
         }
+
+        let totalbyte = componentLength * MeshBufferUtility.TypeSize(dataType);
         
         this.buffers[bufferindex] = dataBuffer;
-        this.buffersDesc[bufferindex] = new MeshVertexAttrDesc(dataType,size,_accessor.count);
+        this.buffersDesc[bufferindex] = new MeshVertexAttrDesc(dataType,size,totalbyte);
 
         return dataBuffer;
     }
+
 
     private getSize(type:string):number{
         switch(type){
