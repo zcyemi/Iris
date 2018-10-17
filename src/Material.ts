@@ -87,6 +87,8 @@ export class Material{
 
     private m_shadertags:ShaderTags = null;
 
+    public static DEF_TEXID_NUM:number = 3;
+
     public get program():GLProgram{
         if(this.m_program == null){
             let newprogram = this.m_shader.getVariantProgram(this.m_optConfig);
@@ -188,8 +190,10 @@ export class Material{
     }
     
 
+    private m_applyTexCount = 0;
 
     public apply(gl:WebGL2RenderingContext){
+        this.m_applyTexCount = 0;
         let program = this.program;
         let pu = this.m_propertyBlock.uniforms;
         for(var key in pu){
@@ -218,31 +222,38 @@ export class Material{
     }
 
     private setUniform(gl:WebGL2RenderingContext,loc:WebGLUniformLocation,type:number,val:any){
-        if(val == null) return;
+        if(val == null && type != gl.SAMPLER_2D) return;
         switch(type){
+            case gl.FLOAT:
+                gl.uniform1f(loc,val);
+                break;
+            case gl.FLOAT_VEC3:
+                gl.uniform3fv(loc,val.raw);
+                break;
             case gl.FLOAT_VEC4:
                 gl.uniform4fv(loc,val.raw);
                 break;
             case gl.SAMPLER_2D:
+                let texCount = this.m_applyTexCount;
                 if(val != null){
-                    gl.activeTexture(gl.TEXTURE2);
-
                     let tex:WebGLTexture = null;
                     if(val instanceof Texture){
                         tex = val.rawtexture;
                     }
                     else if(val instanceof WebGLTexture){
-                        tex=  val;
+                        tex= val;
                     }
-                    else{
-                        return;
+                    if(tex == null){
+                        throw new Error('texture is null');
                     }
+                    gl.activeTexture(gl.TEXTURE4 + texCount);
                     gl.bindTexture(gl.TEXTURE_2D,tex);
-                    gl.uniform1i(loc,2);
+                    gl.uniform1i(loc,4 + texCount);
                 }
                 else{
                     //texture is null
                     //TODO bind internal texture
+                    gl.uniform1i(loc,Material.DEF_TEXID_NUM);
                 }
                 break;
         }

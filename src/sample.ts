@@ -93,7 +93,6 @@ export class SampleGame{
 
         let gltf = await GLTFtool.LoadGLTFBinary('res/gltf/scene.glb');
 
-        console.log(gltf);
         let sceneBuilder = new SceneBuilder(gltf,glctx,this.m_graphicsRender.shaderLib);
 
         //let tex = (await sceneBuilder.getImage(1));
@@ -125,7 +124,7 @@ export class SampleGame{
         this.m_obj1 = obj1;
         obj1.transform.localPosition = glmath.vec3(0,5,-5);
         obj1.transform.localScale = glmath.vec3(1,1,1);
-        let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
+        let matDiffuse = new Material(grender.shaderLib.shaderPbrMetallicRoughness);
         matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
         obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
         obj1.addComponent(<Component>{
@@ -140,12 +139,12 @@ export class SampleGame{
 
         obj1.transform.parent = scene.transform;
 
-        let ccube = new GameObject("ccube");
-        ccube.transform.localPosition = glmath.vec3(0,5,0);
-        let mat1 = matDiffuse.clone();
-        mat1.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0,0,1,1));
-        ccube.render = new MeshRender(Mesh.Cube,mat1);
-        ccube.transform.parent = obj1.transform;
+        // let ccube = new GameObject("ccube");
+        // ccube.transform.localPosition = glmath.vec3(0,5,0);
+        // let mat1 = matDiffuse.clone();
+        // mat1.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0,0,1,1));
+        // ccube.render = new MeshRender(Mesh.Cube,mat1);
+        // ccube.transform.parent = obj1.transform;
 
         // //cube2
         // let obj3 = new GameObject();

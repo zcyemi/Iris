@@ -1,4 +1,5 @@
 import {GLContext, GLUtility } from 'wglut';
+import { Texture } from './Texture';
 
 
 export enum CubeMapType{
@@ -45,13 +46,15 @@ export class TextureCubeMap{
             try{
                 let gl = glctx.gl;
                 let gltex2d = gl.createTexture();
+
+                gl.activeTexture(Texture.TEMP_TEXID);
                 gl.bindTexture(gl.TEXTURE_2D,gltex2d);
-    
                 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
                 gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
                 gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
                 gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+                gl.bindTexture(gl.TEXTURE_2D,null);
     
                 texcube = new TextureCubeMap(CubeMapType.Texture360);
                 texcube.m_rawTex = gltex2d;
@@ -92,8 +95,8 @@ export class TextureCubeMap{
             try{
                 let gl = glctx.gl;
                 let gltexcube = gl.createTexture();
+                gl.activeTexture(Texture.TEMP_TEXID);
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP,gltexcube);
-    
                 for(let i=0;i<6;i++){
                     let img = imgs[i];
                     gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X +i,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
@@ -103,6 +106,7 @@ export class TextureCubeMap{
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_R,gl.CLAMP_TO_EDGE);
+                gl.bindTexture(gl.TEXTURE_CUBE_MAP,null);
     
                 texcube = new TextureCubeMap(CubeMapType.Cube);
                 texcube.m_rawTex = gltexcube;

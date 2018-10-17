@@ -10,6 +10,7 @@ import { Shader } from "../shaderfx/Shader";
 import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap } from "../shaderfx/ShaderFXLibs";
 import { ShadowConfig, ShadowCascade } from "../render/Shadow";
 import { MeshRender } from "../MeshRender";
+import { Texture } from "../Texture";
 
 export class ShadowMapInfo{
     public texture:WebGLTexture;
@@ -101,7 +102,7 @@ export class RenderTaskShadowMap extends RenderTask{
         //depth texture
         let deptex = gl.createTexture();
         this.m_shadowMapTex = deptex;
-        gl.activeTexture(gl.TEXTURE0);
+        gl.activeTexture(Texture.TEMP_TEXID);
         gl.bindTexture(gl.TEXTURE_2D,deptex);
         gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);

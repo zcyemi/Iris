@@ -137,6 +137,7 @@ export class RenderTaskForwardShading extends RenderTask {
         let gl = glctx.gl;
 
         let pipeline = this.pipeline;
+
         pipeline.bindTargetFrameBuffer();
 
         //clean
@@ -184,6 +185,10 @@ export class RenderTaskForwardShading extends RenderTask {
             this.m_shdaowEnabled = shadowmapEnabled;
         }
 
+        //default texture
+        //Can be optimized
+        gl.activeTexture(gl.TEXTURE3);
+        gl.bindTexture(gl.TEXTURE_2D,pipeline.graphicRender.defaultTexture.rawtexture);
 
         //draw
         let len = queue.length;

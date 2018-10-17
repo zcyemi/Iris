@@ -78,8 +78,7 @@ export class RenderTaskSkybox extends RenderTask{
         }
 
 
-        gl.activeTexture(gl.TEXTURE16);
-
+        gl.activeTexture(gl.TEXTURE4);
         let cubetype = this.m_lastCubeType;
         if(cubetype == CubeMapType.Cube){
             gl.bindTexture(gl.TEXTURE_CUBE_MAP,texskybox.gltex);
@@ -87,7 +86,7 @@ export class RenderTaskSkybox extends RenderTask{
         else{
             gl.bindTexture(gl.TEXTURE_2D,texskybox.gltex);
         }
-        gl.uniform1i(this.m_texuniform,16);
+        gl.uniform1i(this.m_texuniform,4);
 
         gl.bindVertexArray(this.m_vao);
 

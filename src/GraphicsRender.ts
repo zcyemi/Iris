@@ -5,6 +5,8 @@ import { ShaderFXLibs } from "./shaderfx/ShaderFXLibs";
 import { ShadowConfig } from "./render/Shadow";
 import { DebugEntry } from "./DebugEntry";
 import { Delayter } from "./Utility";
+import { Texture } from "./Texture";
+import { Material } from "./Material";
 
 
 export class GraphicsRenderCreateInfo{
@@ -17,6 +19,15 @@ export class GraphicsRender{
     private m_glctx:GLContext;
     private canvas:HTMLCanvasElement;
     private m_creationInfo:GraphicsRenderCreateInfo;
+
+    private m_defaultTexture:Texture;
+
+    public static readonly TEXID_FB:number = 0;
+    public static readonly TEXID_TEMP:number = 2;
+    public static readonly TEXID_DEFAULT_TEX:number = 3;
+    public static readonly TEXID_SHADER_TEX:number[] = [4,5,6,7,8,9,10,11];
+    public static readonly TEXID_SHADOW_MAP:number[] = [15,16,17,18];
+
 
     private m_renderPipeline:RenderPipeline;
     private m_shaderFXlib:ShaderFXLibs;
@@ -37,8 +48,15 @@ export class GraphicsRender{
         return this.m_glctx;
     }
 
+    public get defaultTexture():Texture{
+        return this.m_defaultTexture;
+    }
+
+
     public constructor(canvas:HTMLCanvasElement,pipeline:RenderPipeline,creationInfo?:GraphicsRenderCreateInfo){
         this.canvas = canvas;
+
+
 
         if(creationInfo == null){
             creationInfo = new GraphicsRenderCreateInfo();
@@ -56,6 +74,20 @@ export class GraphicsRender{
 
         this.m_renderPipeline = pipeline;
         this.m_shaderFXlib = new ShaderFXLibs(glctx);
+
+        //default texture
+        let gl = glctx.gl;
+
+        Material.DEF_TEXID_NUM = GraphicsRender.TEXID_DEFAULT_TEX;
+        Texture.TEMP_TEXID = gl.TEXTURE2;
+
+        
+        this.m_defaultTexture = Texture.crateEmptyTexture(2,2,glctx);
+        gl.activeTexture(gl.TEXTURE3);
+        gl.bindTexture(gl.TEXTURE_2D,this.m_defaultTexture.rawtexture);
+
+        
+
         pipeline.graphicRender = this;
         pipeline.onInitGL(glctx);
         pipeline.onSetupRender(creationInfo);

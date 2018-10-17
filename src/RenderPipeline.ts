@@ -70,7 +70,7 @@ export abstract class RenderPipeline{
         let gl = this.gl;
 
         let utex_sm = [];
-        let utex_sm_slot = [15,16,17,18];
+        let utex_sm_slot = GraphicsRender.TEXID_SHADOW_MAP;
         utex_sm.push(gl.TEXTURE15);
         utex_sm.push(gl.TEXTURE16);
         utex_sm.push(gl.TEXTURE17);

@@ -3,6 +3,8 @@ import { GLContext } from "wglut";
 
 export class Texture{
 
+    public static TEMP_TEXID:number;
+
     private m_raw:WebGLTexture;
     private m_width:number;
     private m_height:number;
@@ -17,6 +19,24 @@ export class Texture{
         this.m_height = heigt;
     }
 
+    public static crateEmptyTexture(width:number,height:number,glctx:GLContext):Texture{
+        if(width < 2 || height < 2){
+            throw new Error('invalid texture size');
+        }
+        let gl = glctx.gl;
+        let tex = gl.createTexture();
+        gl.activeTexture(Texture.TEMP_TEXID);
+        gl.bindTexture(gl.TEXTURE_2D,tex);
+        gl.texStorage2D(gl.TEXTURE_2D,1,gl.RGBA8,width,height);
+        gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+        gl.bindTexture(gl.TEXTURE_2D,null);
+
+        return new Texture(tex,width,height);
+    }
+
     public static async createTexture(buffer:Uint8Array,mime:string,glctx:GLContext):Promise<Texture>{
         return new Promise<Texture>((res,rej)=>{
             let blob = new Blob([buffer],{type:mime});
@@ -25,6 +45,7 @@ export class Texture{
             image.onload = ()=>{
                 let gl = glctx.gl;
                 let rawtex = gl.createTexture();
+                gl.activeTexture(Texture.TEMP_TEXID);
                 gl.bindTexture(gl.TEXTURE_2D,rawtex);
                 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,image);
                 gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
