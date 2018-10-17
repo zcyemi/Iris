@@ -241,7 +241,7 @@ export class RenderTaskForwardShading extends RenderTask {
             {
                 let objdata = this.m_perObjShaderData;
                 let trs = node.object.transform;
-                objdata.setMtxModel(trs.ObjMatrix);
+                objdata.setMtxModel(trs.objMatrix);
                 gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_perObjUniformBuffer);
                 gl.bufferData(gl.UNIFORM_BUFFER, objdata.rawBuffer, gl.DYNAMIC_DRAW);
             }

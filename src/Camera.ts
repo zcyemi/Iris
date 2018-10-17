@@ -127,7 +127,7 @@ export class Camera extends Component{
     public get WorldMatrix():mat4{
         let trs = this.transform;
         if(trs.isDirty){
-            trs.setDirty(false);
+            trs.setLocalDirty(false);
             this.m_worldMtx = mat4.coordCvt(trs.localPosition,trs.forward,trs.up);
         }
         return this.m_worldMtx;

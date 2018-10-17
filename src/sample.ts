@@ -99,6 +99,7 @@ export class SampleGame{
         //let tex = (await sceneBuilder.getImage(1));
 
         let scene = new Scene() //sceneBuilder.createScene();
+        scene.name = "scene";
         this.m_scene = scene;
         //console.log(scene);
 
@@ -109,17 +110,18 @@ export class SampleGame{
         let camera = Camera.persepctive(null,60,400.0/300.0,0.5,1000);
         camera.transform.setPosition(glmath.vec3(0,2,5));
         //camera.transform.setLookAt(glmath.vec3(0,0,0));
-        camera.transform.setDirty();
+        camera.transform.setLocalDirty();
         camera.ambientColor = glmath.vec4(1,0.2,0.2,0.2);
         camera.clearType = ClearType.Skybox;
         camera.skybox = texcube;
         camera.background = glmath.vec4(0,1,0,1);
         camera.gameobject.addComponent(new CameraFreeFly());
         camera.transform.parent= scene.transform;
+        camera.gameobject.name = "camera";
         this.m_camera = camera;
 
         //cube
-        let obj1 = new GameObject();
+        let obj1 = new GameObject("cube");
         this.m_obj1 = obj1;
         obj1.transform.localPosition = glmath.vec3(0,5,-5);
         obj1.transform.localScale = glmath.vec3(1,1,1);
@@ -138,8 +140,8 @@ export class SampleGame{
 
         obj1.transform.parent = scene.transform;
 
-        let ccube = new GameObject();
-        ccube.transform.localPosition = glmath.vec3(0,2,0);
+        let ccube = new GameObject("ccube");
+        ccube.transform.localPosition = glmath.vec3(0,5,0);
         let mat1 = matDiffuse.clone();
         mat1.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0,0,1,1));
         ccube.render = new MeshRender(Mesh.Cube,mat1);

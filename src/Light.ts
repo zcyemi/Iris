@@ -44,7 +44,7 @@ export class Light extends Component{
         }
         else{
             this.m_paramDirty = false;
-            this.transform.setDirty(false);
+            this.transform.setLocalDirty(false);
         }
     }
 

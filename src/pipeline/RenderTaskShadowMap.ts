@@ -212,7 +212,7 @@ export class RenderTaskShadowMap extends RenderTask{
         let lcount = lights.length;
         for(let i=0;i<lcount;i++){
             let l = lights[i];
-            if(l.active && l.castShadow){
+            if(l.gameobject.active && l.castShadow){
                 this.renderShadowMap(l,scene,nodelist);
             }
         }
@@ -366,7 +366,7 @@ export class RenderTaskShadowMap extends RenderTask{
             let trs = node.object.transform;
 
             //modelmatrix
-            objdata.setMtxModel(trs.ObjMatrix);
+            objdata.setMtxModel(trs.objMatrix);
             gl.bufferData(gl.UNIFORM_BUFFER,objdata.rawBuffer,gl.DYNAMIC_DRAW);
 
             gl.bindVertexArray(node.vertexArrayObj);

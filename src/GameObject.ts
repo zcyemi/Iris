@@ -20,7 +20,8 @@ export class GameObject{
     
     public active:boolean = true;
 
-    public constructor(){
+    public constructor(name?:string){
+        this.name = name;
         this.transform = new Transform(this);
     }
 
@@ -35,11 +36,15 @@ export class GameObject{
             }
         }
 
+        let trs = this.transform;
+        let trsdirty = trs.isDirty;
         
         let children = this.transform.children;
         if(children != null){
             for(let i=0,len = children.length;i<len;i++){
-                children[i].gameobject.update(scene);
+                let g = children[i].gameobject;
+                g.transform.setObjMatrixDirty(trsdirty);
+                g.update(scene);
             }
         }
     }
