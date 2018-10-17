@@ -128,15 +128,15 @@ export class SampleGame{
         let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
         matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
         obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
-        obj1.addComponent(<Component>{
-            onUpdate:function(scene:Scene){
-                let dt = Input.snapshot.deltaTime;
-                dt *= 30.0;
-                const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
-                let trs = this.gameobject.transform;
-                trs.rotate(rota);
-            }
-        })
+        // obj1.addComponent(<Component>{
+        //     onUpdate:function(scene:Scene){
+        //         let dt = Input.snapshot.deltaTime;
+        //         dt *= 30.0;
+        //         const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
+        //         let trs = this.gameobject.transform;
+        //         trs.rotate(rota);
+        //     }
+        // })
 
         obj1.transform.parent = scene.transform;
 

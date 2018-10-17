@@ -7,7 +7,8 @@ export class Transform{
     private m_localScale:vec3 = vec3.one;
 
     private m_localTRSdirty:boolean = true;
-    private m_transformDirty:boolean = false;
+    private m_TRSDirty:boolean = false;
+    private m_curTRSDirty:boolean = false;
 
     private m_localMtx:mat4 = mat4.Identity;
     private m_objMtx:mat4 = mat4.Identity;
@@ -49,14 +50,14 @@ export class Transform{
 
         this.m_localMtx = mat;
         [this.m_localPosition,this.m_localRotation,this.m_localScale] = mat4.Decompose(mat);
-        this.m_transformDirty = true;
+        this.m_TRSDirty = true;
     }
 
     public get localMatrix():mat4{
         if(this.m_localTRSdirty){
             this.m_localMtx.setTRS(this.localPosition,this.localRotation,this.localScale);
             this.m_localTRSdirty =false;
-            this.m_transformDirty = true;
+            this.m_TRSDirty = true;
         }
         return this.m_localMtx;
     }
@@ -103,19 +104,19 @@ export class Transform{
         this.m_up= null;
         this.m_right = null;
         this.m_localTRSdirty =true;
-        this.m_transformDirty = true;
+        this.m_TRSDirty = true;
     }
 
     public setPosition(pos:vec3){
         this.m_localPosition.set(pos);
         this.m_localTRSdirty = true;
-        this.m_transformDirty = true;
+        this.m_TRSDirty = true;
     }
 
     public setScale(scale:vec3){
         this.m_localScale.set(scale);
         this.m_localTRSdirty = true;
-        this.m_transformDirty = true;
+        this.m_TRSDirty = true;
     }
 
     public get forward():vec3{
@@ -142,7 +143,7 @@ export class Transform{
         this.m_up.set(up);
         this.m_right =right;
         this.m_localTRSdirty =true;
-        this.m_transformDirty = true;
+        this.m_TRSDirty = true;
     }
 
     public get up():vec3{
@@ -167,7 +168,7 @@ export class Transform{
         this.m_right = right;
 
         this.m_localTRSdirty =true;
-        this.m_transformDirty = true;
+        this.m_TRSDirty = true;
     }
 
     public get right():vec3{
@@ -192,7 +193,7 @@ export class Transform{
         this.right = right;
 
         this.m_localTRSdirty =true;
-        this.m_transformDirty = true;
+        this.m_TRSDirty = true;
     }
 
     public addChild(trs:Transform):boolean{
@@ -222,21 +223,21 @@ export class Transform{
     public setLocalDirty(dirty:boolean =true){
         this.m_localTRSdirty = dirty;
         if(dirty){
-            this.m_transformDirty = true;
+            this.m_TRSDirty = true;
         }
     }
 
     public setObjMatrixDirty(pmtxdirty:boolean){
-        let dirty = this.m_transformDirty || pmtxdirty;
+        let dirty = this.m_TRSDirty || pmtxdirty;
+        this.m_curTRSDirty = dirty;
+        this.m_TRSDirty = false;
         if(dirty){
             this.m_objMtx = null;
         }
-        else{
-            this.m_transformDirty = false;
-        }
+
     }
 
-    public get isDirty():boolean{ return this.m_localTRSdirty || this.m_transformDirty;}
+    public get isDirty():boolean{ return this.m_localTRSdirty || this.m_curTRSDirty;}
 
     public setLookAt(target:vec3,worldup?:vec3){
         this.m_localTRSdirty= true;
