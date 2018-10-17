@@ -63,7 +63,7 @@ export class Light extends Component{
         return light;
     }
 
-    public static creatDirctionLight(gobj:GameObject,intensity:number = 1.0,color?:vec3,dir:vec3 = vec3.down){
+    public static creatDirctionLight(gobj:GameObject,intensity:number = 1.0,dir:vec3 = vec3.down,color:vec3 = vec3.one){
         let light = new Light(LightType.direction,intensity,color);
         gobj.addComponent(light);
         light.transform.forward = dir.normalized();

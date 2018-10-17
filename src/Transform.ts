@@ -8,6 +8,9 @@ export class Transform{
 
     private m_localTRSdirty:boolean = true;
     private m_TRSDirty:boolean = false;
+    /**
+     * Snapshot of TRS dirty flag at the end of the last updated frame.
+     */
     private m_curTRSDirty:boolean = false;
 
     private m_localMtx:mat4 = mat4.Identity;

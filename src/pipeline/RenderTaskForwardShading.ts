@@ -96,9 +96,10 @@ export class RenderTaskForwardShading extends RenderTask {
                     if (i < lightcount) {
                         let light = lights[i];
                         light.isDirty = false;
-                        let lpos = light.lightPosData;
+                        let lpos = light.lightPosData.mulNumToRef(-1.0);
                         let lcolor = light.lightColor;
                         lightdata.setFloatArray(offset, [lpos.x, lpos.y, lpos.z, light.lightType, lcolor.x, lcolor.y, lcolor.z, light.intensity]);
+
                     }
                     else {
                         lightdata.fill(offset, 0, 8);
