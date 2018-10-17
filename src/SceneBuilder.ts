@@ -56,7 +56,7 @@ export class SceneBuilder{
         for(let i=0,nodeslen = scenenodes.length;i<nodeslen;i++){
             let gobj = this.buildNode(nodes,scenenodes[i]);
             if(gobj != null){
-                gscene.addChild(gobj);
+                gobj.transform.parent = gscene.transform;
             }
         }
         return gscene;
@@ -97,7 +97,7 @@ export class SceneBuilder{
             for(let i=0,len = _nodeChildren.length;i< len;i++){
                 let g = this.buildNode(nodes,_nodeChildren[i]);
                 if(g != null){
-                    gobj.addChild(g);
+                    g.transform.parent= gobj.transform;
                 }
             }
         }

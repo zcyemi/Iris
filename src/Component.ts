@@ -1,5 +1,6 @@
 import { GameObject } from "./GameObject";
 import { Transform } from "./Transform";
+import { Scene } from "./Scene";
 
 export class Component{
     
@@ -7,6 +8,6 @@ export class Component{
     public get transform():Transform{
         return this.gameobject.transform;
     }
-    public onUpdate?():void;
+    public onUpdate?(scene:Scene):void;
     public onStart?():void;
 }

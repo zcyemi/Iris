@@ -2,6 +2,7 @@ import { Component } from "./Component";
 import { Transform } from "./Transform";
 import { Input } from "./Input";
 import { quat, vec3, glmath } from "wglut";
+import { Scene } from "./Scene";
 
 
 export class CameraFreeFly extends Component{
@@ -11,9 +12,11 @@ export class CameraFreeFly extends Component{
     private m_rotay:number= 0;
     private m_rotax:number = 0;
     public onStart(){
+
+        console.log('camera freefly onstart');
         this.m_trs = this.gameobject.transform;
     }
-    public onUpdate(){
+    public onUpdate(scene:Scene){
         let trs = this.m_trs;
 
         let snapshot = Input.snapshot;

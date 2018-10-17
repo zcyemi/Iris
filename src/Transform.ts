@@ -1,4 +1,5 @@
 import { vec3, quat, mat4 } from "wglut";
+import { GameObject } from "./GameObject";
 
 export class Transform{
     private m_position:vec3 = vec3.zero;
@@ -12,6 +13,37 @@ export class Transform{
     private m_right:vec3 = vec3.right.clone();
     private m_forward:vec3 = vec3.forward.clone();
     private m_up:vec3 = vec3.up.clone();
+
+    private m_children:Transform[];
+    private m_parent:Transform;
+    private m_gameobj:GameObject;
+
+    public constructor(gobj:GameObject){
+        this.m_gameobj = gobj;
+    }
+
+    public get gameobject():GameObject{
+        return this.m_gameobj;
+    }
+
+    public get parent():Transform{
+        return this.m_parent;
+    }
+    public set parent(p:Transform){
+        if(p == null){
+            let curp = this.m_parent;
+            if(curp != null){
+                curp.removeChild(this);
+            }
+        }
+        else{
+            p.addChild(this);
+        }
+    }
+
+    public get children():Transform[]{
+        return this.m_children;
+    }
 
     public get localRotation():quat{
         return this.m_rotation;
@@ -51,8 +83,6 @@ export class Transform{
         this.m_dirty = true;
     }
 
-    public constructor(){
-    }
 
     public get forward():vec3{
         if(this.m_forward == null){
@@ -125,6 +155,30 @@ export class Transform{
         this.right = right;
 
         this.m_dirty =true;
+    }
+
+    public addChild(trs:Transform):boolean{
+        if(trs == null) return false;
+        let children = this.m_children;
+        if(children == null){
+            children = [];
+            this.m_children = children;
+        }
+        let index = children.indexOf(trs);
+        if(index >=0) return true;
+        trs.m_parent= this;
+        children.push(trs);
+        return true;
+    }
+
+    public removeChild(trs:Transform):boolean{
+        let children = this.m_children;
+        if(children == null) return false;
+        let index = children.indexOf(trs);
+        if(index < 0) return false;
+        trs.m_parent = null;
+        this.m_children = children.splice(index,1);
+        return true;
     }
 
     public setDirty(dirty:boolean =true){

@@ -2,6 +2,8 @@ import { Transform } from "./Transform";
 import { mat4, vec3, vec4, glmath } from "wglut";
 import { GameObject } from "./GameObject";
 import { TextureCubeMap } from "./TextureCubeMap";
+import { Component } from "./Component";
+import { Scene } from "./Scene";
 
 
 export enum AmbientType{
@@ -19,7 +21,7 @@ export enum ProjectionType{
     orthographic,
 }
 
-export class Camera extends GameObject{
+export class Camera extends Component{
 
     public enabled:boolean = true;
     public order:number = 0;
@@ -145,27 +147,39 @@ export class Camera extends GameObject{
         this.m_projectionType = ProjectionType.perspective;
     }
 
-    public static persepctive(fov:number,aspectratio:number,near:number,far:number):Camera{
+    public onUpdate(scene:Scene){
+        scene.camera = this;
+    }
+
+    public static persepctive(gobj:GameObject,fov:number,aspectratio:number,near:number,far:number):Camera{
         let camera = new Camera();
         camera.m_fov = fov;
         camera.m_aspectratio = aspectratio;
         camera.m_near= near;
         camera.m_far = far;
 
-        camera.transform = new Transform();
+        if(gobj == null){
+            gobj = new GameObject();
+        }
+        gobj.addComponent(camera);
+
         camera.m_projMtx = mat4.perspectiveFoV(fov,aspectratio,near,far);
         camera.m_projectionType = ProjectionType.perspective;
 
         return camera;
     }
 
-    public static orthographic(size:number,aspectratio:number,near:number,far:number){
+    public static orthographic(gobj:GameObject,size:number,aspectratio:number,near:number,far:number){
         let camera = new Camera();
         camera.m_aspectratio = aspectratio;
         camera.m_near =near;
         camera.m_far = far;
 
-        camera.transform =new Transform();
+        if(gobj == null){
+            gobj= new GameObject();
+        }
+        gobj.addComponent(camera);
+        
         camera.orthosize = size;
         let w = size *aspectratio;
         camera.m_projMtx = mat4.orthographic(w,size,near,far);

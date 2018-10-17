@@ -1,5 +1,7 @@
 import { GameObject } from "./GameObject";
 import { vec4, vec3, mat4 } from "wglut";
+import { Component } from "./Component";
+import { Scene } from "./Scene";
 
 
 export enum LightType{
@@ -7,7 +9,7 @@ export enum LightType{
     point = 1
 }
 
-export class Light extends GameObject{
+export class Light extends Component{
     public lightType:LightType = LightType.point;
     public intensity:number = 1.0;
     public lightColor:vec3 = vec3.one;
@@ -53,17 +55,23 @@ export class Light extends GameObject{
         if(color) this.lightColor = color;
     }
 
-    public static createPointLight(range:number = 10,position?:vec3,intensity?:number,color?:vec3){
+    public static createPointLight(gobj:GameObject,range:number = 10,position?:vec3,intensity?:number,color?:vec3){
         let light = new Light(LightType.point,intensity,color);
+        gobj.addComponent(light);
         if(position) light.transform.localPosition = position;
         light.m_range = range;
         return light;
     }
 
-    public static creatDirctionLight(intensity:number = 1.0,color?:vec3,dir:vec3 = vec3.down){
+    public static creatDirctionLight(gobj:GameObject,intensity:number = 1.0,color?:vec3,dir:vec3 = vec3.down){
         let light = new Light(LightType.direction,intensity,color);
+        gobj.addComponent(light);
         light.transform.forward = dir.normalized();
         light.castShadow = true;
         return light;
+    }
+
+    public onUpdate(scene:Scene){
+        scene.addLight(this);
     }
 }

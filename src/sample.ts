@@ -20,6 +20,7 @@ import { CameraFreeFly } from './CameraUtility';
 import { FrameTimer } from './FrameTimer';
 import { TextureCubeMap } from './TextureCubeMap';
 import { SceneBuilder } from './SceneBuilder';
+import { ShaderFXLibs } from './shaderfx/ShaderFXLibs';
 
 export class SampleGame{
     
@@ -97,7 +98,7 @@ export class SampleGame{
 
         //let tex = (await sceneBuilder.getImage(1));
 
-        let scene = sceneBuilder.createScene();
+        let scene = new Scene() //sceneBuilder.createScene();
         this.m_scene = scene;
         //console.log(scene);
 
@@ -105,7 +106,7 @@ export class SampleGame{
         //let scene = this.m_scene;
 
         //camera
-        let camera = Camera.persepctive(60,400.0/300.0,0.5,1000);
+        let camera = Camera.persepctive(null,60,400.0/300.0,0.5,1000);
         camera.transform.setPosition(glmath.vec3(0,2,5));
         //camera.transform.setLookAt(glmath.vec3(0,0,0));
         camera.transform.setDirty();
@@ -113,29 +114,36 @@ export class SampleGame{
         camera.clearType = ClearType.Skybox;
         camera.skybox = texcube;
         camera.background = glmath.vec4(0,1,0,1);
-        scene.camera = camera;
-        camera.addComponent(new CameraFreeFly());
+        camera.gameobject.addComponent(new CameraFreeFly());
+        camera.transform.parent= scene.transform;
         this.m_camera = camera;
 
         //cube
-        // let obj1 = new GameObject();
-        // this.m_obj1 = obj1;
-        // obj1.transform.localPosition = glmath.vec3(0,5,-5);
-        // obj1.transform.localScale = glmath.vec3(1,1,1);
-        // let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
-        // matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
-        // obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
-        // obj1.addComponent(<Component>{
-        //     onUpdate:function(){
+        let obj1 = new GameObject();
+        this.m_obj1 = obj1;
+        obj1.transform.localPosition = glmath.vec3(0,5,-5);
+        obj1.transform.localScale = glmath.vec3(1,1,1);
+        let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
+        matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
+        obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
+        obj1.addComponent(<Component>{
+            onUpdate:function(scene:Scene){
+                let dt = Input.snapshot.deltaTime;
+                dt *= 30.0;
+                const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
+                let trs = this.gameobject.transform;
+                trs.rotate(rota);
+            }
+        })
 
-        //         let dt = Input.snapshot.deltaTime;
-        //         dt *= 30.0;
-        //         const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
-        //         let trs = this.gameobject.transform;
-        //         trs.rotate(rota);
-        //     }
-        // })
-        // scene.addChild(obj1);
+        obj1.transform.parent = scene.transform;
+
+        let ccube = new GameObject();
+        ccube.transform.localPosition = glmath.vec3(0,2,0);
+        let mat1 = matDiffuse.clone();
+        mat1.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0,0,1,1));
+        ccube.render = new MeshRender(Mesh.Cube,mat1);
+        ccube.transform.parent = obj1.transform;
 
         // //cube2
         // let obj3 = new GameObject();
@@ -162,12 +170,14 @@ export class SampleGame{
         obj2mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
         obj2mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
         obj2.render = new MeshRender(Mesh.Quad, obj2mat);
-        scene.addChild(obj2);
+        obj2.transform.parent = scene.transform;
 
         //directional light
-        let light0 = Light.creatDirctionLight(1.0,glmath.vec3(0,-1,1));
+        let lightobj = new GameObject();
+        let light0 = Light.creatDirctionLight(lightobj,1.0,glmath.vec3(0,-1,1));
         light0.lightColor = new vec3([1,1,1]);
-        scene.addChild(light0);
+        lightobj.transform.parent = scene.transform;
+
         this.m_sceneInited = true;
     }
 

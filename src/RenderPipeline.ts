@@ -7,6 +7,7 @@ import { ShaderFX } from "./shaderfx/ShaderFX";
 import { ShadowMapInfo } from "./pipeline/RenderTaskShadowMap";
 import { GraphicsRender, GraphicsRenderCreateInfo } from "./GraphicsRender";
 import { ShaderDataUniformShadowMap } from "./shaderfx/ShaderFXLibs";
+import { Transform } from "./Transform";
 
 export abstract class RenderPipeline{
 
@@ -248,7 +249,7 @@ export abstract class RenderPipeline{
         let nodelist = this.m_nodelist[nodelistIndex];
         nodelist.reset();
 
-        this.traversalRenderNode(nodelist,scene);
+        this.traversalRenderNode(nodelist,scene.transform);
 
         nodelist.sort();
 
@@ -256,14 +257,16 @@ export abstract class RenderPipeline{
 
         return nodelist;
     }
-    private traversalRenderNode(drawlist:RenderNodeList,obj:GameObject){
+    private traversalRenderNode(drawlist:RenderNodeList,obj:Transform){
         let children = obj.children;
         if(children == null) return;
         for(let i=0,len = children.length;i< len;i++){
             let c = children[i];
 
-            if(!c.active) continue;
-            let crender = c.render;
+            let cobj = c.gameobject;
+
+            if(!cobj.active) continue;
+            let crender = cobj.render;
 
             if(crender != null && crender.mesh !=null){
                 drawlist.pushRenderNode(crender);
