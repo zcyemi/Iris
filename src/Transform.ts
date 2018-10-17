@@ -68,7 +68,8 @@ export class Transform{
     public get objMatrix():mat4{
         if(this.m_objMtx == null){
             if(this.parent == null){
-                this.m_objMtx.set(this.localMatrix);
+                this.m_objMtx = this.localMatrix.clone();
+                console.log(this.m_objMtx);
             }
             else{
                 this.m_objMtx = this.parent.objMatrix.mul(this.localMatrix);

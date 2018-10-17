@@ -172,7 +172,7 @@ uniform sampler2D uTexEmissive;
 
 out vec4 fragColor;
 void main(){
-    fragColor = texture(uSampler,vUV) * uColor;
+    fragColor = texture(uSampler,vUV);
 }`;
 	public static readonly pbrMetallicRoughness_vs:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS

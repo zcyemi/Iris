@@ -1,4 +1,4 @@
-import { GLTFdata, GLContext, GLTFnode, quat, GLTFfile, vec4, glmath, vec3 } from "wglut";
+import { GLTFdata, GLContext, GLTFnode, quat, GLTFfile, vec4, glmath, vec3, mat4 } from "wglut";
 import { Scene } from "./Scene";
 import { GameObject } from "./GameObject";
 import { Mesh, MeshDataBuffer, MeshVertexAttrDesc, MeshDataBufferIndices, MeshBufferUtility } from "./Mesh";
@@ -59,6 +59,10 @@ export class SceneBuilder{
                 gobj.transform.parent = gscene.transform;
             }
         }
+
+        let gstrs = gscene.transform;
+        gstrs.localMatrix = mat4.Scale(glmath.vec3(0.001,0.001,0.001));
+
         return gscene;
     }
     
@@ -79,10 +83,10 @@ export class SceneBuilder{
         else if(_node.matrix){
             //Set matrix
             //TODO
-            //gobj.transform.ObjMatrix.raw = _node.matrix.slice(0);
+            gobj.transform.localMatrix = new mat4( _node.matrix);
         }
 
-        gobj.transform.localScale = glmath.vec3(0.001,0.001,0.001);
+        //gobj.transform.localScale = glmath.vec3(0.001,0.001,0.001);
 
         if(_node.mesh){
             let meshrender = this.getMesh(_node.mesh);
@@ -314,7 +318,7 @@ export class SceneBuilder{
         return mat;
     }
 
-    public async getImage(index:number){
+    public getImage(index:number){
         let img = this.images[index];
         if(img != null){
             return img;
@@ -335,7 +339,7 @@ export class SceneBuilder{
         let rawBuffer = this.m_gltfData.rawBinary;
         let uint8array = new Uint8Array(rawBuffer,_bufferview.byteOffset,_bufferview.byteLength);
 
-        let texture = await Texture.createTexture(uint8array,_image.mimeType,this.m_glctx);
+        let texture = Texture.createTextureSync(uint8array,_image.mimeType,this.m_glctx);
         this.images[index] = texture;
         return texture;
     }

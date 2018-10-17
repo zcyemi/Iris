@@ -244,7 +244,9 @@ export class Material{
                         tex= val;
                     }
                     if(tex == null){
-                        throw new Error('texture is null');
+                        //raw texture is null or onloading...
+                        gl.uniform1i(loc,Material.DEF_TEXID_NUM);
+                        return;
                     }
                     gl.activeTexture(gl.TEXTURE4 + texCount);
                     gl.bindTexture(gl.TEXTURE_2D,tex);
@@ -252,7 +254,7 @@ export class Material{
                 }
                 else{
                     //texture is null
-                    //TODO bind internal texture
+                    //use default white texture
                     gl.uniform1i(loc,Material.DEF_TEXID_NUM);
                 }
                 break;

@@ -17,5 +17,5 @@ uniform sampler2D uTexEmissive;
 
 out vec4 fragColor;
 void main(){
-    fragColor = texture(uSampler,vUV) * uColor;
+    fragColor = texture(uSampler,vUV);
 }

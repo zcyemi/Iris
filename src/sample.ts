@@ -97,13 +97,13 @@ export class SampleGame{
 
         //let tex = (await sceneBuilder.getImage(1));
 
-        let scene = new Scene() //sceneBuilder.createScene();
+        let scene = sceneBuilder.createScene();
         scene.name = "scene";
         this.m_scene = scene;
-        //console.log(scene);
+        
 
-        //this.m_scene = new Scene();
-        //let scene = this.m_scene;
+        // this.m_scene = new Scene();
+        // let scene = this.m_scene;
 
         //camera
         let camera = Camera.persepctive(null,60,400.0/300.0,0.5,1000);
@@ -120,24 +120,25 @@ export class SampleGame{
         this.m_camera = camera;
 
         //cube
-        let obj1 = new GameObject("cube");
-        this.m_obj1 = obj1;
-        obj1.transform.localPosition = glmath.vec3(0,5,-5);
-        obj1.transform.localScale = glmath.vec3(1,1,1);
-        let matDiffuse = new Material(grender.shaderLib.shaderPbrMetallicRoughness);
-        matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
-        obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
-        obj1.addComponent(<Component>{
-            onUpdate:function(scene:Scene){
-                let dt = Input.snapshot.deltaTime;
-                dt *= 30.0;
-                const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
-                let trs = this.gameobject.transform;
-                trs.rotate(rota);
-            }
-        })
+        // let obj1 = new GameObject("cube");
+        // this.m_obj1 = obj1;
+        // obj1.transform.localPosition = glmath.vec3(0,5,-5);
+        // obj1.transform.localScale = glmath.vec3(0.001,0.001,0.001);
+        // //let matDiffuse = new Material(grender.shaderLib.shaderPbrMetallicRoughness);
+        // //matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
+        // obj1.render = sceneBuilder.getMesh(4);// new MeshRender(Mesh.Cube,matDiffuse);
+        // // obj1.addComponent(<Component>{
+        // //     onUpdate:function(scene:Scene){
+        // //         let dt = Input.snapshot.deltaTime;
+        // //         dt *= 30.0;
+        // //         const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
+        // //         let trs = this.gameobject.transform;
+        // //         trs.rotate(rota);
+        // //     }
+        // // })
+        // obj1.transform.parent = scene.transform;
 
-        obj1.transform.parent = scene.transform;
+        //obj1.render.material = new Material(grender.shaderLib.shaderUnlitColor);
 
         // let ccube = new GameObject("ccube");
         // ccube.transform.localPosition = glmath.vec3(0,5,0);
@@ -162,16 +163,16 @@ export class SampleGame{
         // scene.addChild(obj3);
 
         //plane
-        let obj2 = new GameObject();
-        this.m_obj2 = obj2;
-        obj2.transform.localPosition = glmath.vec3(0,0,-5);
-        obj2.transform.localScale = glmath.vec3(20,20,1);
-        obj2.transform.localRotation = quat.axisRotationDeg(vec3.right,90);
-        let obj2mat = new Material(grender.shaderLib.shaderUnlitTexture)
-        obj2mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
-        obj2mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
-        obj2.render = new MeshRender(Mesh.Quad, obj2mat);
-        obj2.transform.parent = scene.transform;
+        // let obj2 = new GameObject();
+        // this.m_obj2 = obj2;
+        // obj2.transform.localPosition = glmath.vec3(0,0,-5);
+        // obj2.transform.localScale = glmath.vec3(20,20,1);
+        // obj2.transform.localRotation = quat.axisRotationDeg(vec3.right,90);
+        // let obj2mat = new Material(grender.shaderLib.shaderUnlitTexture)
+        // obj2mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
+        // obj2mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
+        // obj2.render = new MeshRender(Mesh.Quad, obj2mat);
+        // obj2.transform.parent = scene.transform;
 
         //directional light
         let lightobj = new GameObject();
