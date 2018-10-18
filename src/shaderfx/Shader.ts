@@ -12,46 +12,48 @@ export enum RenderQueue{
 }
 
 export enum Comparison{
-    NEVER,
-    LESS,
-    EQUAL,
-    LEQUAL,
-    GREATER,
-    NOTEQUAL,
-    GEQUAL,
-    ALWAYS
+    NEVER = 512,
+    LESS = 513,
+    EQUAL = 514,
+    LEQUAL = 515,
+    GREATER = 516,
+    NOTEQUAL = 517,
+    GEQUAL = 518,
+    ALWAYS = 519
 }
 
 export enum BlendOperator{
-    ADD,
-    SUBTRACT,
-    RESERVE_SUBSTRACT,
-    MIN,
-    MAX
+    ADD = 32774,
+    MIN = 32775,
+    MAX = 32776,
+    SUBTRACT = 32778,
+    RESERVE_SUBSTRACT = 32779,
 }
 
 export enum BlendFactor{
-    ONE,
-    ZERO,
-    SRC_COLOR,
-    ONE_MINUS_SRC_COLOR,
-    DST_COLOR,
-    ONE_MINUS_DST_COLOR,
-    SRC_ALPHA,
-    ONE_MINUS_SRC_ALPHA,
-    DST_ALPHA,
-    ONE_MINUS_DST_ALPHA,
-    CONSTANT_COLOR,
-    ONE_MINUS_CONSTANT_COLOR,
-    CONSTANT_ALPHA,
-    ONE_MINUS_CONSTANT_ALPHA,
-    SRC_ALPHA_SATURATE
+    ONE = 1,
+    ZERO = 0,
+    SRC_COLOR = 768,
+    ONE_MINUS_SRC_COLOR = 769,
+    SRC_ALPHA = 770,
+    ONE_MINUS_SRC_ALPHA = 771,
+    DST_ALPHA = 772,
+    ONE_MINUS_DST_ALPHA = 773,
+    DST_COLOR = 774,
+    ONE_MINUS_DST_COLOR = 775,
+    SRC_ALPHA_SATURATE = 776,
+    
+    CONSTANT_ALPHA = 32771,
+    ONE_MINUS_CONSTANT_ALPHA = 32772,
+    CONSTANT_COLOR = 32769,
+    ONE_MINUS_CONSTANT_COLOR = 32770,
 }
 
 export enum CullingMode{
-    Front,
-    Back,
-    None,
+    Front = 1028,
+    Back = 1029,
+    FRONT_AND_BACK = 1032,
+    None = 0,
 }
 
 export class ShaderTags{
@@ -62,6 +64,19 @@ export class ShaderTags{
     public blendFactorSrc?:BlendFactor;
     public blendFactorDst?:BlendFactor;
     public culling?:CullingMode;
+
+    public clone(){
+        let tags = new ShaderTags();
+        tags.queue= this.queue;
+        tags.ztest = this.ztest;
+        tags.zwrite = this.zwrite;
+        tags.blendOp = this.blendOp;
+        tags.blendFactorDst = this.blendFactorDst;
+        tags.blendFactorSrc = this.blendFactorSrc;
+        tags.culling = this.culling;
+
+        return tags;
+    }
 }
 
 export class Shader{

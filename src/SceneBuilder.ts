@@ -6,7 +6,7 @@ import { MeshRender } from "./MeshRender";
 import { GL, GLDataType } from "./GL";
 import { Material } from "./Material";
 import { ShaderFXLibs } from "./shaderfx/ShaderFXLibs";
-import { Shader, ShaderTags, CullingMode, BlendFactor, BlendOperator } from "./shaderfx/Shader";
+import { Shader, ShaderTags, CullingMode, BlendFactor, BlendOperator, RenderQueue } from "./shaderfx/Shader";
 import { Texture } from "./Texture";
 
 
@@ -260,16 +260,26 @@ export class SceneBuilder{
         let mat = new Material(this.m_pbrShader);
         mat.name= _material.name;
 
-        let shadertags = new ShaderTags();
+        let shadertags:ShaderTags= null;
+        let shadertagsOverride:boolean = false;
 
         let matDoubleSided = _material.doubleSided;
         if(matDoubleSided == true){
+            if(shadertags == null) shadertags = new ShaderTags();
             shadertags.culling = CullingMode.None;
+            shadertagsOverride = true;
         }
 
         let alphaMode = _material.alphaMode;
         if(alphaMode == "BLEND"){
+            if(shadertags == null) shadertags = new ShaderTags();
             shadertags.blendOp = BlendOperator.ADD;
+            shadertags.queue = RenderQueue.Transparent;
+            shadertagsOverride = true;
+        }
+
+        if(shadertagsOverride){
+            mat.shaderTags = shadertags;
         }
 
         //pbr property

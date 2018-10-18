@@ -8,6 +8,79 @@ import { ShadowMapInfo } from "./pipeline/RenderTaskShadowMap";
 import { GraphicsRender, GraphicsRenderCreateInfo } from "./GraphicsRender";
 import { ShaderDataUniformShadowMap } from "./shaderfx/ShaderFXLibs";
 import { Transform } from "./Transform";
+import { ShaderTags } from "./shaderfx/Shader";
+
+
+export class PipelineStateCache{
+
+    private m_curtags:ShaderTags;
+
+    private m_deftags:ShaderTags;
+    private m_lastTags:ShaderTags;
+
+    private gl:WebGL2RenderingContext;
+
+    public constructor(glctx:GLContext){
+        this.gl = glctx.gl;
+        this.m_curtags = new ShaderTags();
+    }
+
+    public reset(tags:ShaderTags){
+        this.m_lastTags = null;
+
+        let curtags = this.m_curtags;
+        let gl = this.gl;
+        if(tags.ztest!= null){
+            let ztest = tags.ztest;
+            if(curtags.ztest != ztest){
+                curtags.ztest = ztest;
+                gl.depthFunc(ztest);
+            }
+        }
+
+        if(tags.culling != null){
+            let culling = tags.culling;
+            if(curtags.culling != culling){
+                curtags.culling = culling;
+                gl.cullFace(culling);
+            }
+        }
+
+        if(tags.zwrite != null){
+            let zwrite = tags.zwrite;
+            if(curtags.zwrite != zwrite){
+                curtags.zwrite =zwrite;
+                gl.depthMask(zwrite);
+            }
+        }
+
+        if(tags.blendOp != null){
+            let blendop = tags.blendOp;
+            if(curtags.blendOp != blendop){
+                curtags.blendOp = blendop;
+                if(blendop == null){
+                    gl.disable(gl.BLEND);
+                }
+                else{
+                    gl.enable(gl.BLEND);
+
+                    let op = tags.blendOp;
+                    let srcf = tags.blendFactorSrc;
+                    let dstf = tags.blendFactorDst;
+
+                }
+            }
+        }
+
+        this.m_deftags= tags;
+    }
+
+    public apply(tags:ShaderTags){
+        if(this.m_lastTags == tags) return;
+
+        this.m_lastTags = tags;
+    }
+}
 
 export abstract class RenderPipeline{
 
