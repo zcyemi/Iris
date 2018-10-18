@@ -61,11 +61,12 @@ export class SceneBuilder{
         }
 
         let gstrs = gscene.transform;
-        gstrs.localMatrix = mat4.Scale(glmath.vec3(0.001,0.001,0.001));
+        // gstrs.localMatrix = mat4.Scale(glmath.vec3(0.001,0.001,0.001));
+        gstrs.setScale(glmath.vec3(0.001,0.001,0.001));
 
         return gscene;
     }
-    
+
     private buildNode(nodes:GLTFnode[],index:number): GameObject{
         let _node= nodes[index];
 
@@ -94,7 +95,7 @@ export class SceneBuilder{
                 gobj.render = meshrender;
             }
         }
-        
+
 
         let _nodeChildren = _node.children;
         if(_nodeChildren!= null && _nodeChildren.length>0){
@@ -184,7 +185,7 @@ export class SceneBuilder{
 
         let _accessors = this.gltf.accessors;
         let _accessor = _accessors[bufferindex];
-        
+
 
         let _bufferview = this.gltf.bufferViews[_accessor.bufferView];
         if(_bufferview == null){
@@ -194,7 +195,7 @@ export class SceneBuilder{
         }
         let rawBuffer = this.m_gltfData.rawBinary;
 
-        
+
         let dataType = _accessor.componentType;
 
         let dataBuffer: MeshDataBuffer = null;
@@ -221,7 +222,7 @@ export class SceneBuilder{
         }
 
         let totalbyte = componentLength * MeshBufferUtility.TypeSize(dataType);
-        
+
         this.buffers[bufferindex] = dataBuffer;
         this.buffersDesc[bufferindex] = new MeshVertexAttrDesc(dataType,size,totalbyte);
 

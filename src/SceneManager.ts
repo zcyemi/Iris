@@ -6,7 +6,9 @@ export class SceneManager{
 
         scene.onFrameStart();
         let strs = scene.transform;
-        strs.setLocalDirty(false);
+        // strs.setLocalDirty(false);
+        // strs.setObjMatrixDirty(false);
+        strs.localMatrix;
         strs.setObjMatrixDirty(false);
         scene.update(scene);
         scene.onFrameEnd();

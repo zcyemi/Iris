@@ -48,7 +48,6 @@ export class Transform{
     }
 
     public set localMatrix(mat:mat4){
-        this.m_localMtx;
         this.m_localTRSdirty = false;
 
         this.m_localMtx = mat;
@@ -57,7 +56,7 @@ export class Transform{
     }
 
     public get localMatrix():mat4{
-        if(this.m_localTRSdirty){
+        if(this.m_localTRSdirty == true){
             this.m_localMtx.setTRS(this.localPosition,this.localRotation,this.localScale);
             this.m_localTRSdirty =false;
             this.m_TRSDirty = true;
@@ -69,7 +68,6 @@ export class Transform{
         if(this.m_objMtx == null){
             if(this.parent == null){
                 this.m_objMtx = this.localMatrix.clone();
-                console.log(this.m_objMtx);
             }
             else{
                 this.m_objMtx = this.parent.objMatrix.mul(this.localMatrix);
