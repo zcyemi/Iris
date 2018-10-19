@@ -1,4 +1,4 @@
-import { ShaderTags, BlendFactor, BlendOperator } from "./shaderfx/Shader";
+import { ShaderTags, BlendFactor, BlendOperator, CullingMode } from "./shaderfx/Shader";
 import { GLContext } from "wglut";
 
 export class PipelineStateCache{
@@ -31,8 +31,17 @@ export class PipelineStateCache{
         if(tags.culling != null){
             let culling = tags.culling;
             if(curtags.culling != culling){
-                curtags.culling = culling;
-                gl.cullFace(culling);
+                let curculling = curtags.culling;
+                curtags.culling= culling;
+                if(culling == CullingMode.None){
+                    gl.disable(gl.CULL_FACE);
+                }
+                else{
+                    if(curculling == CullingMode.None){
+                        gl.enable(gl.CULL_FACE);
+                    }
+                    gl.cullFace(culling);
+                }
             }
         }
 
@@ -101,8 +110,17 @@ export class PipelineStateCache{
         let culling = tags.culling;
         if(culling == null) culling = deftags.culling;
         if(culling != curtags.culling){
+            let curculling = curtags.culling;
             curtags.culling= culling;
-            gl.cullFace(culling);
+            if(culling == CullingMode.None){
+                gl.disable(gl.CULL_FACE);
+            }
+            else{
+                if(curculling == CullingMode.None){
+                    gl.enable(gl.CULL_FACE);
+                }
+                gl.cullFace(culling);
+            }
         }
 
         let zwrite = tags.zwrite;

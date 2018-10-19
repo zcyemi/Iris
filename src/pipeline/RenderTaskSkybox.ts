@@ -53,6 +53,8 @@ export class RenderTaskSkybox extends RenderTask{
         if(camera.clearType != ClearType.Skybox || camera.skybox == null) return;
 
         //draw skybox
+        let pipelint = this.pipeline;
+        this.pipeline.bindTargetFrameBuffer();
 
 
         let texskybox = camera.skybox;

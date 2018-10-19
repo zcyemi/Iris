@@ -11,6 +11,9 @@ export class MeshRender{
 
     public castShadow:boolean = true;
 
+    public _depthVal:number;
+
+
     private m_vao:WebGLVertexArrayObject;
 
     public get vertexArrayObj():WebGLVertexArrayObject{

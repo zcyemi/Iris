@@ -63,6 +63,7 @@ export class RenderTaskForwardShading extends RenderTask {
         deftags.zwrite = true;
         deftags.ztest = Comparison.LEQUAL;
         deftags.culling = CullingMode.Back;
+        deftags.fillDefaultVal();
         this.m_deftags = deftags;
 
         this.m_inited = true;
@@ -179,16 +180,12 @@ export class RenderTaskForwardShading extends RenderTask {
 
 
         //shadowmap
-
         var shadowmapEnabled = pipeline.shadowMapEnabled;
-        
         if(shadowmapEnabled){
             gl.activeTexture(pipeline.utex_sm[0]);
             gl.bindTexture(gl.TEXTURE_2D, pipeline.shadowMapInfo[0].texture);
         }
-
         let shadowOptions:ShaderOptions = null;
-
         if(shadowmapEnabled != this.m_shdaowEnabled){
             shadowOptions = this.m_shadowOptions;
             shadowOptions.default = shadowmapEnabled ? ShaderFX.OPT_SHADOWMAP_SHADOW_ON : ShaderFX.OPT_SHADOWMAP_SHADOW_OFF;
@@ -278,7 +275,8 @@ export class RenderTaskForwardShading extends RenderTask {
 
             mat.clean(gl);
         }
-        gl.bindBuffer(gl.UNIFORM_BUFFER, null);
+
+        //pipeline.UnBindTargetFrameBuffer();
     }
 
     public release(glctx: GLContext) {

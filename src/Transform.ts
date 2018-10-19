@@ -6,6 +6,10 @@ export class Transform{
     private m_localRotation:quat = quat.Identity;
     private m_localScale:vec3 = vec3.one;
 
+    private m_worldPositon:vec3;
+    private m_worldRotation:quat;
+    private m_worldScale:vec3;
+
     private m_localTRSdirty:boolean = true;
     private m_TRSDirty:boolean = false;
     /**
@@ -64,22 +68,81 @@ export class Transform{
         return this.m_localMtx;
     }
 
+    /**
+     * Model matrix, MATRIX_M
+     */
     public get objMatrix():mat4{
         if(this.m_objMtx == null){
-            if(this.parent == null){
-                this.m_objMtx = this.localMatrix.clone();
-            }
-            else{
-                this.m_objMtx = this.parent.objMatrix.mul(this.localMatrix);
-            }
+            this.m_objMtx = this.calObjMatrix();
         }
         return this.m_objMtx;
+    }
+
+    private calObjMatrix(decompose:boolean = false):mat4{
+        let mtx:mat4 = null;
+        if(this.parent == null){
+            mtx = this.localMatrix.clone();
+            this.m_worldPositon = this.m_localPosition.clone();
+            this.m_worldRotation = this.m_localRotation.clone();
+            this.m_worldScale = this.m_localScale.clone();
+        }
+        else{
+            mtx = this.parent.objMatrix.mul(this.localMatrix);
+            if(decompose){
+                [this.m_worldPositon,this.m_worldRotation,this.m_worldScale] = mat4.Decompose(mtx);
+            }
+            else{
+                this.m_worldPositon = null;
+                this.m_worldRotation = null;
+                this.m_worldScale = null;
+            }
+        }
+        return mtx;
+    }
+
+    /**
+     * world-space position
+     */
+    public get position():vec3{
+        let wpos = this.m_worldPositon;
+        if(wpos == null){
+            this.m_objMtx = this.calObjMatrix(true);
+            wpos =this.m_worldPositon;
+        }
+        return wpos;
+    }
+
+    /**
+     * world-space rotation
+     */
+    public get rotation():quat{
+        let wrota = this.m_worldRotation;
+        if(wrota == null){
+            this.m_objMtx = this.calObjMatrix(true);
+            wrota= this.m_worldRotation;
+        }
+        return wrota;
+    }
+
+    /**
+     * world-space scale
+     */
+    public get scale():vec3{
+        let wscale = this.m_worldScale;
+        if(wscale == null){
+            this.m_objMtx = this.calObjMatrix(true);
+            wscale = this.m_worldScale;
+        }
+        return wscale;
     }
 
     public get children():Transform[]{
         return this.m_children;
     }
 
+    /**
+     * local rotation
+     */
     public get localRotation():quat{
         return this.m_localRotation;
     }
@@ -235,6 +298,9 @@ export class Transform{
         this.m_TRSDirty = false;
         if(dirty){
             this.m_objMtx = null;
+            this.m_worldPositon = null;
+            this.m_worldRotation = null;
+            this.m_worldScale = null;
         }
 
     }
@@ -259,12 +325,20 @@ export class Transform{
         this.m_localRotation = quat.Coordinate(f,up);
     }
 
-    public translate(offset:vec3){
+    /**
+     * Apply translate to current transform.
+     * @param offset 
+     */
+    public applyTranslate(offset:vec3){
         this.localPosition.add(offset);
         this.setLocalDirty();
     }
 
-    public rotate(q:quat){
+    /**
+     * Apply rotation to current transform.
+     * @param q 
+     */
+    public applyRotate(q:quat){
         this.localRotation.selfRota(q);
         this.m_forward.mul(q);
         this.m_up.mul(q);
@@ -272,7 +346,11 @@ export class Transform{
         this.setLocalDirty();
     }
     
-    public scale(scale:vec3){
+    /**
+     * Apply scale to current transform.
+     * @param scale 
+     */
+    public applyScale(scale:vec3){
         this.m_localScale.mul(scale);
         this.setLocalDirty();
     }

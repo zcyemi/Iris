@@ -3,6 +3,7 @@ import { RenderTaskForwardShading } from "./RenderTaskForwardShading";
 import { RenderTaskShadowMap } from "./RenderTaskShadowMap";
 import { RenderTaskDebugBuffer } from "./RenderTaskDebugBuffer";
 import { RenderTaskSkybox } from "./RenderTaskSkybox";
+import { RenderTaskTransparent } from "./RenderTaskTransparent";
 
 export class RenderPipelineDefault extends RenderPipeline{
 
@@ -16,7 +17,7 @@ export class RenderPipelineDefault extends RenderPipeline{
         //this.registerTask(new RenderTaskOpaqueImageEffect(1000, this));
         this.registerTask(new RenderTaskSkybox(1500, this));
         //tasks.push(new RenderTaskDrawCoord(1700,this));
-        //this.registerTask(new RenderTaskTransparencies(2000, this));
+        this.registerTask(new RenderTaskTransparent(2000, this));
         //this.registerTask(new RednerTaskImageEffect(3000, this));
         this.registerTask(new RenderTaskDebugBuffer(4000,this));
     }

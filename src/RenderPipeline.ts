@@ -60,6 +60,10 @@ export abstract class RenderPipeline{
         return this.m_mainFrameBufferAspect;
     }
 
+    public get mainFrameBuffer():GLFrameBuffer{
+        return this.m_mainFrameBuffer;
+    }
+
     public get stateCache():PipelineStateCache{
         return this.m_pipestateCache;
     }
@@ -234,14 +238,19 @@ export abstract class RenderPipeline{
         }
     }
 
-    public bindTargetFrameBuffer(){
-        if(this.m_mainFrameBufferBinded) return;
+    /**
+     * @returns whether to call gl.BindFrameBuffer;
+     */
+    public bindTargetFrameBuffer(forece:boolean = false):boolean{
+        if(this.m_mainFrameBufferBinded && !forece) return false;
         let mainfb = this.m_mainFrameBuffer;
         mainfb.bind(this.gl);
         this.m_mainFrameBufferBinded = true;
 
         //TODO
         this.gl.viewport(0,0,mainfb.width,mainfb.height);
+
+        return true;
     }
 
     public UnBindTargetFrameBuffer(){

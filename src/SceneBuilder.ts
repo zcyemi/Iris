@@ -111,7 +111,6 @@ export class SceneBuilder{
 
     public getMesh(meshid:number):MeshRender{
 
-        if(meshid == 15) return null;
         let _meshes = this.gltf.meshes;
         if(_meshes == null) return null;
 
@@ -279,6 +278,8 @@ export class SceneBuilder{
         }
 
         if(shadertagsOverride){
+
+            if(shadertags.queue == null) shadertags.queue = RenderQueue.Opaque;
             mat.shaderTags = shadertags;
         }
 

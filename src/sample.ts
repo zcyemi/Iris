@@ -90,8 +90,10 @@ export class SampleGame{
 
         let texcube = await TextureCubeMap.loadCubeMapTex('res/envmap/day360.jpg',glctx);
 
-
         let gltf = await GLTFtool.LoadGLTFBinary('res/gltf/scene.glb');
+
+
+        console.log(gltf.gltf);
 
         let sceneBuilder = new SceneBuilder(gltf,glctx,this.m_graphicsRender.shaderLib);
 
@@ -100,6 +102,8 @@ export class SampleGame{
         let scene = sceneBuilder.createScene();
         scene.name = "scene";
         this.m_scene = scene;
+
+        console.log(scene);
         
 
         // this.m_scene = new Scene();

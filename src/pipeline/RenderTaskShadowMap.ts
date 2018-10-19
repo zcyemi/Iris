@@ -286,6 +286,8 @@ export class RenderTaskShadowMap extends RenderTask{
 
         let smdata = this.m_smdata;
 
+        pipe.UnBindTargetFrameBuffer();
+
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,this.m_shadowMapFrameBuffer);
 
         //clear depth
