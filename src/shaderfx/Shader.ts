@@ -60,6 +60,7 @@ export class ShaderTags{
     public queue?:RenderQueue;
     public ztest?:Comparison;
     public zwrite?:boolean;
+    public blend:boolean = false;
     public blendOp?:BlendOperator;
     public blendFactorSrc?:BlendFactor;
     public blendFactorDst?:BlendFactor;
@@ -76,6 +77,17 @@ export class ShaderTags{
         tags.culling = this.culling;
 
         return tags;
+    }
+
+    public fillDefaultVal(){
+        if(this.queue == null) this.queue = RenderQueue.Opaque;
+        if(this.zwrite == null) this.zwrite = true;
+        if(this.ztest == null) this.ztest = Comparison.LEQUAL;
+        if(this.culling == null) this.culling = CullingMode.Back;
+
+        if(this.blendOp == null) this.blendOp = BlendOperator.ADD;
+        if(this.blendFactorSrc == null) this.blendFactorSrc = BlendFactor.SRC_ALPHA;
+        if(this.blendFactorDst == null) this.blendFactorDst = BlendFactor.ONE_MINUS_SRC_ALPHA;
     }
 }
 

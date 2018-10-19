@@ -1,7 +1,7 @@
 import { ShaderVariant, ShaderOptionsConfig } from "./ShaderVariant";
 import { ShaderSource } from "./ShaderSource";
 import { GLContext } from "wglut";
-import { Shader } from "./Shader";
+import { Shader, ShaderTags } from "./Shader";
 import { ShaderGen } from "./ShaderGenerated";
 
 export class ShaderFX{
@@ -45,7 +45,13 @@ export class ShaderFX{
         if(p == null) return null;
 
         let shader = new Shader(source,p,optconfig,glctx);
-        shader.tags = source.tags;
+
+        let tags= source.tags;
+        if(tags == null){
+            tags = new ShaderTags();
+        }
+        tags.fillDefaultVal();
+        shader.tags = tags;
 
         return shader;
     }

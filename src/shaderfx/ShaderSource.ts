@@ -1,5 +1,5 @@
 import { ShaderVariant, ShaderOptionsConfig, ShaderOptions } from "./ShaderVariant";
-import { ShaderTags, Comparison, RenderQueue, BlendOperator, BlendFactor } from "./Shader";
+import { ShaderTags, Comparison, RenderQueue, BlendOperator, BlendFactor, CullingMode } from "./Shader";
 import { ShaderPreprocessor } from "./ShaderPreprocessor";
 
 export type VariantsGroup = { [key: string]: ShaderVariant };
@@ -138,6 +138,35 @@ export class ShaderSource {
                     tagval = tagval.charAt(0).toUpperCase() + match[2].slice(1);
                     this.setShaderTagProperty('queue',tagval,RenderQueue);
                     break;
+                case "cull":
+                    {
+                        let cullingmode = CullingMode.Back;
+                        switch(tagval){
+                            case "ALL":
+                                cullingmode = CullingMode.FRONT_AND_BACK;
+                                break;
+                            case "BACK":
+                                cullingmode= CullingMode.Back;
+                                break;
+                            case "FRONT":
+                                cullingmode =CullingMode.Front;
+                                break;
+                            case "NONE":
+                                cullingmode = CullingMode.None;
+                                break;
+                            default:
+                                throw new Error('invalid culling mode');
+                        }
+
+                        if(tags.culling == null){
+                            tags.culling = cullingmode;
+                        }
+                        else{
+                            if(tags.culling != cullingmode){
+                                throw new Error(`culling mode confliect : ${cullingmode} ${tags.culling}`);
+                            }
+                        }
+                    }
                 default:
                     throw new Error(`unknown shader tag [${line}]`);
             }
