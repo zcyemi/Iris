@@ -74,6 +74,7 @@ export class GraphicsRender{
 
         this.m_renderPipeline = pipeline;
         this.m_shaderFXlib = new ShaderFXLibs(glctx);
+        
 
         //default texture
         let gl = glctx.gl;
@@ -85,8 +86,8 @@ export class GraphicsRender{
         this.m_defaultTexture = Texture.crateEmptyTexture(2,2,glctx);
         gl.activeTexture(gl.TEXTURE3);
         gl.bindTexture(gl.TEXTURE_2D,this.m_defaultTexture.rawtexture);
-
         
+        gl.frontFace(gl.CCW);
 
         pipeline.graphicRender = this;
         pipeline.onInitGL(glctx);

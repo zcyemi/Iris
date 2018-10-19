@@ -7,6 +7,7 @@ import { Light } from "../Light";
 import { AmbientType } from "../Camera";
 import { ShaderDataUniformLight, ShaderDataUniformObj, ShaderDataUniformCam } from "../shaderfx/ShaderFXLibs";
 import { ShaderOptions } from "../shaderfx/ShaderVariant";
+import { ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
 
 export class RenderTaskForwardShading extends RenderTask {
     private m_lightUniformBuffer: WebGLBuffer;
@@ -20,6 +21,8 @@ export class RenderTaskForwardShading extends RenderTask {
 
     private m_shadowOptions:ShaderOptions;
     private m_shdaowEnabled:boolean = true;
+
+    private m_deftags:ShaderTags;
 
     public init() {
         if(this.m_inited) return;
@@ -54,6 +57,13 @@ export class RenderTaskForwardShading extends RenderTask {
         //TODO
         let smbuffer = this.pipeline.sharedBufferShadowMap;
         this.m_shadowOptions = new ShaderOptions(ShaderFX.OPT_SHADOWMAP_SHADOW,ShaderFX.OPT_SHADOWMAP_SHADOW_ON);
+
+        let deftags = new ShaderTags();
+        deftags.blendOp = null;
+        deftags.zwrite = true;
+        deftags.ztest = Comparison.LEQUAL;
+        deftags.culling = CullingMode.Back;
+        this.m_deftags = deftags;
 
         this.m_inited = true;
     }
@@ -136,6 +146,7 @@ export class RenderTaskForwardShading extends RenderTask {
         let gl = glctx.gl;
 
         let pipeline = this.pipeline;
+        let statecache = pipeline.stateCache;
 
         pipeline.bindTargetFrameBuffer();
 
@@ -148,7 +159,7 @@ export class RenderTaskForwardShading extends RenderTask {
         //setup draw state
         gl.depthFunc(gl.LEQUAL);
         //gl.enable(gl.CULL_FACE);
-        gl.frontFace(gl.CCW);
+        
         gl.cullFace(gl.BACK);
 
         //light uniform buffer
@@ -183,6 +194,11 @@ export class RenderTaskForwardShading extends RenderTask {
             shadowOptions.default = shadowmapEnabled ? ShaderFX.OPT_SHADOWMAP_SHADOW_ON : ShaderFX.OPT_SHADOWMAP_SHADOW_OFF;
             this.m_shdaowEnabled = shadowmapEnabled;
         }
+
+        //pipeline state
+        
+        statecache.reset(this.m_deftags);
+
 
         //default texture
         //Can be optimized
@@ -238,6 +254,9 @@ export class RenderTaskForwardShading extends RenderTask {
                     }
                 }
             }
+
+            //state
+            statecache.apply(mat.shaderTags);
 
             //uniforms
             mat.apply(gl);
