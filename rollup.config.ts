@@ -6,15 +6,16 @@ import process from 'process';
 
 
 export default{
-    input: `src/index.ts`,
+    input: `src/renderer.ts`,
     output: [
-        {file: 'dist/sample.js', name: 'sample', format: 'iife',sourcemap: false}
+        {file: 'dist/renderer.js', name: 'renderer', format: 'iife',sourcemap: false},
+        {file: 'dist/renderer.es.js',format: 'es'}
     ],
     external: [],
     plugins: [
         typescript({
             tsconfigOverride: {
-                compilerOptions: { module: 'es2015'}
+                compilerOptions: { module: 'es2015'},
             },
             tsconfig: 'tsconfig.json',
             useTsconfigDeclarationDir:true

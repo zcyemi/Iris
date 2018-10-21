@@ -2,7 +2,9 @@
   "name": "rendering-engine",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/renderer.js",
+  "module": "./dist/renderer.es.js",
+  "typings": "./dist/renderer.d.ts",
   "scripts": {
     "build": "gulp build",
     "watch": "gulp watch",

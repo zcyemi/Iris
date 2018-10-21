@@ -39,7 +39,7 @@ function build(){
     if(onBuild == true) return;
     onBuild = true;
     console.log('[Compile Script]');
-    child_process.exec('rollup -c rollup.config.ts',(error,stdout,stderr)=>{
+    child_process.exec('tsc --module amd --outFile ./dist/renderer.js --emitDeclarationOnly && rollup -c rollup.config.ts',(error,stdout,stderr)=>{
         if(stdout != null && stdout != '') console.log(stdout);
         if(stderr != null && stderr != '') console.log(stderr);
 
