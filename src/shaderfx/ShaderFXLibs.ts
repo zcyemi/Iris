@@ -16,6 +16,7 @@ export class ShaderFXLibs{
     private m_uvValue:Shader;
     private m_diffuse:Shader;
     private m_skybox:Shader;
+    private m_depth:Shader;
 
     private m_pbrMetallicRoughness:Shader;
 
@@ -31,6 +32,8 @@ export class ShaderFXLibs{
     public static SH_skybox:ShaderSource;
     @ShaderFile("pbrMetallicRoughness")
     public static SH_pbrMetallicRoughness:ShaderSource;
+    @ShaderFile("depth")
+    public static SH_depth:ShaderSource;
 
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_OBJ)
     public static SHADERFX_OBJ:ShaderVariant;
@@ -86,6 +89,13 @@ export class ShaderFXLibs{
             this.m_pbrMetallicRoughness = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_pbrMetallicRoughness);
         }
         return this.m_pbrMetallicRoughness;
+    }
+
+    public get shaderDepth():Shader{
+        if(this.m_depth == null){
+            this.m_depth = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_depth);
+        }
+        return this.m_depth;
     }
 
     public release(){

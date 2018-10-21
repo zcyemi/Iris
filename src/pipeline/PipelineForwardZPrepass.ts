@@ -11,6 +11,7 @@ import { PassSkybox } from "../render/PassSkybox";
 import { BufferDebugInfo } from "./BufferDebugInfo";
 import { PassDebug } from "../render/PassDebug";
 import { PassGizmos } from "../render/PassGizmos";
+import { PassDepth } from "../render/PassDepth";
 
 
 export class PipelineForwardZPrepass extends RenderPipeline{
@@ -21,11 +22,23 @@ export class PipelineForwardZPrepass extends RenderPipeline{
     public static readonly UNIFORMINDEX_LIGHT:number = 3;
     
 
+    //For debug textures and framebuffers
     private m_bufferDebugInfo:BufferDebugInfo[] = [];
 
     public get bufferDebugInfo():BufferDebugInfo[]{
         return this.m_bufferDebugInfo;
     }
+
+    //Copy of depth texture
+    private m_mainDepthTexture:WebGLTexture;
+    private m_mainDepthFB:WebGLFramebuffer;
+    public get mainDepthTexture():WebGLTexture{
+        return this.m_mainDepthTexture;
+    }
+    public get mainDepthFrameBuffer():WebGLFramebuffer{
+        return this.m_mainDepthFB;
+    }
+    
 
     private m_uniformBufferObj:WebGLBuffer;
     private m_uniformBufferCamera:WebGLBuffer;
@@ -51,6 +64,8 @@ export class PipelineForwardZPrepass extends RenderPipeline{
     }
 
 
+    private m_passDepth:PassDepth;
+
     private m_passOpaque:PassOpaque;
     private m_passTransparent:PassTransparent;
     private m_passSkybox:PassSkybox;
@@ -68,6 +83,9 @@ export class PipelineForwardZPrepass extends RenderPipeline{
         let fb = this.glctx.createFrameBuffer(true,bufferinfo.colorFormat,bufferinfo.depthFormat);
         this.m_mainFrameBuffer = fb;
 
+        this.createMainDepthFB(fb.width,fb.height);
+
+
         let gl = this.glctx.gl;
         gl.depthMask(true);
         gl.depthFunc(gl.LEQUAL);
@@ -79,11 +97,52 @@ export class PipelineForwardZPrepass extends RenderPipeline{
         this.m_passDebug= new PassDebug(this);
         this.m_passGizmos = new PassGizmos(this);
 
+        this.m_passDepth = new PassDepth(this);
 
         this.m_passOpaque = new PassOpaque(this,null);
         this.m_passTransparent = new PassTransparent(this,null);
         this.m_passSkybox =new PassSkybox(this,null);
 
+    }
+
+    private createMainDepthFB(width:number,height:number){
+        let bufferinfo = this.m_mainFrameBufferInfo;
+        let tex = this.glctx.createTexture(bufferinfo.depthFormat,width,height,false,false);
+        this.m_mainDepthTexture = tex;
+        let gl =this.gl;
+        if(this.m_mainDepthFB == null){
+            let fb = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,fb);
+            gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.TEXTURE_2D,tex,0);
+            gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
+            this.m_mainDepthFB = fb;
+        }
+    }
+
+    public resizeFrameBuffer(width:number,height:number){
+        super.resizeFrameBuffer(width,height);
+
+        let depthtex =this.m_mainDepthTexture;
+        
+        let glctx =this.glctx;
+        let gl = this.gl;
+        if(depthtex != null){
+            gl.deleteTexture(depthtex);
+        }
+
+        //resize depth framebuffer
+        if(this.m_mainDepthFB !=null){
+            gl.deleteFramebuffer(this.m_mainDepthFB);
+        }
+
+        const bufferinfo =this.m_mainFrameBufferInfo;
+        this.m_mainDepthTexture = glctx.createTexture(bufferinfo.depthFormat,width,height,false,false);
+
+        let fb = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,fb);
+        gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.TEXTURE_2D,this.mainDepthTexture,0);
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
+        this.m_mainDepthFB = fb;
     }
 
     private createUniformBuffers(){
@@ -147,6 +206,9 @@ export class PipelineForwardZPrepass extends RenderPipeline{
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         //do rendering
+
+        const passDepth = this.m_passDepth;
+        passDepth.render(scene,nodeList.nodeOpaque);
 
         const passOpaque = this.m_passOpaque;
         passOpaque.render(scene,nodeList.nodeOpaque);

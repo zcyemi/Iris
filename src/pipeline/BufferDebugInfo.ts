@@ -17,4 +17,8 @@ export class BufferDebugInfo{
         }
         return this.m_texture;
     }
+
+    public setTexture(tex:WebGLTexture | Texture){
+        this.m_texture = tex;
+    }
 }

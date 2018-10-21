@@ -117,6 +117,7 @@ export abstract class RenderPipeline{
         this.m_mainFrameBufferWidth =width;
         this.m_mainFrameBufferHeight = height;
         this.m_mainFrameBufferAspect = width/ height;
+        
     }
 
     /**

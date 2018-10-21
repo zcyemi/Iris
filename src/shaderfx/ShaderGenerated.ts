@@ -120,6 +120,20 @@ float computeShadowPCF3(vec4 vLightPos,sampler2DShadow shadowsampler){
 }
 
 #endif`;
+	public static readonly depth_ps:string = `#version 300 es\nprecision mediump float;
+
+void main(){
+}`;
+	public static readonly depth_vs:string = `#version 300 es\nprecision mediump float;
+
+#include SHADERFX_BASIS
+#queue other
+
+in vec4 aPosition;
+
+void main(){
+    gl_Position = MATRIX_MVP * aPosition;
+}`;
 	public static readonly diffuse_ps:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_LIGHT
 #include SHADERFX_LIGHTING

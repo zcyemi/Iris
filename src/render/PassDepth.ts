@@ -1,15 +1,22 @@
 import { PipelineForwardZPrepass } from "../pipeline/PipelineForwardZPrepass";
-import { ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
+import { ShaderTags, Comparison, CullingMode, Shader } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
-import { GLProgram } from "wglut";
+import { GLProgram, vec3, glmath } from "wglut";
 import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
+import { BufferDebugInfo } from "../pipeline/BufferDebugInfo";
 
-
-export class PassOpaque{
+/**
+ * Pre-rendering Depth Pass
+ */
+export class PassDepth{
 
     private pipeline:PipelineForwardZPrepass;
     private m_tags:ShaderTags;
+
+    private m_program:GLProgram;
+
+    private m_bufferDebugInfo:BufferDebugInfo;
 
     public constructor(pipeline:PipelineForwardZPrepass,deftags?:ShaderTags){
         this.pipeline = pipeline;
@@ -18,14 +25,22 @@ export class PassOpaque{
             deftags = new ShaderTags();
             deftags.blendOp = null;
             deftags.blend = false;
-            deftags.zwrite = false;
+            deftags.zwrite = true;
             deftags.ztest = Comparison.LEQUAL;
             deftags.culling = CullingMode.Back;
             deftags.fillDefaultVal();
         }
         this.m_tags =deftags;
-    }
 
+        let shader = pipeline.graphicRender.shaderLib.shaderDepth;
+        this.m_program = shader.defaultProgram;
+
+        //debug depth texture
+
+        let debuginfo = new BufferDebugInfo(pipeline.mainDepthTexture,glmath.vec4(0,200,200,200));
+        this.m_bufferDebugInfo = debuginfo;
+        pipeline.addBufferDebugInfo(debuginfo);
+    }
     public render(scene:Scene,queue:MeshRender[]){
         const CLASS = PipelineForwardZPrepass;
 
@@ -41,6 +56,10 @@ export class PassOpaque{
         let cam = scene.camera;
         if(queue.length == 0) return;
 
+        //diable color buffer
+
+        gl.colorMask(false,false,false,false);
+
         //cam
         let datacam = pipe.shaderDataCam;
         datacam.setMtxProj(cam.ProjMatrix);
@@ -48,7 +67,7 @@ export class PassOpaque{
         datacam.setCameraPos(cam.transform.position);
         pipe.updateUniformBufferCamera(datacam);
 
-        //sm
+        //state
         let state =pipe.stateCache;
         state.reset(deftags);
 
@@ -57,7 +76,16 @@ export class PassOpaque{
         //do draw
 
         let len = queue.length;
-        let curprogram:GLProgram = null;
+        let program = this.m_program;
+
+        let glp = program.Program;
+        gl.useProgram(this.m_program.Program);
+
+        let ublock = program.UniformBlock;
+        let indexCam = ublock[NAME_CAM];
+        gl.uniformBlockBinding(glp, indexCam, CLASS.UNIFORMINDEX_CAM);
+        let indexObj = ublock[NAME_OBJ];
+        gl.uniformBlockBinding(glp, indexObj, CLASS.UNIFORMINDEX_OBJ);
 
         const dataobj = pipe.shaderDataObj;
 
@@ -66,29 +94,7 @@ export class PassOpaque{
             let mat = node.material;
             let mesh = node.mesh;
 
-            let program = mat.program;
             node.refershVertexArray(glctx);
-
-            if(program != curprogram){
-                let glp = program.Program;
-                gl.useProgram(glp);
-
-                let ublock = program.UniformBlock;
-                //cam uniform buffer
-                let indexCam = ublock[NAME_CAM];
-                if (indexCam != null) gl.uniformBlockBinding(glp, indexCam, CLASS.UNIFORMINDEX_CAM);
-                //obj uniform buffer
-                let indexObj = ublock[NAME_OBJ];
-                if (indexObj != null) gl.uniformBlockBinding(glp, indexObj, CLASS.UNIFORMINDEX_OBJ);
-                //light uniform buffer
-                let indexLight = ublock[NAME_LIGHT];
-                if (indexLight != null) gl.uniformBlockBinding(glp, indexLight, CLASS.UNIFORMINDEX_LIGHT);
-                curprogram = program;
-            }
-
-            //state.apply(mat.shaderTags);
-            mat.apply(gl);
-
             dataobj.setMtxModel(node.object.transform.objMatrix);
             pipe.updateUniformBufferObject(dataobj);
 
@@ -99,5 +105,28 @@ export class PassOpaque{
 
             mat.clean(gl);
         }
+
+        gl.colorMask(true,true,true,true);
+
+
+        //copy depth buffer to seperated depth texture
+
+        let mainfb = pipe.mainFrameBuffer;
+        
+        gl.bindFramebuffer(gl.READ_FRAMEBUFFER,mainfb.frambuffer);
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,pipe.mainDepthFrameBuffer);
+
+
+        let w = mainfb.width;
+        let h = mainfb.height;
+        gl.blitFramebuffer(0,0,w,h,0,0,w,h,gl.DEPTH_BUFFER_BIT,gl.NEAREST);
+
+        gl.bindFramebuffer(gl.READ_FRAMEBUFFER,null);
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
+
+        pipe.bindTargetFrameBuffer(true);
+
+        this.m_bufferDebugInfo.setTexture(pipe.mainDepthTexture); 
+
     }
 }
