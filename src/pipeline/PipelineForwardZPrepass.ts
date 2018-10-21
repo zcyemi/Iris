@@ -1,5 +1,5 @@
 import { RenderPipeline } from "../RenderPipeline";
-import { GLContext, GLProgram } from "wglut";
+import { GLContext, GLProgram, vec4 } from "wglut";
 import { Scene } from "../Scene";
 import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { GraphicsRenderCreateInfo } from "../GraphicsRender";
@@ -8,6 +8,8 @@ import { ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
 import { PassOpaque } from "../render/PassOpaque";
 import { PassTransparent } from "../render/PassTransparent";
 import { PassSkybox } from "../render/PassSkybox";
+import { BufferDebugInfo } from "./BufferDebugInfo";
+import { PassDebug } from "../render/PassDebug";
 
 
 export class PipelineForwardZPrepass extends RenderPipeline{
@@ -16,6 +18,13 @@ export class PipelineForwardZPrepass extends RenderPipeline{
     public static readonly UNIFORMINDEX_CAM:number = 1;
     public static readonly UNIFORMINDEX_SHADOWMAP:number = 2;
     public static readonly UNIFORMINDEX_LIGHT:number = 3;
+    
+
+    private m_bufferDebugInfo:BufferDebugInfo[] = [];
+
+    public get bufferDebugInfo():BufferDebugInfo[]{
+        return this.m_bufferDebugInfo;
+    }
 
     private m_uniformBufferObj:WebGLBuffer;
     private m_uniformBufferCamera:WebGLBuffer;
@@ -45,6 +54,8 @@ export class PipelineForwardZPrepass extends RenderPipeline{
     private m_passTransparent:PassTransparent;
     private m_passSkybox:PassSkybox;
 
+    private m_passDebug:PassDebug;
+
     public constructor(){
         super();
     }
@@ -63,10 +74,13 @@ export class PipelineForwardZPrepass extends RenderPipeline{
 
         this.createUniformBuffers();
 
+        this.m_passDebug= new PassDebug(this);
+
 
         this.m_passOpaque = new PassOpaque(this,null);
         this.m_passTransparent = new PassTransparent(this,null);
         this.m_passSkybox =new PassSkybox(this,null);
+
     }
 
     private createUniformBuffers(){
@@ -140,6 +154,8 @@ export class PipelineForwardZPrepass extends RenderPipeline{
         const passTransparent = this.m_passTransparent;
         passTransparent.render(scene,nodeList.nodeTransparent);
 
+        this.renderBufferDebug();
+
         this.UnBindTargetFrameBuffer();
 
         const state = this.stateCache;
@@ -178,6 +194,24 @@ export class PipelineForwardZPrepass extends RenderPipeline{
         gl.activeTexture(gl.TEXTURE3);
         gl.bindTexture(gl.TEXTURE_2D,this.graphicRender.defaultTexture.rawtexture);
 
+    }
+
+    public addBufferDebugInfo(info:BufferDebugInfo){
+        let curinfo = this.m_bufferDebugInfo;
+        if(curinfo.indexOf(info) >=0) return;
+        curinfo.push(info);
+    }
+
+    public removeBufferDebugInfo(info:BufferDebugInfo){
+        let curinfo = this.m_bufferDebugInfo;
+        let index = curinfo.indexOf(info);
+        if(index < 0) return;
+        curinfo = curinfo.splice(index,1);
+    }
+
+    public renderBufferDebug(){
+        let passdebug = this.m_passDebug;
+        if(passdebug != null && this.m_bufferDebugInfo.length !=0) passdebug.render(null,null);
     }
 
 }

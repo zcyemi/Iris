@@ -79,6 +79,29 @@ export class ShaderFX{
 
     public static UNIFORM_MAIN_COLOR = "uColor";
     public static UNIFORM_MAIN_TEXTURE = "uSampler";
+
+    public static readonly GL_TEXTURE_FB:number = 0x84C0;
+    public static readonly GL_TEXTURE_TEMP:number = 0x84C2;
+    public static readonly GL_TEXTURE_DEF_TEX:number = 0x84C3;
+
+    //Texture used in shader sampler
+    public static readonly GL_SH_TEXTURE0:number = 	0x84C4;
+    public static readonly GL_SH_TEXTURE1:number = 	0x84C5;
+    public static readonly GL_SH_TEXTURE2:number = 	0x84C6;
+    public static readonly GL_SH_TEXTURE3:number = 	0x84C7;
+    public static readonly GL_SH_TEXTURE4:number = 	0x84C8;
+    public static readonly GL_SH_TEXTURE5:number = 	0x84C9;
+    public static readonly GL_SH_TEXTURE6:number = 	0x84C10;
+    public static readonly GL_SH_TEXTURE7:number = 	0x84C11;
+
+    public static readonly GL_SH_TEXTURE0_ID:number = 	4;
+    public static readonly GL_SH_TEXTURE1_ID:number = 	5;
+    public static readonly GL_SH_TEXTURE2_ID:number = 	6;
+    public static readonly GL_SH_TEXTURE3_ID:number = 	7;
+    public static readonly GL_SH_TEXTURE4_ID:number = 	8;
+    public static readonly GL_SH_TEXTURE5_ID:number = 	9;
+    public static readonly GL_SH_TEXTURE6_ID:number = 	10;
+    public static readonly GL_SH_TEXTURE7_ID:number = 	11;
 }
 
 
