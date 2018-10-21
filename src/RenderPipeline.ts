@@ -45,8 +45,8 @@ export abstract class RenderPipeline{
 
     public graphicRender:GraphicsRender;
 
-    private m_mainFrameBuffer:GLFrameBuffer;
-    private m_mainFrameBufferInfo:GraphicsRenderCreateInfo;
+    protected m_mainFrameBuffer:GLFrameBuffer;
+    protected m_mainFrameBufferInfo:GraphicsRenderCreateInfo;
     protected m_mainFrameBufferBinded:boolean= false;
 
     public get mainFrameBufferWidth():number{

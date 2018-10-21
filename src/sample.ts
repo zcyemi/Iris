@@ -21,6 +21,7 @@ import { FrameTimer } from './FrameTimer';
 import { TextureCubeMap } from './TextureCubeMap';
 import { SceneBuilder } from './SceneBuilder';
 import { ShaderFXLibs } from './shaderfx/ShaderFXLibs';
+import { PipelineForwardZPrepass } from './pipeline/PipelineForwardZPrepass';
 
 export class SampleGame{
     
@@ -36,7 +37,7 @@ export class SampleGame{
 
     public constructor(canvas:HTMLCanvasElement){
         this.m_canvas = canvas;
-        let grender = new GraphicsRender(canvas,new RenderPipelineDefault());
+        let grender = new GraphicsRender(canvas,new PipelineForwardZPrepass());
         this.m_sceneMgr = new SceneManager();
         let sc = grender.shadowConfig;
         sc.shadowDistance = 20;

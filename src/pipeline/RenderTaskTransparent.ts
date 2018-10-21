@@ -109,7 +109,7 @@ export class RenderTaskTransparent extends RenderTask{
                 if (indexObj != null) gl.uniformBlockBinding(glp, indexObj, pipeline.ubufferIndex_PerObj);
 
                 //light uniform buffer
-                let indexLight = ublock[ShaderDataUniformLight.LIGHT];
+                let indexLight = ublock[ShaderDataUniformLight.UNIFORM_LIGHT];
                 if (indexLight != null) gl.uniformBlockBinding(glp, indexLight, pipeline.ubufferIndex_Light);
                 curprogram = program;
             }

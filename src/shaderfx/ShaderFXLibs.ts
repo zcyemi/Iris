@@ -152,7 +152,7 @@ export class ShaderDataUniformCam extends ShaderDataFloat32Buffer{
 }
 
 export class ShaderDataUniformLight extends ShaderDataFloat32Buffer{
-    public static readonly LIGHT:string = "LIGHT";
+    public static readonly UNIFORM_LIGHT:string = "LIGHT";
 
     public constructor (){
         let buffersize = 8 *4+ 4;
