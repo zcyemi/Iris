@@ -47,7 +47,6 @@ export class MeshRender{
     }
 
     public static CreateVertexArrayObj(glctx:GLContext,mesh:Mesh,program:GLProgram):WebGLVertexArrayObject{
-        
         if(!mesh.bufferInited){
             mesh.refreshMeshBuffer(glctx);
         }

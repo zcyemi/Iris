@@ -154,6 +154,22 @@ void main(){
     gl_Position = pos;
     v2f.normal = ObjToWorldDir(aNormal.xyz);
 }`;
+	public static readonly gizmos_ps:string = `#version 300 es\nprecision mediump float;
+out vec4 fragColor;
+void main(){
+    fragColor = vec4(1.0);
+}`;
+	public static readonly gizmos_vs:string = `#version 300 es\nprecision mediump float;
+
+#include SHADERFX_BASIS
+#queue other
+
+in vec4 aPosition;
+
+void main(){
+    vec4 vpos = aPosition;
+    gl_Position = MATRIX_MVP * vpos;
+}`;
 	public static readonly pbrMetallicRoughness_ps:string = `#version 300 es\nprecision mediump float;
 
 in vec2 vUV;

@@ -22,8 +22,8 @@ export class MeshVertexAttrDesc{
 
     /**
      * constructor of MeshVertexAttrDesc
-     * @param type
-     * @param size 
+     * @param type data type
+     * @param size componsnet length [1,2,3,4]
      * @param bytes total size in bytes
      * @param offset offset in bytes
      */
@@ -35,7 +35,7 @@ export class MeshVertexAttrDesc{
     }
 
     public get length():number{
-        return this.size / this.size / MeshBufferUtility.TypeSize(this.type);
+        return this.totalbytes / this.size / MeshBufferUtility.TypeSize(this.type);
     }
 }
 
@@ -95,6 +95,12 @@ export class Mesh{
         this.vertexDesc.uv = new MeshVertexAttrDesc(type,size,data.byteLength);
     }
 
+    /**
+     * 
+     * @param data 
+     * @param type data type
+     * @param size component size
+     */
     public setPosition(data:MeshDataBuffer,type:GLDataType,size:number){
         this.m_dataPosition = data;
         this.vertexDesc.position = new MeshVertexAttrDesc(type,size,data.byteLength);

@@ -45,6 +45,7 @@ export class ShaderFXLibs{
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_SHADOWMAP)
     public static SHADERFX_SHADOWMAP:ShaderVariant;
 
+
     public get shaderUnlitColor():Shader{
         if(this.m_unlitColor == null){
             this.m_unlitColor = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_unitColor);
