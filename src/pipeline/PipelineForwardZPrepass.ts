@@ -7,6 +7,7 @@ import { RenderNodeList } from "../RenderNodeList";
 import { ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
 import { PassOpaque } from "../render/PassOpaque";
 import { PassTransparent } from "../render/PassTransparent";
+import { PassSkybox } from "../render/PassSkybox";
 
 
 export class PipelineForwardZPrepass extends RenderPipeline{
@@ -42,6 +43,7 @@ export class PipelineForwardZPrepass extends RenderPipeline{
 
     private m_passOpaque:PassOpaque;
     private m_passTransparent:PassTransparent;
+    private m_passSkybox:PassSkybox;
 
     public constructor(){
         super();
@@ -64,6 +66,7 @@ export class PipelineForwardZPrepass extends RenderPipeline{
 
         this.m_passOpaque = new PassOpaque(this,null);
         this.m_passTransparent = new PassTransparent(this,null);
+        this.m_passSkybox =new PassSkybox(this,null);
     }
 
     private createUniformBuffers(){
@@ -115,6 +118,8 @@ export class PipelineForwardZPrepass extends RenderPipeline{
 
         if(cam == null) return;
 
+        cam.aspect = this.mainFrameBufferAspect;
+
         let nodeList = this.generateDrawList(scene);
 
         this.bindTargetFrameBuffer();
@@ -124,11 +129,13 @@ export class PipelineForwardZPrepass extends RenderPipeline{
         gl.clearDepth(10.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        //do draw
-        //opaque
+        //do rendering
 
         const passOpaque = this.m_passOpaque;
         passOpaque.render(scene,nodeList.nodeOpaque);
+
+        const passSkybox= this.m_passSkybox;
+        passSkybox.render(scene,null);
 
         const passTransparent = this.m_passTransparent;
         passTransparent.render(scene,nodeList.nodeTransparent);
