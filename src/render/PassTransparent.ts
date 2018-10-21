@@ -1,12 +1,13 @@
 import { PipelineForwardZPrepass } from "../pipeline/PipelineForwardZPrepass";
-import { ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
+import { ShaderTags, Comparison, CullingMode, BlendOperator } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
 import { GLProgram } from "wglut";
 import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 
 
-export class PassOpaque{
+export class PassTransparent{
+
 
     private pipeline:PipelineForwardZPrepass;
     private m_tags:ShaderTags;
@@ -16,8 +17,9 @@ export class PassOpaque{
 
         if(deftags == null){
             deftags = new ShaderTags();
-            deftags.blendOp = null;
-            deftags.zwrite = true;
+            deftags.blendOp = BlendOperator.ADD;
+            deftags.blend = true;
+            deftags.zwrite = false;
             deftags.ztest = Comparison.LEQUAL;
             deftags.culling = CullingMode.Back;
             deftags.fillDefaultVal();
@@ -52,6 +54,7 @@ export class PassOpaque{
         state.reset(deftags);
 
         pipe.activeDefaultTexture();
+
 
         //do draw
 
@@ -99,4 +102,5 @@ export class PassOpaque{
             mat.clean(gl);
         }
     }
+
 }

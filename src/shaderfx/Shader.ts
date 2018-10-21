@@ -50,10 +50,10 @@ export enum BlendFactor{
 }
 
 export enum CullingMode{
-    Front = 1028,
-    Back = 1029,
-    FRONT_AND_BACK = 1032,
-    None = 0,
+    Front = 0x0404,
+    Back = 0x0405,
+    FRONT_AND_BACK = 0x0408,
+    None = 0x0B44,
 }
 
 export class ShaderTags{

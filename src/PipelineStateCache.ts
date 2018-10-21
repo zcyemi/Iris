@@ -1,9 +1,9 @@
-import { ShaderTags, BlendFactor, BlendOperator, CullingMode } from "./shaderfx/Shader";
+import { ShaderTags, BlendFactor, BlendOperator, CullingMode, Comparison } from "./shaderfx/Shader";
 import { GLContext } from "wglut";
 
 export class PipelineStateCache{
 
-    private m_curtags:ShaderTags;
+    private readonly m_curtags:ShaderTags;
 
     private m_deftags:ShaderTags;
     private m_lastTags:ShaderTags;
@@ -32,7 +32,7 @@ export class PipelineStateCache{
             let culling = tags.culling;
             if(curtags.culling != culling){
                 let curculling = curtags.culling;
-                curtags.culling= culling;
+                curtags.culling = culling;
                 if(culling == CullingMode.None){
                     gl.disable(gl.CULL_FACE);
                 }
@@ -50,6 +50,17 @@ export class PipelineStateCache{
             if(curtags.zwrite != zwrite){
                 curtags.zwrite =zwrite;
                 gl.depthMask(zwrite);
+            }
+        }
+
+
+        let blend = tags.blend;
+        if(curtags.blend != blend){
+            if(!blend){
+                gl.disable(gl.BLEND);
+            }
+            else{
+                gl.enable(gl.BLEND);
             }
         }
 
@@ -93,6 +104,40 @@ export class PipelineStateCache{
         this.m_deftags= tags;
     }
 
+    public setZTest(comp:Comparison){
+        const curtag = this.m_curtags;
+
+        if(curtag.ztest == comp) return;
+        curtag.ztest = comp;
+        const gl =this.gl;
+        gl.depthFunc(comp);
+    }
+
+    public setZWrite(enable:boolean){
+        const curtag = this.m_curtags;
+
+        if(curtag.zwrite == enable) return;
+        curtag.zwrite = enable;
+        const gl =this.gl;
+        gl.depthMask(enable);
+    }
+
+    public setBlend(enable:boolean){
+        const curtag = this.m_curtags;
+        if(curtag.blend == enable) return;
+        curtag.blend = enable;
+        const gl =this.gl;
+
+        if(enable){
+            gl.enable(gl.BLEND);
+        }
+        else{
+            gl.disable(gl.BLEND);
+        }
+    }
+
+
+
     public apply(tags:ShaderTags){
         if(this.m_lastTags == tags) return;
 
@@ -130,6 +175,15 @@ export class PipelineStateCache{
             gl.depthMask(zwrite);
         }
 
+        let blend = tags.blend;
+        if(blend != curtags.blend){
+            if(blend){
+                gl.enable(gl.BLEND);
+            }
+            else{
+                gl.disable(gl.BLEND);
+            }
+        }
 
 
         this.m_lastTags = tags;

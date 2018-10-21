@@ -6,6 +6,7 @@ import { GraphicsRenderCreateInfo } from "../GraphicsRender";
 import { RenderNodeList } from "../RenderNodeList";
 import { ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
 import { PassOpaque } from "../render/PassOpaque";
+import { PassTransparent } from "../render/PassTransparent";
 
 
 export class PipelineForwardZPrepass extends RenderPipeline{
@@ -40,6 +41,7 @@ export class PipelineForwardZPrepass extends RenderPipeline{
 
 
     private m_passOpaque:PassOpaque;
+    private m_passTransparent:PassTransparent;
 
     public constructor(){
         super();
@@ -61,6 +63,7 @@ export class PipelineForwardZPrepass extends RenderPipeline{
 
 
         this.m_passOpaque = new PassOpaque(this,null);
+        this.m_passTransparent = new PassTransparent(this,null);
     }
 
     private createUniformBuffers(){
@@ -117,8 +120,8 @@ export class PipelineForwardZPrepass extends RenderPipeline{
         this.bindTargetFrameBuffer();
 
         let gl = this.gl;
-        gl.clearColor(1,1,0,1);
-        gl.clearDepth(1.0);
+        gl.clearColor(1,0,0,1);
+        gl.clearDepth(10.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         //do draw
@@ -127,7 +130,15 @@ export class PipelineForwardZPrepass extends RenderPipeline{
         const passOpaque = this.m_passOpaque;
         passOpaque.render(scene,nodeList.nodeOpaque);
 
+        const passTransparent = this.m_passTransparent;
+        passTransparent.render(scene,nodeList.nodeTransparent);
+
         this.UnBindTargetFrameBuffer();
+
+        const state = this.stateCache;
+        state.setBlend(false);
+        state.setZTest(Comparison.ALWAYS);
+        state.setZWrite(true);
 
     }
 
