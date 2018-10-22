@@ -38,7 +38,6 @@ export class PipelineForwardZPrepass extends RenderPipeline{
     public get mainDepthFrameBuffer():WebGLFramebuffer{
         return this.m_mainDepthFB;
     }
-    
 
     private m_uniformBufferObj:WebGLBuffer;
     private m_uniformBufferCamera:WebGLBuffer;
@@ -62,7 +61,6 @@ export class PipelineForwardZPrepass extends RenderPipeline{
     public get shaderDataShadowMap():ShaderDataUniformShadowMap{
         return this.m_shaderDataShadowMap;
     }
-
 
     private m_passDepth:PassDepth;
 

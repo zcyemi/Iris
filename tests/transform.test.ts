@@ -3,7 +3,6 @@ import {Transform} from '../src/Transform';
 
 describe("Transform",()=>{
     it("rotation",()=>{
-        let trs = new Transform();
+        let trs = new Transform(null);
     })
-
 });

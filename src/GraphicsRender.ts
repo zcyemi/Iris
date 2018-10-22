@@ -53,7 +53,7 @@ export class GraphicsRender{
     }
 
 
-    public constructor(canvas:HTMLCanvasElement,pipeline:RenderPipeline,creationInfo?:GraphicsRenderCreateInfo){
+    public constructor(canvas:HTMLCanvasElement,pipeline?:RenderPipeline,creationInfo?:GraphicsRenderCreateInfo){
         this.canvas = canvas;
 
 
@@ -72,7 +72,6 @@ export class GraphicsRender{
         });
         this.m_glctx = glctx;
 
-        this.m_renderPipeline = pipeline;
         this.m_shaderFXlib = new ShaderFXLibs(glctx);
         
 
@@ -89,9 +88,22 @@ export class GraphicsRender{
         
         gl.frontFace(gl.CCW);
 
+        this.setPipeline(pipeline);
+    }
+
+    public setPipeline(pipeline:RenderPipeline){
+        if(pipeline == null) return;
+        let curpipeline = this.m_renderPipeline;
+
+        if(curpipeline != null){
+            curpipeline.release();
+            curpipeline = null;
+        }
+        
         pipeline.graphicRender = this;
-        pipeline.onInitGL(glctx);
-        pipeline.onSetupRender(creationInfo);
+        pipeline.onInitGL(this.glctx);
+        pipeline.onSetupRender(this.m_creationInfo);
+        this.m_renderPipeline = pipeline;
     }
 
     public reload(){
