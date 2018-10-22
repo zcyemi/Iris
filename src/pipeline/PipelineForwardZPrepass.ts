@@ -12,6 +12,7 @@ import { BufferDebugInfo } from "./BufferDebugInfo";
 import { PassDebug } from "../render/PassDebug";
 import { PassGizmos } from "../render/PassGizmos";
 import { PassDepth } from "../render/PassDepth";
+import { PassShadowMap } from "../render/PassShadowMap";
 
 
 export class PipelineForwardZPrepass extends RenderPipeline{
@@ -71,6 +72,8 @@ export class PipelineForwardZPrepass extends RenderPipeline{
     private m_passDebug:PassDebug;
     private m_passGizmos:PassGizmos;
 
+    private m_passShadowMap:PassShadowMap;
+
     public constructor(){
         super();
     }
@@ -100,6 +103,8 @@ export class PipelineForwardZPrepass extends RenderPipeline{
         this.m_passOpaque = new PassOpaque(this,null);
         this.m_passTransparent = new PassTransparent(this,null);
         this.m_passSkybox =new PassSkybox(this,null);
+
+        this.m_passShadowMap = new PassShadowMap(this);
 
     }
 
@@ -207,6 +212,8 @@ export class PipelineForwardZPrepass extends RenderPipeline{
 
         const passDepth = this.m_passDepth;
         passDepth.render(scene,nodeList.nodeOpaque);
+
+        //sm
 
         const passOpaque = this.m_passOpaque;
         passOpaque.render(scene,nodeList.nodeOpaque);
