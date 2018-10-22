@@ -37,7 +37,7 @@ export class PassDepth{
 
         //debug depth texture
 
-        let debuginfo = new BufferDebugInfo(pipeline.mainDepthTexture,glmath.vec4(0,200,200,200));
+        let debuginfo = new BufferDebugInfo(pipeline.mainDepthTexture,glmath.vec4(0,0,200,200));
         this.m_bufferDebugInfo = debuginfo;
         pipeline.addBufferDebugInfo(debuginfo);
     }
@@ -65,6 +65,8 @@ export class PassDepth{
         datacam.setMtxProj(cam.ProjMatrix);
         datacam.setMtxView(cam.WorldMatrix);
         datacam.setCameraPos(cam.transform.position);
+        datacam.setScreenSize(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight);
+        datacam.setClipPlane(cam.near,cam.far);
         pipe.updateUniformBufferCamera(datacam);
 
         //state

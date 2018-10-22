@@ -81,6 +81,7 @@ export class ShaderFX{
     public static UNIFORM_MAIN_TEXTURE = "uSampler";
 
     public static readonly GL_TEXTURE_FB:number = 0x84C0;
+    public static readonly GL_TEXTURE_DEPTH:number = 0x84C1;
     public static readonly GL_TEXTURE_TEMP:number = 0x84C2;
     public static readonly GL_TEXTURE_DEF_TEX:number = 0x84C3;
 
@@ -107,10 +108,10 @@ export class ShaderFX{
     public static readonly GL_SH_TEXTURE6_ID:number = 	10;
     public static readonly GL_SH_TEXTURE7_ID:number = 	11;
 
-    public static readonly GL_SHADOWMAP_TEX0:number = 0x84C12;
-    public static readonly GL_SHADOWMAP_TEX1:number = 0x84C13;
-    public static readonly GL_SHADOWMAP_TEX2:number = 0x84C14;
-    public static readonly GL_SHADOWMAP_TEX3:number = 0x84C15;
+    public static readonly GL_SHADOWMAP_TEX0:number = 0x84CC;
+    public static readonly GL_SHADOWMAP_TEX1:number = 0x84CD;
+    public static readonly GL_SHADOWMAP_TEX2:number = 0x84CE;
+    public static readonly GL_SHADOWMAP_TEX3:number = 0x84CF;
 
     public static readonly GL_SHADOWMAP_TEX0_ID:number = 12;
     public static readonly GL_SHADOWMAP_TEX1_ID:number = 13;

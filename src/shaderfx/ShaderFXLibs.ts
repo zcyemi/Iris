@@ -145,7 +145,7 @@ export class ShaderDataUniformCam extends ShaderDataFloat32Buffer{
 
 
     public constructor(){
-        let buffersize = 16*4 *2 + 16;
+        let buffersize = 16*4 *2 + 16 + 16 + 16;
         super(buffersize);
     }
 
@@ -158,6 +158,20 @@ export class ShaderDataUniformCam extends ShaderDataFloat32Buffer{
 
     public setCameraPos(pos:vec3){
         this.setVec4(32,pos.vec4(1));
+    }
+
+    public setClipPlane(near:number,far:number){
+        this.setFloat(36,near);
+        this.setFloat(37,far);
+        this.setFloat(38,1.0/near);
+        this.setFloat(39,1.0/far);
+    }
+
+    public setScreenSize(width:number,height:number){
+        this.setFloat(40,width);
+        this.setFloat(41,height);
+        this.setFloat(42,1.0/width);
+        this.setFloat(43,1.0/height);
     }
     
 }

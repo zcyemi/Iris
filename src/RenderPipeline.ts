@@ -68,9 +68,9 @@ export abstract class RenderPipeline{
         return this.m_pipestateCache;
     }
 
-    private m_mainFrameBufferAspect:number = 1.0;
-    private m_mainFrameBufferWidth:number = 0;
-    private m_mainFrameBufferHeight:number = 0;
+    protected m_mainFrameBufferAspect:number = 1.0;
+    protected m_mainFrameBufferWidth:number = 0;
+    protected m_mainFrameBufferHeight:number = 0;
 
     public constructor(){
 

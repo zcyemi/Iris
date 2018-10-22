@@ -4,12 +4,16 @@ import { MeshRender } from "../MeshRender";
 import { ShadowMapInfo } from "../pipeline/RenderTaskShadowMap";
 import { Shader } from "../shaderfx/Shader";
 import { GLProgram, glmath, vec3, mat4, vec4 } from "wglut";
-import { ShaderFX } from "../shaderfx/ShaderFX";
+import { ShaderFX, ShaderFile } from "../shaderfx/ShaderFX";
 import { ShadowCascade, ShadowConfig } from "./Shadow";
-import { Texture } from "../Texture";
+import { Texture, TextureCreationDesc } from "../Texture";
 import { Light, LightType } from "../Light";
 import { Camera } from "../Camera";
 import { RenderNodeList } from "../RenderNodeList";
+import { BufferDebugInfo } from "../pipeline/BufferDebugInfo";
+import { Mesh } from "../Mesh";
+import { ShaderSource } from "../shaderfx/ShaderSource";
+import { Material } from "../Material";
 
 
 export class PassShadowMap{
@@ -25,9 +29,21 @@ export class PassShadowMap{
     private m_smwidth:number;
     private m_smheight:number;
 
-    private m_smtex:WebGLTexture;
+    private m_smtex:Texture;
     private m_smfb:WebGLFramebuffer;
 
+    private m_bufferDebugInfo:BufferDebugInfo;
+
+    //ShadowGathering
+    private m_shadowTexture:Texture;
+    private m_shadowFB:WebGLFramebuffer;
+    private m_quadMesh:Mesh;
+    private m_quadVAO:WebGLVertexArrayObject;
+    private m_gatherMat:Material;
+
+    @ShaderFile("shadowsGather")
+    private static SH_shadowGather:ShaderSource;
+    private static s_shadowGatherShader:Shader;
 
     public constructor(pipeline:PipelineForwardZPrepass){
         this.pipe = pipeline;
@@ -70,26 +86,55 @@ export class PassShadowMap{
         this.m_smwidth = smwidth;
 
         //depth texture and framebuffer
-        let smtex = gl.createTexture();
+
+        let smtexdesc = new TextureCreationDesc(null,gl.DEPTH_COMPONENT24,false,gl.NEAREST,gl.NEAREST);
+        let smtex = Texture.createTexture2D(smwidth,smheight,smtexdesc,glctx);
         this.m_smtex = smtex;
-        gl.activeTexture(ShaderFX.GL_SHADOWMAP_TEX0);
-        gl.bindTexture(gl.TEXTURE_2D,smtex);
-        gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texStorage2D(gl.TEXTURE_2D,1,gl.DEPTH_COMPONENT24,smwidth,smheight);
-        gl.bindTexture(gl.TEXTURE_2D,null);
         
         let smfb = gl.createFramebuffer();
         this.m_smfb = smfb;
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,smfb);
-        gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.TEXTURE_2D,smtex,0);
+        gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.TEXTURE_2D,smtex.rawtexture,0);
         let status = gl.checkFramebufferStatus(gl.DRAW_FRAMEBUFFER);
         if(status != gl.FRAMEBUFFER_COMPLETE){
             console.error('fb status incomplete '+ status.toString(16));
         }
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
+
+
+        let debuginfo = new BufferDebugInfo(this.m_smtex,glmath.vec4(200,0,200,200));
+        pipe.addBufferDebugInfo(debuginfo);
+
+        //shadow gather
+
+        if(PassShadowMap.s_shadowGatherShader == null){
+            let gathersh = ShaderFX.compileShaders(glctx,PassShadowMap.SH_shadowGather);
+            PassShadowMap.s_shadowGatherShader = gathersh;
+        }
+
+        let gathermat = new Material(PassShadowMap.s_shadowGatherShader);
+        let gatherProj = gathermat.program;
+        this.m_gatherMat = gathermat;
+
+        gathermat.setTexture("uDepthTexure",pipe.mainDepthTexture);
+        gathermat.setTexture("uShadowMap",this.m_smtex);
+
+        this.m_quadMesh = Mesh.Quad;
+        this.m_quadVAO = MeshRender.CreateVertexArrayObj(glctx,this.m_quadMesh,gatherProj);
+
+
+        let texdesc = new TextureCreationDesc(gl.RGB,gl.RGB8,false,gl.LINEAR,gl.LINEAR);
+        let stex = Texture.createTexture2D(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight,texdesc,glctx);
+        this.m_shadowTexture = stex;
+
+        let sfb = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,sfb);
+        gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,stex.rawtexture,0);
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
+        this.m_shadowFB = sfb;
+
+        let debugshadows = new BufferDebugInfo(stex,glmath.vec4(0,200,200,200));
+        pipe.addBufferDebugInfo(debugshadows);
 
     }
 
@@ -110,14 +155,18 @@ export class PassShadowMap{
         gl.uniformBlockBinding(glp,this.m_blockIndexCam,CLASS.UNIFORMINDEX_CAM);
         gl.uniformBlockBinding(glp,this.m_blockIndexObj,CLASS.UNIFORMINDEX_OBJ);
 
-        let light = scene.lights;
-        for(let i=0,lcount = light.length;i<lcount;i++){
-            this.renderLightShadowMap(light[i],cam,queue,config);
+        let lights = scene.lights;
+        for(let i=0,lcount = lights.length;i<lcount;i++){
+            this.renderLightShadowMap(lights[i],cam,queue,config);
         }
 
         //update shadowmap uniform buffer
         let smdata = this.pipe.shaderDataShadowMap;
         pipe.updateUniformBufferShadowMap(smdata);
+
+        this.shadowGathering(lights[0]);
+
+        pipe.bindTargetFrameBuffer(true);
     }
 
     private renderLightShadowMap(light:Light,camera:Camera,queue:MeshRender[],config:ShadowConfig){
@@ -238,5 +287,35 @@ export class PassShadowMap{
             gl.drawElements(indicesDesc.topology,indicesDesc.indiceCount,indicesDesc.indices.type,0);
             gl.bindVertexArray(null);
         }
+    }
+
+
+    private shadowGathering(light:Light){
+        const gl =this.pipe.GL;
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,this.m_shadowFB);
+        gl.clearColor(0,0,0,0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        let shadowtex = this.m_shadowTexture;
+
+        gl.viewport(0,0,shadowtex.width,shadowtex.height);
+
+        let mat = this.m_gatherMat;
+        let program = mat.program;
+        gl.useProgram(program.Program);
+
+        mat.apply(gl);
+
+        let mesh = this.m_quadMesh;
+        let vao = this.m_quadVAO;
+        gl.bindVertexArray(vao);
+
+        let indices = mesh.indiceDesc;
+        gl.drawElements(gl.TRIANGLES,indices.indiceCount,indices.indices.type,0);
+        gl.bindVertexArray(null);
+
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
+
+
     }
 }

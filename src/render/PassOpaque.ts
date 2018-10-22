@@ -46,6 +46,8 @@ export class PassOpaque{
         datacam.setMtxProj(cam.ProjMatrix);
         datacam.setMtxView(cam.WorldMatrix);
         datacam.setCameraPos(cam.transform.position);
+        datacam.setScreenSize(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight);
+        datacam.setClipPlane(cam.near,cam.far);
         pipe.updateUniformBufferCamera(datacam);
 
         //sm

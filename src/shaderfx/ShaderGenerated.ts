@@ -7,12 +7,22 @@ export class ShaderGen{
 #include SHADERFX_CAMERA
 vec3 ObjToWorldDir(in vec3 dir){
     return normalize(dir * mat3(MATRIX_WORLD2OBJ));
+}
+
+float SAMPLE_DEPTH_TEXTURE(sampler2D depthtex,vec2 uv){
+    return texture(depthtex,uv).r;
+}
+
+float DECODE_VIEWDEPTH(float d){
+    return 1.0/ ((CAMERA_NEAR_INV - CAMERA_FAR_INV) * d  - CAMERA_NEAR_INV);
 }`;
 	public static readonly SHADERFX_CAMERA:string = `#include SHADERFX_OBJ
 uniform UNIFORM_CAM{
     mat4 _world2view_;
     mat4 _view2proj_;
     vec4 _camerapos_;
+    vec4 _projparam_; //[near,far,1/near,1/far]
+    vec4 _screenparam_;//[width,height,1/wdith,1/height]
 };
 #define MATRIX_V _world2view_
 #define MATRIX_P _view2proj_
@@ -21,7 +31,15 @@ uniform UNIFORM_CAM{
 #define MATRIX_IT_MV transpose(inverse(MATRIX_MV))
 #define MATRIX_MVP MATRIX_P * MATRIX_MV
 #define MATRIX_WORLD2OBJ inverse(MATRIX_M)
-#define CAMERA_POS _camerapos_`;
+#define CAMERA_POS _camerapos_
+#define CAMERA_NEAR _projparam_.x
+#define CAMERA_FAR _projparam_.y
+#define CAMERA_NEAR_INV _projparam_.z
+#define CAMERA_FAR_INV _projparam_.w
+#define SCREEN_WIDTH _screenparam_.x
+#define SCREEN_HEIGHT _screenparam_.y
+#define SCREEN_WIDTH_INV _screenparam_.z
+#define SCREEN_HEIGHT_INV _screenparam_.w`;
 	public static readonly SHADERFX_LIGHT:string = `struct LIGHT_DATA{
     vec4 pos_type;
     vec4 col_intensity;
@@ -218,6 +236,28 @@ out vec2 vUV;
 void main(){
     gl_Position = MATRIX_MVP * vec4(aPosition,1.0);
     vUV = aUV;
+}`;
+	public static readonly shadowsGather_ps:string = `#version 300 es\nprecision mediump float;
+out vec4 fragColor;
+
+uniform sampler2D uDepthTexure;
+uniform sampler2D uShadowMap;
+
+in vec2 vUV;
+
+void main(){
+    fragColor = texture(uDepthTexure,vUV);
+}`;
+	public static readonly shadowsGather_vs:string = `#version 300 es\nprecision mediump float;
+in vec4 aPosition;
+
+out vec2 vUV;
+
+void main(){
+    vec4 pos = aPosition;
+    vUV = pos.xy +0.5;
+    pos.xy *=2.0;
+    gl_Position = pos;
 }`;
 	public static readonly skybox_ps:string = `#version 300 es\nprecision mediump float;
 
