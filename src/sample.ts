@@ -100,7 +100,7 @@ export class SampleGame{
 
         //let tex = (await sceneBuilder.getImage(1));
 
-        const isgltf:boolean =false;
+        const isgltf:boolean =true;
 
         let scene:Scene = null;
 
@@ -110,7 +110,7 @@ export class SampleGame{
             this.m_scene = scene;
 
             let skyboxobj = scene.getChildByName('sky_sky_0');
-            if(skyboxobj!=null) skyboxobj.active = false;
+            if(skyboxobj!=null) skyboxobj.render.castShadow = false;
     
         }
         else{
@@ -137,47 +137,24 @@ export class SampleGame{
         this.m_camera = camera;
 
         //cube
-        // let obj1 = new GameObject("cube");
-        // this.m_obj1 = obj1;
-        // obj1.transform.localPosition = glmath.vec3(0,5,-5);
-        // obj1.transform.localScale = glmath.vec3(0.001,0.001,0.001);
-        let matDiffuse = new Material(grender.shaderLib.shaderUnlitColor);
-        // matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
-        // new MeshRender(Mesh.Cube,matDiffuse);
-        // obj1.addComponent(<Component>{
-        //     onUpdate:function(scene:Scene){
-        //         let dt = Input.snapshot.deltaTime;
-        //         dt *= 30.0;
-        //         const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
-        //         let trs = this.gameobject.transform;
-        //         trs.rotate(rota);
-        //     }
-        // })
-        // obj1.transform.parent = scene.transform;
+        let obj1 = new GameObject("cube");
+        this.m_obj1 = obj1;
+        obj1.transform.localPosition = glmath.vec3(0,5,-5);
+        obj1.transform.localScale = vec3.one;
+        let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
+        matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
+        obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
+        obj1.addComponent(<Component>{
+            onUpdate:function(scene:Scene){
+                let dt = Input.snapshot.deltaTime;
+                dt *= 30.0;
+                const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
+                let trs = this.gameobject.transform;
+                trs.applyRotate(rota);
+            }
+        })
+        obj1.transform.parent = scene.transform;
 
-
-        let ccube = new GameObject("ccube");
-        ccube.transform.localPosition = glmath.vec3(0,3,0);
-        ccube.transform.applyRotate(quat.fromEulerDeg(30,20,70));
-        let mat1 = matDiffuse.clone();
-        mat1.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0,0,1,1));
-        ccube.render = new MeshRender(Mesh.Cube,mat1);
-        ccube.transform.parent = scene.transform;
-
-        // //cube2
-        // let obj3 = new GameObject();
-        // this.m_obj3 = obj3;
-        // obj3.transform.setPosition(glmath.vec3(-3,3,-3));
-        // obj3.transform.setScale(glmath.vec3(0.001,0.001,0.001));
-        // obj3.transform.rotate(quat.fromEulerDeg(20,45,0));
-        // let matColor = new Material(grender.shaderLib.shaderPbrMetallicRoughness);
-        // matColor.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0,0,1,1));
-
-        // let mesh = sceneBuilder.getMesh(4);
-        // console.log(mesh);
-
-        // obj3.render = mesh;
-        // scene.addChild(obj3);
 
         //plane
         let obj2 = new GameObject();
@@ -185,7 +162,7 @@ export class SampleGame{
         obj2.transform.localPosition = glmath.vec3(0,0,-5);
         obj2.transform.localScale = glmath.vec3(20,20,1);
         obj2.transform.localRotation = quat.axisRotationDeg(vec3.right,90);
-        let obj2mat = new Material(grender.shaderLib.shaderUnlitColor)
+        let obj2mat = new Material(grender.shaderLib.shaderUnlitTexture)
         obj2mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
         obj2mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
         obj2.render = new MeshRender(Mesh.Quad, obj2mat);
@@ -193,7 +170,7 @@ export class SampleGame{
 
         //directional light
         let lightobj = new GameObject();
-        let light0 = Light.creatDirctionLight(lightobj,1.0,glmath.vec3(0.5,-1,0.5));
+        let light0 = Light.creatDirctionLight(lightobj,1.0,glmath.vec3(-0.5,-1,0.4));
         light0.lightColor = new vec3([1,1,1]);
         lightobj.transform.parent = scene.transform;
 

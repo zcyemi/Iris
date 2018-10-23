@@ -24,11 +24,6 @@ void main(){
 
     vec2 coord=  lcpos.xy;
     float shadowDep = texture(uShadowMap,coord).x;
-
-    // if(coord < 0.01){
-    //     coord = 1.0;
-    // }
-
     float d = shadowDep;// lcpos.z;
 
     fragColor = vec4(lcpos.z -1.0,0,0,1.0);

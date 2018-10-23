@@ -182,8 +182,7 @@ export class RenderTaskForwardShading extends RenderTask {
         //shadowmap
         var shadowmapEnabled = pipeline.shadowMapEnabled;
         if(shadowmapEnabled){
-            gl.activeTexture(pipeline.utex_sm[0]);
-            gl.bindTexture(gl.TEXTURE_2D, pipeline.shadowMapInfo[0].texture);
+
         }
         let shadowOptions:ShaderOptions = null;
         if(shadowmapEnabled != this.m_shdaowEnabled){
@@ -201,6 +200,9 @@ export class RenderTaskForwardShading extends RenderTask {
         //Can be optimized
         gl.activeTexture(gl.TEXTURE3);
         gl.bindTexture(gl.TEXTURE_2D,pipeline.graphicRender.defaultTexture.rawtexture);
+
+        gl.activeTexture(gl.TEXTURE15);
+        gl.bindTexture(gl.TEXTURE_2D, pipeline.shadowMapInfo[0].texture);
 
         //draw
         let len = queue.length;
@@ -245,9 +247,13 @@ export class RenderTaskForwardShading extends RenderTask {
                 if(shadowmapEnabled){
                     let indexSM = ublock[ShaderFX.UNIFORM_SHADOWMAP];
                     if (indexSM != null) {
+
                         gl.uniformBlockBinding(glp, indexSM, pipeline.ubufferIndex_ShadowMap);
                         let loc = program.Uniforms['uShadowMap'];
-                        if (loc != null) gl.uniform1i(loc, pipeline.utex_sm_slot[0]);
+                        if (loc != null){
+                            gl.uniform1i(loc,15);
+                        }
+
                     }
                 }
             }

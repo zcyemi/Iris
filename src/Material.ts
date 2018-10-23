@@ -198,6 +198,8 @@ export class Material{
         let pu = this.m_propertyBlock.uniforms;
         for(var key in pu){
             let u = pu[key];
+
+            if(key === "uShadowMap") continue;
             this.setUniform(gl,program.Uniforms[key],u.type,u.value);
         }
     }

@@ -5274,25 +5274,25 @@ var ShaderGen = /** @class */ (function () {
     ShaderGen.SHADERFX_LIGHT = "struct LIGHT_DATA{\n    vec4 pos_type;\n    vec4 col_intensity;\n};\nuniform LIGHT{\n    LIGHT_DATA light_source[4];\n    vec4 ambient_color;\n};\n#define LIGHT_COLOR0 light_source[0].col_intensity.xyz\n#define LIGHT_COLOR1 light_source[1].col_intensity.xyz\n#define LIGHT_COLOR2 light_source[2].col_intensity.xyz\n#define LIGHT_COLOR3 light_source[3].col_intensity.xyz\n\n#define LIGHT_INTENSITY0 light_source[0].col_intensity.w\n#define LIGHT_INTENSITY1 light_source[1].col_intensity.w\n#define LIGHT_INTENSITY2 light_source[2].col_intensity.w\n#define LIGHT_INTENSITY3 light_source[3].col_intensity.w\n\n#define LIGHT_DIR0 light_source[0].pos_type.xyz\n#define LIGHT_DIR1 light_source[1].pos_type.xyz";
     ShaderGen.SHADERFX_LIGHTING = "vec3 LightModel_Lambert(vec3 lightdir,vec3 lightColor,vec3 normal,vec3 albedo){\n    float diff = max(.0,dot(lightdir,normal));\n    return albedo * lightColor * diff;\n}";
     ShaderGen.SHADERFX_OBJ = "uniform UNIFORM_OBJ{\n    mat4 _obj2world_;\n};\n#define MATRIX_M _obj2world_";
-    ShaderGen.SHADERFX_SHADOWMAP = "#options SMCASCADE NONE TWO FOUR\n#options SHADOW ON OFF\n\n#ifdef SHADOW_ON\n\nuniform UNIFORM_SHADOWMAP{\n    mat4 uLightMtx[4];\n    float uShadowDist;\n};\nuniform sampler2D uShadowMap;\n\nfloat computeShadow(vec4 vLightPos,sampler2D shadowsampler){\n    vec3 clipspace = vLightPos.xyz / vLightPos.w;\n    clipspace = clipspace *0.5 + 0.5;\n    float shadowDep = texture(shadowsampler,vec2(clipspace.xy)).x;\n    return step(clipspace.z- 0.01,shadowDep);\n}\n\nfloat computeShadowPoisson(vec4 vLightPos,sampler2D shadowsampler){\n    vec3 clipspace = vLightPos.xyz / vLightPos.w;\n    clipspace = clipspace *0.5 + 0.5;\n\n    vec2 coord = clipspace.xy;\n    float curdepth = clipspace.z - 0.01;\n    float visibility = 1.0;\n\n    float mapsize = 1.0/1024.0;\n\n    vec2 poissonDisk[4];\n        poissonDisk[0] = vec2(-0.94201624, -0.39906216);\n        poissonDisk[1] = vec2(0.94558609, -0.76890725);\n        poissonDisk[2] = vec2(-0.094184101, -0.92938870);\n        poissonDisk[3] = vec2(0.34495938, 0.29387760);\n\n    if(texture(shadowsampler,coord + poissonDisk[0] * mapsize).r <curdepth) visibility -=0.25;\n    if(texture(shadowsampler,coord + poissonDisk[1] * mapsize).r <curdepth) visibility -=0.25;\n    if(texture(shadowsampler,coord + poissonDisk[2] * mapsize).r <curdepth) visibility -=0.25;\n    if(texture(shadowsampler,coord + poissonDisk[3] * mapsize).r <curdepth) visibility -=0.25;\n    return visibility;\n}\n\nfloat computeShadowPCF3(vec4 vLightPos,sampler2DShadow shadowsampler){\n    vec3 clipspace = vLightPos.xyz / vLightPos.w;\n    clipspace = clipspace *0.5 + 0.5;\n\n    vec2 shadowMapSizeInv = vec2(1024.0,1.0/1024.0);\n\n    float curdepth = clipspace.z;\n\n    vec2 uv = clipspace.xy *shadowMapSizeInv.x;\n    uv += 0.5;\n    vec2 st = fract(uv);\n    vec2 base_uv = floor(uv) - 0.5;\n    base_uv *= shadowMapSizeInv.y;\n\n    vec2 uvw0 = 3. - 2. * st;\n    vec2 uvw1 = 1. + 2. * st;\n    vec2 u = vec2((2. - st.x) / uvw0.x - 1., st.x / uvw1.x + 1.) * shadowMapSizeInv.y;\n    vec2 v = vec2((2. - st.y) / uvw0.y - 1., st.y / uvw1.y + 1.) * shadowMapSizeInv.y;\n\n    float shadow = 0.;\n    shadow += uvw0.x * uvw0.y * texture(shadowsampler, vec3(base_uv.xy + vec2(u[0], v[0]), curdepth));\n    shadow += uvw1.x * uvw0.y * texture(shadowsampler, vec3(base_uv.xy + vec2(u[1], v[0]), curdepth));\n    shadow += uvw0.x * uvw1.y * texture(shadowsampler, vec3(base_uv.xy + vec2(u[0], v[1]), curdepth));\n    shadow += uvw1.x * uvw1.y * texture(shadowsampler, vec3(base_uv.xy + vec2(u[1], v[1]), curdepth));\n    shadow = shadow / 16.;\n    return shadow;\n}\n\n#endif";
+    ShaderGen.SHADERFX_SHADOWMAP = "#options SMCASCADE NONE TWO FOUR\n#options SHADOW ON OFF\n\n#ifdef SHADOW_ON\n\nuniform UNIFORM_SHADOWMAP{\n    mat4 uLightMtx[4];\n    float uShadowDist;\n};\nuniform sampler2D uShadowMap;\n\nfloat computeShadow(vec4 vLightPos,sampler2D shadowsampler){\n    vec3 clipspace = vLightPos.xyz / vLightPos.w;\n    clipspace = clipspace *0.5 + 0.5;\n    float shadowDep = texture(shadowsampler,vec2(clipspace.xy)).x;\n    \n    //fix shadowmpa edge clamp\n    vec2 border = step(clipspace.xy,vec2(0.002));\n    border += step(vec2(0.998),clipspace.xy);\n    shadowDep += (border.x + border.y);\n\n    return step(clipspace.z- 0.01,shadowDep);\n}\n\nfloat computeShadowPoisson(vec4 vLightPos,sampler2D shadowsampler){\n    vec3 clipspace = vLightPos.xyz / vLightPos.w;\n    clipspace = clipspace *0.5 + 0.5;\n\n    vec2 coord = clipspace.xy;\n    float curdepth = clipspace.z - 0.01;\n    float visibility = 1.0;\n\n    float mapsize = 1.0/1024.0;\n\n    vec2 poissonDisk[4];\n        poissonDisk[0] = vec2(-0.94201624, -0.39906216);\n        poissonDisk[1] = vec2(0.94558609, -0.76890725);\n        poissonDisk[2] = vec2(-0.094184101, -0.92938870);\n        poissonDisk[3] = vec2(0.34495938, 0.29387760);\n\n    if(texture(shadowsampler,coord + poissonDisk[0] * mapsize).r <curdepth) visibility -=0.25;\n    if(texture(shadowsampler,coord + poissonDisk[1] * mapsize).r <curdepth) visibility -=0.25;\n    if(texture(shadowsampler,coord + poissonDisk[2] * mapsize).r <curdepth) visibility -=0.25;\n    if(texture(shadowsampler,coord + poissonDisk[3] * mapsize).r <curdepth) visibility -=0.25;\n    return visibility;\n}\n\nfloat computeShadowPCF3(vec4 vLightPos,sampler2DShadow shadowsampler){\n    vec3 clipspace = vLightPos.xyz / vLightPos.w;\n    clipspace = clipspace *0.5 + 0.5;\n\n    vec2 shadowMapSizeInv = vec2(1024.0,1.0/1024.0);\n\n    float curdepth = clipspace.z;\n\n    vec2 uv = clipspace.xy *shadowMapSizeInv.x;\n    uv += 0.5;\n    vec2 st = fract(uv);\n    vec2 base_uv = floor(uv) - 0.5;\n    base_uv *= shadowMapSizeInv.y;\n\n    vec2 uvw0 = 3. - 2. * st;\n    vec2 uvw1 = 1. + 2. * st;\n    vec2 u = vec2((2. - st.x) / uvw0.x - 1., st.x / uvw1.x + 1.) * shadowMapSizeInv.y;\n    vec2 v = vec2((2. - st.y) / uvw0.y - 1., st.y / uvw1.y + 1.) * shadowMapSizeInv.y;\n\n    float shadow = 0.;\n    shadow += uvw0.x * uvw0.y * texture(shadowsampler, vec3(base_uv.xy + vec2(u[0], v[0]), curdepth));\n    shadow += uvw1.x * uvw0.y * texture(shadowsampler, vec3(base_uv.xy + vec2(u[1], v[0]), curdepth));\n    shadow += uvw0.x * uvw1.y * texture(shadowsampler, vec3(base_uv.xy + vec2(u[0], v[1]), curdepth));\n    shadow += uvw1.x * uvw1.y * texture(shadowsampler, vec3(base_uv.xy + vec2(u[1], v[1]), curdepth));\n    shadow = shadow / 16.;\n    return shadow;\n}\n\n#endif";
     ShaderGen.depth_ps = "#version 300 es\n\nprecision mediump float;\n\nvoid main(){\n}";
     ShaderGen.depth_vs = "#version 300 es\n\nprecision mediump float;\n\n#include SHADERFX_BASIS\n#queue other\n\nin vec4 aPosition;\n\nvoid main(){\n    gl_Position = MATRIX_MVP * aPosition;\n}";
-    ShaderGen.diffuse_ps = "#version 300 es\nprecision mediump float;\n#include SHADERFX_LIGHT\n#include SHADERFX_LIGHTING\nstruct V2F{\n    vec3 pos;\n    vec3 normal;\n};\nin V2F v2f;\nout lowp vec4 fragColor;\nuniform vec4 uColor;\nvoid main(){\n    vec3 lcolor = LightModel_Lambert(LIGHT_DIR0,LIGHT_COLOR0,v2f.normal,uColor.xyz);\n    fragColor = vec4(lcolor + 0.1,1.0);\n}";
-    ShaderGen.diffuse_vs = "#version 300 es\nprecision mediump float;\n#include SHADERFX_BASIS\n\n#queue opaque\n\nin vec4 aPosition;\nin vec2 aUV;\nin vec4 aNormal;\nstruct V2F{\n    vec3 pos;\n    vec3 normal;\n};\nout V2F v2f;\nvoid main(){\n    vec4 wpos = MATRIX_M * aPosition;\n    v2f.pos = wpos.xyz;\n    vec4 pos = MATRIX_VP * wpos;\n    gl_Position = pos;\n    v2f.normal = ObjToWorldDir(aNormal.xyz);\n}";
+    ShaderGen.diffuse_ps = "#version 300 es\n\nprecision mediump float;\n#include SHADERFX_LIGHT\n#include SHADERFX_LIGHTING\nstruct V2F{\n    vec3 pos;\n    vec3 normal;\n};\nin V2F v2f;\nout lowp vec4 fragColor;\nuniform vec4 uColor;\nvoid main(){\n    vec3 lcolor = LightModel_Lambert(LIGHT_DIR0,LIGHT_COLOR0,v2f.normal,uColor.xyz);\n    fragColor = vec4(lcolor +0.1,1.0);\n}";
+    ShaderGen.diffuse_vs = "#version 300 es\n\nprecision mediump float;\n#include SHADERFX_BASIS\n\n#queue opaque\n\nin vec4 aPosition;\nin vec2 aUV;\nin vec4 aNormal;\nstruct V2F{\n    vec3 pos;\n    vec3 normal;\n};\nout V2F v2f;\nvoid main(){\n    vec4 wpos = MATRIX_M * aPosition;\n    v2f.pos = wpos.xyz;\n    vec4 pos = MATRIX_VP * wpos;\n    gl_Position = pos;\n    v2f.normal = ObjToWorldDir(aNormal.xyz);\n}";
     ShaderGen.gizmos_ps = "#version 300 es\n\nprecision mediump float;\nout vec4 fragColor;\nvoid main(){\n    fragColor = vec4(1.0);\n}";
     ShaderGen.gizmos_vs = "#version 300 es\n\nprecision mediump float;\n\n#include SHADERFX_BASIS\n#queue other\n\nin vec4 aPosition;\n\nvoid main(){\n    vec4 vpos = aPosition;\n    gl_Position = MATRIX_MVP * vpos;\n}";
-    ShaderGen.pbrMetallicRoughness_ps = "#version 300 es\n\nprecision mediump float;\n\nin vec2 vUV;\n\nuniform uPBR{\n    vec4 uColor;\n    float uMetallic;\n    float uRoughness;\n    float uEmissive;\n};\n\nuniform sampler2D uSampler;\nuniform sampler2D uTexMetallicRoughness;\nuniform sampler2D uTexEmissive;\n\n\nout vec4 fragColor;\nvoid main(){\n    fragColor = texture(uSampler,vUV);\n}";
-    ShaderGen.pbrMetallicRoughness_vs = "#version 300 es\n\nprecision mediump float;\n#include SHADERFX_BASIS\n\n#queue opaque\n\nin vec3 aPosition;\nin vec3 aNormal;\nin vec2 aUV;\n\nout vec2 vUV;\n\nvoid main(){\n    gl_Position = MATRIX_MVP * vec4(aPosition,1.0);\n    vUV = aUV;\n}";
-    ShaderGen.shadowsGather_ps = "#version 300 es\n\nprecision mediump float;\n\n#include SHADERFX_BASIS\n#include SHADERFX_SHADOWMAP\n\nout vec4 fragColor;\n\nuniform sampler2D uDepthTexure;\n\nin vec2 vUV;\nin vec3 vvdir;\n\nvoid main(){\n    float eyedepth = DECODE_VIEWDEPTH(SAMPLE_DEPTH_TEXTURE(uDepthTexure,vUV));\n\n    vec3 dir = normalize(vvdir);\n    vec3 wpos = dir * eyedepth + CAMERA_POS.xyz;\n    vec4 lpos = uLightMtx[0] * vec4(wpos,1.0);\n\n    vec3 lcpos = lpos.xyz / lpos.w;\n\n    lcpos = lpos.xyz *0.5 +0.5;\n\n    vec2 coord=  lcpos.xy;\n    float shadowDep = texture(uShadowMap,coord).x;\n\n    // if(coord < 0.01){\n    //     coord = 1.0;\n    // }\n\n    float d = shadowDep;// lcpos.z;\n\n    fragColor = vec4(lcpos.z -1.0,0,0,1.0);\n}";
+    ShaderGen.pbrMetallicRoughness_ps = "#version 300 es\n\nprecision mediump float;\n#include SHADERFX_SHADOWMAP\n\nin vec2 vUV;\n\n#ifdef SHADOW_ON\nin vec4 lpos;\n#endif\n\nuniform uPBR{\n    vec4 uColor;\n    float uMetallic;\n    float uRoughness;\n    float uEmissive;\n};\n\nuniform sampler2D uSampler;\nuniform sampler2D uTexMetallicRoughness;\nuniform sampler2D uTexEmissive;\n\nout vec4 fragColor;\nvoid main(){\n\n    #ifdef SHADOW_ON\n    float shadow = computeShadow(lpos,uShadowMap);\n    fragColor = texture(uSampler,vUV) * clamp(shadow+0.2,0.0,1.0);\n    #else\n    fragColor = texture(uSampler,vUV);\n    #endif\n\n}";
+    ShaderGen.pbrMetallicRoughness_vs = "#version 300 es\n\nprecision mediump float;\n#include SHADERFX_BASIS\n#include SHADERFX_SHADOWMAP\n\n#queue opaque\n\nin vec3 aPosition;\nin vec3 aNormal;\nin vec2 aUV;\n\nout vec2 vUV;\n\n#ifdef SHADOW_ON\nout vec4 lpos;\n#endif\n\n\nvoid main(){\n    #ifdef SHADOW_ON\n    vec4 wpos = MATRIX_M * vec4(aPosition,1.0);\n    lpos = uLightMtx[0] * wpos;\n    gl_Position = MATRIX_VP * wpos;\n    #else\n    gl_Position = MATRIX_MVP * vec4(aPosition,1.0);\n    #endif\n    vUV = aUV;\n}";
+    ShaderGen.shadowsGather_ps = "#version 300 es\n\nprecision mediump float;\n\n#include SHADERFX_BASIS\n#include SHADERFX_SHADOWMAP\n\nout vec4 fragColor;\n\nuniform sampler2D uDepthTexure;\n\nin vec2 vUV;\nin vec3 vvdir;\n\nvoid main(){\n    float eyedepth = DECODE_VIEWDEPTH(SAMPLE_DEPTH_TEXTURE(uDepthTexure,vUV));\n\n    vec3 dir = normalize(vvdir);\n    vec3 wpos = dir * eyedepth + CAMERA_POS.xyz;\n    vec4 lpos = uLightMtx[0] * vec4(wpos,1.0);\n\n    vec3 lcpos = lpos.xyz / lpos.w;\n\n    lcpos = lpos.xyz *0.5 +0.5;\n\n    vec2 coord=  lcpos.xy;\n    float shadowDep = texture(uShadowMap,coord).x;\n    float d = shadowDep;// lcpos.z;\n\n    fragColor = vec4(lcpos.z -1.0,0,0,1.0);\n}";
     ShaderGen.shadowsGather_vs = "#version 300 es\n\nprecision mediump float;\n\n#include SHADERFX_BASIS\nin vec4 aPosition;\nout vec2 vUV;\nout vec3 vvdir;\n\nvoid main(){\n    vec4 pos = aPosition;\n    vUV = pos.xy +0.5;\n    pos.xy *=2.0;\n\n    vec4 clippos = vec4(pos.xy *2.0,1.0,1.0);\n    vec4 cwpos = ClipToWorld(clippos);\n\n    vvdir = (cwpos.xyz / cwpos.w) - CAMERA_POS.xyz;\n    \n    gl_Position = pos;\n}";
     ShaderGen.skybox_ps = "#version 300 es\n\nprecision mediump float;\n\n#include SHADERFX_BASIS\n\n#ifdef ENVMAP_TYPE_CUBE\nin vec4 vWorldDir;\nuniform samplerCube uSampler;\n#endif\n#ifdef ENVMAP_TYPE_TEX\nin vec3 vWorldDir;\nuniform sampler2D uSampler;\n#endif\n\n\nout lowp vec4 fragColor;\nvoid main(){\n    vec3 dir = vWorldDir.xyz;\n    #ifdef ENVMAP_TYPE_CUBE\n    fragColor = texture(uSampler,dir);\n    #endif\n    #ifdef ENVMAP_TYPE_TEX\n    dir = normalize(dir);\n    float y = 1.0 - 0.5 *(1.0 + dir.y);\n    float x = atan(dir.z,dir.x) / PI_2 + 0.5;\n    fragColor = texture(uSampler,vec2(x,y));\n    #endif\n}";
     ShaderGen.skybox_vs = "#version 300 es\n\nprecision mediump float;\n#include SHADERFX_BASIS\n\n#options ENVMAP_TYPE CUBE TEX \n\n#queue skybox\n\nin vec4 aPosition;\n\n#ifdef ENVMAP_TYPE_CUBE\nout vec4 vWorldDir;\n#endif\n\n#ifdef ENVMAP_TYPE_TEX\nout vec3 vWorldDir;\n#endif\n\nvoid main(){\n    vec4 pos = aPosition;\n    pos.xy*=2.0;\n    pos.z = 1.0;\n    gl_Position = pos;\n\n    vec4 wpos =  inverse(MATRIX_VP) * pos;\n    wpos.xyz = wpos.xyz / wpos.w - CAMERA_POS.xyz;\n    #ifdef ENVMAP_TYPE_CUBE\n    vWorldDir = wpos;\n    #endif\n\n    #ifdef ENVMAP_TYPE_TEX\n    vWorldDir = wpos.xyz;\n    #endif\n    \n}";
     ShaderGen.UnlitColor_ps = "#version 300 es\n\nprecision mediump float;\nuniform vec4 uColor;\nout vec4 fragColor;\nvoid main(){\n    fragColor = uColor;\n}";
-    ShaderGen.UnlitColor_vs = "#version 300 es\nprecision mediump float;\n\n#include SHADERFX_BASIS\n#queue opaque\n\nin vec4 aPosition;\nvoid main(){\n    gl_Position = MATRIX_MVP * aPosition;\n}";
-    ShaderGen.UnlitTexture_ps = "#version 300 es\n\nprecision mediump float;\n#include SHADERFX_SHADOWMAP\n\nin vec2 vUV;\n#ifdef SHADOW_ON\nin vec4 wpos;\nin vec4 lpos;\n#endif\nout vec4 fragColor;\nuniform sampler2D uSampler;\nvoid main(){\n    #ifdef SHADOW_ON\n    float shadow = computeShadow(lpos,uShadowMap);\n    fragColor = texture(uSampler,vUV) * clamp(shadow +0.2,.0,1.);\n    #else\n    fragColor = texture(uSampler,vUV);\n    #endif\n}";
+    ShaderGen.UnlitColor_vs = "#version 300 es\n\nprecision mediump float;\n\n#include SHADERFX_BASIS\n#queue opaque\n\nin vec4 aPosition;\nvoid main(){\n    gl_Position = MATRIX_MVP * aPosition;\n}";
+    ShaderGen.UnlitTexture_ps = "#version 300 es\n\nprecision mediump float;\n#include SHADERFX_SHADOWMAP\n\nin vec2 vUV;\n#ifdef SHADOW_ON\nin vec4 wpos;\nin vec4 lpos;\n#endif\nout vec4 fragColor;\nuniform sampler2D uSampler;\nvoid main(){\n    #ifdef SHADOW_ON\n    float shadow = computeShadow(lpos,uShadowMap);\n\n    vec3 clip = lpos.xyz / lpos.w;\n    clip = clip *0.5 + 0.5;\n\n    fragColor =vec4(shadow,0,0,1.0);\n    #else\n    fragColor = vec4(0,1.0,0,1.0);\n    #endif\n}";
     ShaderGen.UnlitTexture_vs = "#version 300 es\n\nprecision mediump float;\n#include SHADERFX_CAMERA\n#include SHADERFX_SHADOWMAP\n\nin vec4 aPosition;\nin vec2 aUV;\nout vec2 vUV;\n\n#ifdef SHADOW_ON\nout vec4 wpos;\nout vec4 lpos;\n#endif\n\n#queue opaque\n\nvoid main(){\n    #ifdef SHADOW_ON\n    wpos = MATRIX_M * aPosition;\n    lpos = uLightMtx[0] * wpos;\n    gl_Position = MATRIX_VP * wpos;\n    #else\n    gl_Position = MATRIX_MVP * aPosition;\n    #endif\n    vUV = aUV;\n}";
-    ShaderGen.uvValue_ps = "#version 300 es\nprecision mediump float;\nin vec2 vUV;\nout vec4 fragColor;\nvoid main(){\n    fragColor = vec4(vUV,0,1.0);\n}";
-    ShaderGen.uvValue_vs = "#version 300 es\nprecision mediump float;\n#include SHADERFX_CAMERA\nin vec4 aPosition;\nin vec2 aUV;\nout vec2 vUV;\nvoid main(){\n    gl_Position = MATRIX_MVP * aPosition;\n    vUV = aUV;\n}";
+    ShaderGen.uvValue_ps = "#version 300 es\n\nprecision mediump float;\nin vec2 vUV;\nout vec4 fragColor;\nvoid main(){\n    fragColor = vec4(vUV,0,1.0);\n}";
+    ShaderGen.uvValue_vs = "#version 300 es\n\nprecision mediump float;\n#include SHADERFX_CAMERA\nin vec4 aPosition;\nin vec2 aUV;\nout vec2 vUV;\nvoid main(){\n    gl_Position = MATRIX_MVP * aPosition;\n    vUV = aUV;\n}";
     return ShaderGen;
 }());
 
@@ -5751,7 +5751,7 @@ var ShadowCascade;
 })(ShadowCascade || (ShadowCascade = {}));
 var ShadowConfig = /** @class */ (function () {
     function ShadowConfig() {
-        this.shadowmapSize = 512;
+        this.shadowmapSize = 1024;
         this.cascade = ShadowCascade.NoCascade;
         this.shadowDistance = 40.0;
         this.cascadeSplit = ShadowConfig.CASCADE_SPLIT_NONE;
@@ -6134,6 +6134,8 @@ var Material = /** @class */ (function () {
         var pu = this.m_propertyBlock.uniforms;
         for (var key in pu) {
             var u = pu[key];
+            if (key === "uShadowMap")
+                continue;
             this.setUniform(gl, program.Uniforms[key], u.type, u.value);
         }
     };
@@ -8486,7 +8488,7 @@ var RenderPipeline = /** @class */ (function () {
     function RenderPipeline() {
         this.tasks = [];
         this.m_tasksDirty = false;
-        this.shadowMapEnabled = false;
+        this.shadowMapEnabled = true;
         this.ubufferIndex_PerObj = 0;
         this.ubufferIndex_PerCam = 1;
         this.ubufferIndex_Light = 2;
@@ -8770,6 +8772,8 @@ var PassOpaque = /** @class */ (function () {
             deftags.fillDefaultVal();
         }
         this.m_tags = deftags;
+        var gl = pipeline.GL;
+        gl.polygonOffset(-1, -1);
     }
     PassOpaque.prototype.render = function (scene, queue) {
         var CLASS = PipelineForwardZPrepass;
@@ -8780,9 +8784,11 @@ var PassOpaque = /** @class */ (function () {
         var NAME_CAM = ShaderDataUniformCam.UNIFORM_CAM;
         var NAME_OBJ = ShaderDataUniformObj.UNIFORM_OBJ;
         var NAME_LIGHT = ShaderDataUniformLight.UNIFORM_LIGHT;
+        var NAME_SM = ShaderFX.UNIFORM_SHADOWMAP;
         var cam = scene.camera;
         if (queue.length == 0)
             return;
+        gl.enable(gl.POLYGON_OFFSET_FILL);
         //cam
         var datacam = pipe.shaderDataCam;
         datacam.setMtxProj(cam.ProjMatrix);
@@ -8822,6 +8828,14 @@ var PassOpaque = /** @class */ (function () {
                 if (indexLight != null)
                     gl.uniformBlockBinding(glp, indexLight, CLASS.UNIFORMINDEX_LIGHT);
                 curprogram = program;
+                var indexSM = ublock[NAME_SM];
+                if (indexSM != null) {
+                    gl.uniformBlockBinding(glp, indexSM, CLASS.UNIFORMINDEX_SHADOWMAP);
+                    var loc = program.Uniforms['uShadowMap'];
+                    if (loc != null) {
+                        gl.uniform1i(loc, 12);
+                    }
+                }
             }
             //state.apply(mat.shaderTags);
             mat.apply(gl);
@@ -8833,6 +8847,7 @@ var PassOpaque = /** @class */ (function () {
             gl.bindVertexArray(null);
             mat.clean(gl);
         }
+        gl.disable(gl.POLYGON_OFFSET_FILL);
     };
     return PassOpaque;
 }());
@@ -9526,6 +9541,8 @@ var PassShadowMap = /** @class */ (function () {
         var smtexdesc = new TextureCreationDesc(null, gl.DEPTH_COMPONENT24, false, gl.NEAREST, gl.NEAREST);
         var smtex = Texture.createTexture2D(smwidth, smheight, smtexdesc, glctx);
         this.m_smtex = smtex;
+        gl.activeTexture(gl.TEXTURE12);
+        gl.bindTexture(gl.TEXTURE_2D, smtex.rawtexture);
         var smfb = gl.createFramebuffer();
         this.m_smfb = smfb;
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, smfb);
@@ -9590,7 +9607,7 @@ var PassShadowMap = /** @class */ (function () {
         datacam.setMtxView(cam.WorldMatrix);
         datacam.setScreenSize(pipe.mainFrameBufferWidth, pipe.mainFrameBufferHeight);
         pipe.updateUniformBufferCamera(datacam);
-        this.shadowGathering(lights[0]);
+        //this.shadowGathering(lights[0]);
         pipe.bindTargetFrameBuffer(true);
     };
     PassShadowMap.prototype.renderLightShadowMap = function (light, camera, queue, config) {
@@ -9613,17 +9630,17 @@ var PassShadowMap = /** @class */ (function () {
         var cascades = config.cascade;
         var size = this.m_smheight;
         if (cascades == 1) {
-            this.renderShadowCascade(glmath.vec4(0, 0, size, size), queue, lightMtxs[0], lightMtx);
+            this.renderShadowCascade(glmath.vec4(0, 0, size, size), queue, lightMtxs[0]);
         }
         else if (cascades == 2) {
-            this.renderShadowCascade(glmath.vec4(0, 0, size, size), queue, lightMtxs[0], lightMtx);
-            this.renderShadowCascade(glmath.vec4(size, 0, size, size), queue, lightMtxs[1], lightMtx);
+            this.renderShadowCascade(glmath.vec4(0, 0, size, size), queue, lightMtxs[0]);
+            this.renderShadowCascade(glmath.vec4(size, 0, size, size), queue, lightMtxs[1]);
         }
         else {
-            this.renderShadowCascade(glmath.vec4(0, 0, size, size), queue, lightMtxs[0], lightMtx);
-            this.renderShadowCascade(glmath.vec4(size, 0, size, size), queue, lightMtxs[1], lightMtx);
-            this.renderShadowCascade(glmath.vec4(0, size, size, size), queue, lightMtxs[2], lightMtx);
-            this.renderShadowCascade(glmath.vec4(size, size, size, size), queue, lightMtxs[3], lightMtx);
+            this.renderShadowCascade(glmath.vec4(0, 0, size, size), queue, lightMtxs[0]);
+            this.renderShadowCascade(glmath.vec4(size, 0, size, size), queue, lightMtxs[1]);
+            this.renderShadowCascade(glmath.vec4(0, size, size, size), queue, lightMtxs[2]);
+            this.renderShadowCascade(glmath.vec4(size, size, size, size), queue, lightMtxs[3]);
         }
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
     };
@@ -9639,8 +9656,8 @@ var PassShadowMap = /** @class */ (function () {
         var neardist = near;
         var campos = ctrs.localPosition;
         var camforward = ctrs.forward;
-        var hcoefficient = Math.tan(camera.fov / 2.0 * glmath.Deg2Rad);
-        var wcoefficient = hcoefficient * camera.aspect;
+        var hCoefficient = Math.tan(camera.fov / 2.0 * glmath.Deg2Rad);
+        var wCoefficient = hCoefficient * camera.aspect;
         var ldir = light.lightPosData;
         var lup = vec3.up;
         if (Math.abs(vec3.Dot(lup, ldir)) > 0.99) {
@@ -9653,24 +9670,25 @@ var PassShadowMap = /** @class */ (function () {
             var d = dist * 0.5;
             var cdist = neardist + d;
             var cpos = campos.clone().sub(camforward.clone().mul(cdist));
-            var h = fardist * hcoefficient;
-            var w = fardist * wcoefficient;
+            var h = fardist * hCoefficient;
+            var w = fardist * wCoefficient;
             var r = Math.sqrt(h * h + d * d + w * w);
             var lpos = cpos.sub(ldir.mulToRef(r));
             var vmtx = mat4.coordCvt(lpos, ldir, lup);
             var pmtx = mat4.orthographic(r, r, 0.1, r * 2.0);
             ret.push([vmtx, pmtx]);
+            //next frausta
             neardist += dist;
         }
         return ret;
     };
-    PassShadowMap.prototype.renderShadowCascade = function (vp, queue, mtx, lmtxVP) {
+    PassShadowMap.prototype.renderShadowCascade = function (vp, queue, mtx) {
         var pipe = this.pipe;
         var glctx = pipe.GLCtx;
         var gl = glctx.gl;
         var camdata = pipe.shaderDataCam;
-        camdata.setMtxView(lmtxVP);
-        camdata.setMtxProj(mat4.Identity);
+        camdata.setMtxView(mtx[0]);
+        camdata.setMtxProj(mtx[1]);
         pipe.updateUniformBufferCamera(camdata);
         gl.viewport(vp.x, vp.y, vp.z, vp.w);
         var objdata = pipe.shaderDataObj;
@@ -9998,7 +10016,7 @@ var SampleGame = /** @class */ (function () {
     };
     SampleGame.prototype.createScene = function (glctx) {
         return __awaiter$1(this, void 0, void 0, function () {
-            var grender, tex, texcube, gltf, sceneBuilder, isgltf, scene, skyboxobj, camera, matDiffuse, ccube, mat1, obj2, obj2mat, lightobj, light0;
+            var grender, tex, texcube, gltf, sceneBuilder, isgltf, scene, skyboxobj, camera, obj1, matDiffuse, obj2, obj2mat, lightobj, light0;
             return __generator$1(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -10014,7 +10032,7 @@ var SampleGame = /** @class */ (function () {
                         gltf = _a.sent();
                         console.log(gltf.gltf);
                         sceneBuilder = new SceneBuilder(gltf, glctx, this.m_graphicsRender.shaderLib);
-                        isgltf = false;
+                        isgltf = true;
                         scene = null;
                         if (isgltf) {
                             scene = sceneBuilder.createScene();
@@ -10022,7 +10040,7 @@ var SampleGame = /** @class */ (function () {
                             this.m_scene = scene;
                             skyboxobj = scene.getChildByName('sky_sky_0');
                             if (skyboxobj != null)
-                                skyboxobj.active = false;
+                                skyboxobj.render.castShadow = false;
                         }
                         else {
                             scene = new Scene();
@@ -10040,26 +10058,35 @@ var SampleGame = /** @class */ (function () {
                         camera.transform.parent = scene.transform;
                         camera.gameobject.name = "camera";
                         this.m_camera = camera;
-                        matDiffuse = new Material(grender.shaderLib.shaderUnlitColor);
-                        ccube = new GameObject("ccube");
-                        ccube.transform.localPosition = glmath.vec3(0, 3, 0);
-                        ccube.transform.applyRotate(quat.fromEulerDeg(30, 20, 70));
-                        mat1 = matDiffuse.clone();
-                        mat1.setColor(ShaderFX.UNIFORM_MAIN_COLOR, glmath.vec4(0, 0, 1, 1));
-                        ccube.render = new MeshRender(Mesh.Cube, mat1);
-                        ccube.transform.parent = scene.transform;
+                        obj1 = new GameObject("cube");
+                        this.m_obj1 = obj1;
+                        obj1.transform.localPosition = glmath.vec3(0, 5, -5);
+                        obj1.transform.localScale = vec3.one;
+                        matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
+                        matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR, glmath.vec4(1, 1, 0, 1));
+                        obj1.render = new MeshRender(Mesh.Cube, matDiffuse);
+                        obj1.addComponent({
+                            onUpdate: function (scene) {
+                                var dt = Input.snapshot.deltaTime;
+                                dt *= 30.0;
+                                var rota = quat.fromEulerDeg(dt, -dt, -2 * dt);
+                                var trs = this.gameobject.transform;
+                                trs.applyRotate(rota);
+                            }
+                        });
+                        obj1.transform.parent = scene.transform;
                         obj2 = new GameObject();
                         this.m_obj2 = obj2;
                         obj2.transform.localPosition = glmath.vec3(0, 0, -5);
                         obj2.transform.localScale = glmath.vec3(20, 20, 1);
                         obj2.transform.localRotation = quat.axisRotationDeg(vec3.right, 90);
-                        obj2mat = new Material(grender.shaderLib.shaderUnlitColor);
+                        obj2mat = new Material(grender.shaderLib.shaderUnlitTexture);
                         obj2mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR, glmath.vec4(0.5, 0.5, 0.5, 1));
                         obj2mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE, tex);
                         obj2.render = new MeshRender(Mesh.Quad, obj2mat);
                         obj2.transform.parent = scene.transform;
                         lightobj = new GameObject();
-                        light0 = Light.creatDirctionLight(lightobj, 1.0, glmath.vec3(0.5, -1, 0.5));
+                        light0 = Light.creatDirctionLight(lightobj, 1.0, glmath.vec3(-0.5, -1, 0.4));
                         light0.lightColor = new vec3([1, 1, 1]);
                         lightobj.transform.parent = scene.transform;
                         this.m_sceneInited = true;

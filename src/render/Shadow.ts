@@ -11,7 +11,7 @@ export enum ShadowCascade{
 
 export class ShadowConfig{
 
-    public shadowmapSize:number = 512;
+    public shadowmapSize:number = 1024;
 
     public static readonly CASCADE_SPLIT_TWO_CASCADE:number[] = [0.333,0.667];
     public static readonly CASCADE_SPLIT_FOUR_CASCADE:number[] = [0.067,0.133,0.266,0.534];

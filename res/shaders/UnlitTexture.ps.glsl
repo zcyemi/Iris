@@ -12,8 +12,12 @@ uniform sampler2D uSampler;
 void main(){
     #ifdef SHADOW_ON
     float shadow = computeShadow(lpos,uShadowMap);
-    fragColor = texture(uSampler,vUV) * clamp(shadow +0.2,.0,1.);
+
+    vec3 clip = lpos.xyz / lpos.w;
+    clip = clip *0.5 + 0.5;
+
+    fragColor =vec4(shadow,0,0,1.0);
     #else
-    fragColor = texture(uSampler,vUV);
+    fragColor = vec4(0,1.0,0,1.0);
     #endif
 }

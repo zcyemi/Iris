@@ -25,7 +25,7 @@ export abstract class RenderPipeline{
 
 
     public shadowMapInfo: ShadowMapInfo[];
-    public shadowMapEnabled:boolean = false;
+    public shadowMapEnabled:boolean = true;
 
 
     public ubufferIndex_PerObj:number = 0;

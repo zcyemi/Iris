@@ -92,6 +92,10 @@ export class PassShadowMap{
         let smtexdesc = new TextureCreationDesc(null,gl.DEPTH_COMPONENT24,false,gl.NEAREST,gl.NEAREST);
         let smtex = Texture.createTexture2D(smwidth,smheight,smtexdesc,glctx);
         this.m_smtex = smtex;
+
+        
+        gl.activeTexture(gl.TEXTURE12);
+        gl.bindTexture(gl.TEXTURE_2D,smtex.rawtexture);
         
         let smfb = gl.createFramebuffer();
         this.m_smfb = smfb;
@@ -138,6 +142,7 @@ export class PassShadowMap{
         let debugshadows = new BufferDebugInfo(stex,glmath.vec4(0,200,200,200));
         pipe.addBufferDebugInfo(debugshadows);
 
+
     }
 
     public render(scene:Scene,queue:MeshRender[]){
@@ -156,6 +161,7 @@ export class PassShadowMap{
         gl.useProgram(glp);
         gl.uniformBlockBinding(glp,this.m_blockIndexCam,CLASS.UNIFORMINDEX_CAM);
         gl.uniformBlockBinding(glp,this.m_blockIndexObj,CLASS.UNIFORMINDEX_OBJ);
+
 
         let lights = scene.lights;
         for(let i=0,lcount = lights.length;i<lcount;i++){
@@ -176,7 +182,7 @@ export class PassShadowMap{
         datacam.setScreenSize(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight);
         pipe.updateUniformBufferCamera(datacam);
 
-        this.shadowGathering(lights[0]);
+        //this.shadowGathering(lights[0]);
 
         pipe.bindTargetFrameBuffer(true);
     }
@@ -205,16 +211,16 @@ export class PassShadowMap{
         let cascades =config.cascade;
         let size = this.m_smheight;
         if(cascades == 1){
-            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0],lightMtx);
+            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0]);
         }
         else if(cascades == 2){
-            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0],lightMtx);
-            this.renderShadowCascade(glmath.vec4(size,0,size,size),queue,lightMtxs[1],lightMtx);
+            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0]);
+            this.renderShadowCascade(glmath.vec4(size,0,size,size),queue,lightMtxs[1]);
         }else{
-            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0],lightMtx);
-            this.renderShadowCascade(glmath.vec4(size,0,size,size),queue,lightMtxs[1],lightMtx);
-            this.renderShadowCascade(glmath.vec4(0,size,size,size),queue,lightMtxs[2],lightMtx);
-            this.renderShadowCascade(glmath.vec4(size,size,size,size),queue,lightMtxs[3],lightMtx);
+            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0]);
+            this.renderShadowCascade(glmath.vec4(size,0,size,size),queue,lightMtxs[1]);
+            this.renderShadowCascade(glmath.vec4(0,size,size,size),queue,lightMtxs[2]);
+            this.renderShadowCascade(glmath.vec4(size,size,size,size),queue,lightMtxs[3]);
         }
 
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
@@ -225,9 +231,9 @@ export class PassShadowMap{
         let near = camera.near;
         let far = camera.far;
 
-        let camdist = far- near;
-        let shadowDis= Math.min(camdist,config.shadowDistance);
-        let cascades:number= config.cascade;
+        let camdist = far - near;
+        let shadowDis = Math.min(camdist,config.shadowDistance);
+        let cascades:number = config.cascade;
         let cascadeSplit:number[] = config.cascadeSplit;
 
         let fardist = near;
@@ -236,25 +242,28 @@ export class PassShadowMap{
         let campos = ctrs.localPosition;
         let camforward = ctrs.forward;
 
-        let hcoefficient = Math.tan(camera.fov /2.0 * glmath.Deg2Rad);
-        let wcoefficient = hcoefficient * camera.aspect;
+        let hCoefficient = Math.tan(camera.fov / 2.0 * glmath.Deg2Rad);
+        let wCoefficient = hCoefficient * camera.aspect;
 
         let ldir = light.lightPosData;
         let lup = vec3.up;
-
-        if(Math.abs(vec3.Dot(lup,ldir)) > 0.99){
+        if(Math.abs(vec3.Dot(lup,ldir))>0.99){
             lup = glmath.vec3(0,1,0.001);
         }
-
+        
         let ret = [];
+
         for(let i=0;i<cascades;i++){
-            let dist = cascadeSplit[i ]* shadowDis;
-            fardist +=dist;
-            let d = dist *0.5;
+            let dist = cascadeSplit[i] * shadowDis;
+            fardist += dist;
+
+            let d =dist *0.5;
+
             let cdist = neardist + d;
             let cpos = campos.clone().sub(camforward.clone().mul(cdist));
-            let h = fardist * hcoefficient;
-            let w = fardist * wcoefficient;
+            let h = fardist * hCoefficient;
+            let w = fardist * wCoefficient;
+
             let r = Math.sqrt(h *h + d* d + w * w);
             let lpos = cpos.sub(ldir.mulToRef(r));
 
@@ -263,19 +272,21 @@ export class PassShadowMap{
 
             ret.push([vmtx,pmtx]);
 
+            //next frausta
             neardist += dist;
         }
         return ret;
     }
 
-    private renderShadowCascade(vp:vec4,queue:MeshRender[],mtx:[mat4,mat4],lmtxVP:mat4){
+    private renderShadowCascade(vp:vec4,queue:MeshRender[],mtx:[mat4,mat4]){
+
         let pipe = this.pipe;
         let glctx = pipe.GLCtx;
         let gl = glctx.gl;
 
         let camdata = pipe.shaderDataCam;
-        camdata.setMtxView(lmtxVP);
-        camdata.setMtxProj(mat4.Identity);
+        camdata.setMtxView(mtx[0]);
+        camdata.setMtxProj(mtx[1]);
         pipe.updateUniformBufferCamera(camdata);
 
         gl.viewport(vp.x,vp.y,vp.z,vp.w);

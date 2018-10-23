@@ -18,7 +18,6 @@ import { Mesh } from "../Mesh";
 import { Texture, TextureCreationDesc } from "../Texture";
 import { GL } from "../GL";
 
-
 export class PipelineForwardZPrepass extends RenderPipeline{
 
     public static readonly UNIFORMINDEX_OBJ:number = 0;
@@ -246,6 +245,8 @@ export class PipelineForwardZPrepass extends RenderPipeline{
         state.setZWrite(true);
 
     }
+
+
 
     public updateUniformBufferCamera(data:ShaderDataUniformCam){
         const gl = this.gl;

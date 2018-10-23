@@ -29,7 +29,7 @@ gulp.task('watch',()=>{
             }
         },
         port: 6644,
-        files: ['./dist/*.js', './*.html']
+        files: ['./res/*.js', './*.html']
     })
 })
 
@@ -40,11 +40,14 @@ function build(){
     onBuild = true;
     console.log('[Compile Script]');
     //--emitDeclarationOnly
-    child_process.exec('tsc && rollup -c rollup.config.ts',(error,stdout,stderr)=>{
+    //tsc &&
+    child_process.exec('rollup -c rollup.config.ts',(error,stdout,stderr)=>{
         if(stdout != null && stdout != '') console.log(stdout);
         if(stderr != null && stderr != '') console.log(stderr);
 
         onBuild = false;
+
+        console.log('[build done]');
     });
 }
 

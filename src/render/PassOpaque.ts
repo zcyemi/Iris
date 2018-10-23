@@ -4,6 +4,7 @@ import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
 import { GLProgram } from "wglut";
 import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
+import { ShaderFX } from "../shaderfx/ShaderFX";
 
 
 export class PassOpaque{
@@ -24,9 +25,15 @@ export class PassOpaque{
             deftags.fillDefaultVal();
         }
         this.m_tags =deftags;
+
+        let gl = pipeline.GL;
+
+        gl.polygonOffset(-1,-1);
+
     }
 
     public render(scene:Scene,queue:MeshRender[]){
+
         const CLASS = PipelineForwardZPrepass;
 
         const pipe = this.pipeline;
@@ -37,9 +44,13 @@ export class PassOpaque{
         const NAME_CAM = ShaderDataUniformCam.UNIFORM_CAM;
         const NAME_OBJ = ShaderDataUniformObj.UNIFORM_OBJ;
         const NAME_LIGHT = ShaderDataUniformLight.UNIFORM_LIGHT;
+        const NAME_SM = ShaderFX.UNIFORM_SHADOWMAP;
 
         let cam = scene.camera;
         if(queue.length == 0) return;
+
+        gl.enable(gl.POLYGON_OFFSET_FILL);
+       
 
         //cam
         let datacam = pipe.shaderDataCam;
@@ -86,6 +97,15 @@ export class PassOpaque{
                 let indexLight = ublock[NAME_LIGHT];
                 if (indexLight != null) gl.uniformBlockBinding(glp, indexLight, CLASS.UNIFORMINDEX_LIGHT);
                 curprogram = program;
+
+                let indexSM = ublock[NAME_SM];
+                if(indexSM != null){
+                    gl.uniformBlockBinding(glp, indexSM, CLASS.UNIFORMINDEX_SHADOWMAP);
+                    let loc = program.Uniforms['uShadowMap'];
+                    if (loc != null){
+                        gl.uniform1i(loc,12);
+                    }
+                }
             }
 
             //state.apply(mat.shaderTags);
@@ -101,5 +121,8 @@ export class PassOpaque{
 
             mat.clean(gl);
         }
+
+        gl.disable(gl.POLYGON_OFFSET_FILL);
+
     }
 }

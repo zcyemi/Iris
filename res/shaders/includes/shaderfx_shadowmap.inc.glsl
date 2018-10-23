@@ -13,6 +13,12 @@ float computeShadow(vec4 vLightPos,sampler2D shadowsampler){
     vec3 clipspace = vLightPos.xyz / vLightPos.w;
     clipspace = clipspace *0.5 + 0.5;
     float shadowDep = texture(shadowsampler,vec2(clipspace.xy)).x;
+    
+    //fix shadowmpa edge clamp
+    vec2 border = step(clipspace.xy,vec2(0.002));
+    border += step(vec2(0.998),clipspace.xy);
+    shadowDep += (border.x + border.y);
+
     return step(clipspace.z- 0.01,shadowDep);
 }
 
