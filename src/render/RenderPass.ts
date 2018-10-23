@@ -1,12 +1,12 @@
 import { RenderNodeList } from "../RenderNodeList";
 import { Scene } from "../Scene";
-import { PipelineForwardZPrepass } from "../pipeline/PipelineForwardZPrepass";
+import { PipelineBase } from "../pipeline/PipelineBase";
 
 export abstract class RenderPass {
 
-    protected pipeline:PipelineForwardZPrepass;
+    protected pipeline:PipelineBase;
 
-    constructor(pipeline:PipelineForwardZPrepass) {
+    constructor(pipeline:PipelineBase) {
         this.pipeline = pipeline;
     }
 

@@ -1,5 +1,4 @@
 import { GLContext, vec4, GLFrameBuffer } from "wglut";
-import { RenderPipeline } from "./RenderPipeline";
 import { Scene } from "./Scene";
 import { ShaderFXLibs } from "./shaderfx/ShaderFXLibs";
 import { ShadowConfig } from "./render/Shadow";
@@ -7,6 +6,7 @@ import { DebugEntry } from "./DebugEntry";
 import { Delayter } from "./Utility";
 import { Texture } from "./Texture";
 import { Material } from "./Material";
+import { PipelineBase } from "./pipeline/PipelineBase";
 
 
 export class GraphicsRenderCreateInfo{
@@ -29,14 +29,14 @@ export class GraphicsRender{
     public static readonly TEXID_SHADOW_MAP:number[] = [15,16,17,18];
 
 
-    private m_renderPipeline:RenderPipeline;
+    private m_renderPipeline:PipelineBase;
     private m_shaderFXlib:ShaderFXLibs;
     public shadowConfig:ShadowConfig = new ShadowConfig();
 
     public pause:boolean = false;
     private m_frameBufferInvalid:boolean = false;
 
-    public get pipeline():RenderPipeline{
+    public get pipeline():PipelineBase{
         return this.m_renderPipeline;
     }
 
@@ -53,7 +53,7 @@ export class GraphicsRender{
     }
 
 
-    public constructor(canvas:HTMLCanvasElement,pipeline?:RenderPipeline,creationInfo?:GraphicsRenderCreateInfo){
+    public constructor(canvas:HTMLCanvasElement,pipeline?:PipelineBase,creationInfo?:GraphicsRenderCreateInfo){
         this.canvas = canvas;
 
 
@@ -91,7 +91,7 @@ export class GraphicsRender{
         this.setPipeline(pipeline);
     }
 
-    public setPipeline(pipeline:RenderPipeline){
+    public setPipeline(pipeline:PipelineBase){
         if(pipeline == null) return;
         let curpipeline = this.m_renderPipeline;
 

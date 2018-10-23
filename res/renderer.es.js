@@ -5761,6 +5761,11 @@ var ShadowConfig = /** @class */ (function () {
     ShadowConfig.CASCADE_SPLIT_NONE = [1.0];
     return ShadowConfig;
 }());
+var ShadowMapData = /** @class */ (function () {
+    function ShadowMapData() {
+    }
+    return ShadowMapData;
+}());
 
 var GLConst;
 (function (GLConst) {
@@ -8484,217 +8489,225 @@ var PipelineStateCache = /** @class */ (function () {
     return PipelineStateCache;
 }());
 
-var RenderPipeline = /** @class */ (function () {
-    function RenderPipeline() {
-        this.tasks = [];
-        this.m_tasksDirty = false;
-        this.shadowMapEnabled = true;
-        this.ubufferIndex_PerObj = 0;
-        this.ubufferIndex_PerCam = 1;
-        this.ubufferIndex_Light = 2;
-        this.ubufferIndex_ShadowMap = 3;
-        this.m_taskSetup = false;
+var PipelineBase = /** @class */ (function () {
+    function PipelineBase() {
+        //For debug textures and framebuffers
+        this.m_bufferDebugInfo = [];
+        this.m_shadowMapData = new ShadowMapData();
+        this.m_shadowEnabled = true;
+        this.m_nodelist = [new RenderNodeList(), new RenderNodeList()];
+        this.m_nodelistIndex = 0;
         this.m_mainFrameBufferBinded = false;
         this.m_mainFrameBufferAspect = 1.0;
         this.m_mainFrameBufferWidth = 0;
         this.m_mainFrameBufferHeight = 0;
-        this.m_nodelist = [new RenderNodeList(), new RenderNodeList()];
-        this.m_nodelistIndex = 0;
     }
-    Object.defineProperty(RenderPipeline.prototype, "mainFrameBufferWidth", {
+    Object.defineProperty(PipelineBase.prototype, "bufferDebugInfo", {
         get: function () {
-            return this.m_mainFrameBufferWidth;
+            return this.m_bufferDebugInfo;
         },
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(RenderPipeline.prototype, "mainFrameBufferHeight", {
+    Object.defineProperty(PipelineBase.prototype, "mainDepthTexture", {
         get: function () {
-            return this.m_mainFrameBufferHeight;
+            return this.m_mainDepthTexture;
         },
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(RenderPipeline.prototype, "mainFrameBufferAspect", {
+    Object.defineProperty(PipelineBase.prototype, "mainDepthFrameBuffer", {
         get: function () {
-            return this.m_mainFrameBufferAspect;
+            return this.m_mainDepthFB;
         },
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(RenderPipeline.prototype, "mainFrameBuffer", {
+    Object.defineProperty(PipelineBase.prototype, "shaderDataCam", {
         get: function () {
-            return this.m_mainFrameBuffer;
+            return this.m_shaderDataCam;
         },
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(RenderPipeline.prototype, "stateCache", {
+    Object.defineProperty(PipelineBase.prototype, "shaderDataObj", {
         get: function () {
-            return this.m_pipestateCache;
+            return this.m_shaderDataObj;
         },
         enumerable: true,
         configurable: true
     });
-    RenderPipeline.prototype.onInitGL = function (glctx) {
+    Object.defineProperty(PipelineBase.prototype, "shaderDataLight", {
+        get: function () {
+            return this.m_shaderDataLight;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PipelineBase.prototype, "shaderDataShadowMap", {
+        get: function () {
+            return this.m_shaderDataShadowMap;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PipelineBase.prototype, "shadowMapData", {
+        get: function () { return this.m_shadowMapData; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PipelineBase.prototype, "GLCtx", {
+        get: function () { return this.glctx; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PipelineBase.prototype, "GL", {
+        get: function () { return this.gl; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PipelineBase.prototype, "mainFrameBufferWidth", {
+        get: function () { return this.m_mainFrameBufferWidth; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PipelineBase.prototype, "mainFrameBufferHeight", {
+        get: function () { return this.m_mainFrameBufferHeight; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PipelineBase.prototype, "mainFrameBufferAspect", {
+        get: function () { return this.m_mainFrameBufferAspect; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PipelineBase.prototype, "mainFrameBuffer", {
+        get: function () { return this.m_mainFrameBuffer; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PipelineBase.prototype, "stateCache", {
+        get: function () { return this.m_pipestateCache; },
+        enumerable: true,
+        configurable: true
+    });
+    PipelineBase.prototype.onInitGL = function (glctx) {
         this.glctx = glctx;
         this.gl = glctx.gl;
-        var gl = this.gl;
-        var utex_sm = [];
-        var utex_sm_slot = GraphicsRender.TEXID_SHADOW_MAP;
-        utex_sm.push(gl.TEXTURE15);
-        utex_sm.push(gl.TEXTURE16);
-        utex_sm.push(gl.TEXTURE17);
-        utex_sm.push(gl.TEXTURE18);
-        this.utex_sm = utex_sm;
-        this.utex_sm_slot = utex_sm_slot;
         this.m_pipestateCache = new PipelineStateCache(glctx);
     };
-    /**
-     * render setup process, create main framebuffer
-     * custom render can override this function
-     * @param bufferinfo
-     */
-    RenderPipeline.prototype.onSetupRender = function (bufferinfo) {
+    PipelineBase.prototype.onSetupRender = function (bufferinfo) {
         this.m_mainFrameBufferInfo = bufferinfo;
         var fb = this.glctx.createFrameBuffer(true, bufferinfo.colorFormat, bufferinfo.depthFormat);
         this.m_mainFrameBuffer = fb;
-        var gl = this.glctx.gl;
-        gl.depthMask(true);
-        gl.depthFunc(gl.LEQUAL);
-        gl.enable(gl.DEPTH_TEST);
+        this.m_mainFrameBufferWidth = fb.width;
+        this.m_mainFrameBufferHeight = fb.height;
+        this.m_mainFrameBufferAspect = fb.width / fb.height;
+        this.createUniformBuffers();
     };
-    RenderPipeline.prototype.resizeFrameBuffer = function (width, height) {
+    PipelineBase.prototype.renderBufferDebug = function () {
+        var passdebug = this.m_passDebug;
+        if (passdebug != null && this.m_bufferDebugInfo.length != 0)
+            passdebug.render(null, null);
+    };
+    PipelineBase.prototype.resizeFrameBuffer = function (width, height) {
         var bufferInfo = this.m_mainFrameBufferInfo;
         this.m_mainFrameBuffer = this.glctx.createFrameBuffer(false, bufferInfo.colorFormat, bufferInfo.depthFormat, width, height, this.m_mainFrameBuffer);
         this.m_mainFrameBufferWidth = width;
         this.m_mainFrameBufferHeight = height;
         this.m_mainFrameBufferAspect = width / height;
     };
+    PipelineBase.prototype.createUniformBuffers = function () {
+        var CLASS = PipelineBase;
+        var gl = this.gl;
+        //create internal uniform buffer
+        if (this.m_uniformBufferObj == null) {
+            var data = new ShaderDataUniformObj();
+            this.m_shaderDataObj = data;
+            var buffer = gl.createBuffer();
+            gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+            gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+            gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_OBJ, buffer);
+            this.m_uniformBufferObj = buffer;
+        }
+        if (this.m_uniformBufferCamera == null) {
+            var data = new ShaderDataUniformCam();
+            this.m_shaderDataCam = data;
+            var buffer = gl.createBuffer();
+            gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+            gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+            gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_CAM, buffer);
+            this.m_uniformBufferCamera = buffer;
+        }
+        if (this.m_uniformBufferShadowMap == null) {
+            var data = new ShaderDataUniformShadowMap();
+            this.m_shaderDataShadowMap = data;
+            var buffer = gl.createBuffer();
+            gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+            gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+            gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_SHADOWMAP, buffer);
+            this.m_uniformBufferShadowMap = buffer;
+        }
+        if (this.m_uniformBufferLight == null) {
+            var data = new ShaderDataUniformLight();
+            this.m_shaderDataLight = data;
+            var buffer = gl.createBuffer();
+            gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+            gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+            gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_LIGHT, buffer);
+            this.m_uniformBufferLight = buffer;
+        }
+    };
+    PipelineBase.prototype.exec = function (scene) {
+    };
     /**
      * draw main framebuffer to canvas buffer
      */
-    RenderPipeline.prototype.onRenderToCanvas = function () {
+    PipelineBase.prototype.onRenderToCanvas = function () {
         this.glctx.drawTexFullscreen(this.m_mainFrameBuffer.colorTex0, false, false);
     };
-    Object.defineProperty(RenderPipeline.prototype, "GLCtx", {
-        get: function () {
-            return this.glctx;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderPipeline.prototype, "GL", {
-        get: function () {
-            return this.gl;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderPipeline.prototype, "sharedBufferPerCam", {
-        get: function () {
-            var buf = this.m_sharedBuffer_PerCam;
-            if (buf != null)
-                return buf;
-            var gl = this.gl;
-            buf = gl.createBuffer();
-            gl.bindBuffer(gl.UNIFORM_BUFFER, buf);
-            gl.bindBufferBase(gl.UNIFORM_BUFFER, this.ubufferIndex_PerCam, buf);
-            this.m_sharedBuffer_PerCam = buf;
-            return buf;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderPipeline.prototype, "sharedBufferPerObj", {
-        get: function () {
-            var buf = this.m_sharedBuffer_PerObj;
-            if (buf != null)
-                return buf;
-            var gl = this.gl;
-            buf = gl.createBuffer();
-            gl.bindBuffer(gl.UNIFORM_BUFFER, buf);
-            gl.bindBufferBase(gl.UNIFORM_BUFFER, this.ubufferIndex_PerObj, buf);
-            this.m_sharedBuffer_PerObj = buf;
-            return buf;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RenderPipeline.prototype, "sharedBufferShadowMap", {
-        get: function () {
-            var buf = this.m_sharedBuffer_ShadowMap;
-            if (buf != null)
-                return buf;
-            var gl = this.gl;
-            buf = gl.createBuffer();
-            gl.bindBuffer(gl.UNIFORM_BUFFER, buf);
-            gl.bufferData(gl.UNIFORM_BUFFER, new ShaderDataUniformShadowMap().rawBuffer, gl.DYNAMIC_DRAW);
-            gl.bindBufferBase(gl.UNIFORM_BUFFER, this.ubufferIndex_ShadowMap, buf);
-            this.m_sharedBuffer_ShadowMap = buf;
-            return buf;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    RenderPipeline.prototype.registerTask = function (task) {
-        task.pipeline = this;
-        this.tasks.push(task);
-        this.m_tasksDirty = true;
+    PipelineBase.prototype.updateUniformBufferCamera = function (data) {
+        var gl = this.gl;
+        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_uniformBufferCamera);
+        gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
     };
-    RenderPipeline.prototype.sortTasks = function () {
-        if (this.m_tasksDirty)
+    PipelineBase.prototype.updateUniformBufferObject = function (data) {
+        var gl = this.gl;
+        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_uniformBufferObj);
+        gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+    };
+    PipelineBase.prototype.updateUniformBufferShadowMap = function (data) {
+        var gl = this.gl;
+        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_uniformBufferShadowMap);
+        gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+    };
+    PipelineBase.prototype.updateUniformBufferLight = function (data) {
+        var gl = this.gl;
+        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_uniformBufferLight);
+        gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+    };
+    PipelineBase.prototype.activeDefaultTexture = function () {
+        var gl = this.gl;
+        gl.activeTexture(gl.TEXTURE3);
+        gl.bindTexture(gl.TEXTURE_2D, this.graphicRender.defaultTexture.rawtexture);
+    };
+    PipelineBase.prototype.addBufferDebugInfo = function (info) {
+        var curinfo = this.m_bufferDebugInfo;
+        if (curinfo.indexOf(info) >= 0)
             return;
-        this.tasks.sort(function (a, b) { return a.order - b.order; });
-        this.m_tasksDirty = false;
+        curinfo.push(info);
     };
-    RenderPipeline.prototype.setupTasks = function () {
-        var tasks = this.tasks;
-        for (var i = 0, len = tasks.length; i < len; i++) {
-            var t = tasks[i];
-            if (!t.isInited) {
-                t.init();
-            }
-        }
-    };
-    RenderPipeline.prototype.exec = function (scene) {
-        var glctx = this.glctx;
-        this.m_mainFrameBufferBinded = false;
-        var nodeList = this.generateDrawList(scene);
-        //exec task
-        this.sortTasks();
-        if (!this.m_taskSetup) {
-            this.setupTasks();
-            this.m_taskSetup = true;
-        }
-        var tasks = this.tasks;
-        for (var i = 0, len = tasks.length; i < len; i++) {
-            var t = tasks[i];
-            t.render(nodeList, scene, glctx);
-        }
-        this.UnBindTargetFrameBuffer();
-    };
-    RenderPipeline.prototype.release = function () {
-        var glctx = this.glctx;
-        var task = this.tasks;
-        for (var i = 0, len = task.length; i < len; i++) {
-            var t = task[i];
-            t.release(glctx);
-        }
-        task = [];
-    };
-    RenderPipeline.prototype.reload = function () {
-        var glctx = this.glctx;
-        var task = this.tasks;
-        for (var i = 0, len = task.length; i < len; i++) {
-            var t = task[i];
-            t.reload(glctx);
-        }
+    PipelineBase.prototype.removeBufferDebugInfo = function (info) {
+        var curinfo = this.m_bufferDebugInfo;
+        var index = curinfo.indexOf(info);
+        if (index < 0)
+            return;
+        curinfo = curinfo.splice(index, 1);
     };
     /**
      * @returns whether to call gl.BindFrameBuffer;
      */
-    RenderPipeline.prototype.bindTargetFrameBuffer = function (forece) {
+    PipelineBase.prototype.bindTargetFrameBuffer = function (forece) {
         if (forece === void 0) { forece = false; }
         if (this.m_mainFrameBufferBinded && !forece)
             return false;
@@ -8705,14 +8718,14 @@ var RenderPipeline = /** @class */ (function () {
         this.gl.viewport(0, 0, mainfb.width, mainfb.height);
         return true;
     };
-    RenderPipeline.prototype.UnBindTargetFrameBuffer = function () {
+    PipelineBase.prototype.UnBindTargetFrameBuffer = function () {
         if (!this.m_mainFrameBufferBinded)
             return;
         var gl = this.gl;
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         this.m_mainFrameBufferBinded = false;
     };
-    RenderPipeline.prototype.generateDrawList = function (scene) {
+    PipelineBase.prototype.generateDrawList = function (scene) {
         var nodelistIndex = this.m_nodelistIndex;
         var nodelist = this.m_nodelist[nodelistIndex];
         nodelist.reset();
@@ -8721,7 +8734,7 @@ var RenderPipeline = /** @class */ (function () {
         this.m_nodelistIndex = nodelistIndex == 0 ? 1 : 0;
         return nodelist;
     };
-    RenderPipeline.prototype.traversalRenderNode = function (drawlist, obj) {
+    PipelineBase.prototype.traversalRenderNode = function (drawlist, obj) {
         var children = obj.children;
         if (children == null)
             return;
@@ -8737,26 +8750,15 @@ var RenderPipeline = /** @class */ (function () {
             this.traversalRenderNode(drawlist, c);
         }
     };
-    return RenderPipeline;
-}());
-var RenderTask = /** @class */ (function () {
-    function RenderTask(o, pipeline) {
-        this.order = 0;
-        this.m_inited = false;
-        this.order = o;
-        this.pipeline = pipeline;
-    }
-    Object.defineProperty(RenderTask.prototype, "isInited", {
-        get: function () {
-            return this.m_inited;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    RenderTask.prototype.init = function () {
-        this.m_inited = true;
+    PipelineBase.prototype.release = function () {
     };
-    return RenderTask;
+    PipelineBase.prototype.reload = function () {
+    };
+    PipelineBase.UNIFORMINDEX_OBJ = 0;
+    PipelineBase.UNIFORMINDEX_CAM = 1;
+    PipelineBase.UNIFORMINDEX_SHADOWMAP = 2;
+    PipelineBase.UNIFORMINDEX_LIGHT = 3;
+    return PipelineBase;
 }());
 
 var PassOpaque = /** @class */ (function () {
@@ -8776,7 +8778,7 @@ var PassOpaque = /** @class */ (function () {
         gl.polygonOffset(-1, -1);
     }
     PassOpaque.prototype.render = function (scene, queue) {
-        var CLASS = PipelineForwardZPrepass;
+        var CLASS = PipelineBase;
         var pipe = this.pipeline;
         var gl = pipe.GL;
         var glctx = pipe.GLCtx;
@@ -8867,7 +8869,7 @@ var PassTransparent = /** @class */ (function () {
         this.m_tags = deftags;
     }
     PassTransparent.prototype.render = function (scene, queue) {
-        var CLASS = PipelineForwardZPrepass;
+        var CLASS = PipelineBase;
         var pipe = this.pipeline;
         var gl = pipe.GL;
         var glctx = pipe.GLCtx;
@@ -8955,7 +8957,7 @@ var PassSkybox = /** @class */ (function () {
         this.m_uniformBlockCamIndex = program.UniformBlock[ShaderDataUniformCam.UNIFORM_CAM];
     }
     PassSkybox.prototype.render = function (scene, queue) {
-        var CLASS = PipelineForwardZPrepass;
+        var CLASS = PipelineBase;
         var camera = scene.camera;
         if (camera.clearType != ClearType.Skybox || camera.skybox == null)
             return;
@@ -9078,7 +9080,7 @@ var PassGizmos = /** @class */ (function () {
         var mesh = this.m_mesh;
         if (mesh == null)
             return;
-        var CLASS = PipelineForwardZPrepass;
+        var CLASS = PipelineBase;
         var NAME_CAM = ShaderDataUniformCam.UNIFORM_CAM;
         var NAME_OBJ = ShaderDataUniformObj.UNIFORM_OBJ;
         var pipeline = this.pipeline;
@@ -9166,7 +9168,7 @@ var PassDepth = /** @class */ (function () {
         pipeline.addBufferDebugInfo(debuginfo);
     }
     PassDepth.prototype.render = function (scene, queue) {
-        var CLASS = PipelineForwardZPrepass;
+        var CLASS = PipelineBase;
         var pipe = this.pipeline;
         var gl = pipe.GL;
         var glctx = pipe.GLCtx;
@@ -9230,281 +9232,6 @@ var PassDepth = /** @class */ (function () {
     return PassDepth;
 }());
 
-var ShadowMapInfo = /** @class */ (function () {
-    function ShadowMapInfo() {
-    }
-    return ShadowMapInfo;
-}());
-var RenderTaskShadowMap = /** @class */ (function (_super) {
-    __extends$1(RenderTaskShadowMap, _super);
-    function RenderTaskShadowMap() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.m_debugColor = false;
-        _this.m_shadowMapSize = 1024;
-        return _this;
-    }
-    RenderTaskShadowMap.prototype.init = function () {
-        if (this.m_inited)
-            return;
-        var pipe = this.pipeline;
-        var gl = pipe.GL;
-        var glctx = pipe.GLCtx;
-        this.m_shadowConfig = pipe.graphicRender.shadowConfig;
-        pipe.shadowMapEnabled = true;
-        //uniformbuffer
-        if (this.m_camdata == null)
-            this.m_camdata = new ShaderDataUniformCam();
-        if (this.m_objdata == null)
-            this.m_objdata = new ShaderDataUniformObj();
-        this.m_cambuffer = pipe.sharedBufferPerCam;
-        this.m_objbuffer = pipe.sharedBufferPerObj;
-        if (this.m_smdata == null)
-            this.m_smdata = new ShaderDataUniformShadowMap();
-        this.m_smbuffer = pipe.sharedBufferShadowMap;
-        //sminfo
-        var shadowMapInfos = [];
-        pipe.shadowMapInfo = shadowMapInfos;
-        for (var i = 0; i < 4; i++) {
-            shadowMapInfos.push(new ShadowMapInfo());
-        }
-        //shaders
-        var shader = ShaderFX.compileShaders(glctx, RenderTaskShadowMap.s_shaderShadowMap);
-        this.m_shadowMapShader = shader;
-        this.m_shadowMapProgram = shader.defaultProgram;
-        var program = this.m_shadowMapProgram;
-        var ublocks = program.UniformBlock;
-        this.m_blockIndexPerCam = ublocks[ShaderFX.UNIFORM_CAM];
-        this.m_blockIndexPerObj = ublocks[ShaderFX.UNIFORM_OBJ];
-        var size = this.m_shadowMapSize;
-        var config = this.m_shadowConfig;
-        this.m_smHeight = size;
-        var smwidth = size;
-        var smheight = size;
-        if (config.cascade == ShadowCascade.TwoCascade) {
-            smwidth *= 2;
-        }
-        this.m_smWidth = smwidth;
-        this.m_smHeight = smheight;
-        //depth texture
-        var deptex = gl.createTexture();
-        this.m_shadowMapTex = deptex;
-        gl.activeTexture(Texture.TEMP_TEXID);
-        gl.bindTexture(gl.TEXTURE_2D, deptex);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texStorage2D(gl.TEXTURE_2D, 1, gl.DEPTH_COMPONENT24, smwidth, smheight);
-        gl.bindTexture(gl.TEXTURE_2D, null);
-        pipe.shadowMapInfo[0].texture = deptex;
-        //debug color texture;
-        if (this.m_debugColor) {
-            var debugtex = gl.createTexture();
-            this.m_shadowMapTexDebug = debugtex;
-            gl.bindTexture(gl.TEXTURE_2D, debugtex);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, smwidth, smheight);
-            gl.bindTexture(gl.TEXTURE_2D, null);
-            this.m_shadowMapTexDebug = debugtex;
-        }
-        //framebuffer
-        var fb = gl.createFramebuffer();
-        this.m_shadowMapFrameBuffer = fb;
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, fb);
-        gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, deptex, 0);
-        if (this.m_shadowMapTexDebug)
-            gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.m_shadowMapTexDebug, 0);
-        var status = gl.checkFramebufferStatus(gl.DRAW_FRAMEBUFFER);
-        if (status != gl.FRAMEBUFFER_COMPLETE) {
-            console.error('fb status incomplete ' + status.toString(16));
-        }
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
-        this.m_inited = true;
-    };
-    RenderTaskShadowMap.prototype.release = function (glctx) {
-        var pipeline = this.pipeline;
-        var gl = pipeline.GL;
-        this.m_shadowConfig = null;
-        //shader buffers
-        this.m_camdata = null;
-        this.m_objdata = null;
-        this.m_cambuffer = null;
-        this.m_objbuffer = null;
-        this.m_smdata = null;
-        this.m_smbuffer = null;
-        //sminfo
-        pipeline.shadowMapInfo = null;
-        //shaders
-        this.m_shadowMapShader.release();
-        var program = this.m_shadowMapProgram;
-        gl.deleteProgram(program.Program);
-        this.m_shadowMapProgram = null;
-        this.m_blockIndexPerCam = null;
-        this.m_blockIndexPerObj = null;
-        //framebuffers
-        if (this.m_shadowMapFrameBuffer != null) {
-            gl.deleteFramebuffer(this.m_shadowMapFrameBuffer);
-            this.m_shadowMapFrameBuffer = null;
-        }
-        if (this.m_shadowMapTex != null) {
-            gl.deleteTexture(this.m_shadowMapTex);
-            this.m_shadowMapTex = null;
-        }
-        if (this.m_shadowMapTexDebug != null) {
-            gl.deleteTexture(this.m_shadowMapTexDebug);
-            this.m_shadowMapTexDebug = null;
-        }
-        this.m_inited = false;
-    };
-    RenderTaskShadowMap.prototype.reload = function (glctx) {
-        this.release(glctx);
-        this.init();
-        console.log('[reload RenderTaskShadowMap done!]');
-    };
-    RenderTaskShadowMap.prototype.render = function (nodelist, scene, glctx) {
-        var camera = scene.camera;
-        if (camera == null)
-            return;
-        camera.aspect = this.pipeline.mainFrameBufferAspect;
-        var lights = scene.lights;
-        var lcount = lights.length;
-        for (var i = 0; i < lcount; i++) {
-            var l = lights[i];
-            if (l.gameobject.active && l.castShadow) {
-                this.renderShadowMap(l, scene, nodelist);
-            }
-        }
-        //update uniformbuffer
-        var gl = this.pipeline.GL;
-        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_smbuffer);
-        gl.bufferData(gl.UNIFORM_BUFFER, this.m_smdata.rawBuffer, gl.DYNAMIC_DRAW);
-    };
-    RenderTaskShadowMap.prototype.calCascadeShadowMapLightMtx = function (light, camera, config) {
-        var ctrs = camera.transform;
-        var near = camera.near;
-        var far = camera.far;
-        var camdist = far - near;
-        var shadowDis = Math.min(camdist, config.shadowDistance);
-        var cascades = config.cascade;
-        var cascadeSplit = config.cascadeSplit;
-        var fardist = near;
-        var neardist = near;
-        var campos = ctrs.localPosition;
-        var camforward = ctrs.forward;
-        var hCoefficient = Math.tan(camera.fov / 2.0 * glmath.Deg2Rad);
-        var wCoefficient = hCoefficient * camera.aspect;
-        var ldir = light.lightPosData;
-        var lup = vec3.up;
-        if (Math.abs(vec3.Dot(lup, ldir)) > 0.99) {
-            lup = glmath.vec3(0, 1, 0.001);
-        }
-        var ret = [];
-        for (var i = 0; i < cascades; i++) {
-            var dist = cascadeSplit[i] * shadowDis;
-            fardist += dist;
-            var d = dist * 0.5;
-            var cdist = neardist + d;
-            var cpos = campos.clone().sub(camforward.clone().mul(cdist));
-            var h = fardist * hCoefficient;
-            var w = fardist * wCoefficient;
-            var r = Math.sqrt(h * h + d * d + w * w);
-            var lpos = cpos.sub(ldir.mulToRef(r));
-            var vmtx = mat4.coordCvt(lpos, ldir, lup);
-            var pmtx = mat4.orthographic(r, r, 0.1, r * 2.0);
-            ret.push([vmtx, pmtx]);
-            //next frausta
-            neardist += dist;
-        }
-        return ret;
-    };
-    RenderTaskShadowMap.prototype.renderShadowMap = function (light, scene, nodelist) {
-        //Temp: only support directional light currently.
-        if (light.lightType != LightType.direction)
-            return;
-        var gl = this.pipeline.GL;
-        var pipe = this.pipeline;
-        var smdata = this.m_smdata;
-        pipe.UnBindTargetFrameBuffer();
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.m_shadowMapFrameBuffer);
-        //clear depth
-        gl.enable(gl.DEPTH_TEST);
-        gl.depthFunc(gl.LEQUAL);
-        gl.clearDepth(1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.viewport(0, 0, this.m_smWidth, this.m_smHeight);
-        var program = this.m_shadowMapProgram;
-        var glp = program.Program;
-        gl.useProgram(program.Program);
-        gl.uniformBlockBinding(glp, this.m_blockIndexPerCam, pipe.ubufferIndex_PerCam);
-        gl.uniformBlockBinding(glp, this.m_blockIndexPerObj, pipe.ubufferIndex_PerObj);
-        //light mtx
-        var camera = scene.camera;
-        var f = camera.far;
-        var lightMtxs = this.calCascadeShadowMapLightMtx(light, camera, this.m_shadowConfig);
-        var _a = lightMtxs[0], lightworldMtx = _a[0], lightProjMtx = _a[1];
-        var lightMtx = lightProjMtx.mul(lightworldMtx);
-        smdata.setLightMtx(lightMtx, 0);
-        this.pipeline.shadowMapInfo[0].lightMtx = lightMtx;
-        var cascades = this.m_shadowConfig.cascade;
-        var nodequeue = nodelist.nodeOpaque;
-        var size = this.m_smHeight;
-        if (cascades == 1) {
-            this.renderShadowCascade(glmath.vec4(0, 0, size, size), nodequeue, lightMtxs[0]);
-        }
-        else if (cascades == 2) {
-            this.renderShadowCascade(glmath.vec4(0, 0, size, size), nodequeue, lightMtxs[0]);
-            this.renderShadowCascade(glmath.vec4(size, 0, size, size), nodequeue, lightMtxs[1]);
-        }
-        else {
-            this.renderShadowCascade(glmath.vec4(0, 0, size, size), nodequeue, lightMtxs[0]);
-            this.renderShadowCascade(glmath.vec4(size, 0, size, size), nodequeue, lightMtxs[1]);
-            this.renderShadowCascade(glmath.vec4(0, size, size, size), nodequeue, lightMtxs[2]);
-            this.renderShadowCascade(glmath.vec4(size, size, size, size), nodequeue, lightMtxs[3]);
-        }
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
-    };
-    RenderTaskShadowMap.prototype.renderShadowCascade = function (viewport, nodelist, mtx) {
-        var glctx = this.pipeline.GLCtx;
-        var gl = glctx.gl;
-        var camData = this.m_camdata;
-        camData.setMtxView(mtx[0]);
-        camData.setMtxProj(mtx[1]);
-        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_cambuffer);
-        gl.bufferData(gl.UNIFORM_BUFFER, camData.rawBuffer, gl.DYNAMIC_DRAW);
-        gl.viewport(viewport.x, viewport.y, viewport.z, viewport.w);
-        var objdata = this.m_objdata;
-        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_objbuffer);
-        var queue = nodelist;
-        var queueLen = queue.length;
-        for (var i = 0; i < queueLen; i++) {
-            var node = queue[i];
-            if (!node.castShadow)
-                continue;
-            var mat = node.material;
-            var mesh = node.mesh;
-            if (mat == null || mesh == null || mat.program == null)
-                continue;
-            node.refershVertexArray(glctx);
-            var trs = node.object.transform;
-            //modelmatrix
-            objdata.setMtxModel(trs.objMatrix);
-            gl.bufferData(gl.UNIFORM_BUFFER, objdata.rawBuffer, gl.DYNAMIC_DRAW);
-            gl.bindVertexArray(node.vertexArrayObj);
-            var indicesDesc = mesh.indiceDesc;
-            gl.drawElements(gl.TRIANGLES, indicesDesc.indiceCount, indicesDesc.indices.type, 0);
-            gl.bindVertexArray(null);
-        }
-    };
-    RenderTaskShadowMap.genShaderShadwoMap = function () {
-        return new ShaderSource("\n        #version 300 es\n        precision highp float;\n        #include SHADERFX_BASIS\n        in vec4 aPosition;\n        void main(){\n            gl_Position = MATRIX_MVP * aPosition;\n        }\n        ", "\n        #version 300 es\n        precision lowp float;\n        out vec4 fragColor;\n        void main(){\n            fragColor = vec4(0,1.0,0,1.0);\n        }\n        ");
-    };
-    RenderTaskShadowMap.s_shaderShadowMap = RenderTaskShadowMap.genShaderShadwoMap();
-    return RenderTaskShadowMap;
-}(RenderTask));
-
 var PassShadowMap = /** @class */ (function () {
     function PassShadowMap(pipeline) {
         this.pipe = pipeline;
@@ -9515,11 +9242,6 @@ var PassShadowMap = /** @class */ (function () {
         var gl = pipe.GL;
         var glctx = pipe.GLCtx;
         var config = pipe.graphicRender.shadowConfig;
-        var shadowMapInfo = [];
-        pipe.shadowMapInfo = shadowMapInfo;
-        for (var i = 0; i < 4; i++) {
-            shadowMapInfo.push(new ShadowMapInfo());
-        }
         var shader = pipe.graphicRender.shaderLib.shaderDepth;
         var program = shader.defaultProgram;
         this.m_shader = shader;
@@ -9578,7 +9300,7 @@ var PassShadowMap = /** @class */ (function () {
         pipe.addBufferDebugInfo(debugshadows);
     };
     PassShadowMap.prototype.render = function (scene, queue) {
-        var CLASS = PipelineForwardZPrepass;
+        var CLASS = PipelineBase;
         var cam = scene.camera;
         if (cam == null)
             return;
@@ -9626,7 +9348,7 @@ var PassShadowMap = /** @class */ (function () {
         var _a = lightMtxs[0], lightworldMtx = _a[0], lightProjMtx = _a[1];
         var lightMtx = lightProjMtx.mul(lightworldMtx);
         smdata.setLightMtx(lightMtx, 0);
-        pipe.shadowMapInfo[0].lightMtx = lightMtx;
+        pipe.shadowMapData.lightMtx0 = lightMtx;
         var cascades = config.cascade;
         var size = this.m_smheight;
         if (cascades == 1) {
@@ -9712,9 +9434,9 @@ var PassShadowMap = /** @class */ (function () {
         }
     };
     PassShadowMap.prototype.shadowGathering = function (light) {
-        var CLASS = PipelineForwardZPrepass;
+        var CLASS = PipelineBase;
         var dataSM = this.pipe.shaderDataShadowMap;
-        dataSM.setLightMtx(this.pipe.shadowMapInfo[0].lightMtx, 0);
+        dataSM.setLightMtx(this.pipe.shadowMapData.lightMtx0, 0);
         this.pipe.updateUniformBufferShadowMap(dataSM);
         var gl = this.pipe.GL;
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.m_shadowFB);
@@ -9754,76 +9476,19 @@ var PassShadowMap = /** @class */ (function () {
     return PassShadowMap;
 }());
 
-var PipelineForwardZPrepass = /** @class */ (function (_super) {
-    __extends$1(PipelineForwardZPrepass, _super);
-    function PipelineForwardZPrepass() {
-        var _this = _super.call(this) || this;
-        //For debug textures and framebuffers
-        _this.m_bufferDebugInfo = [];
-        return _this;
+var PipelineForwardZPrePass = /** @class */ (function (_super) {
+    __extends$1(PipelineForwardZPrePass, _super);
+    function PipelineForwardZPrePass() {
+        return _super.call(this) || this;
     }
-    Object.defineProperty(PipelineForwardZPrepass.prototype, "bufferDebugInfo", {
-        get: function () {
-            return this.m_bufferDebugInfo;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(PipelineForwardZPrepass.prototype, "mainDepthTexture", {
-        get: function () {
-            return this.m_mainDepthTexture;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(PipelineForwardZPrepass.prototype, "mainDepthFrameBuffer", {
-        get: function () {
-            return this.m_mainDepthFB;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(PipelineForwardZPrepass.prototype, "shaderDataCam", {
-        get: function () {
-            return this.m_shaderDataCam;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(PipelineForwardZPrepass.prototype, "shaderDataObj", {
-        get: function () {
-            return this.m_shaderDataObj;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(PipelineForwardZPrepass.prototype, "shaderDataLight", {
-        get: function () {
-            return this.m_shaderDataLight;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(PipelineForwardZPrepass.prototype, "shaderDataShadowMap", {
-        get: function () {
-            return this.m_shaderDataShadowMap;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    PipelineForwardZPrepass.prototype.onSetupRender = function (bufferinfo) {
-        this.m_mainFrameBufferInfo = bufferinfo;
-        var fb = this.glctx.createFrameBuffer(true, bufferinfo.colorFormat, bufferinfo.depthFormat);
-        this.m_mainFrameBuffer = fb;
-        this.m_mainFrameBufferWidth = fb.width;
-        this.m_mainFrameBufferHeight = fb.height;
-        this.m_mainFrameBufferAspect = fb.width / fb.height;
-        this.createMainDepthFB(fb.width, fb.height);
+    PipelineForwardZPrePass.prototype.onSetupRender = function (bufferinfo) {
+        _super.prototype.onSetupRender.call(this, bufferinfo);
         var gl = this.glctx.gl;
         gl.depthMask(true);
         gl.depthFunc(gl.LEQUAL);
         gl.enable(gl.DEPTH_TEST);
-        this.createUniformBuffers();
+        var fb = this.m_mainFrameBuffer;
+        this.createMainDepthFB(fb.width, fb.height);
         this.m_passDebug = new PassDebug(this);
         this.m_passGizmos = new PassGizmos(this);
         this.m_passDepth = new PassDepth(this);
@@ -9832,7 +9497,7 @@ var PipelineForwardZPrepass = /** @class */ (function (_super) {
         this.m_passSkybox = new PassSkybox(this, null);
         this.m_passShadowMap = new PassShadowMap(this);
     };
-    PipelineForwardZPrepass.prototype.createMainDepthFB = function (width, height) {
+    PipelineForwardZPrePass.prototype.createMainDepthFB = function (width, height) {
         var bufferinfo = this.m_mainFrameBufferInfo;
         var depthtexdesc = new TextureCreationDesc(null, bufferinfo.depthFormat, false, GL.NEAREST, GL.NEAREST);
         var tex = Texture.createTexture2D(width, height, depthtexdesc, this.glctx);
@@ -9846,7 +9511,7 @@ var PipelineForwardZPrepass = /** @class */ (function (_super) {
             this.m_mainDepthFB = fb;
         }
     };
-    PipelineForwardZPrepass.prototype.resizeFrameBuffer = function (width, height) {
+    PipelineForwardZPrePass.prototype.resizeFrameBuffer = function (width, height) {
         _super.prototype.resizeFrameBuffer.call(this, width, height);
         var glctx = this.glctx;
         var gl = this.gl;
@@ -9862,48 +9527,7 @@ var PipelineForwardZPrepass = /** @class */ (function (_super) {
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
         this.m_mainDepthFB = fb;
     };
-    PipelineForwardZPrepass.prototype.createUniformBuffers = function () {
-        var CLASS = PipelineForwardZPrepass;
-        var gl = this.gl;
-        //create internal uniform buffer
-        if (this.m_uniformBufferObj == null) {
-            var data = new ShaderDataUniformObj();
-            this.m_shaderDataObj = data;
-            var buffer = gl.createBuffer();
-            gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-            gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
-            gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_OBJ, buffer);
-            this.m_uniformBufferObj = buffer;
-        }
-        if (this.m_uniformBufferCamera == null) {
-            var data = new ShaderDataUniformCam();
-            this.m_shaderDataCam = data;
-            var buffer = gl.createBuffer();
-            gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-            gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
-            gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_CAM, buffer);
-            this.m_uniformBufferCamera = buffer;
-        }
-        if (this.m_uniformBufferShadowMap == null) {
-            var data = new ShaderDataUniformShadowMap();
-            this.m_shaderDataShadowMap = data;
-            var buffer = gl.createBuffer();
-            gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-            gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
-            gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_SHADOWMAP, buffer);
-            this.m_uniformBufferShadowMap = buffer;
-        }
-        if (this.m_uniformBufferLight == null) {
-            var data = new ShaderDataUniformLight();
-            this.m_shaderDataLight = data;
-            var buffer = gl.createBuffer();
-            gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-            gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
-            gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_LIGHT, buffer);
-            this.m_uniformBufferLight = buffer;
-        }
-    };
-    PipelineForwardZPrepass.prototype.exec = function (scene) {
+    PipelineForwardZPrePass.prototype.exec = function (scene) {
         var cam = scene.camera;
         if (cam == null)
             return;
@@ -9935,62 +9559,15 @@ var PipelineForwardZPrepass = /** @class */ (function (_super) {
         state.setZTest(Comparison.ALWAYS);
         state.setZWrite(true);
     };
-    PipelineForwardZPrepass.prototype.updateUniformBufferCamera = function (data) {
-        var gl = this.gl;
-        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_uniformBufferCamera);
-        gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
-    };
-    PipelineForwardZPrepass.prototype.updateUniformBufferObject = function (data) {
-        var gl = this.gl;
-        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_uniformBufferObj);
-        gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
-    };
-    PipelineForwardZPrepass.prototype.updateUniformBufferShadowMap = function (data) {
-        var gl = this.gl;
-        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_uniformBufferShadowMap);
-        gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
-    };
-    PipelineForwardZPrepass.prototype.updateUniformBufferLight = function (data) {
-        var gl = this.gl;
-        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_uniformBufferLight);
-        gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
-    };
-    PipelineForwardZPrepass.prototype.activeDefaultTexture = function () {
-        var gl = this.gl;
-        gl.activeTexture(gl.TEXTURE3);
-        gl.bindTexture(gl.TEXTURE_2D, this.graphicRender.defaultTexture.rawtexture);
-    };
-    PipelineForwardZPrepass.prototype.addBufferDebugInfo = function (info) {
-        var curinfo = this.m_bufferDebugInfo;
-        if (curinfo.indexOf(info) >= 0)
-            return;
-        curinfo.push(info);
-    };
-    PipelineForwardZPrepass.prototype.removeBufferDebugInfo = function (info) {
-        var curinfo = this.m_bufferDebugInfo;
-        var index = curinfo.indexOf(info);
-        if (index < 0)
-            return;
-        curinfo = curinfo.splice(index, 1);
-    };
-    PipelineForwardZPrepass.prototype.renderBufferDebug = function () {
-        var passdebug = this.m_passDebug;
-        if (passdebug != null && this.m_bufferDebugInfo.length != 0)
-            passdebug.render(null, null);
-    };
-    PipelineForwardZPrepass.UNIFORMINDEX_OBJ = 0;
-    PipelineForwardZPrepass.UNIFORMINDEX_CAM = 1;
-    PipelineForwardZPrepass.UNIFORMINDEX_SHADOWMAP = 2;
-    PipelineForwardZPrepass.UNIFORMINDEX_LIGHT = 3;
-    return PipelineForwardZPrepass;
-}(RenderPipeline));
+    return PipelineForwardZPrePass;
+}(PipelineBase));
 
 var SampleGame = /** @class */ (function () {
     function SampleGame(canvas) {
         this.m_sceneInited = false;
         this.m_timer = new FrameTimer(false);
         this.m_canvas = canvas;
-        var grender = new GraphicsRender(canvas, new PipelineForwardZPrepass());
+        var grender = new GraphicsRender(canvas, new PipelineForwardZPrePass());
         this.m_sceneMgr = new SceneManager();
         var sc = grender.shadowConfig;
         sc.shadowDistance = 20;

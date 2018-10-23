@@ -1,7 +1,6 @@
-import { PipelineForwardZPrepass } from "../pipeline/PipelineForwardZPrepass";
+import { PipelineBase } from "../pipeline/PipelineBase";
 import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
-import { ShadowMapInfo } from "../pipeline/RenderTaskShadowMap";
 import { Shader } from "../shaderfx/Shader";
 import { GLProgram, glmath, vec3, mat4, vec4 } from "wglut";
 import { ShaderFX, ShaderFile } from "../shaderfx/ShaderFX";
@@ -10,7 +9,7 @@ import { Texture, TextureCreationDesc } from "../Texture";
 import { Light, LightType } from "../Light";
 import { Camera } from "../Camera";
 import { RenderNodeList } from "../RenderNodeList";
-import { BufferDebugInfo } from "../pipeline/BufferDebugInfo";
+import { BufferDebugInfo } from "./BufferDebugInfo";
 import { Mesh } from "../Mesh";
 import { ShaderSource } from "../shaderfx/ShaderSource";
 import { Material } from "../Material";
@@ -20,7 +19,7 @@ import { pipeline } from "stream";
 
 export class PassShadowMap{
 
-    private pipe:PipelineForwardZPrepass;
+    private pipe:PipelineBase;
 
     private m_shader:Shader;
     private m_program:GLProgram;
@@ -47,7 +46,7 @@ export class PassShadowMap{
     private static SH_shadowGather:ShaderSource;
     private static s_shadowGatherShader:Shader;
 
-    public constructor(pipeline:PipelineForwardZPrepass){
+    public constructor(pipeline:PipelineBase){
         this.pipe = pipeline;
 
         this.initShadowMaps();
@@ -59,12 +58,6 @@ export class PassShadowMap{
         let glctx = pipe.GLCtx;
 
         let config = pipe.graphicRender.shadowConfig;
-
-        let shadowMapInfo:ShadowMapInfo[] = [];
-        pipe.shadowMapInfo = shadowMapInfo;
-        for(let i=0;i<4;i++){
-            shadowMapInfo.push(new ShadowMapInfo());
-        }
 
         let shader = pipe.graphicRender.shaderLib.shaderDepth;
         let program = shader.defaultProgram;
@@ -146,7 +139,7 @@ export class PassShadowMap{
     }
 
     public render(scene:Scene,queue:MeshRender[]){
-        const CLASS = PipelineForwardZPrepass;
+        const CLASS = PipelineBase;
 
         let cam = scene.camera;
         if(cam == null) return;
@@ -206,7 +199,7 @@ export class PassShadowMap{
         let [lightworldMtx,lightProjMtx] = lightMtxs[0];
         let lightMtx = lightProjMtx.mul(lightworldMtx);
         smdata.setLightMtx(lightMtx,0);
-        pipe.shadowMapInfo[0].lightMtx = lightMtx;
+        pipe.shadowMapData.lightMtx0 = lightMtx;
 
         let cascades =config.cascade;
         let size = this.m_smheight;
@@ -315,12 +308,12 @@ export class PassShadowMap{
 
     private shadowGathering(light:Light){
 
-        const CLASS = PipelineForwardZPrepass;
+        const CLASS = PipelineBase;
 
 
         let dataSM =this.pipe.shaderDataShadowMap;
 
-        dataSM.setLightMtx(this.pipe.shadowMapInfo[0].lightMtx,0);
+        dataSM.setLightMtx(this.pipe.shadowMapData.lightMtx0,0);
         this.pipe.updateUniformBufferShadowMap(dataSM);
 
         const gl =this.pipe.GL;

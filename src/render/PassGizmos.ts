@@ -1,4 +1,4 @@
-import { PipelineForwardZPrepass } from "../pipeline/PipelineForwardZPrepass";
+import { PipelineBase } from "../pipeline/PipelineBase";
 import { Scene } from "../Scene";
 import { RenderQueue, Shader, ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
 import { Material } from "../Material";
@@ -13,7 +13,7 @@ import { MeshBuilder } from "../MeshBuilder";
 
 export class PassGizmos{
 
-    private pipeline:PipelineForwardZPrepass;
+    private pipeline:PipelineBase;
 
     protected m_material:Material;
     private m_mesh:Mesh;
@@ -28,7 +28,7 @@ export class PassGizmos{
     
     private m_tags:ShaderTags;
 
-    public constructor(pipe:PipelineForwardZPrepass){
+    public constructor(pipe:PipelineBase){
         this.pipeline = pipe;
 
 
@@ -63,7 +63,7 @@ export class PassGizmos{
         if(mesh == null) return;
         
 
-        const CLASS = PipelineForwardZPrepass;
+        const CLASS = PipelineBase;
         const NAME_CAM = ShaderDataUniformCam.UNIFORM_CAM;
         const NAME_OBJ = ShaderDataUniformObj.UNIFORM_OBJ;
 

@@ -1,6 +1,4 @@
-
 import { GLContext,GLUtility, quat, glmath, vec3, GLTFtool, vec4} from 'wglut';
-import { RenderPipelineDefault } from './pipeline/RenderPipelineDefault';
 import { Scene } from './Scene';
 import { GameObject } from './GameObject';
 import { MeshRender } from './MeshRender';
@@ -10,7 +8,6 @@ import { Camera, AmbientType, ClearType } from './Camera';
 import { GraphicsRender } from './GraphicsRender';
 import { ShaderFX } from './shaderfx/ShaderFX';
 import { Light } from './Light';
-import { RenderTaskDebugBuffer } from './pipeline/RenderTaskDebugBuffer';
 import { DebugEntry } from './DebugEntry';
 import { Utility } from './Utility';
 import { Input } from './Input';
@@ -21,7 +18,8 @@ import { FrameTimer } from './FrameTimer';
 import { TextureCubeMap } from './TextureCubeMap';
 import { SceneBuilder } from './SceneBuilder';
 import { ShaderFXLibs } from './shaderfx/ShaderFXLibs';
-import { PipelineForwardZPrepass } from './pipeline/PipelineForwardZPrepass';
+import { PipelineBase } from './pipeline/PipelineBase';
+import { PipelineForwardZPrePass } from './pipeline/PipelineForwardZPrePass';
 
 export class SampleGame{
     
@@ -37,7 +35,7 @@ export class SampleGame{
 
     public constructor(canvas:HTMLCanvasElement){
         this.m_canvas = canvas;
-        let grender = new GraphicsRender(canvas,new PipelineForwardZPrepass());
+        let grender = new GraphicsRender(canvas,new PipelineForwardZPrePass());
         this.m_sceneMgr = new SceneManager();
         let sc = grender.shadowConfig;
         sc.shadowDistance = 20;

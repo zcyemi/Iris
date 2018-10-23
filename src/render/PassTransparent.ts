@@ -1,4 +1,4 @@
-import { PipelineForwardZPrepass } from "../pipeline/PipelineForwardZPrepass";
+import { PipelineBase } from "../pipeline/PipelineBase";
 import { ShaderTags, Comparison, CullingMode, BlendOperator } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
@@ -9,10 +9,10 @@ import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap,
 export class PassTransparent{
 
 
-    private pipeline:PipelineForwardZPrepass;
+    private pipeline:PipelineBase;
     private m_tags:ShaderTags;
 
-    public constructor(pipeline:PipelineForwardZPrepass,deftags?:ShaderTags){
+    public constructor(pipeline:PipelineBase,deftags?:ShaderTags){
         this.pipeline = pipeline;
 
         if(deftags == null){
@@ -28,7 +28,7 @@ export class PassTransparent{
     }
 
     public render(scene:Scene,queue:MeshRender[]){
-        const CLASS = PipelineForwardZPrepass;
+        const CLASS = PipelineBase;
 
         const pipe = this.pipeline;
         const gl = pipe.GL;

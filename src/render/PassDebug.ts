@@ -1,13 +1,13 @@
-import { PipelineForwardZPrepass } from "../pipeline/PipelineForwardZPrepass";
+import { PipelineBase } from "../pipeline/PipelineBase";
 import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
 
 
 export class PassDebug{
 
-    private pipeline:PipelineForwardZPrepass;
+    private pipeline:PipelineBase;
 
-    public constructor(pipe:PipelineForwardZPrepass){
+    public constructor(pipe:PipelineBase){
         this.pipeline = pipe;
     }
 

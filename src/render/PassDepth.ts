@@ -1,24 +1,24 @@
-import { PipelineForwardZPrepass } from "../pipeline/PipelineForwardZPrepass";
+import { PipelineBase } from "../pipeline/PipelineBase";
 import { ShaderTags, Comparison, CullingMode, Shader } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
 import { GLProgram, vec3, glmath } from "wglut";
 import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
-import { BufferDebugInfo } from "../pipeline/BufferDebugInfo";
+import { BufferDebugInfo } from "./BufferDebugInfo";
 
 /**
  * Pre-rendering Depth Pass
  */
 export class PassDepth{
 
-    private pipeline:PipelineForwardZPrepass;
+    private pipeline:PipelineBase;
     private m_tags:ShaderTags;
 
     private m_program:GLProgram;
 
     private m_bufferDebugInfo:BufferDebugInfo;
 
-    public constructor(pipeline:PipelineForwardZPrepass,deftags?:ShaderTags){
+    public constructor(pipeline:PipelineBase,deftags?:ShaderTags){
         this.pipeline = pipeline;
 
         if(deftags == null){
@@ -42,7 +42,7 @@ export class PassDepth{
         pipeline.addBufferDebugInfo(debuginfo);
     }
     public render(scene:Scene,queue:MeshRender[]){
-        const CLASS = PipelineForwardZPrepass;
+        const CLASS = PipelineBase;
 
         const pipe = this.pipeline;
         const gl = pipe.GL;
