@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "./dist/renderer.js",
-  "module": "./dist/renderer.es.js",
   "typings": "./dist/renderer.d.ts",
   "scripts": {
     "build": "gulp build",
@@ -30,6 +29,6 @@
     "rollup-plugin-node-resolve": "^3.4.0",
     "rollup-plugin-typescript2": "^0.17.1",
     "ts-node": "^7.0.1",
-    "typescript": "^3.1.1"
+    "typescript": "^3.1.3"
   }
 }

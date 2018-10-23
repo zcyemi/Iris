@@ -8,14 +8,14 @@ import process from 'process';
 export default{
     input: `src/renderer.ts`,
     output: [
-        {file: 'dist/renderer.js', name: 'renderer', format: 'iife',sourcemap: false},
-        {file: 'dist/renderer.es.js',format: 'es'}
+        {file: 'res/renderer.iife.js', name: 'renderer', format: 'iife',sourcemap: false},
+        {file: 'res/renderer.es.js',format: 'es'}
     ],
     external: [],
     plugins: [
         typescript({
             tsconfigOverride: {
-                compilerOptions: { module: 'es2015'},
+                compilerOptions: { module: 'es2015',declaration:false},
             },
             tsconfig: 'tsconfig.json',
             useTsconfigDeclarationDir:true
