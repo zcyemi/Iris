@@ -15,7 +15,13 @@ float SAMPLE_DEPTH_TEXTURE(sampler2D depthtex,vec2 uv){
 
 float DECODE_VIEWDEPTH(float d){
     return 1.0/ ((CAMERA_NEAR_INV - CAMERA_FAR_INV) * d  - CAMERA_NEAR_INV);
-}`;
+}
+
+vec4 ClipToWorld(in vec4 clippoint){
+    return inverse(MATRIX_VP) * clippoint;
+}
+
+`;
 	public static readonly SHADERFX_CAMERA:string = `#include SHADERFX_OBJ
 uniform UNIFORM_CAM{
     mat4 _world2view_;
@@ -39,7 +45,8 @@ uniform UNIFORM_CAM{
 #define SCREEN_WIDTH _screenparam_.x
 #define SCREEN_HEIGHT _screenparam_.y
 #define SCREEN_WIDTH_INV _screenparam_.z
-#define SCREEN_HEIGHT_INV _screenparam_.w`;
+#define SCREEN_HEIGHT_INV _screenparam_.w
+#`;
 	public static readonly SHADERFX_LIGHT:string = `struct LIGHT_DATA{
     vec4 pos_type;
     vec4 col_intensity;
@@ -152,7 +159,7 @@ in vec4 aPosition;
 void main(){
     gl_Position = MATRIX_MVP * aPosition;
 }`;
-	public static readonly diffuse_ps:string = `#version 300 es\nprecision mediump float;
+	public static readonly diffuse_ps:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_LIGHT
 #include SHADERFX_LIGHTING
 struct V2F{
@@ -166,7 +173,7 @@ void main(){
     vec3 lcolor = LightModel_Lambert(LIGHT_DIR0,LIGHT_COLOR0,v2f.normal,uColor.xyz);
     fragColor = vec4(lcolor + 0.1,1.0);
 }`;
-	public static readonly diffuse_vs:string = `#version 300 es\nprecision mediump float;
+	public static readonly diffuse_vs:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 
 #queue opaque
@@ -238,25 +245,56 @@ void main(){
     vUV = aUV;
 }`;
 	public static readonly shadowsGather_ps:string = `#version 300 es\nprecision mediump float;
+
+#include SHADERFX_BASIS
+#include SHADERFX_SHADOWMAP
+
 out vec4 fragColor;
 
 uniform sampler2D uDepthTexure;
-uniform sampler2D uShadowMap;
 
 in vec2 vUV;
+in vec3 vvdir;
 
 void main(){
-    fragColor = texture(uDepthTexure,vUV);
+    float eyedepth = DECODE_VIEWDEPTH(SAMPLE_DEPTH_TEXTURE(uDepthTexure,vUV));
+
+    vec3 dir = normalize(vvdir);
+    vec3 wpos = dir * eyedepth + CAMERA_POS.xyz;
+    vec4 lpos = uLightMtx[0] * vec4(wpos,1.0);
+
+    vec3 lcpos = lpos.xyz / lpos.w;
+
+    lcpos = lpos.xyz *0.5 +0.5;
+
+    vec2 coord=  lcpos.xy;
+    float shadowDep = texture(uShadowMap,coord).x;
+
+    // if(coord < 0.01){
+    //     coord = 1.0;
+    // }
+
+    float d = shadowDep;// lcpos.z;
+
+    fragColor = vec4(lcpos.z -1.0,0,0,1.0);
 }`;
 	public static readonly shadowsGather_vs:string = `#version 300 es\nprecision mediump float;
-in vec4 aPosition;
 
+#include SHADERFX_BASIS
+in vec4 aPosition;
 out vec2 vUV;
+out vec3 vvdir;
 
 void main(){
     vec4 pos = aPosition;
     vUV = pos.xy +0.5;
     pos.xy *=2.0;
+
+    vec4 clippos = vec4(pos.xy *2.0,1.0,1.0);
+    vec4 cwpos = ClipToWorld(clippos);
+
+    vvdir = (cwpos.xyz / cwpos.w) - CAMERA_POS.xyz;
+    
     gl_Position = pos;
 }`;
 	public static readonly skybox_ps:string = `#version 300 es\nprecision mediump float;
@@ -326,7 +364,7 @@ out vec4 fragColor;
 void main(){
     fragColor = uColor;
 }`;
-	public static readonly UnlitColor_vs:string = `#version 300 es\nprecision mediump float;
+	public static readonly UnlitColor_vs:string = `#version 300 es\nprecision mediump float;
 
 #include SHADERFX_BASIS
 #queue opaque
@@ -378,13 +416,13 @@ void main(){
     #endif
     vUV = aUV;
 }`;
-	public static readonly uvValue_ps:string = `#version 300 es\nprecision mediump float;
+	public static readonly uvValue_ps:string = `#version 300 es\nprecision mediump float;
 in vec2 vUV;
 out vec4 fragColor;
 void main(){
     fragColor = vec4(vUV,0,1.0);
 }`;
-	public static readonly uvValue_vs:string = `#version 300 es\nprecision mediump float;
+	public static readonly uvValue_vs:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_CAMERA
 in vec4 aPosition;
 in vec2 aUV;

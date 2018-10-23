@@ -15,3 +15,8 @@ float SAMPLE_DEPTH_TEXTURE(sampler2D depthtex,vec2 uv){
 float DECODE_VIEWDEPTH(float d){
     return 1.0/ ((CAMERA_NEAR_INV - CAMERA_FAR_INV) * d  - CAMERA_NEAR_INV);
 }
+
+vec4 ClipToWorld(in vec4 clippoint){
+    return inverse(MATRIX_VP) * clippoint;
+}
+

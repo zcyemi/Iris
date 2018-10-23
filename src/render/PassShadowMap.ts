@@ -14,6 +14,8 @@ import { BufferDebugInfo } from "../pipeline/BufferDebugInfo";
 import { Mesh } from "../Mesh";
 import { ShaderSource } from "../shaderfx/ShaderSource";
 import { Material } from "../Material";
+import { ShaderDataUniformShadowMap } from "../shaderfx/ShaderFXLibs";
+import { pipeline } from "stream";
 
 
 export class PassShadowMap{
@@ -164,6 +166,16 @@ export class PassShadowMap{
         let smdata = this.pipe.shaderDataShadowMap;
         pipe.updateUniformBufferShadowMap(smdata);
 
+        //update camerabuffer
+
+        let datacam = pipe.shaderDataCam;
+        datacam.setCameraPos(cam.transform.position);
+        datacam.setClipPlane(cam.near,cam.far);
+        datacam.setMtxProj(cam.ProjMatrix);
+        datacam.setMtxView(cam.WorldMatrix);
+        datacam.setScreenSize(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight);
+        pipe.updateUniformBufferCamera(datacam);
+
         this.shadowGathering(lights[0]);
 
         pipe.bindTargetFrameBuffer(true);
@@ -193,16 +205,16 @@ export class PassShadowMap{
         let cascades =config.cascade;
         let size = this.m_smheight;
         if(cascades == 1){
-            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0]);
+            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0],lightMtx);
         }
         else if(cascades == 2){
-            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0]);
-            this.renderShadowCascade(glmath.vec4(size,0,size,size),queue,lightMtxs[1]);
+            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0],lightMtx);
+            this.renderShadowCascade(glmath.vec4(size,0,size,size),queue,lightMtxs[1],lightMtx);
         }else{
-            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0]);
-            this.renderShadowCascade(glmath.vec4(size,0,size,size),queue,lightMtxs[1]);
-            this.renderShadowCascade(glmath.vec4(0,size,size,size),queue,lightMtxs[2]);
-            this.renderShadowCascade(glmath.vec4(size,size,size,size),queue,lightMtxs[3]);
+            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0],lightMtx);
+            this.renderShadowCascade(glmath.vec4(size,0,size,size),queue,lightMtxs[1],lightMtx);
+            this.renderShadowCascade(glmath.vec4(0,size,size,size),queue,lightMtxs[2],lightMtx);
+            this.renderShadowCascade(glmath.vec4(size,size,size,size),queue,lightMtxs[3],lightMtx);
         }
 
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
@@ -256,14 +268,14 @@ export class PassShadowMap{
         return ret;
     }
 
-    private renderShadowCascade(vp:vec4,queue:MeshRender[],mtx:[mat4,mat4]){
+    private renderShadowCascade(vp:vec4,queue:MeshRender[],mtx:[mat4,mat4],lmtxVP:mat4){
         let pipe = this.pipe;
         let glctx = pipe.GLCtx;
         let gl = glctx.gl;
 
-        let camdata = pipe.shaderDataCam;;
-        camdata.setMtxView(mtx[0]);
-        camdata.setMtxProj(mtx[1]);
+        let camdata = pipe.shaderDataCam;
+        camdata.setMtxView(lmtxVP);
+        camdata.setMtxProj(mat4.Identity);
         pipe.updateUniformBufferCamera(camdata);
 
         gl.viewport(vp.x,vp.y,vp.z,vp.w);
@@ -291,6 +303,15 @@ export class PassShadowMap{
 
 
     private shadowGathering(light:Light){
+
+        const CLASS = PipelineForwardZPrepass;
+
+
+        let dataSM =this.pipe.shaderDataShadowMap;
+
+        dataSM.setLightMtx(this.pipe.shadowMapInfo[0].lightMtx,0);
+        this.pipe.updateUniformBufferShadowMap(dataSM);
+
         const gl =this.pipe.GL;
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,this.m_shadowFB);
         gl.clearColor(0,0,0,0);
@@ -302,7 +323,25 @@ export class PassShadowMap{
 
         let mat = this.m_gatherMat;
         let program = mat.program;
-        gl.useProgram(program.Program);
+
+        let glp = program.Program;
+        gl.useProgram(glp);
+
+        let blocks = program.UniformBlock;
+        let indexSM = blocks[ShaderFX.UNIFORM_SHADOWMAP];
+        if(indexSM !=null){
+            gl.uniformBlockBinding(glp,indexSM,CLASS.UNIFORMINDEX_SHADOWMAP);
+        }
+
+        let indexCam = blocks[ShaderFX.UNIFORM_CAM];
+        if(indexCam != null){
+            gl.uniformBlockBinding(glp,indexCam,CLASS.UNIFORMINDEX_CAM);
+        }
+
+        let indexObj = blocks[ShaderFX.UNIFORM_OBJ];
+        if(indexObj != null){
+            gl.uniformBlockBinding(glp,indexObj,CLASS.UNIFORMINDEX_OBJ);
+        }
 
         mat.apply(gl);
 

@@ -71,4 +71,18 @@ export class GameObject{
         }
         return null;
     }
+
+    public getChildByName(name:string):GameObject{
+        let children = this.transform.children;
+        if(children == null )  return null;
+
+        for(let i=0,len = children.length;i<len;i++){
+            let ct = children[i].gameobject;
+            if(ct.name === name) return ct;
+
+            let cc = ct.getChildByName(name);
+            if(cc != null) return cc;
+        }
+        return null;
+    }
 }
