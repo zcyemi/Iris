@@ -4,7 +4,7 @@ import { ShaderOptionsConfig, ShaderOptions } from "./shaderfx/ShaderVariant";
 import { Utility } from "./Utility";
 import { Texture } from "./Texture";
 
-type MaterialProperty = {type:number,value:any}
+export type MaterialProperty = {type:number,value:any}
 
 export class MaterialPorpertyBlock{
     public uniforms:{[key:string]:MaterialProperty};

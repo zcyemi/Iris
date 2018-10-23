@@ -2,7 +2,7 @@ import { vec3, glmath } from "wglut";
 import { MapStr } from "./Utility";
 
 
-class InputSnapShot{
+export class InputSnapShot{
     public key:MapStr<boolean> = {};
     public keyDown:{} = {};
     public keyUp:{} = {};

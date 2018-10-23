@@ -374,8 +374,6 @@ export class MeshBufferUtility{
         else{
             throw new Error('not implemented');
         }
-
-        return 0;
     }
 
     public static TypeSize(type:GLDataType):number{
