@@ -9,8 +9,9 @@ import { Texture } from "../Texture";
 import { ShadowMapData } from "../render/Shadow";
 import { PipelineStateCache } from "../PipelineStateCache";
 import { Transform } from "../Transform";
+import { IRenderPipeline } from "./IRenderPipeline";
 
-export class PipelineBase {
+export class PipelineBase implements IRenderPipeline {
 
     public static readonly UNIFORMINDEX_OBJ: number = 0;
     public static readonly UNIFORMINDEX_CAM: number = 1;
