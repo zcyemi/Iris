@@ -141,7 +141,6 @@ export function ShaderInc(filename:string){
 function getShaderSource(vss:string,pss:string,name?:string){
     let unified = ShaderGen[vss];
     if(unified !=null){
-        console.log(unified);
         return ShaderSource.create(unified,name);
     }
 

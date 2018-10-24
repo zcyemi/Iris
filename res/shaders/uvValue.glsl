@@ -1,10 +1,19 @@
 #version 300 es
 precision mediump float;
 #include SHADERFX_CAMERA
+
+inout vec2 vUV;
+
+#pragma vs vertex
 in vec4 aPosition;
 in vec2 aUV;
-out vec2 vUV;
-void main(){
+void vertex(){
     gl_Position = MATRIX_MVP * aPosition;
     vUV = aUV;
+}
+
+#pragma ps fragment
+out vec4 fragColor;
+void fragment(){
+    fragColor = vec4(vUV,0,1.0);
 }

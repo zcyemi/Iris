@@ -1,20 +1,42 @@
 #version 300 es
 precision mediump float;
-
 #include SHADERFX_BASIS
+#options ENVMAP_TYPE CUBE TEX 
+#queue skybox
 
 #ifdef ENVMAP_TYPE_CUBE
-in vec4 vWorldDir;
+inout vec4 vWorldDir;
 uniform samplerCube uSampler;
 #endif
 #ifdef ENVMAP_TYPE_TEX
-in vec3 vWorldDir;
+inout vec3 vWorldDir;
 uniform sampler2D uSampler;
 #endif
 
+#pragma vs vertex
 
+in vec4 aPosition;
+void vertex(){
+    vec4 pos = aPosition;
+    pos.xy*=2.0;
+    pos.z = 1.0;
+    gl_Position = pos;
+
+    vec4 wpos =  inverse(MATRIX_VP) * pos;
+    wpos.xyz = wpos.xyz / wpos.w - CAMERA_POS.xyz;
+    #ifdef ENVMAP_TYPE_CUBE
+    vWorldDir = wpos;
+    #endif
+
+    #ifdef ENVMAP_TYPE_TEX
+    vWorldDir = wpos.xyz;
+    #endif
+    
+}
+
+#pragma ps fragment
 out lowp vec4 fragColor;
-void main(){
+void fragment(){
     vec3 dir = vWorldDir.xyz;
     #ifdef ENVMAP_TYPE_CUBE
     fragColor = texture(uSampler,dir);

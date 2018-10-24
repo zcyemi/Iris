@@ -164,65 +164,83 @@ void vertex(){
 
 void fragment(){
 }`;
-	public static readonly diffuse_ps:string = `#version 300 es\nprecision mediump float;
+	public static readonly diffuse:string = `#version 300 es\nprecision mediump float;
+#include SHADERFX_BASIS
 #include SHADERFX_LIGHT
 #include SHADERFX_LIGHTING
-struct V2F{
-    vec3 pos;
-    vec3 normal;
-};
-in V2F v2f;
-out lowp vec4 fragColor;
-uniform vec4 uColor;
-void main(){
-    vec3 lcolor = LightModel_Lambert(LIGHT_DIR0,LIGHT_COLOR0,v2f.normal,uColor.xyz);
-    fragColor = vec4(lcolor +0.1,1.0);
-}`;
-	public static readonly diffuse_vs:string = `#version 300 es\nprecision mediump float;
-#include SHADERFX_BASIS
 
 #queue opaque
+#pragma vs vertex
+#pragma ps fragment
 
 in vec4 aPosition;
 in vec2 aUV;
 in vec4 aNormal;
+
 struct V2F{
     vec3 pos;
     vec3 normal;
 };
-out V2F v2f;
-void main(){
+inout V2F v2f;
+
+void vertex(){
     vec4 wpos = MATRIX_M * aPosition;
     v2f.pos = wpos.xyz;
     vec4 pos = MATRIX_VP * wpos;
     gl_Position = pos;
     v2f.normal = ObjToWorldDir(aNormal.xyz);
-}`;
-	public static readonly gizmos_ps:string = `#version 300 es\nprecision mediump float;
-out vec4 fragColor;
-void main(){
-    fragColor = vec4(1.0);
-}`;
-	public static readonly gizmos_vs:string = `#version 300 es\nprecision mediump float;
+}
 
+out lowp vec4 fragColor;
+uniform vec4 uColor;
+void fragment(){
+    vec3 lcolor = LightModel_Lambert(LIGHT_DIR0,LIGHT_COLOR0,v2f.normal,uColor.xyz);
+    fragColor = vec4(lcolor +0.1,1.0);
+}`;
+	public static readonly gizmos:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #queue other
+#pragma vs vertex
+#pragma ps fragment
 
 in vec4 aPosition;
 
-void main(){
+void vertex(){
     vec4 vpos = aPosition;
     gl_Position = MATRIX_MVP * vpos;
+}
+
+out vec4 fragColor;
+void fragment(){
+    fragColor = vec4(1.0);
 }`;
-	public static readonly pbrMetallicRoughness_ps:string = `#version 300 es\nprecision mediump float;
+	public static readonly pbrMetallicRoughness:string = `#version 300 es\nprecision mediump float;
+#include SHADERFX_BASIS
 #include SHADERFX_SHADOWMAP
+#queue opaque
 
-in vec2 vUV;
-
+inout vec2 vUV;
 #ifdef SHADOW_ON
-in vec4 lpos;
+inout vec4 lpos;
 #endif
 
+#pragma vs vertex
+in vec3 aPosition;
+in vec3 aNormal;
+in vec2 aUV;
+
+void vertex(){
+    #ifdef SHADOW_ON
+    vec4 wpos = MATRIX_M * vec4(aPosition,1.0);
+    lpos = uLightMtx[0] * wpos;
+    gl_Position = MATRIX_VP * wpos;
+    #else
+    gl_Position = MATRIX_MVP * vec4(aPosition,1.0);
+    #endif
+    vUV = aUV;
+}
+
+#pragma ps fragment
 uniform uPBR{
     vec4 uColor;
     float uMetallic;
@@ -235,7 +253,7 @@ uniform sampler2D uTexMetallicRoughness;
 uniform sampler2D uTexEmissive;
 
 out vec4 fragColor;
-void main(){
+void fragment(){
 
     #ifdef SHADOW_ON
     float shadow = computeShadow(lpos,uShadowMap);
@@ -245,70 +263,17 @@ void main(){
     #endif
 
 }`;
-	public static readonly pbrMetallicRoughness_vs:string = `#version 300 es\nprecision mediump float;
+	public static readonly shadowsGather:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #include SHADERFX_SHADOWMAP
 
-#queue opaque
+inout vec2 vUV;
+inout vec3 vvdir;
 
-in vec3 aPosition;
-in vec3 aNormal;
-in vec2 aUV;
+#pragma vs vertex
 
-out vec2 vUV;
-
-#ifdef SHADOW_ON
-out vec4 lpos;
-#endif
-
-
-void main(){
-    #ifdef SHADOW_ON
-    vec4 wpos = MATRIX_M * vec4(aPosition,1.0);
-    lpos = uLightMtx[0] * wpos;
-    gl_Position = MATRIX_VP * wpos;
-    #else
-    gl_Position = MATRIX_MVP * vec4(aPosition,1.0);
-    #endif
-    vUV = aUV;
-}`;
-	public static readonly shadowsGather_ps:string = `#version 300 es\nprecision mediump float;
-
-#include SHADERFX_BASIS
-#include SHADERFX_SHADOWMAP
-
-out vec4 fragColor;
-
-uniform sampler2D uDepthTexure;
-
-in vec2 vUV;
-in vec3 vvdir;
-
-void main(){
-    float eyedepth = DECODE_VIEWDEPTH(SAMPLE_DEPTH_TEXTURE(uDepthTexure,vUV));
-
-    vec3 dir = normalize(vvdir);
-    vec3 wpos = dir * eyedepth + CAMERA_POS.xyz;
-    vec4 lpos = uLightMtx[0] * vec4(wpos,1.0);
-
-    vec3 lcpos = lpos.xyz / lpos.w;
-
-    lcpos = lpos.xyz *0.5 +0.5;
-
-    vec2 coord=  lcpos.xy;
-    float shadowDep = texture(uShadowMap,coord).x;
-    float d = shadowDep;// lcpos.z;
-
-    fragColor = vec4(lcpos.z -1.0,0,0,1.0);
-}`;
-	public static readonly shadowsGather_vs:string = `#version 300 es\nprecision mediump float;
-
-#include SHADERFX_BASIS
 in vec4 aPosition;
-out vec2 vUV;
-out vec3 vvdir;
-
-void main(){
+void vertex(){
     vec4 pos = aPosition;
     vUV = pos.xy +0.5;
     pos.xy *=2.0;
@@ -319,52 +284,42 @@ void main(){
     vvdir = (cwpos.xyz / cwpos.w) - CAMERA_POS.xyz;
     
     gl_Position = pos;
-}`;
-	public static readonly skybox_ps:string = `#version 300 es\nprecision mediump float;
+}
 
+#pragma ps fragment
+
+out vec4 fragColor;
+uniform sampler2D uDepthTexure;
+void fragment(){
+    float eyedepth = DECODE_VIEWDEPTH(SAMPLE_DEPTH_TEXTURE(uDepthTexure,vUV));
+    vec3 dir = normalize(vvdir);
+    vec3 wpos = dir * eyedepth + CAMERA_POS.xyz;
+    vec4 lpos = uLightMtx[0] * vec4(wpos,1.0);
+    vec3 lcpos = lpos.xyz / lpos.w;
+    lcpos = lpos.xyz *0.5 +0.5;
+    vec2 coord=  lcpos.xy;
+    float shadowDep = texture(uShadowMap,coord).x;
+    float d = shadowDep;// lcpos.z;
+    fragColor = vec4(lcpos.z -1.0,0,0,1.0);
+}`;
+	public static readonly skybox:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
+#options ENVMAP_TYPE CUBE TEX 
+#queue skybox
 
 #ifdef ENVMAP_TYPE_CUBE
-in vec4 vWorldDir;
+inout vec4 vWorldDir;
 uniform samplerCube uSampler;
 #endif
 #ifdef ENVMAP_TYPE_TEX
-in vec3 vWorldDir;
+inout vec3 vWorldDir;
 uniform sampler2D uSampler;
 #endif
 
-
-out lowp vec4 fragColor;
-void main(){
-    vec3 dir = vWorldDir.xyz;
-    #ifdef ENVMAP_TYPE_CUBE
-    fragColor = texture(uSampler,dir);
-    #endif
-    #ifdef ENVMAP_TYPE_TEX
-    dir = normalize(dir);
-    float y = 1.0 - 0.5 *(1.0 + dir.y);
-    float x = atan(dir.z,dir.x) / PI_2 + 0.5;
-    fragColor = texture(uSampler,vec2(x,y));
-    #endif
-}`;
-	public static readonly skybox_vs:string = `#version 300 es\nprecision mediump float;
-#include SHADERFX_BASIS
-
-#options ENVMAP_TYPE CUBE TEX 
-
-#queue skybox
+#pragma vs vertex
 
 in vec4 aPosition;
-
-#ifdef ENVMAP_TYPE_CUBE
-out vec4 vWorldDir;
-#endif
-
-#ifdef ENVMAP_TYPE_TEX
-out vec3 vWorldDir;
-#endif
-
-void main(){
+void vertex(){
     vec4 pos = aPosition;
     pos.xy*=2.0;
     pos.z = 1.0;
@@ -380,34 +335,68 @@ void main(){
     vWorldDir = wpos.xyz;
     #endif
     
-}`;
-	public static readonly UnlitColor_ps:string = `#version 300 es\nprecision mediump float;
-uniform vec4 uColor;
-out vec4 fragColor;
-void main(){
-    fragColor = uColor;
-}`;
-	public static readonly UnlitColor_vs:string = `#version 300 es\nprecision mediump float;
+}
 
+#pragma ps fragment
+out lowp vec4 fragColor;
+void fragment(){
+    vec3 dir = vWorldDir.xyz;
+    #ifdef ENVMAP_TYPE_CUBE
+    fragColor = texture(uSampler,dir);
+    #endif
+    #ifdef ENVMAP_TYPE_TEX
+    dir = normalize(dir);
+    float y = 1.0 - 0.5 *(1.0 + dir.y);
+    float x = atan(dir.z,dir.x) / PI_2 + 0.5;
+    fragColor = texture(uSampler,vec2(x,y));
+    #endif
+}`;
+	public static readonly UnlitColor:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #queue opaque
 
+#pragma vs vertex
 in vec4 aPosition;
-void main(){
+void vertex(){
     gl_Position = MATRIX_MVP * aPosition;
+}
+
+#pragma ps fragment
+uniform vec4 uColor;
+out vec4 fragColor;
+void fragment(){
+    fragColor = uColor;
 }`;
-	public static readonly UnlitTexture_ps:string = `#version 300 es\nprecision mediump float;
+	public static readonly UnlitTexture:string = `#version 300 es\nprecision mediump float;
+#include SHADERFX_CAMERA
 #include SHADERFX_SHADOWMAP
 
+#queue opaque
 
-in vec2 vUV;
+inout vec2 vUV;
 #ifdef SHADOW_ON
-in vec4 lpos;
+inout vec4 lpos;
 #endif
-uniform sampler2D uSampler;
 
+#pragma vs vertex
+in vec4 aPosition;
+in vec2 aUV;
+void vertex(){
+    #ifdef SHADOW_ON
+    vec4 wpos = MATRIX_M * aPosition;
+    lpos = uLightMtx[0] * wpos;
+    gl_Position = MATRIX_VP * wpos;
+    #else
+    gl_Position = MATRIX_MVP * aPosition;
+    #endif
+    vUV = aUV;
+}
+
+#pragma ps fragment
+
+uniform sampler2D uSampler;
 out vec4 fragColor;
-void main(){
+void fragment(){
     #ifdef SHADOW_ON
     float shadow = computeShadow(lpos,uShadowMap);
 
@@ -419,45 +408,22 @@ void main(){
     fragColor = vec4(0,1.0,0,1.0);
     #endif
 }`;
-	public static readonly UnlitTexture_vs:string = `#version 300 es\nprecision mediump float;
+	public static readonly uvValue:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_CAMERA
-#include SHADERFX_SHADOWMAP
 
+inout vec2 vUV;
 
-
+#pragma vs vertex
 in vec4 aPosition;
 in vec2 aUV;
-out vec2 vUV;
-
-#ifdef SHADOW_ON
-out vec4 lpos;
-#endif
-
-#queue opaque
-
-void main(){
-    #ifdef SHADOW_ON
-    vec4 wpos = MATRIX_M * aPosition;
-    lpos = uLightMtx[0] * wpos;
-    gl_Position = MATRIX_VP * wpos;
-    #else
+void vertex(){
     gl_Position = MATRIX_MVP * aPosition;
-    #endif
     vUV = aUV;
-}`;
-	public static readonly uvValue_ps:string = `#version 300 es\nprecision mediump float;
-in vec2 vUV;
+}
+
+#pragma ps fragment
 out vec4 fragColor;
-void main(){
+void fragment(){
     fragColor = vec4(vUV,0,1.0);
-}`;
-	public static readonly uvValue_vs:string = `#version 300 es\nprecision mediump float;
-#include SHADERFX_CAMERA
-in vec4 aPosition;
-in vec2 aUV;
-out vec2 vUV;
-void main(){
-    gl_Position = MATRIX_MVP * aPosition;
-    vUV = aUV;
 }`;
 }
