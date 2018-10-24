@@ -20,6 +20,8 @@ import { SceneBuilder } from './SceneBuilder';
 import { ShaderFXLibs } from './shaderfx/ShaderFXLibs';
 import { PipelineBase } from './pipeline/PipelineBase';
 import { PipelineForwardZPrePass } from './pipeline/PipelineForwardZPrePass';
+import { ShaderPreprocessor } from './shaderfx/ShaderPreprocessor';
+import { ShaderGen } from './shaderfx/ShaderGenerated';
 
 export class SampleGame{
     

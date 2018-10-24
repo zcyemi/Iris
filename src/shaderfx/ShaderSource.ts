@@ -15,11 +15,18 @@ export class ShaderSource {
     private m_shaderTag: ShaderTags = null;
 
 
+    public name:string;
     public optionsList:ShaderOptions[] = [];
 
-    public constructor(vs: string, ps?: string) {
+    public constructor(vs: string, ps?: string,name?:string) {
         this.ps = ps;
         this.vs = vs;
+        this.name = name;
+    }
+
+    public static create(unified:string,name?:string):ShaderSource{
+        let [vs,ps] = ShaderPreprocessor.processUnifiedSource(unified,name);
+        return new ShaderSource(vs,ps,name);
     }
 
     public get isBuilt() {

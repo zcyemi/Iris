@@ -151,19 +151,18 @@ float computeShadowPCF3(vec4 vLightPos,sampler2DShadow shadowsampler){
 }
 
 #endif`;
-	public static readonly depth_ps:string = `#version 300 es\nprecision mediump float;
-
-void main(){
-}`;
-	public static readonly depth_vs:string = `#version 300 es\nprecision mediump float;
-
+	public static readonly depth:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #queue other
+#pragma vs vertex
+#pragma ps fragment
 
 in vec4 aPosition;
-
-void main(){
+void vertex(){
     gl_Position = MATRIX_MVP * aPosition;
+}
+
+void fragment(){
 }`;
 	public static readonly diffuse_ps:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_LIGHT
@@ -400,13 +399,14 @@ void main(){
 	public static readonly UnlitTexture_ps:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_SHADOWMAP
 
+
 in vec2 vUV;
 #ifdef SHADOW_ON
-in vec4 wpos;
 in vec4 lpos;
 #endif
-out vec4 fragColor;
 uniform sampler2D uSampler;
+
+out vec4 fragColor;
 void main(){
     #ifdef SHADOW_ON
     float shadow = computeShadow(lpos,uShadowMap);
@@ -423,12 +423,13 @@ void main(){
 #include SHADERFX_CAMERA
 #include SHADERFX_SHADOWMAP
 
+
+
 in vec4 aPosition;
 in vec2 aUV;
 out vec2 vUV;
 
 #ifdef SHADOW_ON
-out vec4 wpos;
 out vec4 lpos;
 #endif
 
@@ -436,7 +437,7 @@ out vec4 lpos;
 
 void main(){
     #ifdef SHADOW_ON
-    wpos = MATRIX_M * aPosition;
+    vec4 wpos = MATRIX_M * aPosition;
     lpos = uLightMtx[0] * wpos;
     gl_Position = MATRIX_VP * wpos;
     #else

@@ -126,7 +126,7 @@ export function ShaderFile(vsfile:string,psfile?:string){
         if(psfile == null){
             psfile = vsfile;
         }
-        target[key] = getShaderSource(vsfile,psfile);
+        target[key] = getShaderSource(vsfile,psfile,key);
     }
 }
 
@@ -138,11 +138,18 @@ export function ShaderInc(filename:string){
     }
 }
 
-function getShaderSource(vss:string,pss:string){
+function getShaderSource(vss:string,pss:string,name?:string){
+    let unified = ShaderGen[vss];
+    if(unified !=null){
+        console.log(unified);
+        return ShaderSource.create(unified,name);
+    }
+
     let vs = ShaderGen[vss+'_vs'];
     let ps = ShaderGen[pss+'_ps'];
+
     if(vs != null && ps != null){
-        return new ShaderSource(vs,ps);
+        return new ShaderSource(vs,ps,name);
     }
     throw new Error(`shader source invalid : ${vss} ${pss}`);
 }

@@ -2,8 +2,6 @@ import { IncludeIndex, ShaderOptions } from "./ShaderVariant";
 import { VariantsGroup } from "./ShaderSource";
 
 export class ShaderPreprocessor {
-
-
     public static readonly REGEX_INCLUDE: RegExp = /#include ([\w]+)/;
     public static readonly REGEX_OPTIONS: RegExp = /^[\s]*#options/;
 
@@ -14,6 +12,116 @@ export class ShaderPreprocessor {
             return { key: matchInc[1], line: lineindex };
         }
         return null;
+    }
+
+    public static processUnifiedSource(unified:string,name?:string):[string,string]{
+        const pattern_pragma = /#pragma ([\w]+) ([\w]+)/g;
+        const pattern_entry = /void ([\w\d]+)[\s]*\(/g;
+
+        let vs_entry:string = null;
+        let ps_entry:string = null;
+
+        let matchPragma = unified.match(pattern_pragma);
+        if(matchPragma != null){
+            for(let i=0,mlen = matchPragma.length;i<mlen;i++){
+                let pragmastr = matchPragma[i];
+                let splits = pragmastr.split(/\s+/);
+                let key = splits[1];
+                let val = splits[2];
+                if(key === 'vs') vs_entry = val;
+                if(key === 'ps') ps_entry = val;
+            }
+        }
+
+        if(vs_entry == null) throw new Error(`vs entry is not definded, shader:${name}`);
+        if(ps_entry == null) throw new Error(`ps entry is not definded, shader:${name}`);
+
+        let vs_func:[number,number] = null; 
+        let ps_func:[number,number] = null;
+        
+        let matchEntry = unified.match(pattern_entry);
+        if(matchEntry != null){
+            let len = matchEntry.length;
+            for(let i=0;i<len;i++){
+                let entry = matchEntry[i];
+
+                let part = entry.split(/\s+/)[1].replace('(','').trim();
+                if(part === vs_entry){
+                    vs_func = ShaderPreprocessor.getFunctionPosIndex(unified,entry);
+                    continue;
+                }
+                if(part === ps_entry){
+                    ps_func = ShaderPreprocessor.getFunctionPosIndex(unified,entry);
+                    continue;
+                }
+            }
+        }
+        //porcess lines
+        let main = unified;
+        let vs_main = null;
+        let ps_main = null;
+        if(vs_func[0] > ps_func[0]){
+            [main,vs_main] = ShaderPreprocessor.Seperate(main,vs_func[0],vs_func[1]);
+            [main,ps_main] = ShaderPreprocessor.Seperate(main,ps_func[0],ps_func[1]);
+        }
+        else{
+            [main,ps_main] = ShaderPreprocessor.Seperate(main,ps_func[0],ps_func[1]);
+            [main,vs_main] = ShaderPreprocessor.Seperate(main,vs_func[0],vs_func[1]);
+        }
+        
+        let lines = main.split('\n');
+
+        let vs_lines:string[] = [];
+        let ps_lines:string[] = [];
+
+        const pattern_varying = /^(inout|in|out)\s+[\d\w]+\s+/;
+        for(let i=0,len = lines.length;i<len;i++){
+            let line = lines[i].trimLeft();
+            if(line == null || line ==='') continue;
+            let match = line.match(pattern_varying);
+            if(match!=null){
+                let decorator = match[1];
+                if(decorator === 'inout'){
+                    line = line.substr(5);
+                    vs_lines.push('out' + line);
+                    ps_lines.push('in'+line);
+                }
+                else if(decorator === 'in'){
+                    vs_lines.push(line);                    
+                }
+                else if(decorator === 'out'){
+                    ps_lines.push(line);
+                }
+            }
+            else{
+                vs_lines.push(line);
+                ps_lines.push(line);
+            }
+        }
+
+        vs_main = vs_main.replace(vs_entry,'main');
+        ps_main = ps_main.replace(ps_entry,'main');
+
+        let vs_final = vs_lines.join('\n') + '\n' + vs_main;
+        let ps_final = ps_lines.join('\n') + '\n' + ps_main;
+
+        return [vs_final,ps_final];
+    }
+
+    public static getFunctionPosIndex(text:string,entry:string):[number,number]{
+        let startindex = text.indexOf(entry);
+        let len = entry.length + startindex;
+        let subtext = text.substr(len);
+        let endpos = subtext.indexOf('}');
+        
+        return [startindex,len+endpos +1];
+    }
+
+    public static Seperate(str:string,spos:number,epos:number):[string, string]{
+        let f = str.substr(0,spos);
+        let c = str.substr(spos,epos-spos);
+        let e = str.substr(epos);
+        return [f+e,c];
     }
 
     /**

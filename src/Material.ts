@@ -204,7 +204,6 @@ export class Material{
         }
     }
     
-
     /**
      * TODO clean apply process
      * especially for binded texture

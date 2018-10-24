@@ -91,6 +91,21 @@ export class ShaderTags{
     }
 }
 
+export class ShaderProgram{
+    public hash:string;
+
+    private glprogram:GLProgram;
+
+    public get glProgram():WebGLProgram{
+        return this.glprogram.Program;
+    }
+}
+
+export class ShaderPass{
+    public name:string;
+    public program:ShaderProgram;
+}
+
 export class Shader{
     
     private m_source:ShaderSource;
@@ -137,7 +152,7 @@ export class Shader{
         }
     }
 
-    
+
 
     public release(){
         this.m_glctx = null;
