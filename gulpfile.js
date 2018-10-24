@@ -7,6 +7,11 @@ const browsersync = require('browser-sync');
 gulp.task('build',()=>{
     mergeShader();
     build();
+
+    child_process.exec('tsc',(error,stdout,stderr)=>{
+        if(stdout != null && stdout != '') console.log(stdout);
+        if(stderr != null && stderr != '') console.log(stderr);
+    });
 });
 
 gulp.task('watch',()=>{
@@ -15,6 +20,11 @@ gulp.task('watch',()=>{
 
     gulp.watch('./src/**/*.ts',null,()=>{
         build();
+    });
+
+    child_process.exec('tsc -w',(error,stdout,stderr)=>{
+        if(stdout != null && stdout != '') console.log(stdout);
+        if(stderr != null && stderr != '') console.log(stderr);
     });
 
     gulp.watch('./res/shaders/**/*.glsl',null,()=>{

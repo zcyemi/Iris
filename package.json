@@ -1,9 +1,9 @@
 {
-  "name": "rendering-engine",
+  "name": "iris",
   "version": "1.0.0",
-  "description": "",
-  "main": "./dist/renderer.js",
-  "typings": "./dist/renderer.d.ts",
+  "description": "a webgl rendering framework.",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
   "scripts": {
     "build": "gulp build",
     "watch": "gulp watch",

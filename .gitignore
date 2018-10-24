@@ -4,3 +4,5 @@ node_modules/
 resource/*.*
 package-lock.json
 /package-lock.json
+res/iris.es.js
+res/iris.iife.js

@@ -6,10 +6,10 @@ import process from 'process';
 
 
 export default{
-    input: `src/renderer.ts`,
+    input: `src/index.ts`,
     output: [
-        {file: 'res/renderer.iife.js', name: 'renderer', format: 'iife',sourcemap: false},
-        {file: 'res/renderer.es.js',format: 'es'}
+        {file: 'res/iris.iife.js', name: 'iris', format: 'iife',sourcemap: false},
+        {file: 'res/iris.es.js',format: 'es'}
     ],
     external: [],
     plugins: [

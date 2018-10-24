@@ -179,7 +179,7 @@ void main(){
     vec3 lcolor = LightModel_Lambert(LIGHT_DIR0,LIGHT_COLOR0,v2f.normal,uColor.xyz);
     fragColor = vec4(lcolor +0.1,1.0);
 }`;
-	public static readonly diffuse_vs:string = `#version 300 es\nprecision mediump float;
+	public static readonly diffuse_vs:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 
 #queue opaque
@@ -388,7 +388,7 @@ out vec4 fragColor;
 void main(){
     fragColor = uColor;
 }`;
-	public static readonly UnlitColor_vs:string = `#version 300 es\nprecision mediump float;
+	public static readonly UnlitColor_vs:string = `#version 300 es\nprecision mediump float;
 
 #include SHADERFX_BASIS
 #queue opaque
@@ -444,13 +444,13 @@ void main(){
     #endif
     vUV = aUV;
 }`;
-	public static readonly uvValue_ps:string = `#version 300 es\nprecision mediump float;
+	public static readonly uvValue_ps:string = `#version 300 es\nprecision mediump float;
 in vec2 vUV;
 out vec4 fragColor;
 void main(){
     fragColor = vec4(vUV,0,1.0);
 }`;
-	public static readonly uvValue_vs:string = `#version 300 es\nprecision mediump float;
+	public static readonly uvValue_vs:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_CAMERA
 in vec4 aPosition;
 in vec2 aUV;
