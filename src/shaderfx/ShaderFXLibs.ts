@@ -183,6 +183,23 @@ export class ShaderDataUniformLight extends ShaderDataFloat32Buffer{
         let buffersize = 8 *4+ 4;
         super(buffersize);
     }
+
+    public setLightData(pos:vec3,type:number,index:number){
+        let offset = index * 8;
+        this.setVec3(offset,pos);
+        this.setFloat(offset+3,type);
+    }
+
+    public setLightColorIntensity(col:vec3,intensity:number,index:number){
+        let offset = index * 8;
+        this.setVec3(offset+4,col);
+        this.setFloat(offset+7,intensity);
+    }
+
+    public setAmbientColor(ambient:vec4){
+        this.setVec4(32,ambient);
+    }
+
 }
 
 export class ShaderDataUniformShadowMap extends ShaderDataArrayBuffer{

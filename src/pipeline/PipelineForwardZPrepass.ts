@@ -114,8 +114,8 @@ export class PipelineForwardZPrePass extends PipelineBase {
         const passTransparent = this.m_passTransparent;
         passTransparent.render(scene, nodeList.nodeTransparent);
 
-        const passGizmos = this.m_passGizmos;
-        passGizmos.render(null, null);
+        // const passGizmos = this.m_passGizmos;
+        // passGizmos.render(null, null);
 
         this.renderBufferDebug();
         this.UnBindTargetFrameBuffer();

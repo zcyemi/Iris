@@ -89,6 +89,10 @@ export class Utility {
 	public static randomColor():vec4{
 		return glmath.vec4(Math.random(),Math.random(),Math.random(),1);
 	}
+
+	public static colorRGBA(r:number,g:number,b:number,a:number):vec4{
+		return glmath.vec4(r,g,b,a).div(255.0);
+	}
 }
 
 

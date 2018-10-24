@@ -17,6 +17,7 @@ export class SceneBuilder{
     private m_glctx:GLContext;
     private m_shaderfxlib:ShaderFXLibs;
     private m_pbrShader:Shader;
+    private m_pbrBlendShader:Shader;
 
     private gltf:GLTFfile;
 
@@ -32,6 +33,7 @@ export class SceneBuilder{
         this.m_shaderfxlib = shaderlib;
 
         this.m_pbrShader = shaderlib.shaderPbrMetallicRoughness;
+        this.m_pbrBlendShader = shaderlib.shaderUnlitTexture;
 
         this.gltf= gltfdata.gltf;
     }
@@ -275,6 +277,8 @@ export class SceneBuilder{
             shadertags.blendOp = BlendOperator.ADD;
             shadertags.queue = RenderQueue.Transparent;
             shadertagsOverride = true;
+
+            mat.setShader(this.m_pbrBlendShader);
         }
 
         if(shadertagsOverride){

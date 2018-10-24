@@ -24,6 +24,7 @@ export class MeshRender{
         this.mesh = mesh;
         this.material = mat;
     }
+    
 
     public release(glctx:GLContext){
         if(this.m_vao != null){

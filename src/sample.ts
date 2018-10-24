@@ -94,7 +94,6 @@ export class SampleGame{
         let gltf = await GLTFtool.LoadGLTFBinary('res/gltf/scene.glb');
 
 
-        console.log(gltf.gltf);
 
         let sceneBuilder = new SceneBuilder(gltf,glctx,this.m_graphicsRender.shaderLib);
 
@@ -110,7 +109,13 @@ export class SampleGame{
             this.m_scene = scene;
 
             let skyboxobj = scene.getChildByName('sky_sky_0');
-            if(skyboxobj!=null) skyboxobj.render.castShadow = false;
+            if(skyboxobj!=null){
+                let skyrender = skyboxobj.render;
+                skyrender.castShadow = false;
+                skyrender.material.setShader(grender.shaderLib.shaderUnlitTexture);
+            }
+
+            scene.transform.children[0].applyTranslate(glmath.vec3(0,15000,0));
     
         }
         else{
@@ -127,7 +132,7 @@ export class SampleGame{
         camera.transform.setPosition(glmath.vec3(0,2,5));
         //camera.transform.setLookAt(glmath.vec3(0,0,0));
         camera.transform.setLocalDirty();
-        camera.ambientColor = glmath.vec4(1,0.2,0.2,0.2);
+        camera.ambientColor = Utility.colorRGBA(3, 110, 167,15);
         camera.clearType = ClearType.Skybox;
         camera.skybox = texcube;
         camera.background = glmath.vec4(0,1,0,1);
@@ -170,7 +175,7 @@ export class SampleGame{
 
         //directional light
         let lightobj = new GameObject();
-        let light0 = Light.creatDirctionLight(lightobj,1.0,glmath.vec3(-0.5,-1,0.4));
+        let light0 = Light.creatDirctionLight(lightobj,1.0,glmath.vec3(0.5,-1,0.6));
         light0.lightColor = new vec3([1,1,1]);
         lightobj.transform.parent = scene.transform;
 

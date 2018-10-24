@@ -61,6 +61,16 @@ export class PassOpaque{
         datacam.setClipPlane(cam.near,cam.far);
         pipe.updateUniformBufferCamera(datacam);
 
+        //light
+        let light = scene.lights[0];
+        if(light !=null && light.isDirty){
+            let datalight = pipe.shaderDataLight;
+            datalight.setLightData(light.lightPosData,light.lightType,0);
+            datalight.setLightColorIntensity(light.lightColor,light.intensity,0);
+            datalight.setAmbientColor(cam.ambientColor);
+            pipe.updateUniformBufferLight(datalight);
+        }
+
         //sm
         let state =pipe.stateCache;
         state.reset(deftags);

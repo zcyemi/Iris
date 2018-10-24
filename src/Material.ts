@@ -43,6 +43,9 @@ export class MaterialPorpertyBlock{
             }
         }
         for(var key in uinfo){
+
+
+
             let u = selfu[key];
             let up = uinfo[key];
             if(u == null){
@@ -108,6 +111,12 @@ export class Material{
 
     public get propertyBlock():MaterialPorpertyBlock{
         return this.m_propertyBlock;
+    }
+
+    public setShader(shader:Shader){
+        this.m_shader = shader;
+        this.m_program = null;
+        this.m_useVariants = false;
     }
 
     public constructor(shader?:Shader){
@@ -198,7 +207,6 @@ export class Material{
         let pu = this.m_propertyBlock.uniforms;
         for(var key in pu){
             let u = pu[key];
-
             if(key === "uShadowMap") continue;
             this.setUniform(gl,program.Uniforms[key],u.type,u.value);
         }
