@@ -10,7 +10,16 @@ export abstract class RenderPass {
         this.pipeline = pipeline;
     }
 
-    public render(nodelist:RenderNodeList,scene:Scene){
+    public render(scene?:Scene){
 
+    }
+
+    public release(){
+        this.pipeline = null;
+    }
+
+    public static Release(pass:RenderPass):RenderPass{
+        pass.release();
+        return null;
     }
 }

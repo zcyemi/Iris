@@ -18,4 +18,4 @@ export * from './Component';
 export * from './Utility';
 
 //TODO move sample to another repo
-export * from './sample';
+export * from './test/sample';

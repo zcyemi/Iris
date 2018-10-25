@@ -189,4 +189,8 @@ export class PipelineStateCache{
         this.m_lastTags = tags;
     }
 
+    public release(){
+        
+    }
+
 }

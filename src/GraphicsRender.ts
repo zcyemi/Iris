@@ -36,6 +36,10 @@ export class GraphicsRender{
     public pause:boolean = false;
     private m_frameBufferInvalid:boolean = false;
 
+    private m_valid:boolean = false;
+
+
+
     public get pipeline():IRenderPipeline{
         return this.m_renderPipeline;
     }
@@ -56,14 +60,10 @@ export class GraphicsRender{
     public constructor(canvas:HTMLCanvasElement,pipeline?:IRenderPipeline,creationInfo?:GraphicsRenderCreateInfo){
         this.canvas = canvas;
 
-
-
         if(creationInfo == null){
             creationInfo = new GraphicsRenderCreateInfo();
             this.m_creationInfo = creationInfo;
         }
-
-
         var glctx = <GLContext>GLContext.createFromCanvas(canvas, {
             antialias: true,
             alpha: false,
@@ -80,7 +80,6 @@ export class GraphicsRender{
 
         Material.DEF_TEXID_NUM = GraphicsRender.TEXID_DEFAULT_TEX;
         Texture.TEMP_TEXID = gl.TEXTURE2;
-
         
         this.m_defaultTexture = Texture.crateEmptyTexture(2,2,glctx);
         gl.activeTexture(gl.TEXTURE3);
@@ -101,15 +100,28 @@ export class GraphicsRender{
         }
         
         pipeline.graphicRender = this;
-        pipeline.onInitGL(this.glctx);
-        pipeline.onSetupRender(this.m_creationInfo);
+        pipeline.onSetupRender(this.glctx,this.m_creationInfo);
         this.m_renderPipeline = pipeline;
+
+        this.m_valid = false;
     }
 
     public reload(){
-        //TODO
-        //this.m_shaderFXlib.reload();
-        this.m_renderPipeline.reload();
+        let shaderfxlib = this.m_shaderFXlib;
+        if(shaderfxlib != null) shaderfxlib.reload();
+        let renderpipeline = this.m_renderPipeline;
+        if(renderpipeline != null) renderpipeline.reload();
+    }
+
+    public release(){
+        let renderpipe = this.m_renderPipeline;
+        if(renderpipe !=null){
+            renderpipe.release();
+            this.m_renderPipeline = null;
+        }
+        this.m_shaderFXlib.release();
+
+        this.m_valid = false;
     }
 
     private m_resizeDelayter: Delayter = new Delayter();

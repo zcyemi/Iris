@@ -10,6 +10,7 @@ import { ShadowMapData } from "../render/Shadow";
 import { PipelineStateCache } from "../PipelineStateCache";
 import { Transform } from "../Transform";
 import { IRenderPipeline } from "./IRenderPipeline";
+import { RenderPass } from "../render/RenderPass";
 
 export class PipelineBase implements IRenderPipeline {
 
@@ -18,9 +19,13 @@ export class PipelineBase implements IRenderPipeline {
     public static readonly UNIFORMINDEX_SHADOWMAP: number = 2;
     public static readonly UNIFORMINDEX_LIGHT: number = 3;
 
+    public get GLCtx(): GLContext { return this.glctx; }
+    public get GL(): WebGL2RenderingContext { return this.gl; }
+
     protected glctx: GLContext;
     protected gl: WebGL2RenderingContext;
     private m_pipestateCache: PipelineStateCache;
+    protected m_inited:boolean = false;
 
     public graphicRender: GraphicsRender;
 
@@ -64,14 +69,14 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     protected m_shadowMapData: ShadowMapData = new ShadowMapData();
-    protected m_shadowEnabled: boolean = true;
+    public get shadowMapData(): ShadowMapData { return this.m_shadowMapData; }
+    protected m_shadowEnabled: boolean = false;
 
     private m_nodelist: RenderNodeList[] = [new RenderNodeList(), new RenderNodeList()];
     private m_nodelistIndex: number = 0;
-
-    public get shadowMapData(): ShadowMapData { return this.m_shadowMapData; }
-    public get GLCtx(): GLContext { return this.glctx; }
-    public get GL(): WebGL2RenderingContext { return this.gl; }
+    public get nodeList():RenderNodeList{
+        return this.m_nodelist[this.m_nodelistIndex];
+    }
 
     protected m_mainFrameBuffer: GLFrameBuffer;
     protected m_mainFrameBufferInfo: GraphicsRenderCreateInfo;
@@ -88,39 +93,35 @@ export class PipelineBase implements IRenderPipeline {
     protected m_mainFrameBufferWidth: number = 0;
     protected m_mainFrameBufferHeight: number = 0;
 
+    /* DebugPass own by PipelineBase */
     protected m_passDebug: PassDebug;
 
     public constructor() { }
 
-    public onInitGL(glctx: GLContext) {
+    public onSetupRender(glctx:GLContext,bufferinfo: GraphicsRenderCreateInfo) {
         this.glctx = glctx;
         this.gl = glctx.gl;
-        this.m_pipestateCache = new PipelineStateCache(glctx);
-    }
-
-    public onSetupRender(bufferinfo: GraphicsRenderCreateInfo) {
         this.m_mainFrameBufferInfo = bufferinfo;
 
+        this.init();
+    }
+
+    public init(){
+        if(this.m_inited) return;
+        let glctx = this.glctx;
+        let bufferinfo = this.m_mainFrameBufferInfo;
+        this.m_pipestateCache = new PipelineStateCache(glctx);
         let fb = this.glctx.createFrameBuffer(true, bufferinfo.colorFormat, bufferinfo.depthFormat);
         this.m_mainFrameBuffer = fb;
         this.m_mainFrameBufferWidth = fb.width;
         this.m_mainFrameBufferHeight = fb.height;
         this.m_mainFrameBufferAspect = fb.width / fb.height;
-
         this.createUniformBuffers();
-    }
 
-    public renderBufferDebug() {
-        let passdebug = this.m_passDebug;
-        if (passdebug != null && this.m_bufferDebugInfo.length != 0) passdebug.render(null, null);
-    }
+        this.m_passDebug = new PassDebug(this,);
 
-    public resizeFrameBuffer(width: number, height: number) {
-        let bufferInfo = this.m_mainFrameBufferInfo;
-        this.m_mainFrameBuffer = this.glctx.createFrameBuffer(false, bufferInfo.colorFormat, bufferInfo.depthFormat, width, height, this.m_mainFrameBuffer);
-        this.m_mainFrameBufferWidth = width;
-        this.m_mainFrameBufferHeight = height;
-        this.m_mainFrameBufferAspect = width / height;
+        this.m_inited= true;
+
     }
 
     private createUniformBuffers() {
@@ -164,6 +165,21 @@ export class PipelineBase implements IRenderPipeline {
             this.m_uniformBufferLight = buffer;
         }
     }
+
+    public renderBufferDebug() {
+        let passdebug = this.m_passDebug;
+        if (passdebug != null && this.m_bufferDebugInfo.length != 0) passdebug.render();
+    }
+
+    public resizeFrameBuffer(width: number, height: number) {
+        let bufferInfo = this.m_mainFrameBufferInfo;
+        this.m_mainFrameBuffer = this.glctx.createFrameBuffer(false, bufferInfo.colorFormat, bufferInfo.depthFormat, width, height, this.m_mainFrameBuffer);
+        this.m_mainFrameBufferWidth = width;
+        this.m_mainFrameBufferHeight = height;
+        this.m_mainFrameBufferAspect = width / height;
+    }
+
+   
 
     public exec(scene: Scene) {
     }
@@ -268,9 +284,47 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     public release() {
+        if(!this.m_inited) return;
+        
+        let glctx = this.glctx;
+
+        this.m_bufferDebugInfo = [];
+        
+        this.m_mainFrameBuffer.release(glctx);
+        this.m_mainFrameBufferWidth = 0;
+        this.m_mainFrameBufferHeight = 0;
+        this.m_mainFrameBufferAspect = 1.0;
+        this.m_mainFrameBuffer = null;
+
+        this.m_pipestateCache.release();
+        this.m_pipestateCache = null;
+
+        let gl = glctx.gl;
+
+        gl.deleteBuffer(this.m_uniformBufferCamera);
+        gl.deleteBuffer(this.m_uniformBufferLight);
+        gl.deleteBuffer(this.m_uniformBufferObj);
+        gl.deleteBuffer(this.updateUniformBufferShadowMap);
+
+        this.m_uniformBufferCamera = null;
+        this.m_uniformBufferLight = null;
+        this.m_uniformBufferObj= null;
+        this.m_uniformBufferShadowMap = null;
+
+        this.m_shadowEnabled = false;
+        this.m_shadowMapData = new ShadowMapData();
+
+        let passDebug = this.m_passDebug;
+        if(passDebug != null){
+            this.m_passDebug = RenderPass.Release(passDebug);
+        }
+
+        this.m_inited = false;
     }
 
     public reload() {
+        this.release();
+        this.init();
     }
 
 }

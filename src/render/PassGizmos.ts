@@ -9,11 +9,11 @@ import { MeshRender } from "../MeshRender";
 import { ShaderSource } from "../shaderfx/ShaderSource";
 import { ShaderFile, ShaderFX } from "../shaderfx/ShaderFX";
 import { MeshBuilder } from "../MeshBuilder";
+import { RenderPass } from "./RenderPass";
 
 
-export class PassGizmos{
+export class PassGizmos extends RenderPass{
 
-    private pipeline:PipelineBase;
 
     protected m_material:Material;
     private m_mesh:Mesh;
@@ -29,8 +29,7 @@ export class PassGizmos{
     private m_tags:ShaderTags;
 
     public constructor(pipe:PipelineBase){
-        this.pipeline = pipe;
-
+        super(pipe);
 
         if(PassGizmos.s_shader == null){
             let shader = ShaderFX.compileShaders(pipe.GLCtx,PassGizmos.SH_gizmos);
@@ -55,8 +54,7 @@ export class PassGizmos{
         this.m_tags = tags;
     }
 
-    public render(scene:Scene,queue:RenderQueue[]){
-
+    public render(scene?:Scene){
         if(!this.enable) return;
 
         const mesh =this.m_mesh;

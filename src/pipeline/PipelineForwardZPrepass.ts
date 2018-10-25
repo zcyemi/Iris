@@ -11,6 +11,7 @@ import { TextureCreationDesc, Texture } from "../Texture";
 import { Scene } from "../Scene";
 import { Comparison } from "../shaderfx/Shader";
 import { GL } from "../GL";
+import { GLContext } from "wglut";
 
 export class PipelineForwardZPrePass extends PipelineBase {
 
@@ -25,8 +26,10 @@ export class PipelineForwardZPrePass extends PipelineBase {
         super();
     }
 
-    public onSetupRender(bufferinfo: GraphicsRenderCreateInfo) {
-        super.onSetupRender(bufferinfo);
+    public init(){
+        if(this.m_inited) return;
+        super.init();
+
         let gl = this.glctx.gl;
         gl.depthMask(true);
         gl.depthFunc(gl.LEQUAL);
@@ -34,14 +37,14 @@ export class PipelineForwardZPrePass extends PipelineBase {
 
         let fb = this.m_mainFrameBuffer;
         this.createMainDepthFB(fb.width, fb.height);
-
-        this.m_passDebug = new PassDebug(this);
         this.m_passGizmos = new PassGizmos(this);
         this.m_passDepth = new PassDepth(this);
         this.m_passOpaque = new PassOpaque(this, null);
         this.m_passTransparent = new PassTransparent(this, null);
         this.m_passSkybox = new PassSkybox(this, null);
         this.m_passShadowMap = new PassShadowMap(this);
+
+        this.m_inited = true;
     }
 
     private createMainDepthFB(width: number, height: number) {
@@ -99,7 +102,7 @@ export class PipelineForwardZPrePass extends PipelineBase {
         //do rendering
 
         const passDepth = this.m_passDepth;
-        passDepth.render(scene, nodeList.nodeOpaque);
+        passDepth.render(scene);
 
         //sm
         const passSM = this.m_passShadowMap;
@@ -114,8 +117,8 @@ export class PipelineForwardZPrePass extends PipelineBase {
         const passTransparent = this.m_passTransparent;
         passTransparent.render(scene, nodeList.nodeTransparent);
 
-        // const passGizmos = this.m_passGizmos;
-        // passGizmos.render(null, null);
+        const passGizmos = this.m_passGizmos;
+        passGizmos.render();
 
         this.renderBufferDebug();
         this.UnBindTargetFrameBuffer();
@@ -126,5 +129,14 @@ export class PipelineForwardZPrePass extends PipelineBase {
         state.setZWrite(true);
     }
 
+    public release(){
+        if(this.m_inited) return;
+    
+    }
+
+    public reload(){
+        this.release();
+        this.init();
+    }
 
 }

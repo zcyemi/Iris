@@ -5,43 +5,38 @@ import { MeshRender } from "../MeshRender";
 import { GLProgram, vec3, glmath } from "wglut";
 import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { BufferDebugInfo } from "./BufferDebugInfo";
+import { RenderPass } from "./RenderPass";
 
 /**
  * Pre-rendering Depth Pass
  */
-export class PassDepth{
+export class PassDepth extends RenderPass{
 
-    private pipeline:PipelineBase;
     private m_tags:ShaderTags;
-
     private m_program:GLProgram;
-
     private m_bufferDebugInfo:BufferDebugInfo;
 
-    public constructor(pipeline:PipelineBase,deftags?:ShaderTags){
-        this.pipeline = pipeline;
+    public constructor(pipeline:PipelineBase){
+        super(pipeline);
 
-        if(deftags == null){
-            deftags = new ShaderTags();
-            deftags.blendOp = null;
-            deftags.blend = false;
-            deftags.zwrite = true;
-            deftags.ztest = Comparison.LEQUAL;
-            deftags.culling = CullingMode.Back;
-            deftags.fillDefaultVal();
-        }
+        let deftags = new ShaderTags();
+        deftags.blendOp = null;
+        deftags.blend = false;
+        deftags.zwrite = true;
+        deftags.ztest = Comparison.LEQUAL;
+        deftags.culling = CullingMode.Back;
+        deftags.fillDefaultVal();
         this.m_tags =deftags;
 
         let shader = pipeline.graphicRender.shaderLib.shaderDepth;
         this.m_program = shader.defaultProgram;
 
         //debug depth texture
-
         let debuginfo = new BufferDebugInfo(pipeline.mainDepthTexture,glmath.vec4(0,0,200,200));
         this.m_bufferDebugInfo = debuginfo;
         pipeline.addBufferDebugInfo(debuginfo);
     }
-    public render(scene:Scene,queue:MeshRender[]){
+    public render(scene?:Scene){
         const CLASS = PipelineBase;
 
         const pipe = this.pipeline;
@@ -54,6 +49,8 @@ export class PassDepth{
         const NAME_LIGHT = ShaderDataUniformLight.UNIFORM_LIGHT;
 
         let cam = scene.camera;
+
+        let queue = pipe.nodeList.nodeOpaque;
         if(queue.length == 0) return;
 
         //diable color buffer
