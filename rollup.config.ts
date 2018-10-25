@@ -20,7 +20,9 @@ export default{
             tsconfig: 'tsconfig.json',
             useTsconfigDeclarationDir:true
         }),
-        commonjs(),
+        commonjs({
+            include: 'node_modules/**'
+        }),
         resolve({
             jsnext:true,
             extensions: ['.ts','.js']

@@ -73,7 +73,7 @@ export class SampleGame{
     private m_obj2:GameObject;
     private m_obj3:GameObject;
     private m_camera:Camera;
-    private async createScene(glctx:GLContext){
+    public async createScene(glctx:GLContext):Promise<void>{
         let grender = this.m_graphicsRender;
 
         //texture

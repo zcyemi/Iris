@@ -19,4 +19,3 @@ export * from './Utility';
 
 //TODO move sample to another repo
 export * from './sample';
-
