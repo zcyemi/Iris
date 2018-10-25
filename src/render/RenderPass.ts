@@ -1,4 +1,3 @@
-import { RenderNodeList } from "../RenderNodeList";
 import { Scene } from "../Scene";
 import { PipelineBase } from "../pipeline/PipelineBase";
 
@@ -18,7 +17,7 @@ export abstract class RenderPass {
         this.pipeline = null;
     }
 
-    public static Release(pass:RenderPass):RenderPass{
+    public static Release(pass:RenderPass):null{
         pass.release();
         return null;
     }

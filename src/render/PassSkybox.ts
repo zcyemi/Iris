@@ -9,11 +9,9 @@ import { CubeMapType } from "../TextureCubeMap";
 import { Material } from "../Material";
 import { Mesh } from "../Mesh";
 import { ShaderFX } from "../shaderfx/ShaderFX";
+import { RenderPass } from "./RenderPass";
 
-export class PassSkybox{
-
-    
-    private pipeline:PipelineBase;
+export class PassSkybox extends RenderPass{
     private m_tags:ShaderTags;
     private m_material:Material;
     private m_program:GLProgram;
@@ -26,17 +24,16 @@ export class PassSkybox{
 
     private m_lastCubeType: CubeMapType;
 
-    public constructor(pipeline:PipelineBase,deftags?:ShaderTags){
-        this.pipeline = pipeline;
+    public constructor(pipeline:PipelineBase){
+        super(pipeline);
 
-        if(deftags == null){
-            deftags = new ShaderTags();
-            deftags.blend = false;
-            deftags.zwrite = true;
-            deftags.ztest = Comparison.LEQUAL;
-            deftags.culling = CullingMode.Back;
-            deftags.fillDefaultVal();
-        }
+
+        let deftags = new ShaderTags();
+        deftags.blend = false;
+        deftags.zwrite = true;
+        deftags.ztest = Comparison.LEQUAL;
+        deftags.culling = CullingMode.Back;
+        deftags.fillDefaultVal();
         this.m_tags =deftags;
 
         let mat= new Material(pipeline.graphicRender.shaderLib.shaderSkybox);
@@ -55,7 +52,7 @@ export class PassSkybox{
         this.m_uniformBlockCamIndex = program.UniformBlock[ShaderDataUniformCam.UNIFORM_CAM];
     }
 
-    public render(scene:Scene,queue:MeshRender[]){
+    public render(scene?:Scene){
         const CLASS = PipelineBase;
 
         let camera = scene.camera;

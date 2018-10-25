@@ -15,11 +15,11 @@ import { ShaderSource } from "../shaderfx/ShaderSource";
 import { Material } from "../Material";
 import { ShaderDataUniformShadowMap } from "../shaderfx/ShaderFXLibs";
 import { pipeline } from "stream";
+import { RenderPass } from "./RenderPass";
 
 
-export class PassShadowMap{
+export class PassShadowMap extends RenderPass{
 
-    private pipe:PipelineBase;
 
     private m_shader:Shader;
     private m_program:GLProgram;
@@ -47,13 +47,13 @@ export class PassShadowMap{
     private static s_shadowGatherShader:Shader;
 
     public constructor(pipeline:PipelineBase){
-        this.pipe = pipeline;
+        super(pipeline);
 
         this.initShadowMaps();
     }
 
     private initShadowMaps(){
-        let pipe = this.pipe;
+        let pipe = this.pipeline;
         let gl =pipe.GL;
         let glctx = pipe.GLCtx;
 
@@ -138,12 +138,14 @@ export class PassShadowMap{
 
     }
 
-    public render(scene:Scene,queue:MeshRender[]){
+    public render(scene:Scene){
         const CLASS = PipelineBase;
+
+        let queue = this.pipeline.nodeList.nodeOpaque;
 
         let cam = scene.camera;
         if(cam == null) return;
-        let pipe = this.pipe;
+        let pipe = this.pipeline;
         cam.aspect = pipe.mainFrameBufferAspect;
         let config = pipe.graphicRender.shadowConfig;
 
@@ -155,14 +157,13 @@ export class PassShadowMap{
         gl.uniformBlockBinding(glp,this.m_blockIndexCam,CLASS.UNIFORMINDEX_CAM);
         gl.uniformBlockBinding(glp,this.m_blockIndexObj,CLASS.UNIFORMINDEX_OBJ);
 
-
         let lights = scene.lights;
         for(let i=0,lcount = lights.length;i<lcount;i++){
             this.renderLightShadowMap(lights[i],cam,queue,config);
         }
 
         //update shadowmap uniform buffer
-        let smdata = this.pipe.shaderDataShadowMap;
+        let smdata = this.pipeline.shaderDataShadowMap;
         pipe.updateUniformBufferShadowMap(smdata);
 
         //update camerabuffer
@@ -184,7 +185,7 @@ export class PassShadowMap{
 
         if(light.lightType != LightType.direction) return;
 
-        let pipe = this.pipe;
+        let pipe = this.pipeline;
         let gl = pipe.GL;
         let smdata =pipe.shaderDataShadowMap;
 
@@ -273,7 +274,7 @@ export class PassShadowMap{
 
     private renderShadowCascade(vp:vec4,queue:MeshRender[],mtx:[mat4,mat4]){
 
-        let pipe = this.pipe;
+        let pipe = this.pipeline;
         let glctx = pipe.GLCtx;
         let gl = glctx.gl;
 
@@ -311,12 +312,12 @@ export class PassShadowMap{
         const CLASS = PipelineBase;
 
 
-        let dataSM =this.pipe.shaderDataShadowMap;
+        let dataSM =this.pipeline.shaderDataShadowMap;
 
-        dataSM.setLightMtx(this.pipe.shadowMapData.lightMtx0,0);
-        this.pipe.updateUniformBufferShadowMap(dataSM);
+        dataSM.setLightMtx(this.pipeline.shadowMapData.lightMtx0,0);
+        this.pipeline.updateUniformBufferShadowMap(dataSM);
 
-        const gl =this.pipe.GL;
+        const gl =this.pipeline.GL;
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,this.m_shadowFB);
         gl.clearColor(0,0,0,0);
         gl.clear(gl.COLOR_BUFFER_BIT);

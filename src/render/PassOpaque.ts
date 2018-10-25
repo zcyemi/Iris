@@ -5,25 +5,25 @@ import { MeshRender } from "../MeshRender";
 import { GLProgram } from "wglut";
 import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { ShaderFX } from "../shaderfx/ShaderFX";
+import { RenderPass } from "./RenderPass";
 
 
-export class PassOpaque{
+export class PassOpaque extends RenderPass{
 
-    private pipeline:PipelineBase;
     private m_tags:ShaderTags;
 
-    public constructor(pipeline:PipelineBase,deftags?:ShaderTags){
-        this.pipeline = pipeline;
+    public constructor(pipeline:PipelineBase){
+        super(pipeline);
 
-        if(deftags == null){
-            deftags = new ShaderTags();
-            deftags.blendOp = null;
-            deftags.blend = false;
-            deftags.zwrite = false;
-            deftags.ztest = Comparison.LEQUAL;
-            deftags.culling = CullingMode.Back;
-            deftags.fillDefaultVal();
-        }
+        console.log('init opaque')
+
+        let deftags = new ShaderTags();
+        deftags.blendOp = null;
+        deftags.blend = false;
+        deftags.zwrite = false;
+        deftags.ztest = Comparison.LEQUAL;
+        deftags.culling = CullingMode.Back;
+        deftags.fillDefaultVal();
         this.m_tags =deftags;
 
         let gl = pipeline.GL;
@@ -32,9 +32,12 @@ export class PassOpaque{
 
     }
 
-    public render(scene:Scene,queue:MeshRender[]){
+    public render(scene:Scene){
 
         const CLASS = PipelineBase;
+
+        let queue = this.pipeline.nodeList.nodeOpaque;
+
 
         const pipe = this.pipeline;
         const gl = pipe.GL;
@@ -47,6 +50,7 @@ export class PassOpaque{
         const NAME_SM = ShaderFX.UNIFORM_SHADOWMAP;
 
         let cam = scene.camera;
+
         if(queue.length == 0) return;
 
         gl.enable(gl.POLYGON_OFFSET_FILL);

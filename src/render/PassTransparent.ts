@@ -1,33 +1,30 @@
 import { PipelineBase } from "../pipeline/PipelineBase";
 import { ShaderTags, Comparison, CullingMode, BlendOperator } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
-import { MeshRender } from "../MeshRender";
 import { GLProgram } from "wglut";
 import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
+import { RenderPass } from "./RenderPass";
 
 
-export class PassTransparent{
+export class PassTransparent extends RenderPass{
 
 
-    private pipeline:PipelineBase;
     private m_tags:ShaderTags;
 
-    public constructor(pipeline:PipelineBase,deftags?:ShaderTags){
-        this.pipeline = pipeline;
+    public constructor(pipeline:PipelineBase){
+        super(pipeline);
 
-        if(deftags == null){
-            deftags = new ShaderTags();
-            deftags.blendOp = BlendOperator.ADD;
-            deftags.blend = true;
-            deftags.zwrite = false;
-            deftags.ztest = Comparison.LEQUAL;
-            deftags.culling = CullingMode.Back;
-            deftags.fillDefaultVal();
-        }
+        let deftags = new ShaderTags();
+        deftags.blendOp = BlendOperator.ADD;
+        deftags.blend = true;
+        deftags.zwrite = false;
+        deftags.ztest = Comparison.LEQUAL;
+        deftags.culling = CullingMode.Back;
+        deftags.fillDefaultVal();
         this.m_tags =deftags;
     }
 
-    public render(scene:Scene,queue:MeshRender[]){
+    public render(scene?:Scene){
         const CLASS = PipelineBase;
 
         const pipe = this.pipeline;
@@ -40,6 +37,8 @@ export class PassTransparent{
         const NAME_LIGHT = ShaderDataUniformLight.UNIFORM_LIGHT;
 
         let cam = scene.camera;
+
+        let queue = pipe.nodeList.nodeTransparent;
         if(queue.length == 0) return;
 
         //cam

@@ -1,17 +1,15 @@
 import { PassOpaque } from "../render/PassOpaque";
 import { PassTransparent } from "../render/PassTransparent";
 import { PassSkybox } from "../render/PassSkybox";
-import { PassDebug } from "../render/PassDebug";
 import { PassGizmos } from "../render/PassGizmos";
 import { PassDepth } from "../render/PassDepth";
 import { PassShadowMap } from "../render/PassShadowMap";
 import { PipelineBase } from "./PipelineBase";
-import { GraphicsRenderCreateInfo } from "../GraphicsRender";
 import { TextureCreationDesc, Texture } from "../Texture";
 import { Scene } from "../Scene";
 import { Comparison } from "../shaderfx/Shader";
 import { GL } from "../GL";
-import { GLContext } from "wglut";
+import { RenderPass } from "../render/RenderPass";
 
 export class PipelineForwardZPrePass extends PipelineBase {
 
@@ -39,22 +37,18 @@ export class PipelineForwardZPrePass extends PipelineBase {
         this.createMainDepthFB(fb.width, fb.height);
         this.m_passGizmos = new PassGizmos(this);
         this.m_passDepth = new PassDepth(this);
-        this.m_passOpaque = new PassOpaque(this, null);
-        this.m_passTransparent = new PassTransparent(this, null);
-        this.m_passSkybox = new PassSkybox(this, null);
+        this.m_passOpaque = new PassOpaque(this);
+        this.m_passTransparent = new PassTransparent(this);
+        this.m_passSkybox = new PassSkybox(this);
         this.m_passShadowMap = new PassShadowMap(this);
-
         this.m_inited = true;
     }
 
     private createMainDepthFB(width: number, height: number) {
         let bufferinfo = this.m_mainFrameBufferInfo;
-
         let depthtexdesc = new TextureCreationDesc(null, bufferinfo.depthFormat, false, GL.NEAREST, GL.NEAREST);
-
         let tex = Texture.createTexture2D(width, height, depthtexdesc, this.glctx);
         this.m_mainDepthTexture = tex;
-
         let gl = this.gl;
         if (this.m_mainDepthFB == null) {
             let fb = gl.createFramebuffer();
@@ -70,7 +64,6 @@ export class PipelineForwardZPrePass extends PipelineBase {
 
         let glctx = this.glctx;
         let gl = this.gl;
-
         //resize depth framebuffer
         if (this.m_mainDepthFB != null) {
             gl.deleteFramebuffer(this.m_mainDepthFB);
@@ -90,7 +83,7 @@ export class PipelineForwardZPrePass extends PipelineBase {
         let cam = scene.camera;
         if (cam == null) return;
         cam.aspect = this.mainFrameBufferAspect;
-        let nodeList = this.generateDrawList(scene);
+        this.generateDrawList(scene);
 
         this.bindTargetFrameBuffer();
 
@@ -106,16 +99,16 @@ export class PipelineForwardZPrePass extends PipelineBase {
 
         //sm
         const passSM = this.m_passShadowMap;
-        passSM.render(scene, nodeList.nodeOpaque);
+        passSM.render(scene);
 
         const passOpaque = this.m_passOpaque;
-        passOpaque.render(scene, nodeList.nodeOpaque);
+        passOpaque.render(scene);
 
         const passSkybox = this.m_passSkybox;
-        passSkybox.render(scene, null);
+        passSkybox.render(scene);
 
         const passTransparent = this.m_passTransparent;
-        passTransparent.render(scene, nodeList.nodeTransparent);
+        passTransparent.render(scene);
 
         const passGizmos = this.m_passGizmos;
         passGizmos.render();
@@ -131,7 +124,18 @@ export class PipelineForwardZPrePass extends PipelineBase {
 
     public release(){
         if(this.m_inited) return;
+
+        let gl =this.gl;
+        gl.deleteFramebuffer(this.m_mainDepthFB);
+        this.m_mainDepthTexture.release(this.glctx);
+        this.m_mainDepthTexture = null;
     
+        this.m_passDebug = RenderPass.Release(this.m_passDepth);
+        this.m_passGizmos = RenderPass.Release(this.m_passGizmos);
+        this.m_passOpaque = RenderPass.Release(this.m_passOpaque);
+        this.m_passShadowMap = RenderPass.Release(this.m_passShadowMap);
+        this.m_passSkybox = RenderPass.Release(this.m_passSkybox);
+        this.m_passTransparent = RenderPass.Release(this.m_passTransparent);
     }
 
     public reload(){

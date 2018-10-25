@@ -53,6 +53,11 @@ export class Texture {
         this.m_desc = desc;
     }
 
+
+    public release(glctx:GLContext){
+        
+    }
+
     public static createTexture2D(width: number, height: number, desc: TextureCreationDesc, glctx: GLContext): Texture {
         let gl = glctx.gl;
 
@@ -161,4 +166,5 @@ export class Texture {
             })
         })
     }
+
 }

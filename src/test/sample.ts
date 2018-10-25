@@ -34,10 +34,19 @@ export class SampleGame{
     private m_sceneInited:boolean = false;
     private m_timer:FrameTimer = new FrameTimer(false);
 
+    private static Instance:SampleGame;
+    private m_pipeline:PipelineBase;
 
     public constructor(canvas:HTMLCanvasElement){
+
+        SampleGame.Instance = this;
+
         this.m_canvas = canvas;
-        let grender = new GraphicsRender(canvas,new PipelineForwardZPrePass());
+
+        let pipe = new PipelineForwardZPrePass();
+        this.m_pipeline = pipe;
+
+        let grender = new GraphicsRender(canvas,pipe);
         this.m_sceneMgr = new SceneManager();
         let sc = grender.shadowConfig;
         sc.shadowDistance = 20;
@@ -185,6 +194,12 @@ export class SampleGame{
     @DebugEntry('cmd.reload')
     public static cmdReload(target:SampleGame){
         if(target != null) target.m_graphicsRender.reload();
+    }
+
+    @DebugEntry('cmd.passDebug')
+    public static cmdPassDebug(){
+        let instance = SampleGame.Instance;
+        if(instance != null) instance.m_pipeline.renderPassDebug = !instance.m_pipeline.renderPassDebug;
     }
 }
 

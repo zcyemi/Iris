@@ -1,16 +1,12 @@
 import { mat4 } from "wglut";
 
-
 export enum ShadowCascade{
     NoCascade = 1,
     TwoCascade = 2,
     FourCascade = 4
 }
 
-
-
 export class ShadowConfig{
-
     public shadowmapSize:number = 1024;
 
     public static readonly CASCADE_SPLIT_TWO_CASCADE:number[] = [0.333,0.667];
@@ -23,7 +19,6 @@ export class ShadowConfig{
 }
 
 export class ShadowMapData{
-
     public tex0:WebGLTexture;
     public tex1:WebGLTexture;
     public tex2:WebGLTexture;

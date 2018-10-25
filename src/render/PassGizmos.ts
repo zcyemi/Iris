@@ -48,7 +48,7 @@ export class PassGizmos extends RenderPass{
 
         let tags= new ShaderTags();
         tags.blend = false;
-        tags.ztest = Comparison.ALWAYS;
+        tags.ztest = Comparison.LEQUAL;
         tags.zwrite = false;
         tags.fillDefaultVal();
         this.m_tags = tags;

@@ -74,8 +74,9 @@ export class PipelineBase implements IRenderPipeline {
 
     private m_nodelist: RenderNodeList[] = [new RenderNodeList(), new RenderNodeList()];
     private m_nodelistIndex: number = 0;
+    private m_nodelistCur:RenderNodeList;
     public get nodeList():RenderNodeList{
-        return this.m_nodelist[this.m_nodelistIndex];
+        return this.m_nodelistCur;
     }
 
     protected m_mainFrameBuffer: GLFrameBuffer;
@@ -95,6 +96,7 @@ export class PipelineBase implements IRenderPipeline {
 
     /* DebugPass own by PipelineBase */
     protected m_passDebug: PassDebug;
+    public renderPassDebug:boolean = false;
 
     public constructor() { }
 
@@ -103,11 +105,16 @@ export class PipelineBase implements IRenderPipeline {
         this.gl = glctx.gl;
         this.m_mainFrameBufferInfo = bufferinfo;
 
+        console.log('setup renderbase');
+
         this.init();
     }
 
     public init(){
         if(this.m_inited) return;
+
+        console.log('init pipebase');
+
         let glctx = this.glctx;
         let bufferinfo = this.m_mainFrameBufferInfo;
         this.m_pipestateCache = new PipelineStateCache(glctx);
@@ -118,7 +125,7 @@ export class PipelineBase implements IRenderPipeline {
         this.m_mainFrameBufferAspect = fb.width / fb.height;
         this.createUniformBuffers();
 
-        this.m_passDebug = new PassDebug(this,);
+        this.m_passDebug = new PassDebug(this);
 
         this.m_inited= true;
 
@@ -167,6 +174,7 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     public renderBufferDebug() {
+        if(!this.renderPassDebug) return;
         let passdebug = this.m_passDebug;
         if (passdebug != null && this.m_bufferDebugInfo.length != 0) passdebug.render();
     }
@@ -265,6 +273,7 @@ export class PipelineBase implements IRenderPipeline {
         this.traversalRenderNode(nodelist, scene.transform);
         nodelist.sort();
         this.m_nodelistIndex = nodelistIndex == 0 ? 1 : 0;
+        this.m_nodelistCur = nodelist;
         return nodelist;
     }
 
