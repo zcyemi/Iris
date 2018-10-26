@@ -36,6 +36,8 @@ export class GraphicsRender{
     public pause:boolean = false;
     private m_frameBufferInvalid:boolean = false;
 
+    public get isFrameBufferInvalid():boolean{ return this.m_frameBufferInvalid;}
+
     private m_valid:boolean = false;
 
 

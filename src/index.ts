@@ -3,6 +3,8 @@ export * from 'wglut';
 export * from './DebugEntry';
 export * from './GraphicsRender';
 export * from './pipeline/IRenderPipeline';
+export * from './pipeline/PipelineBase';
+export * from './pipeline/PipelineForwardZPrepass';
 
 export * from './Camera';
 export * from './CameraUtility';

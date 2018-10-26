@@ -9,7 +9,7 @@ import { GraphicsRender } from '../GraphicsRender';
 import { ShaderFX } from '../shaderfx/ShaderFX';
 import { Light } from '../Light';
 import { DebugEntry } from '../DebugEntry';
-import { Utility } from '../Utility';
+import { Utility, WindowUtility } from '../Utility';
 import { Input } from '../Input';
 import { SceneManager } from '../SceneManager';
 import { Component} from '../Component';
@@ -58,10 +58,14 @@ export class SampleGame{
 
         GLUtility.setTargetFPS(60);
         GLUtility.registerOnFrame(this.onFrame.bind(this));
+
+        this.resizeCanvas();
+        WindowUtility.setOnResizeFunc(this.resizeCanvas.bind(this));
     }
 
-    public resizeCanvas(w:number,h:number){
-        this.m_graphicsRender.resizeCanvas(w,h);
+    public resizeCanvas(){
+        const canvas = this.m_canvas;
+        this.m_graphicsRender.resizeCanvas(canvas.clientWidth,canvas.clientHeight);
     }
 
 

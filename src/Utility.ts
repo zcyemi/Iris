@@ -96,3 +96,27 @@ export class Utility {
 }
 
 
+export class WindowUtility{
+
+	private static onResizeFunc:()=>void;
+	private static s_windowResizeRegisted:boolean = false;
+
+	public static setOnResizeFunc(callback:()=>void){
+
+		WindowUtility.onResizeFunc= callback;
+		if(this.s_windowResizeRegisted){
+			return;
+		}
+		WindowUtility.s_windowResizeRegisted = true;
+		window.addEventListener('resize',WindowUtility.onWindowResize);
+	}
+
+	private static onWindowResize(){
+		let cb = WindowUtility.onResizeFunc;
+		if(cb != null){
+			cb();
+		}
+	}
+}
+
+
