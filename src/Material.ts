@@ -33,7 +33,6 @@ export class MaterialPorpertyBlock{
             this.m_program = program;
             return;
         }
-
         this.m_program = program;
         let uinfo = program.UniformsInfo;
         let selfu = this.uniforms;
@@ -44,8 +43,6 @@ export class MaterialPorpertyBlock{
         }
         for(var key in uinfo){
 
-
-
             let u = selfu[key];
             let up = uinfo[key];
             if(u == null){
@@ -55,6 +52,8 @@ export class MaterialPorpertyBlock{
                 if(u.type != up.type){
                     u.type = up.type;
                     u.value = null;
+                    //TODO this can be optimized by checking if old value is compatible with new uniform type.
+                    //(e.g., Texture object wrap with TEXTURE_CUBE and TEXTURE_2D)
                 }
             }
         }
@@ -157,7 +156,14 @@ export class Material{
         p.value = val;
     }
 
-    public setFlag(key:string,value:string){
+    /**
+     * SetFlag will not switch to new program immediately,
+     * setUniform parameters must be called after @property {program} refreshed.
+     * @param key 
+     * @param value 
+     * @param refresh
+     */
+    public setFlag(key:string,value:string,refresh:boolean = false){
         let defOptCfg = this.m_shader.m_defaultOptionsConfig;
         let verified = this.m_shader.m_defaultOptionsConfig.verifyFlag(key,value);
         if(!verified){
@@ -174,6 +180,15 @@ export class Material{
         else{
             console.warn("set shader flag: value not changed");
         }
+
+        if(refresh) this.refreshProgram();
+    }
+
+    /**
+     * refresh program after @function <setFlag> called.
+     */
+    public refreshProgram():GLProgram{
+        return this.program;
     }
 
     public setFlagNoVerify(options:ShaderOptions){

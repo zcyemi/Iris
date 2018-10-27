@@ -17,8 +17,8 @@ export class PassSkybox extends RenderPass{
 
     private m_skyrender:MeshRender;
 
-    private m_lastCubeType: CubeMapType;
-    private m_lastSkybox:TextureCubeMap;
+    private m_lastCubeType: CubeMapType = CubeMapType.Texture360;
+    private m_lastTex:WebGLTexture;
 
     public constructor(pipeline:PipelineBase){
         super(pipeline);
@@ -31,7 +31,7 @@ export class PassSkybox extends RenderPass{
         this.m_tags =deftags;
 
         let mat= new Material(pipeline.graphicRender.shaderLib.shaderSkybox);
-        mat.setFlag("ENVMAP_TYPE","CUBE");
+        mat.setFlag("ENVMAP_TYPE","TEX",true);
 
         let skyrender = new MeshRender(Mesh.Quad,mat);
         this.m_skyrender = skyrender;
@@ -40,7 +40,7 @@ export class PassSkybox extends RenderPass{
     public release(){
         this.m_skyrender.release(this.pipeline.GLCtx);
         this.m_skyrender = null;
-        this.m_lastSkybox = null;
+        this.m_lastTex = null;
 
         super.release();
     }
@@ -56,21 +56,18 @@ export class PassSkybox extends RenderPass{
         const skyboxrender = this.m_skyrender;
         const mat = skyboxrender.material;
         let texskybox = camera.skybox;
-        let texDirty = false;
         if(texskybox.cubemapType != this.m_lastCubeType){
             let newtype = texskybox.cubemapType;
             this.m_lastCubeType = newtype;
-            mat.setFlag("ENVMAP_TYPE",newtype == CubeMapType.Cube? "CUBE":"TEX");
-            texDirty = true;
-        }
-
-        if(texskybox != this.m_lastSkybox){
-            texDirty = true;
-            this.m_lastSkybox = texskybox;
-        }
-
-        if(texDirty){
+            mat.setFlag("ENVMAP_TYPE",newtype == CubeMapType.Cube? "CUBE":"TEX",true);
             mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,texskybox.gltex);
+        }
+
+        if(texskybox.gltex != this.m_lastTex){
+            let tex =texskybox.gltex;
+            this.m_lastTex = tex;
+            mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
+
         }
 
         pipeline.drawMeshRender(skyboxrender);

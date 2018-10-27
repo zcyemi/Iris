@@ -104,6 +104,8 @@ export class SampleGame{
 
         let texcube = await TextureCubeMap.loadCubeMapTex('res/envmap/day360.jpg',glctx);
 
+    console.log('tex load suc');
+
         let gltf = await GLTFtool.LoadGLTFBinary('res/gltf/scene.glb');
 
 
