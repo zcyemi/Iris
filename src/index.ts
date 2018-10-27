@@ -23,6 +23,9 @@ export * from './Material';
 export * from './Mesh';
 export * from './Transform';
 export * from './Component';
+export * from './Scene';
+export * from './SceneManager';
+export * from './SceneBuilder';
 
 export * from './Utility';
 

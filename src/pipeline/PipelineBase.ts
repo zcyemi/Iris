@@ -15,6 +15,7 @@ import { ShaderFX } from "../shaderfx/ShaderFX";
 import { Mesh } from "../Mesh";
 import { MeshRender } from "../MeshRender";
 import { Material } from "../Material";
+import { Camera } from "../Camera";
 
 export class PipelineBase implements IRenderPipeline {
 
@@ -98,6 +99,9 @@ export class PipelineBase implements IRenderPipeline {
     protected m_mainFrameBufferWidth: number = 0;
     protected m_mainFrameBufferHeight: number = 0;
 
+    /** for viewport update in @function <bindTargetFrameBuffer> */
+    private m_mainFrameBufferResized:boolean = true;
+
     /* DebugPass own by PipelineBase */
     protected m_passDebug: PassDebug;
     public renderPassDebug:boolean = false;
@@ -172,6 +176,8 @@ export class PipelineBase implements IRenderPipeline {
             gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_LIGHT, buffer);
             this.m_uniformBufferLight = buffer;
         }
+
+        console.log('create uniform buffers');
     }
 
     public renderBufferDebug() {
@@ -186,6 +192,7 @@ export class PipelineBase implements IRenderPipeline {
         this.m_mainFrameBufferWidth = width;
         this.m_mainFrameBufferHeight = height;
         this.m_mainFrameBufferAspect = width / height;
+        this.m_mainFrameBufferResized = true;
     }
 
    
@@ -198,6 +205,15 @@ export class PipelineBase implements IRenderPipeline {
      */
     public onRenderToCanvas() {
         this.glctx.drawTexFullscreen(this.m_mainFrameBuffer.colorTex0, false, false);
+    }
+
+    public updateUniformCamera(camera:Camera){
+        const data = this.m_shaderDataCam;
+        let ctrs = camera.transform;
+        data.setCameraPos(ctrs.position);
+        data.setMtxProj(camera.ProjMatrix);
+        data.setMtxView(camera.WorldMatrix);
+        this.updateUniformBufferCamera(data);
     }
 
     public updateUniformBufferCamera(data: ShaderDataUniformCam) {
@@ -244,19 +260,18 @@ export class PipelineBase implements IRenderPipeline {
         curinfo = curinfo.splice(index, 1);
     }
 
-    /**
-     * @returns whether to call gl.BindFrameBuffer;
-     */
-    public bindTargetFrameBuffer(forece: boolean = false): boolean {
-        if (this.m_mainFrameBufferBinded && !forece) return false;
+    public bindTargetFrameBuffer(forece: boolean = false) {
         let mainfb = this.m_mainFrameBuffer;
-        mainfb.bind(this.gl);
-        this.m_mainFrameBufferBinded = true;
+        if (!this.m_mainFrameBufferBinded || forece ){
+            mainfb.bind(this.gl);
+            this.m_mainFrameBufferBinded = true;
+            forece = true;
+        }
 
-        //TODO
-        this.gl.viewport(0, 0, mainfb.width, mainfb.height);
-
-        return true;
+        if(this.m_mainFrameBufferResized || forece){
+            this.gl.viewport(0, 0, mainfb.width, mainfb.height);
+            this.m_mainFrameBufferResized = false;
+        }
     }
 
     public UnBindTargetFrameBuffer() {
@@ -390,6 +405,7 @@ export class PipelineBase implements IRenderPipeline {
         if(!this.m_inited) return;
         
         let glctx = this.glctx;
+        let gl = glctx.gl;
 
         this.m_bufferDebugInfo = [];
         
@@ -402,7 +418,6 @@ export class PipelineBase implements IRenderPipeline {
         this.m_pipestateCache.release();
         this.m_pipestateCache = null;
 
-        let gl = glctx.gl;
 
         gl.deleteBuffer(this.m_uniformBufferCamera);
         gl.deleteBuffer(this.m_uniformBufferLight);

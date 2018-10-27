@@ -46,7 +46,7 @@ export class ShaderVariant{
             this.linked = true;
         }
         this.m_sources = this.lines.join('\n');
-        console.log(`link success ${this.variantName}`);
+        //console.log(`link success ${this.variantName}`);
     }
 
     private process(variantName:string,source:string){

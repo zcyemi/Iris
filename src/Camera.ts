@@ -124,6 +124,7 @@ export class Camera extends Component{
 
     public worldRHS:boolean = true;
 
+    /** View matrix of camera */
     public get WorldMatrix():mat4{
         let trs = this.transform;
         if(trs.isDirty){
@@ -133,6 +134,7 @@ export class Camera extends Component{
         return this.m_worldMtx;
     }
 
+    /** Projection matrix of camera */
     public get ProjMatrix():mat4{
         if(this.m_projDirty){
             this.m_projMtx = mat4.perspectiveFoV(this.m_fov,this.m_aspectratio,this.m_near,this.m_far);
@@ -165,6 +167,8 @@ export class Camera extends Component{
 
         camera.m_projMtx = mat4.perspectiveFoV(fov,aspectratio,near,far);
         camera.m_projectionType = ProjectionType.perspective;
+        let trs = gobj.transform;
+        camera.m_worldMtx = mat4.coordCvt(trs.localPosition,trs.forward,trs.up);
 
         return camera;
     }
@@ -184,6 +188,8 @@ export class Camera extends Component{
         let w = size *aspectratio;
         camera.m_projMtx = mat4.orthographic(w,size,near,far);
         camera.m_projectionType = ProjectionType.orthographic;
+        let trs = gobj.transform;
+        camera.m_worldMtx = mat4.coordCvt(trs.localPosition,trs.forward,trs.up);
 
         return camera;
     }
