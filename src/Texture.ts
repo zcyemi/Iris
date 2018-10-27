@@ -27,6 +27,14 @@ export class TextureCreationDesc {
         this.wrap_s = wrap_s;
         this.wrap_t = wrap_t;
     }
+
+    public clone(){
+        let c = Object.create(TextureCreationDesc.prototype);
+        for(let p in this){
+            c[p] = this[p];
+        }
+        return c;
+    }
 }
 
 export class Texture {
@@ -50,7 +58,7 @@ export class Texture {
         this.m_raw = tex;
         this.m_width = width;
         this.m_height = heigt;
-        this.m_desc = desc;
+        this.m_desc = desc == null? null: desc.clone();
     }
 
 

@@ -1,6 +1,8 @@
 import { ShaderVariant, ShaderOptionsConfig, ShaderOptions } from "./ShaderVariant";
 import { ShaderTags, Comparison, RenderQueue, BlendOperator, BlendFactor, CullingMode } from "./Shader";
 import { ShaderPreprocessor } from "./ShaderPreprocessor";
+import { Utility } from "../Utility";
+import { GLUtility } from "wglut";
 
 export type VariantsGroup = { [key: string]: ShaderVariant };
 export class ShaderSource {
@@ -27,6 +29,15 @@ export class ShaderSource {
     public static create(unified:string,name?:string):ShaderSource{
         let [vs,ps] = ShaderPreprocessor.processUnifiedSource(unified,name);
         return new ShaderSource(vs,ps,name);
+    }
+    
+    public static async load(url:string,name?:string):Promise<ShaderSource>{
+        if(url == null || url === '') return null;
+        return new Promise<ShaderSource>(async (res,rej)=>{
+            let glsl = await GLUtility.HttpGet(url,"text");
+            let source = ShaderSource.create(glsl,name);
+            res(source);
+        })
     }
 
     public get isBuilt() {

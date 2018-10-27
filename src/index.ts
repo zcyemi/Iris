@@ -6,6 +6,13 @@ export * from './pipeline/IRenderPipeline';
 export * from './pipeline/PipelineBase';
 export * from './pipeline/PipelineForwardZPrepass';
 
+export * from './shaderfx/ShaderFX';
+export * from './shaderfx/Shader';
+export * from './shaderfx/ShaderBuffer';
+export * from './shaderfx/ShaderFXLibs';
+export * from './shaderfx/ShaderSource';
+export * from './shaderfx/ShaderVariant';
+
 export * from './Camera';
 export * from './CameraUtility';
 export * from './FrameTimer';
