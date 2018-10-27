@@ -31,6 +31,8 @@ export class MeshRender{
             glctx.gl.deleteVertexArray(this.m_vao);
             this.m_vao = null;
         }
+
+        this.mesh = null;
     }
     
     public refershVertexArray(glctx:GLContext){

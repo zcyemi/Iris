@@ -99,27 +99,9 @@ export class PassOpaque extends RenderPass{
             if(program != curprogram){
                 let glp = program.Program;
                 gl.useProgram(glp);
+                pipe.uniformBindDefault(program);
 
-                let ublock = program.UniformBlock;
-                //cam uniform buffer
-                let indexCam = ublock[NAME_CAM];
-                if (indexCam != null) gl.uniformBlockBinding(glp, indexCam, CLASS.UNIFORMINDEX_CAM);
-                //obj uniform buffer
-                let indexObj = ublock[NAME_OBJ];
-                if (indexObj != null) gl.uniformBlockBinding(glp, indexObj, CLASS.UNIFORMINDEX_OBJ);
-                //light uniform buffer
-                let indexLight = ublock[NAME_LIGHT];
-                if (indexLight != null) gl.uniformBlockBinding(glp, indexLight, CLASS.UNIFORMINDEX_LIGHT);
                 curprogram = program;
-
-                let indexSM = ublock[NAME_SM];
-                if(indexSM != null){
-                    gl.uniformBlockBinding(glp, indexSM, CLASS.UNIFORMINDEX_SHADOWMAP);
-                    let loc = program.Uniforms['uShadowMap'];
-                    if (loc != null){
-                        gl.uniform1i(loc,12);
-                    }
-                }
             }
 
             //state.apply(mat.shaderTags);

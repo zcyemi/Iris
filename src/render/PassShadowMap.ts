@@ -332,6 +332,7 @@ export class PassShadowMap extends RenderPass{
         let glp = program.Program;
         gl.useProgram(glp);
 
+
         let blocks = program.UniformBlock;
         let indexSM = blocks[ShaderFX.UNIFORM_SHADOWMAP];
         if(indexSM !=null){

@@ -76,6 +76,7 @@ export class ShaderFX{
     public static UNIFORM_CAM = "UNIFORM_CAM";
     public static UNIFORM_OBJ = "UNIFORM_OBJ";
     public static UNIFORM_SHADOWMAP = "UNIFORM_SHADOWMAP";
+    public static UNIFORM_SHADOWMAP_SAMPLER = "uShadowMap";
 
     public static UNIFORM_MAIN_COLOR = "uColor";
     public static UNIFORM_MAIN_TEXTURE = "uSampler";

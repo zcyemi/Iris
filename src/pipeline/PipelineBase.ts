@@ -1,4 +1,4 @@
-import { GLContext, GLFrameBuffer } from "wglut";
+import { GLContext, GLFrameBuffer, GLProgram, mat4, quat } from "wglut";
 import { Scene } from "../Scene";
 import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { GraphicsRenderCreateInfo, GraphicsRender } from "../GraphicsRender";
@@ -11,6 +11,10 @@ import { PipelineStateCache } from "../PipelineStateCache";
 import { Transform } from "../Transform";
 import { IRenderPipeline } from "./IRenderPipeline";
 import { RenderPass } from "../render/RenderPass";
+import { ShaderFX } from "../shaderfx/ShaderFX";
+import { Mesh } from "../Mesh";
+import { MeshRender } from "../MeshRender";
+import { Material } from "../Material";
 
 export class PipelineBase implements IRenderPipeline {
 
@@ -105,15 +109,11 @@ export class PipelineBase implements IRenderPipeline {
         this.gl = glctx.gl;
         this.m_mainFrameBufferInfo = bufferinfo;
 
-        console.log('setup renderbase');
-
         this.init();
     }
 
     public init(){
         if(this.m_inited) return;
-
-        console.log('init pipebase');
 
         let glctx = this.glctx;
         let bufferinfo = this.m_mainFrameBufferInfo;
@@ -126,6 +126,7 @@ export class PipelineBase implements IRenderPipeline {
         this.createUniformBuffers();
 
         this.m_passDebug = new PassDebug(this);
+
 
         this.m_inited= true;
 
@@ -290,6 +291,99 @@ export class PipelineBase implements IRenderPipeline {
             }
             this.traversalRenderNode(drawlist, c);
         }
+    }
+
+    /**
+     * Bind internal ShaderFX uniform block index to current program;
+     * UNIFORM_CAM, UNIFORM_OBJ, UNIFORM_LIGHT, UNIFORM_SM
+     * @param program 
+     */
+    public uniformBindDefault(program: GLProgram) {
+        const CLASS = PipelineBase;
+        const NAME_CAM = ShaderDataUniformCam.UNIFORM_CAM;
+        const NAME_OBJ = ShaderDataUniformObj.UNIFORM_OBJ;
+        const NAME_LIGHT = ShaderDataUniformLight.UNIFORM_LIGHT;
+        const NAME_SM = ShaderFX.UNIFORM_SHADOWMAP;
+        const gl = this.gl;
+        let ublock = program.UniformBlock;
+        let glp = program.Program;
+        //cam uniform buffer
+        let indexCam = ublock[NAME_CAM];
+        if (indexCam != null) gl.uniformBlockBinding(glp, indexCam, CLASS.UNIFORMINDEX_CAM);
+        //obj uniform buffer
+        let indexObj = ublock[NAME_OBJ];
+        if (indexObj != null) gl.uniformBlockBinding(glp, indexObj, CLASS.UNIFORMINDEX_OBJ);
+        //light uniform buffer
+        let indexLight = ublock[NAME_LIGHT];
+        if (indexLight != null) gl.uniformBlockBinding(glp, indexLight, CLASS.UNIFORMINDEX_LIGHT);
+
+        let indexSM = ublock[NAME_SM];
+        if(indexSM != null){
+            gl.uniformBlockBinding(glp, indexSM, CLASS.UNIFORMINDEX_SHADOWMAP);
+            let loc = program.Uniforms[ShaderFX.UNIFORM_SHADOWMAP_SAMPLER];
+            if (loc != null){
+                gl.uniform1i(loc,ShaderFX.GL_SHADOWMAP_TEX0_ID);
+            }
+        }
+    }
+
+    /**
+     * procedural drawing a mesh with material
+     * @param mesh 
+     * @param mat 
+     * @param vao 
+     * @param objmtx 
+     * @param defUniformBlock 
+     */
+    public drawMeshWithMat(mesh:Mesh,mat:Material,vao:WebGLVertexArrayObject,objmtx?:mat4,defUniformBlock:boolean = true){
+        const gl = this.gl;
+        let program = mat.program;
+        gl.useProgram(program.Program);
+        if(defUniformBlock){
+            this.uniformBindDefault(program);
+        }
+        mat.apply(gl);
+        const dataobj = this.m_shaderDataObj;
+        if(objmtx !=null){
+            dataobj.setMtxModel(objmtx);
+            this.updateUniformBufferObject(dataobj);
+        }
+        if(vao == null) throw new Error('vertex array obj is null!');
+        gl.bindVertexArray(vao);
+        let indicedesc = mesh.indiceDesc;
+        gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.indices.type, 0);
+        gl.bindVertexArray(null);
+        mat.clean(gl);
+    }
+
+    /**
+     * draw a seperated MeshRender
+     * @param meshrender 
+     * @param objmtx 
+     * @param defUniformBlock 
+     */
+    public drawMeshRender(meshrender:MeshRender,objmtx?:mat4,defUniformBlock:boolean = true){
+        const gl = this.gl;
+        let mat = meshrender.material;
+        let mesh = meshrender.mesh;
+        meshrender.refershVertexArray(this.glctx);
+        let program = mat.program;
+        gl.useProgram(program.Program);
+        if(defUniformBlock){
+            this.uniformBindDefault(program);
+        }
+        mat.apply(gl);
+        const dataobj = this.m_shaderDataObj;
+        if(objmtx !=null){
+            dataobj.setMtxModel(objmtx);
+            this.updateUniformBufferObject(dataobj);
+        }
+        let vao = meshrender.vertexArrayObj;
+        gl.bindVertexArray(vao);
+        let indicedesc = mesh.indiceDesc;
+        gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.indices.type, 0);
+        gl.bindVertexArray(null);
+        mat.clean(gl);
     }
 
     public release() {
