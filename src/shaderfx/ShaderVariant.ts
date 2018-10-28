@@ -1,4 +1,4 @@
-import { int } from "wglut";
+import { int, GLUtility } from "wglut";
 import { Utility } from "../Utility";
 import { ShaderPreprocessor } from "./ShaderPreprocessor";
 
@@ -17,6 +17,16 @@ export class ShaderVariant{
         this.variantName = variantName;
         this.process(variantName,source);
     }
+
+    public static async load(url:string,variantName:string):Promise<ShaderVariant>{
+        if(url == null || url === '') return null;
+        return new Promise<ShaderVariant>(async (res,rej)=>{
+            let glsl = await GLUtility.HttpGet(url,"text");
+            let source = new ShaderVariant(variantName,glsl);
+            res(source);
+        })
+    }
+
 
     public get sources():string{
         return this.m_sources;

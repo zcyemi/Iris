@@ -112,8 +112,24 @@ export class ShaderPreprocessor {
         let startindex = text.indexOf(entry);
         let len = entry.length + startindex;
         let subtext = text.substr(len);
-        let endpos = subtext.indexOf('}');
-        
+        let slen = subtext.length;
+        let endpos = -1;
+        let t =0;
+        for(let i=0;i<slen;i++){
+            let c = subtext[i];
+            if(c === '{'){
+                t ++;
+            }
+            else if(c === '}'){
+                t--;
+                if(t == 0){
+                    endpos = i;
+                    break;
+                }
+            }
+
+        }
+        if(endpos== -1) throw new Error('invalid function');
         return [startindex,len+endpos +1];
     }
 
