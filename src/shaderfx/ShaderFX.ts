@@ -56,6 +56,12 @@ export class ShaderFX{
         return shader;
     }
 
+    public static isInternalUniformBlockName(blockname:string):boolean{
+        const CLASS = ShaderFX;
+        if(blockname ==CLASS.UNIFORM_CAM || blockname == CLASS.UNIFORM_OBJ || blockname == CLASS.UNIFORM_SHADOWMAP) return true;
+        return false;
+    }
+
 
     public static VARIANT_SHADERFX_OBJ = "SHADERFX_OBJ";
     public static VARIANT_SHADERFX_CAMERA = "SHADERFX_CAMERA";

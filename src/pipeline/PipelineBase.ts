@@ -24,6 +24,8 @@ export class PipelineBase implements IRenderPipeline {
     public static readonly UNIFORMINDEX_SHADOWMAP: number = 2;
     public static readonly UNIFORMINDEX_LIGHT: number = 3;
 
+    public static readonly UNIFORMINDEX_SHADER:number = 4;
+
     public get GLCtx(): GLContext { return this.glctx; }
     public get GL(): WebGL2RenderingContext { return this.gl; }
 

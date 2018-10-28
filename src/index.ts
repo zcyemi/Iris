@@ -6,6 +6,16 @@ export * from './pipeline/IRenderPipeline';
 export * from './pipeline/PipelineBase';
 export * from './pipeline/PipelineForwardZPrepass';
 
+export * from './render/PassDebug';
+export * from './render/PassGizmos';
+export * from './render/PassDepth';
+export * from './render/PassOpaque';
+export * from './render/PassShadowMap';
+export * from './render/PassSkybox';
+export * from './render/PassTransparent';
+export * from './render/RenderPass';
+export * from './render/Shadow';
+
 export * from './shaderfx/ShaderFX';
 export * from './shaderfx/Shader';
 export * from './shaderfx/ShaderBuffer';

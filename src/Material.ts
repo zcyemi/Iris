@@ -3,19 +3,20 @@ import { Shader, ShaderTags } from "./shaderfx/Shader";
 import { ShaderOptionsConfig, ShaderOptions } from "./shaderfx/ShaderVariant";
 import { Utility } from "./Utility";
 import { Texture } from "./Texture";
+import { ShaderFX } from "./shaderfx/ShaderFX";
 
-export type MaterialProperty = {type:number,value:any}
+export type MaterialProperty = {type:number,value:any};
 
 export class MaterialPorpertyBlock{
     public uniforms:{[key:string]:MaterialProperty};
+    /** default is null, perperty might be set with @function <setUniformBlock> or @function <setUniformBlockwitName> */
+    public uniformsBlock:{[slot:number]:number};
     private m_program:GLProgram;
 
     public constructor(program?:GLProgram){
         if(program == null) return;
-        let selfu =this.uniforms;
-        if(selfu == null){
-            selfu = {}
-            this.uniforms = selfu;
+        if(this.uniforms == null){
+            this.uniforms = {};
         }
         this.setProgram(program);
     }
@@ -33,7 +34,7 @@ export class MaterialPorpertyBlock{
             this.m_program = program;
             return;
         }
-        this.m_program = program;
+        
         let uinfo = program.UniformsInfo;
         let selfu = this.uniforms;
         for(var key in selfu){
@@ -57,6 +58,39 @@ export class MaterialPorpertyBlock{
                 }
             }
         }
+
+        //sync uniformblocks
+        let selfprogrm = this.m_program;
+        let selfBlock = this.uniformsBlock;
+        let uniformBlock = program.UniformBlock;
+        let newblocks = null;
+        if(selfBlock != null){
+            for(let slot in selfBlock){
+                let slotindex = selfBlock[slot];
+                let blockname = Material.programGetUniformBlockName(selfprogrm,slotindex);
+                if(blockname == null) continue;
+                let newindex = uniformBlock[blockname];
+                if(newindex == null) continue;
+                delete selfBlock[slot];
+                selfBlock[newindex] = slotindex;
+            }
+        }
+
+        for(let bname in uniformBlock){
+            if(ShaderFX.isInternalUniformBlockName(bname)) continue;
+
+            let info = selfprogrm.UniformBlock[bname];
+            if(info != null){
+                newblocks[uniformBlock[bname]] = selfBlock[info];
+            }
+            else{
+                newblocks[uniformBlock[bname]] = null;
+            }
+        }
+        this.uniformsBlock = newblocks;
+
+        //sync program
+        this.m_program = program;
     }
 
     public clone():MaterialPorpertyBlock{
@@ -157,6 +191,68 @@ export class Material{
     }
 
     /**
+     * Set uniform block binding
+     * @param name 
+     * @param index 
+     */
+    public setUniformBlockwitName(name:string,index:number){
+        let u = this.m_program.UniformBlock[name];
+        if(u == null) return;
+
+        let propertyblock = this.m_propertyBlock;
+        let uniformblock = propertyblock.uniformsBlock
+        if(uniformblock == null){
+            uniformblock = {};
+            propertyblock.uniformsBlock = uniformblock;
+        }
+        uniformblock[u] = index;
+    }
+
+    /**
+     * Set uniform block binding
+     * @param bufferindex shader uniform index, this value can be queried by @function <getUniformBlockIndex>
+     * @param index uniform buffer binded index
+     */
+    public setUniformBlock(bufferindex:number,index:number){
+        const propertyblock = this.propertyBlock;
+        let uniformblock = propertyblock.uniformsBlock;
+        if(uniformblock == null){
+            uniformblock = {};
+            propertyblock.uniformsBlock = uniformblock;
+        }
+        uniformblock[bufferindex] = index;
+    }
+
+    /**
+     * Query the uniform blocksindex in current shader program
+     * @param name 
+     */
+    public getUniformBlockIndex(name:string):number{
+        return this.m_program.UniformBlock[name];
+    }
+
+    /**
+     * 
+     * @param slotindex 
+     */
+    public getUniformBlockName(slotindex:number):string{
+        return Material.programGetUniformBlockName(this.program,slotindex);
+    }
+
+    /**
+     * Query the uniform block name with uniform block slot index.
+     * @todo merge this function to class ShaderProgram
+     * @param program 
+     * @param slotindex 
+     */
+    public static programGetUniformBlockName(program:GLProgram,slotindex:number):string{
+        let blocks = program.UniformBlock;
+        for(let key in blocks){
+            if(blocks[key] == slotindex) return key;
+        }
+    }
+
+    /**
      * SetFlag will not switch to new program immediately,
      * setUniform parameters must be called after @property {program} refreshed.
      * @param key 
@@ -213,17 +309,27 @@ export class Material{
         return optCfg.getFlag(key);
     }
     
-
     private m_applyTexCount = 0;
 
     public apply(gl:WebGL2RenderingContext){
         this.m_applyTexCount = 0;
         let program = this.program;
-        let pu = this.m_propertyBlock.uniforms;
+
+        let propertyblock = this.m_propertyBlock;
+        let pu = propertyblock.uniforms;
         for(var key in pu){
             let u = pu[key];
             if(key === "uShadowMap") continue;
             this.setUniform(gl,program.Uniforms[key],u.type,u.value);
+        }
+
+        let puniformblocks = propertyblock.uniformsBlock;
+        if(puniformblocks != null){
+            const glp = program.Program;
+            for(var key in puniformblocks){
+                let ind = Number(key);
+                gl.uniformBlockBinding(glp,ind,puniformblocks[ind]);
+            }
         }
     }
     
