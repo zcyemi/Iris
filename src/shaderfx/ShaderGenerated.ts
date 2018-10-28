@@ -68,7 +68,7 @@ uniform LIGHT{
 #define LIGHT_DIR0 light_source[0].pos_type.xyz
 #define LIGHT_DIR1 light_source[1].pos_type.xyz`;
 	public static readonly SHADERFX_LIGHTING:string = `vec3 LightModel_Lambert(vec3 lightdir,vec3 lightColor,vec3 normal,vec3 albedo){
-    float diff = max(.0,dot(lightdir,normal));
+    float diff = max(.0,dot(-lightdir,normal));
     return albedo * lightColor * diff;
 }`;
 	public static readonly SHADERFX_OBJ:string = `uniform UNIFORM_OBJ{

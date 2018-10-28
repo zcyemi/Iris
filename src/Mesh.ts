@@ -1,6 +1,5 @@
-import { vec3, vec4, GLContext, GLTFdata } from "wglut";
+import { vec3, vec4, GLContext, GLTFdata, glmath, quat } from "wglut";
 import { GL, GLDataType, GLConst } from "./GL";
-import { type } from "os";
 
 export enum MeshTopology{
     Triangles = 4,
@@ -73,6 +72,7 @@ export class Mesh{
 
     private static s_quad:Mesh;
     private static s_cube:Mesh;
+    private static s_sphere:Mesh;
 
     private m_dataPosition:MeshDataBuffer;
     private m_dataUV:MeshDataBuffer;
@@ -80,6 +80,10 @@ export class Mesh{
     private m_dataIndices:MeshDataBufferIndices;
 
     private m_bufferInited:boolean =false;
+
+    public constructor(name?:string){
+        this.name = name;
+    }
 
     public get bufferInited():boolean{
         return this.m_bufferInited;
@@ -149,6 +153,92 @@ export class Mesh{
 
         quad.calculateNormal();
         return quad;
+    }
+
+    public static get Sphere():Mesh{
+        if(Mesh.s_sphere != null) return Mesh.s_sphere;
+        let sphere = new Mesh('sphere');
+        Mesh.s_sphere = sphere;
+
+        let slicey = 16;
+        let slicer = slicey *2;
+
+        let radstep  = Math.PI / slicey;
+
+        let rad = -Math.PI /2.0 + radstep;
+
+        let positions:number[] = [];
+        let uvs:number[] = [];
+
+        let pcount = (slicey - 1) * (slicer+1) +2;
+        positions.push(.0,-1.0,.0,1.0);
+        uvs.push(0.5,0.0);
+
+        for(let t = 1;t <slicey;t++){
+            let y = Math.sin(rad);
+            let d = Math.cos(rad);
+            
+            let yaw = 0;
+
+            let v = t*1.0 / slicey;
+
+            for(let s = 0;s <= slicer;s++){
+                let x = d * Math.cos(yaw);
+                let z = d * Math.sin(yaw);
+                positions.push(x,y,z,1.0);
+                uvs.push(s*1.0/slicer,v);
+                yaw += radstep;
+            }
+            rad += radstep;
+        }
+        positions.push(.0,1.0,.0,1.0);
+        uvs.push(0.5,1.0);
+
+        let indices:number[] = [];
+        {
+            //bottom
+            for(let t=1,tbmax = slicer;t<=tbmax;t++){
+                indices.push(0,t,t+1);
+            }
+            //center
+            let slicerlayer = slicer +1;
+            for(let t = 0;t <slicey-2;t++){
+                let ib = 1+ t *slicerlayer;
+                let it = ib + slicerlayer;
+                for(let s= 0;s< slicerlayer;s++){
+                    let ibs = ib + s;
+                    let its = it +s;
+                    indices.push(ibs,ibs+1,its+1,ibs,its+1,its);
+                }
+            }
+            //top
+            let imax = pcount-1;
+            let istart = imax - slicer-1;
+            for(let t=istart,ttmax = imax;t<ttmax;t++){
+                indices.push(imax,t,t+1);
+            }
+        }
+
+        let dataposition = new Float32Array(positions);
+        sphere.m_dataPosition = dataposition;
+        let dataindices = new Uint16Array(indices);
+        sphere.m_dataIndices = dataindices;
+        let datauv = new Float32Array(uvs);
+        sphere.m_dataUV = datauv;
+
+        sphere.m_dataNormal = dataposition;
+
+        let vertexdesc =sphere.vertexDesc;
+        vertexdesc.position= new MeshVertexAttrDesc(GL.FLOAT,4,dataposition.byteLength);
+        vertexdesc.normal= new MeshVertexAttrDesc(GL.FLOAT,4,dataposition.byteLength);
+        vertexdesc.uv= new MeshVertexAttrDesc(GL.FLOAT,2,datauv.byteLength);
+
+        let indicesdesc = sphere.indiceDesc;
+        indicesdesc.topology = MeshTopology.Triangles;
+        indicesdesc.indices = new MeshVertexAttrDesc(GL.UNSIGNED_SHORT,1,dataindices.byteLength,0);
+        indicesdesc.indiceCount = indices.length;
+
+        return sphere;
     }
 
     public static get Cube():Mesh{
