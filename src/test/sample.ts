@@ -22,6 +22,7 @@ import { PipelineBase } from '../pipeline/PipelineBase';
 import { PipelineForwardZPrePass } from '../pipeline/PipelineForwardZPrePass';
 import { ShaderPreprocessor } from '../shaderfx/ShaderPreprocessor';
 import { ShaderGen } from '../shaderfx/ShaderGenerated';
+import { Transform } from '../Transform';
 
 export class SampleGame{
     
@@ -88,7 +89,12 @@ export class SampleGame{
     private m_camera:Camera;
     public async createScene(glctx:GLContext):Promise<void>{
         let grender = this.m_graphicsRender;
-        
+
+        let tr= new Transform(null);
+        tr.forward = vec3.down;
+        console.error(tr.up);
+        throw new Error('');
+
         //texture
         let tex = await glctx.createTextureImageAsync('res/images/tex0.png');
 

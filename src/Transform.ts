@@ -198,9 +198,8 @@ export class Transform{
             return;
         }
         let forward = dir.divToRef(len);
-
         let up = this.up;
-        let right = forward.cross(up).normalize;
+        let right = vec3.SafeCross(forward,up).normalize;
         up = forward.cross(right).normalize;
 
         this.m_localRotation = quat.Coordinate(forward,up);
@@ -225,7 +224,7 @@ export class Transform{
             return;
         }
         let up = dir.divToRef(len);
-        let right = up.cross(this.forward).normalize;
+        let right =vec3.SafeCross(up,this.forward).normalize;
         let forward = right.cross(up).normalize;
         this.m_localRotation = quat.Coordinate(forward,up);
         this.m_up = up;
@@ -250,7 +249,7 @@ export class Transform{
             return;
         }
         let right = dir.divToRef(len);
-        let forward = right.cross(this.up).normalize;
+        let forward = vec3.SafeCross(right,this.up).normalize;
         let up = forward.cross(right);
         this.m_localRotation = quat.Coordinate(forward,up);
         this.m_up.set(up);
@@ -317,7 +316,7 @@ export class Transform{
 
         let f = forward.normalized();
         if(worldup == null) worldup = this.up;
-        let right = worldup.cross(f).normalize;
+        let right = vec3.SafeCross(worldup,f).normalize;
         let up = f.cross(right).normalize;
         this.m_up.set(up);
         this.m_right= right;
