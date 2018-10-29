@@ -3,6 +3,7 @@ import { ShaderSource } from "./ShaderSource";
 import { GLContext } from "wglut";
 import { Shader, ShaderTags } from "./Shader";
 import { ShaderGen } from "./ShaderGenerated";
+import { ShaderDataBuffer, ShaderDataArrayBuffer } from "./ShaderBuffer";
 
 export class ShaderFX{
 
@@ -167,3 +168,5 @@ function getShaderInclude(src:string){
     }
     return new ShaderVariant(src.toUpperCase(),inc);
 }
+
+

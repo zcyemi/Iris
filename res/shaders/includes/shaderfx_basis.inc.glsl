@@ -20,3 +20,24 @@ vec4 ClipToWorld(in vec4 clippoint){
     return inverse(MATRIX_VP) * clippoint;
 }
 
+#ifdef SFX
+
+uniform UNIFORM_SHADERFX{
+    //basic region
+    vec4 _screenparam_;//[width,height,1/wdith,1/height]
+    vec4 _projparam_;//[near,far,1/near,1/far]
+    highp vec4 _time_;//[Time,deltaTime,sinTime,cosTime]
+
+    //camera
+    vec4 _camera_pos_;
+    mat4 _camera_view_;
+    mat4 _camera_proj_;
+    mat4 _camera_invproj_;
+
+    //Ambient And Fog
+    lowp vec4 _ambientcolor_;
+    vec4 _fogcolor_;
+    vec4 _fogparam_;
+}
+
+#endif

@@ -220,3 +220,43 @@ export class ShaderDataUniformShadowMap extends ShaderDataArrayBuffer{
 
     }
 }
+
+export class ShaderFXBasis{
+    
+    private screenparam:vec4;
+    private time:vec4;
+}
+
+export class ShaderFXAmbientFog{
+    private ambientcolor:vec4;
+    private fogcolor:vec4;
+    private fogparam:vec4;
+}
+
+export class ShaderFXCamera{
+    private projparam:vec4;
+    private pos:vec4;
+    private mtxview:mat4;
+    private mtxproj:mat4;
+    private mtxinvproj:mat4;
+}
+
+
+export class ShaderFXDataBuffer{
+    
+    private m_datadirty = false;
+
+    private m_updateall:boolean = false;
+    private m_offsetmin:number;
+    private m_offsetmax:number;
+
+    public submitChanges(gl:WebGL2RenderingContext,buffer:WebGLBuffer){
+        if(!this.m_datadirty) return;
+
+        if(this.m_updateall){
+            gl.bufferData(gl.UNIFORM_BUFFER,null,gl.DYNAMIC_DRAW);
+        }
+        else{
+        }
+    }
+}
