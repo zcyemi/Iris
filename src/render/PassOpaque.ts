@@ -32,38 +32,16 @@ export class PassOpaque extends RenderPass{
     }
 
     public render(scene:Scene){
-
-        const CLASS = PipelineBase;
-
         let queue = this.pipeline.nodeList.nodeOpaque;
-
 
         const pipe = this.pipeline;
         const gl = pipe.GL;
         const glctx = pipe.GLCtx;
         const deftags = this.m_tags;
 
-        const NAME_BASIS = ShaderFX.UNIFORM_BASIS;
-        const NAME_OBJ = ShaderFX.UNIFORM_OBJ;
-        const NAME_LIGHT = ShaderFX.UNIFORM_LIGHT;
-        const NAME_SM = ShaderFX.UNIFORM_SHADOWMAP;
-
-        let cam = scene.camera;
-
+        let cam = scene.mainCamera;
         if(queue.length == 0) return;
-
         gl.enable(gl.POLYGON_OFFSET_FILL);
-       
-
-        //cam
-        let datacam = pipe.shaderDataBasis.camrea;
-        datacam.setCameraMtxProj(cam.ProjMatrix);
-        datacam.setCameraMtxView(cam.WorldMatrix);
-        datacam.setCameraPos(cam.transform.position);
-        let databasic = pipe.shaderDataBasis.basic;
-        databasic.setScreenParam(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight);
-        datacam.setProjParam(cam.near,cam.far);
-        pipe.submitShaderDataBasis();
 
         //light
         let light = scene.lights[0];
@@ -85,9 +63,7 @@ export class PassOpaque extends RenderPass{
 
         let len = queue.length;
         let curprogram:GLProgram = null;
-
         const dataobj = pipe.shaderDataObj;
-
         for(let i=0;i<len;i++){
             let node = queue[i];
             let mat = node.material;
@@ -103,7 +79,6 @@ export class PassOpaque extends RenderPass{
 
                 curprogram = program;
             }
-
             //state.apply(mat.shaderTags);
             mat.apply(gl);
 
@@ -119,6 +94,5 @@ export class PassOpaque extends RenderPass{
         }
 
         gl.disable(gl.POLYGON_OFFSET_FILL);
-
     }
 }

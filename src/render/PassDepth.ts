@@ -47,9 +47,8 @@ export class PassDepth extends RenderPass{
 
         const NAME_BASIS = ShaderFX.UNIFORM_BASIS;
         const NAME_OBJ = ShaderFX.UNIFORM_OBJ;
-        const NAME_LIGHT = ShaderFX.UNIFORM_LIGHT;
 
-        let cam = scene.camera;
+        let cam = scene.mainCamera;
 
         let queue = pipe.nodeList.nodeOpaque;
         if(queue.length == 0) return;
@@ -57,16 +56,6 @@ export class PassDepth extends RenderPass{
         //diable color buffer
 
         gl.colorMask(false,false,false,false);
-
-        //cam
-        let databasis = pipe.shaderDataBasis;
-        let datacam = databasis.camrea;
-        datacam.setCameraMtxProj(cam.ProjMatrix);
-        datacam.setCameraMtxView(cam.WorldMatrix);
-        datacam.setCameraPos(cam.transform.position);
-        databasis.basic.setScreenParam(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight);
-        datacam.setProjParam(cam.near,cam.far);
-        pipe.submitShaderDataBasis();
 
         //state
         let state =pipe.stateCache;

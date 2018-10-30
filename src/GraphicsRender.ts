@@ -5,6 +5,7 @@ import { Delayter } from "./Utility";
 import { Texture } from "./Texture";
 import { Material } from "./Material";
 import { IRenderPipeline } from "./pipeline/IRenderPipeline";
+import { Input } from "./Input";
 
 export class GraphicsRenderCreateInfo{
     public colorFormat:number = 0x8058;
@@ -34,6 +35,12 @@ export class GraphicsRender{
     public get isFrameBufferInvalid():boolean{ return this.m_frameBufferInvalid;}
 
     private m_valid:boolean = false;
+
+    private m_time:number = 0;
+    private m_dt:number = 0;
+
+    public get time():number {return this.m_time;}
+    public get deltaTime():number{ return this.m_dt;}
 
     public get pipeline():IRenderPipeline{
         return this.m_renderPipeline;
@@ -108,7 +115,7 @@ export class GraphicsRender{
             this.m_renderPipeline = null;
         }
         this.m_shaderFXlib.release();
-
+        this.m_time = 0.0;
         this.m_valid = false;
     }
 
@@ -146,8 +153,16 @@ export class GraphicsRender{
         }
     }
 
-    public render(scene:any){
+    /**
+     * 
+     * @param scene 
+     * @param dt deltaTime /s
+     */
+    public render(scene:any,dt:number){
         if(this.pause || this.m_frameBufferInvalid) return;
+        this.m_time += dt;
+        this.m_dt = dt;
+
         let gl =this.m_glctx.gl;
 
         gl.clearColor(0,0,0,1);

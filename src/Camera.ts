@@ -38,13 +38,28 @@ export class Camera extends Component{
     private m_projMtx:mat4;
     private m_worldMtx:mat4;
 
-
     private m_background:vec4 = vec4.zero;
     private m_ambientColor:vec4 = glmath.vec4(0.1,0.1,0.1,1.0);
     private m_ambientType:AmbientType = AmbientType.AmbientColor;
     private m_clearType:ClearType = ClearType.Background;
 
     private m_skybox:TextureCubeMap;
+
+    private m_dataTrsDirty:boolean = true;
+    public get isDataTrsDirty():boolean{
+        return this.m_dataTrsDirty || this.transform.isDirty;
+    }
+    public set isDataTrsDirty(v:boolean){
+        this.m_dataTrsDirty = v;
+    }
+    
+    private m_dataProjDirty:boolean = true;
+    public get isDataProjDirty():boolean{
+        return this.m_dataProjDirty;
+    }
+    public set isDataProjDirty(v:boolean){
+        this.m_dataProjDirty= v;
+    }
 
     public get far():number{
         return this.m_far;
@@ -53,6 +68,7 @@ export class Camera extends Component{
         if(this.m_far == v) return;
         this.m_far = v;
         this.m_projDirty = true;
+        this.m_dataProjDirty = true;
     }
     public get near():number{
         return this.m_near;
@@ -61,6 +77,7 @@ export class Camera extends Component{
         if(this.m_near == v) return;
         this.m_near = v;
         this.m_projDirty =true;
+        this.m_dataProjDirty = true;
     }
     public get fov():number{
         return this.m_fov;
@@ -69,6 +86,7 @@ export class Camera extends Component{
         if(this.m_fov == v) return;
         this.m_fov = v;
         this.m_projDirty = true;
+        this.m_dataProjDirty = true;
     }
     public get aspect():number{
         return this.m_aspectratio;
@@ -77,6 +95,7 @@ export class Camera extends Component{
         if(v == this.m_aspectratio) return;
         this.m_aspectratio = v;
         this.m_projDirty = true;
+        this.m_dataProjDirty = true;
     }
 
     public ambientDataDirty:boolean = true;
@@ -130,6 +149,7 @@ export class Camera extends Component{
         if(trs.isDirty){
             trs.setLocalDirty(false);
             this.m_worldMtx = mat4.coordCvt(trs.localPosition,trs.forward,trs.up);
+            this.m_dataTrsDirty = true;
         }
         return this.m_worldMtx;
     }
@@ -139,6 +159,7 @@ export class Camera extends Component{
         if(this.m_projDirty){
             this.m_projMtx = mat4.perspectiveFoV(this.m_fov,this.m_aspectratio,this.m_near,this.m_far);
             this.m_projDirty= false;
+            this.m_dataProjDirty = true;
         }
         return this.m_projMtx;
     }
@@ -150,7 +171,7 @@ export class Camera extends Component{
     }
 
     public onUpdate(scene:Scene){
-        scene.camera = this;
+        scene.mainCamera = this;
     }
 
     public static persepctive(gobj:GameObject,fov:number,aspectratio:number,near:number,far:number):Camera{

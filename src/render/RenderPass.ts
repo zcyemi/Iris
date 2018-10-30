@@ -10,7 +10,6 @@ export abstract class RenderPass {
     }
 
     public render(scene?:Scene){
-
     }
 
     public release(){

@@ -10,9 +10,9 @@ uniform UNIFORM_BASIS{
     vec4 _screenparam_;//[width,height,1/wdith,1/height]
     highp vec4 _time_;//[Time,deltaTime,sinTime,cosTime]
     //camera
-    vec4 _camera_projparam_;//[near,far,1/near,1/far]
     vec4 _camera_pos_;
     mat4 _camera_mtx_view_;
+    vec4 _camera_projparam_;//[near,far,1/near,1/far]
     mat4 _camera_mtx_proj_;
     mat4 _camera_mtx_invproj_;
     //Ambient And Fog

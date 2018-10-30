@@ -178,14 +178,20 @@ export class ShaderData{
         this.buffer = new ShaderBuffer(bytelength);
     }
 
-    public submitBuffer(gl:WebGL2RenderingContext,glbuffer:WebGLBuffer){
+    public submitBuffer(gl:WebGL2RenderingContext,glbuffer:WebGLBuffer):boolean{
         const fxbuffer = this.buffer;
-        if(!fxbuffer.isDirty) return;
-        gl.bindBuffer(gl.UNIFORM_BUFFER,glbuffer);
+        if(!fxbuffer.isDirty) return false;
         let minoff = fxbuffer.offsetMin;
-        gl.bufferSubData(gl.UNIFORM_BUFFER,minoff,fxbuffer.raw,minoff,fxbuffer.offsetMax - minoff);
+        let maxoff = fxbuffer.offsetMax;
+        if(minoff>= maxoff){
+            fxbuffer.setDirty(false);
+            return false;
+        }
+        gl.bindBuffer(gl.UNIFORM_BUFFER,glbuffer);
+        gl.bufferSubData(gl.UNIFORM_BUFFER,minoff,fxbuffer.raw,minoff,maxoff - minoff);
         gl.bindBuffer(gl.UNIFORM_BUFFER,null);
         fxbuffer.setDirty(false);
+        return true;
     }
 
 }

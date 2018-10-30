@@ -16,6 +16,7 @@ import { Mesh } from "../Mesh";
 import { MeshRender } from "../MeshRender";
 import { Material } from "../Material";
 import { Camera } from "../Camera";
+import { Input } from "../Input";
 
 export class PipelineBase implements IRenderPipeline {
 
@@ -105,6 +106,9 @@ export class PipelineBase implements IRenderPipeline {
 
     /** for viewport update in @function <bindTargetFrameBuffer> */
     private m_mainFrameBufferResized:boolean = true;
+
+    /** for shderDataBasis screnparam */
+    private m_shaderDataScreenResized:boolean= false;
 
     /* DebugPass own by PipelineBase */
     protected m_passDebug: PassDebug;
@@ -197,9 +201,9 @@ export class PipelineBase implements IRenderPipeline {
         this.m_mainFrameBufferHeight = height;
         this.m_mainFrameBufferAspect = width / height;
         this.m_mainFrameBufferResized = true;
-    }
 
-   
+        this.m_shaderDataScreenResized  = true;
+    }
 
     public exec(scene: Scene) {
     }
@@ -209,6 +213,34 @@ export class PipelineBase implements IRenderPipeline {
      */
     public onRenderToCanvas() {
         this.glctx.drawTexFullscreen(this.m_mainFrameBuffer.colorTex0, false, false);
+    }
+
+    public updateShaderDataBasis(camera:Camera,submit:boolean =true){
+        const grender = this.graphicRender;
+        const databasis = this.m_shaderDataBasis;
+        
+        const databasic = databasis.basic;
+        databasic.setTime(grender.time,this.graphicRender.deltaTime);
+        if(this.m_shaderDataScreenResized){
+            databasic.setScreenParam(this.mainFrameBufferWidth,this.mainFrameBufferHeight);
+            this.m_shaderDataScreenResized = false;
+        }
+
+        const datacamera = databasis.camrea;
+        if(camera.isDataTrsDirty){
+            datacamera.setCameraMtxView(camera.WorldMatrix);
+            datacamera.setCameraPos(camera.transform.position);
+            camera.isDataTrsDirty = false;
+        }
+        if(camera.isDataProjDirty){
+            datacamera.setCameraMtxProj(camera.ProjMatrix);
+            datacamera.setProjParam(camera.near,camera.far);
+            camera.isDataProjDirty = false;
+        }
+
+        if(submit){
+            this.submitShaderDataBasis();
+        }
     }
 
 

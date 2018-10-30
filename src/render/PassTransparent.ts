@@ -2,13 +2,9 @@ import { PipelineBase } from "../pipeline/PipelineBase";
 import { ShaderTags, Comparison, CullingMode, BlendOperator } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
 import { GLProgram } from "wglut";
-import { ShaderDataUniformObj, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { RenderPass } from "./RenderPass";
 
-
 export class PassTransparent extends RenderPass{
-
-
     private m_tags:ShaderTags;
 
     public constructor(pipeline:PipelineBase){
@@ -25,24 +21,13 @@ export class PassTransparent extends RenderPass{
     }
 
     public render(scene?:Scene){
-        const CLASS = PipelineBase;
-
         const pipe = this.pipeline;
         const gl = pipe.GL;
         const glctx = pipe.GLCtx;
         const deftags = this.m_tags;
 
-        let cam = scene.camera;
-
         let queue = pipe.nodeList.nodeTransparent;
         if(queue.length == 0) return;
-
-        //cam
-        let datacam = pipe.shaderDataBasis.camrea;
-        datacam.setCameraMtxProj(cam.ProjMatrix);
-        datacam.setCameraMtxView(cam.WorldMatrix);
-        datacam.setCameraPos(cam.transform.position);
-        pipe.submitShaderDataBasis();
 
         //sm
         let state =pipe.stateCache;

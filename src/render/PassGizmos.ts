@@ -11,10 +11,7 @@ import { ShaderFile, ShaderFX } from "../shaderfx/ShaderFX";
 import { MeshBuilder } from "../MeshBuilder";
 import { RenderPass } from "./RenderPass";
 
-
 export class PassGizmos extends RenderPass{
-
-
     protected m_material:Material;
     private m_mesh:Mesh;
 
@@ -59,7 +56,6 @@ export class PassGizmos extends RenderPass{
 
         const mesh =this.m_mesh;
         if(mesh == null) return;
-        
 
         const CLASS = PipelineBase;
         const NAME_BASIS = ShaderFX.UNIFORM_BASIS;

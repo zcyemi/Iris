@@ -3,7 +3,7 @@ import { Camera } from "./Camera";
 import { Light } from "./Light";
 
 export class Scene extends GameObject{
-    public camera:Camera;
+    public mainCamera:Camera;
 
     private m_lightList:Light[] = [];
 

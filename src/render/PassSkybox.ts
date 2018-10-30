@@ -45,7 +45,7 @@ export class PassSkybox extends RenderPass{
     }
 
     public render(scene?:Scene){
-        let camera = scene.camera;
+        let camera = scene.mainCamera;
         if(camera.clearType != ClearType.Skybox || camera.skybox == null) return;
 
         let pipeline = this.pipeline;

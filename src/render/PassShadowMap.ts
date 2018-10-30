@@ -8,21 +8,16 @@ import { ShadowCascade, ShadowConfig } from "./Shadow";
 import { Texture, TextureCreationDesc } from "../Texture";
 import { Light, LightType } from "../Light";
 import { Camera } from "../Camera";
-import { RenderNodeList } from "../RenderNodeList";
 import { BufferDebugInfo } from "./BufferDebugInfo";
 import { Mesh } from "../Mesh";
 import { ShaderSource } from "../shaderfx/ShaderSource";
 import { Material } from "../Material";
-import { ShaderDataUniformShadowMap } from "../shaderfx/ShaderFXLibs";
-import { pipeline } from "stream";
 import { RenderPass } from "./RenderPass";
 
-
 export class PassShadowMap extends RenderPass{
-
-
     private m_shader:Shader;
     private m_program:GLProgram;
+    private m_uniformLightVP:WebGLUniformLocation;
 
     private m_blockIndexBasis:number;
     private m_blockIndexObj:number;
@@ -32,8 +27,6 @@ export class PassShadowMap extends RenderPass{
 
     private m_smtex:Texture;
     private m_smfb:WebGLFramebuffer;
-
-    private m_bufferDebugInfo:BufferDebugInfo;
 
     //ShadowGathering
     private m_shadowTexture:Texture;
@@ -59,10 +52,11 @@ export class PassShadowMap extends RenderPass{
 
         let config = pipe.graphicRender.shadowConfig;
 
-        let shader = pipe.graphicRender.shaderLib.shaderDepth;
+        let shader = pipe.graphicRender.shaderLib.shaderShadowMap;
         let program = shader.defaultProgram;
         this.m_shader = shader;
         this.m_program = program;
+        this.m_uniformLightVP = program.Uniforms['uLightVP'];
 
         let ublocks = program.UniformBlock;
         let indexCam = ublocks[ShaderFX.UNIFORM_BASIS];
@@ -143,7 +137,7 @@ export class PassShadowMap extends RenderPass{
 
         let queue = this.pipeline.nodeList.nodeOpaque;
 
-        let cam = scene.camera;
+        let cam = scene.mainCamera;
         if(cam == null) return;
         let pipe = this.pipeline;
         cam.aspect = pipe.mainFrameBufferAspect;
@@ -166,19 +160,6 @@ export class PassShadowMap extends RenderPass{
         let smdata = this.pipeline.shaderDataShadowMap;
         pipe.updateUniformBufferShadowMap(smdata);
 
-        //update camerabuffer
-
-        let databasic = pipe.shaderDataBasis.basic;
-        let datacam = pipe.shaderDataBasis.camrea;
-        datacam.setCameraPos(cam.transform.position);
-        datacam.setProjParam(cam.near,cam.far);
-        datacam.setCameraMtxProj(cam.ProjMatrix);
-        datacam.setCameraMtxView(cam.WorldMatrix);
-        databasic.setScreenParam(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight);
-        pipe.submitShaderDataBasis();
-
-        //this.shadowGathering(lights[0]);
-
         pipe.bindTargetFrameBuffer(true);
     }
 
@@ -199,23 +180,24 @@ export class PassShadowMap extends RenderPass{
 
         let lightMtxs = this.calculateLightMatrix(light,camera,config);
         let [lightworldMtx,lightProjMtx] = lightMtxs[0];
-        let lightMtx = lightProjMtx.mul(lightworldMtx);
-        smdata.setLightMtx(lightMtx,0);
-        pipe.shadowMapData.lightMtx0 = lightMtx;
+
+        let lightMtxVP = lightProjMtx.mul(lightworldMtx);
+        smdata.setLightMtx(lightMtxVP,0);
+        pipe.shadowMapData.lightMtx0 = lightMtxVP;
 
         let cascades =config.cascade;
         let size = this.m_smheight;
         if(cascades == 1){
-            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0]);
+            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxVP);
         }
         else if(cascades == 2){
-            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0]);
-            this.renderShadowCascade(glmath.vec4(size,0,size,size),queue,lightMtxs[1]);
+            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxVP);
+            this.renderShadowCascade(glmath.vec4(size,0,size,size),queue,lightMtxVP);
         }else{
-            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxs[0]);
-            this.renderShadowCascade(glmath.vec4(size,0,size,size),queue,lightMtxs[1]);
-            this.renderShadowCascade(glmath.vec4(0,size,size,size),queue,lightMtxs[2]);
-            this.renderShadowCascade(glmath.vec4(size,size,size,size),queue,lightMtxs[3]);
+            this.renderShadowCascade(glmath.vec4(0,0,size,size),queue,lightMtxVP);
+            this.renderShadowCascade(glmath.vec4(size,0,size,size),queue,lightMtxVP);
+            this.renderShadowCascade(glmath.vec4(0,size,size,size),queue,lightMtxVP);
+            this.renderShadowCascade(glmath.vec4(size,size,size,size),queue,lightMtxVP);
         }
 
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
@@ -273,17 +255,12 @@ export class PassShadowMap extends RenderPass{
         return ret;
     }
 
-    private renderShadowCascade(vp:vec4,queue:MeshRender[],mtx:[mat4,mat4]){
-
+    private renderShadowCascade(vp:vec4,queue:MeshRender[],lmtxVP:mat4){
         let pipe = this.pipeline;
         let glctx = pipe.GLCtx;
         let gl = glctx.gl;
 
-        let camdata = pipe.shaderDataBasis.camrea;;
-        camdata.setCameraMtxView(mtx[0]);
-        camdata.setCameraMtxProj(mtx[1]);
-        pipe.submitShaderDataBasis();
-
+        gl.uniformMatrix4fv(this.m_uniformLightVP,false,lmtxVP.raw);
         gl.viewport(vp.x,vp.y,vp.z,vp.w);
         let objdata = pipe.shaderDataObj;
 

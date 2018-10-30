@@ -11,9 +11,9 @@ uniform UNIFORM_BASIS{
     vec4 _screenparam_;//[width,height,1/wdith,1/height]
     highp vec4 _time_;//[Time,deltaTime,sinTime,cosTime]
     //camera
-    vec4 _camera_projparam_;//[near,far,1/near,1/far]
     vec4 _camera_pos_;
     mat4 _camera_mtx_view_;
+    vec4 _camera_projparam_;//[near,far,1/near,1/far]
     mat4 _camera_mtx_proj_;
     mat4 _camera_mtx_invproj_;
     //Ambient And Fog
@@ -325,6 +325,21 @@ void fragment(){
 
     fragColor = vec4(col *1.2,1.0);
 
+}`;
+	public static readonly shadowmap:string = `#version 300 es\nprecision mediump float;
+#include SHADERFX_BASIS
+#queue other
+#pragma vs vertex
+#pragma ps fragment
+
+uniform mat4 uLightVP;
+
+in vec4 aPosition;
+void vertex(){
+    gl_Position = (uLightVP * MATRIX_M) * aPosition;
+}
+
+void fragment(){
 }`;
 	public static readonly shadowsGather:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS

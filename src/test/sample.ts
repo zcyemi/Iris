@@ -74,12 +74,13 @@ export class SampleGame{
         if(!this.m_sceneInited) return;
 
         let delta = this.m_timer.tick(ts);
-        Input.onFrame(delta/1000);
+        let dt = delta /1000;
+        Input.onFrame(dt);
         let scene = this.m_scene;
         this.m_sceneMgr.onFrame(scene);
 
         let gredner = this.m_graphicsRender;
-        gredner.render(scene);
+        gredner.render(scene,dt);
         gredner.renderToCanvas();
     }
 

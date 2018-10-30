@@ -17,6 +17,7 @@ export class ShaderFXLibs{
     private m_diffuse:Shader;
     private m_skybox:Shader;
     private m_depth:Shader;
+    private m_shadermap:Shader;
 
     private m_pbrMetallicRoughness:Shader;
 
@@ -34,6 +35,8 @@ export class ShaderFXLibs{
     public static SH_pbrMetallicRoughness:ShaderSource;
     @ShaderFile("depth")
     public static SH_depth:ShaderSource;
+    @ShaderFile("shadowmap")
+    public static SH_shadowmap:ShaderSource;
 
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_BASIS)
     public static SHADERFX_BASIS:ShaderVariant;
@@ -92,6 +95,13 @@ export class ShaderFXLibs{
             this.m_depth = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_depth);
         }
         return this.m_depth;
+    }
+
+    public get shaderShadowMap():Shader{
+        if(this.m_shadermap == null){
+            this.m_shadermap = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_shadowmap);
+        }
+        return this.m_shadermap;
     }
 
     public release(){
@@ -188,6 +198,14 @@ export class FXDataBasis extends ShaderData{
             data.setDirty = false;
         }
     }
+
+    public submitBuffer(gl:WebGL2RenderingContext,glbuffer:WebGLBuffer):boolean{
+        let min = this.buffer.offsetMin;
+        let max = this.buffer.offsetMax;
+        let t = super.submitBuffer(gl,glbuffer);
+        //if(t)console.log(min,max);
+        return t;
+    }
 }
 
 export class FXDataBasic extends ShaderSubData{
@@ -205,9 +223,9 @@ export class FXDataBasic extends ShaderSubData{
 }
 
 export class FXDataCamera extends ShaderSubData{
-    //[0,16] vec4 _camera_projparam_;
-    //[16,32] vec4 _camera_pos_;
-    //[32,96] mat4 _camera_mtx_view_;
+    //[0,16] vec4 _camera_pos_;
+    //[16,80] mat4 _camera_mtx_view_;
+    //[80,96] vec4 _camera_projparam_;
     //[96,160] mat4 _camera_mtx_proj_;
     //[160,224] mat4 _camera_mtx_invproj_;
 
@@ -215,13 +233,13 @@ export class FXDataCamera extends ShaderSubData{
         super(data,224,32);
     }
     public setProjParam(near:number,far:number){
-        this.view.setVec4(0,new vec4([near,far,1.0/near,1.0/far]));
+        this.view.setVec4(80,new vec4([near,far,1.0/near,1.0/far]));
     }
     public setCameraPos(pos:vec3){
-        this.view.setVec3(16,pos);
+        this.view.setVec3(0,pos);
     }
     public setCameraMtxView(view:mat4){
-        this.view.setMat4(32,view);
+        this.view.setMat4(16,view);
     }
     public setCameraMtxProj(proj:mat4,invproj?:mat4){
         const view = this.view;
