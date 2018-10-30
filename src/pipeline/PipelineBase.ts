@@ -396,7 +396,7 @@ export class PipelineBase implements IRenderPipeline {
         if(vao == null) throw new Error('vertex array obj is null!');
         gl.bindVertexArray(vao);
         let indicedesc = mesh.indiceDesc;
-        gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.indices.type, 0);
+        gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type,indicedesc.offset);
         gl.bindVertexArray(null);
         mat.clean(gl);
     }
@@ -426,7 +426,7 @@ export class PipelineBase implements IRenderPipeline {
         let vao = meshrender.vertexArrayObj;
         gl.bindVertexArray(vao);
         let indicedesc = mesh.indiceDesc;
-        gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.indices.type, 0);
+        gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type,indicedesc.offset);
         gl.bindVertexArray(null);
         mat.clean(gl);
     }
