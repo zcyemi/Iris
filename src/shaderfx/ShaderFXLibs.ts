@@ -18,6 +18,7 @@ export class ShaderFXLibs{
     private m_skybox:Shader;
     private m_depth:Shader;
     private m_shadermap:Shader;
+    private m_blit:Shader;
 
     private m_pbrMetallicRoughness:Shader;
 
@@ -37,6 +38,8 @@ export class ShaderFXLibs{
     public static SH_depth:ShaderSource;
     @ShaderFile("shadowmap")
     public static SH_shadowmap:ShaderSource;
+    @ShaderFile("blit")
+    public static SH_blit:ShaderSource;
 
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_BASIS)
     public static SHADERFX_BASIS:ShaderVariant;
@@ -102,6 +105,13 @@ export class ShaderFXLibs{
             this.m_shadermap = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_shadowmap);
         }
         return this.m_shadermap;
+    }
+
+    public get shaderBlit():Shader{
+        if(this.m_blit == null){
+            this.m_blit = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_blit);
+        }
+        return this.m_blit;
     }
 
     public release(){

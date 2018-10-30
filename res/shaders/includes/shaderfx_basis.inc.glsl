@@ -20,6 +20,9 @@ uniform UNIFORM_BASIS{
     vec4 _fogcolor_;
     vec4 _fogparam_;
 };
+#define TIME _time_
+#define SCREEN _screenparam_
+
 #define MATRIX_V _camera_mtx_view_
 #define MATRIX_P _camera_mtx_proj_
 #define MATRIX_VP MATRIX_P * MATRIX_V

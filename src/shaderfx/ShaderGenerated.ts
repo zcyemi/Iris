@@ -21,6 +21,9 @@ uniform UNIFORM_BASIS{
     vec4 _fogcolor_;
     vec4 _fogparam_;
 };
+#define TIME _time_
+#define SCREEN _screenparam_
+
 #define MATRIX_V _camera_mtx_view_
 #define MATRIX_P _camera_mtx_proj_
 #define MATRIX_VP MATRIX_P * MATRIX_V
@@ -150,6 +153,24 @@ float computeShadowPCF3(vec4 vLightPos,sampler2DShadow shadowsampler){
 }
 
 #endif`;
+	public static readonly blit:string = `#version 300 es\nprecision mediump float;
+#queue opaque
+inout vec2 vUV;
+#pragma vs vertex
+in vec4 aPosition;
+in vec2 aUV;
+void vertex(){
+    vec4 pos = aPosition;
+    pos.xy *=2.0;
+    vUV = vec2(aUV.x,1.0 -aUV.y);
+    gl_Position = pos;
+}
+#pragma ps fragment
+uniform sampler2D uSampler;
+out vec4 fragColor;
+void fragment(){
+    fragColor = texture(uSampler,vUV);
+}`;
 	public static readonly depth:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #queue other
@@ -447,7 +468,6 @@ void fragment(){
 }`;
 	public static readonly UnlitTexture:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
-#include SHADERFX_SHADOWMAP
 
 #queue opaque
 

@@ -114,6 +114,9 @@ export class PipelineBase implements IRenderPipeline {
     protected m_passDebug: PassDebug;
     public renderPassDebug:boolean = false;
 
+    private m_fullscreenRender:MeshRender;
+    private m_fullscreenMat:Material;
+
     public constructor() { }
 
     public onSetupRender(glctx:GLContext,bufferinfo: GraphicsRenderCreateInfo) {
@@ -138,6 +141,14 @@ export class PipelineBase implements IRenderPipeline {
         this.createUniformBuffers();
 
         this.m_passDebug = new PassDebug(this);
+
+        if(this.m_fullscreenMat == null){
+            this.m_fullscreenMat = new Material(this.graphicRender.shaderLib.shaderBlit);
+        }
+
+        if(this.m_fullscreenRender == null){
+            this.m_fullscreenRender = new MeshRender(Mesh.Quad,this.m_fullscreenMat);
+        }
 
 
         this.m_inited= true;
@@ -370,6 +381,13 @@ export class PipelineBase implements IRenderPipeline {
                 gl.uniform1i(loc,ShaderFX.GL_SHADOWMAP_TEX0_ID);
             }
         }
+    }
+
+    /** draw fullscreen tex */
+    public drawFullScreenTex(tex:Texture){
+        const mat =this.m_fullscreenMat;
+        mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
+        this.drawMeshRender(this.m_fullscreenRender);
     }
 
     /**
