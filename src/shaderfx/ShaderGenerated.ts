@@ -150,7 +150,7 @@ float computeShadowPCF3(vec4 vLightPos,sampler2DShadow shadowsampler){
 }
 
 #endif`;
-	public static readonly depth:string = `#version 300 es\nprecision mediump float;
+	public static readonly depth:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #queue other
 #pragma vs vertex
@@ -163,7 +163,7 @@ void vertex(){
 
 void fragment(){
 }`;
-	public static readonly diffuse:string = `#version 300 es\nprecision mediump float;
+	public static readonly diffuse:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #include SHADERFX_LIGHT
 #include SHADERFX_LIGHTING
@@ -429,7 +429,7 @@ void fragment(){
     fragColor = texture(uSampler,vec2(x,y));
     #endif
 }`;
-	public static readonly UnlitColor:string = `#version 300 es\nprecision mediump float;
+	public static readonly UnlitColor:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #queue opaque
 
@@ -469,7 +469,7 @@ out vec4 fragColor;
 void fragment(){
     fragColor = texture(uSampler,vUV);
 }`;
-	public static readonly uvValue:string = `#version 300 es\nprecision mediump float;
+	public static readonly uvValue:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 
 inout vec2 vUV;

@@ -10,7 +10,7 @@ import { Shader, ShaderTags, CullingMode, BlendFactor, BlendOperator, RenderQueu
 import { Texture } from "./Texture";
 
 
-export class SceneBuilder{
+export class GLTFSceneBuilder{
 
 
     private m_gltfData:GLTFdata;
@@ -42,7 +42,7 @@ export class SceneBuilder{
 
     }
 
-    public createScene():Scene{
+    public createScene():GameObject{
         let gltf = this.gltf;
         let scenes = gltf.scenes;
         if(scenes == null) return null;
@@ -53,20 +53,19 @@ export class SceneBuilder{
 
         var scenenodes = scene.nodes;
 
-        let gscene = new Scene();
+        let gsceneobj = new GameObject();
 
         for(let i=0,nodeslen = scenenodes.length;i<nodeslen;i++){
             let gobj = this.buildNode(nodes,scenenodes[i]);
             if(gobj != null){
-                gobj.transform.parent = gscene.transform;
+                gobj.transform.parent = gsceneobj.transform;
             }
         }
 
-        let gstrs = gscene.transform;
-        // gstrs.localMatrix = mat4.Scale(glmath.vec3(0.001,0.001,0.001));
+        let gstrs = gsceneobj.transform;
         gstrs.setScale(glmath.vec3(0.001,0.001,0.001));
 
-        return gscene;
+        return gsceneobj;
     }
 
     private buildNode(nodes:GLTFnode[],index:number): GameObject{

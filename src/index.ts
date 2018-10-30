@@ -35,7 +35,7 @@ export * from './Transform';
 export * from './Component';
 export * from './Scene';
 export * from './SceneManager';
-export * from './SceneBuilder';
+export * from './GLTFSceneBuilder';
 
 export * from './Utility';
 

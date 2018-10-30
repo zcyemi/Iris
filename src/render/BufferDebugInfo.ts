@@ -1,6 +1,7 @@
 import { Texture } from "../Texture";
 import { vec4 } from "wglut";
 
+
 export class BufferDebugInfo{
 
     public drawRect:vec4;

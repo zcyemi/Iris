@@ -16,7 +16,7 @@ import { Component} from '../Component';
 import { CameraFreeFly } from '../CameraUtility';
 import { FrameTimer } from '../FrameTimer';
 import { TextureCubeMap } from '../TextureCubeMap';
-import { SceneBuilder } from '../SceneBuilder';
+import { GLTFSceneBuilder } from '../GLTFSceneBuilder';
 import { ShaderFXLibs } from '../shaderfx/ShaderFXLibs';
 import { PipelineBase } from '../pipeline/PipelineBase';
 import { PipelineForwardZPrePass } from '../pipeline/PipelineForwardZPrePass';
@@ -114,34 +114,31 @@ export class SampleGame{
 
 
 
-        let sceneBuilder = new SceneBuilder(gltf,glctx,this.m_graphicsRender.shaderLib);
+        let sceneBuilder = new GLTFSceneBuilder(gltf,glctx,this.m_graphicsRender.shaderLib);
 
         //let tex = (await sceneBuilder.getImage(1));
 
         const isgltf:boolean =true;
 
-        let scene:Scene = null;
+        let scene:Scene = new Scene();
+        this.m_scene = scene;
+
 
         if(isgltf){
-            scene = sceneBuilder.createScene();
-            scene.name = "scene";
-            this.m_scene = scene;
+            let gobj = sceneBuilder.createScene();
+            gobj.name = "gltfscene";
 
-            let skyboxobj = scene.getChildByName('sky_sky_0');
+            let skyboxobj = gobj.getChildByName('sky_sky_0');
             if(skyboxobj!=null){
                 let skyrender = skyboxobj.render;
                 skyrender.castShadow = false;
                 skyrender.material.setShader(grender.shaderLib.shaderUnlitTexture);
             }
 
-            scene.transform.children[0].applyTranslate(glmath.vec3(0,15000,0));
+            gobj.transform.parent = scene.transform;
+            gobj.transform.applyTranslate(glmath.vec3(0,15,0));
     
         }
-        else{
-            scene = new Scene();
-            this.m_scene = scene;
-        }
-
 
         // this.m_scene = new Scene();
         // let scene = this.m_scene;

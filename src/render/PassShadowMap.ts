@@ -216,7 +216,7 @@ export class PassShadowMap extends RenderPass{
         let fardist = near;
         let neardist = near;
 
-        let campos = ctrs.localPosition;
+        let campos = ctrs.position;
         let camforward = ctrs.forward;
 
         let hCoefficient = Math.tan(camera.fov / 2.0 * glmath.Deg2Rad);

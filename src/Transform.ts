@@ -18,7 +18,11 @@ export class Transform{
     private m_curTRSDirty:boolean = false;
 
     private m_localMtx:mat4 = mat4.Identity;
+
+    /** localToWorld mtx */
     private m_objMtx:mat4 = mat4.Identity;
+    /** worldToLocal mtx */
+    private m_objMtxInv:mat4;
 
     private m_right:vec3 = vec3.right.clone();
     private m_forward:vec3 = vec3.forward.clone();
@@ -78,6 +82,13 @@ export class Transform{
         return this.m_objMtx;
     }
 
+    public get worldToLocalMatrix():mat4{
+        if(this.m_objMtxInv == null){
+            this.m_objMtxInv = this.objMatrix.inverse();
+        }
+        return this.m_objMtxInv;
+    }
+
     private calObjMatrix(decompose:boolean = false):mat4{
         let mtx:mat4 = null;
         if(this.parent == null){
@@ -97,6 +108,7 @@ export class Transform{
                 this.m_worldScale = null;
             }
         }
+        this.m_objMtxInv = null;
         return mtx;
     }
 
@@ -163,6 +175,7 @@ export class Transform{
         this.setRotation(q);
     }
 
+    /** set local rotation */
     public setRotation(q:quat){
         this.m_localRotation.set(q);
         this.m_forward = null;
@@ -171,13 +184,13 @@ export class Transform{
         this.m_localTRSdirty =true;
         this.m_TRSDirty = true;
     }
-
+    /** set local rotation */
     public setPosition(pos:vec3){
         this.m_localPosition.set(pos);
         this.m_localTRSdirty = true;
         this.m_TRSDirty = true;
     }
-
+    /** set local scale */
     public setScale(scale:vec3){
         this.m_localScale.set(scale);
         this.m_localTRSdirty = true;
@@ -189,6 +202,18 @@ export class Transform{
             this.m_forward = this.m_localRotation.rota(vec3.forward);
         }
         return this.m_forward;
+    }
+
+    public get worldForward():vec3{
+        return this.rotation.rota(vec3.forward);
+    }
+
+    public get worldUp():vec3{
+        return this.rotation.rota(vec3.up);
+    }
+
+    public get worldRight():vec3{
+        return this.rotation.rota(vec3.right);
     }
 
     public set forward(dir:vec3){
@@ -285,12 +310,20 @@ export class Transform{
     }
 
     public setLocalDirty(dirty:boolean =true){
+        if(dirty == this.m_localTRSdirty) return;
         this.m_localTRSdirty = dirty;
         if(dirty){
             this.m_TRSDirty = true;
         }
+        else{
+            this.localMatrix;
+        }
     }
 
+    /**
+     * 
+     * @param pmtxdirty parent's transform dirty?
+     */
     public setObjMatrixDirty(pmtxdirty:boolean){
         let dirty = this.m_TRSDirty || pmtxdirty;
         this.m_curTRSDirty = dirty;
@@ -328,9 +361,17 @@ export class Transform{
      * Apply translate to current transform.
      * @param offset 
      */
-    public applyTranslate(offset:vec3){
-        this.localPosition.add(offset);
-        this.setLocalDirty();
+    public applyTranslate(offset:vec3,local:boolean = true){
+        if(local){
+            this.localPosition.add(offset);
+            this.setLocalDirty();
+        }
+        else{
+            let localoffset = this.worldToLocalMatrix.mulvec(offset.vec4(0));
+            this.localPosition.add(localoffset);
+            this.setLocalDirty();
+        }
+
     }
 
     /**

@@ -37,6 +37,7 @@ export class Camera extends Component{
 
     private m_projMtx:mat4;
     private m_worldMtx:mat4;
+    private m_worldMtxCalculated:boolean = false;
 
     private m_background:vec4 = vec4.zero;
     private m_ambientColor:vec4 = glmath.vec4(0.1,0.1,0.1,1.0);
@@ -146,10 +147,10 @@ export class Camera extends Component{
     /** View matrix of camera */
     public get WorldMatrix():mat4{
         let trs = this.transform;
-        if(trs.isDirty){
-            trs.setLocalDirty(false);
-            this.m_worldMtx = mat4.coordCvt(trs.localPosition,trs.forward,trs.up);
+        if(!this.m_worldMtxCalculated && trs.isDirty){
+            this.m_worldMtx = mat4.coordCvt(trs.position,trs.forward,trs.up);
             this.m_dataTrsDirty = true;
+            this.m_worldMtxCalculated = true;
         }
         return this.m_worldMtx;
     }
@@ -172,6 +173,7 @@ export class Camera extends Component{
 
     public onUpdate(scene:Scene){
         scene.mainCamera = this;
+        this.m_worldMtxCalculated = false;
     }
 
     public static persepctive(gobj:GameObject,fov:number,aspectratio:number,near:number,far:number):Camera{
