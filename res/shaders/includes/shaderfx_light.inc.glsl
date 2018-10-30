@@ -2,7 +2,7 @@ struct LIGHT_DATA{
     vec4 pos_type;
     vec4 col_intensity;
 };
-uniform LIGHT{
+uniform UNIFORM_LIGHT{
     LIGHT_DATA light_source[4];
     vec4 ambient_color;
 };

@@ -2,7 +2,7 @@ import { PipelineBase } from "../pipeline/PipelineBase";
 import { ShaderTags, Comparison, CullingMode, BlendOperator } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
 import { GLProgram } from "wglut";
-import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
+import { ShaderDataUniformObj, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { RenderPass } from "./RenderPass";
 
 
@@ -32,21 +32,17 @@ export class PassTransparent extends RenderPass{
         const glctx = pipe.GLCtx;
         const deftags = this.m_tags;
 
-        const NAME_CAM = ShaderDataUniformCam.UNIFORM_CAM;
-        const NAME_OBJ = ShaderDataUniformObj.UNIFORM_OBJ;
-        const NAME_LIGHT = ShaderDataUniformLight.UNIFORM_LIGHT;
-
         let cam = scene.camera;
 
         let queue = pipe.nodeList.nodeTransparent;
         if(queue.length == 0) return;
 
         //cam
-        let datacam = pipe.shaderDataCam;
-        datacam.setMtxProj(cam.ProjMatrix);
-        datacam.setMtxView(cam.WorldMatrix);
+        let datacam = pipe.shaderDataBasis.camrea;
+        datacam.setCameraMtxProj(cam.ProjMatrix);
+        datacam.setCameraMtxView(cam.WorldMatrix);
         datacam.setCameraPos(cam.transform.position);
-        pipe.updateUniformBufferCamera(datacam);
+        pipe.submitShaderDataBasis();
 
         //sm
         let state =pipe.stateCache;
@@ -54,9 +50,7 @@ export class PassTransparent extends RenderPass{
 
         pipe.activeDefaultTexture();
 
-
         //do draw
-
         let len = queue.length;
         let curprogram:GLProgram = null;
 

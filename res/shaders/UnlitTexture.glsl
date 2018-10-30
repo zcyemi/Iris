@@ -1,6 +1,6 @@
 #version 300 es
 precision mediump float;
-#include SHADERFX_CAMERA
+#include SHADERFX_BASIS
 #include SHADERFX_SHADOWMAP
 
 #queue opaque

@@ -3,8 +3,6 @@ import { ShaderSource } from "./ShaderSource";
 import { GLContext } from "wglut";
 import { Shader, ShaderTags } from "./Shader";
 import { ShaderGen } from "./ShaderGenerated";
-import { ShaderDataBuffer, ShaderDataArrayBuffer } from "./ShaderBuffer";
-
 export class ShaderFX{
 
     public static variants:{[key:string]:ShaderVariant} = {};
@@ -59,7 +57,7 @@ export class ShaderFX{
 
     public static isInternalUniformBlockName(blockname:string):boolean{
         const CLASS = ShaderFX;
-        if(blockname ==CLASS.UNIFORM_CAM || blockname == CLASS.UNIFORM_OBJ || blockname == CLASS.UNIFORM_SHADOWMAP) return true;
+        if(blockname ==CLASS.UNIFORM_BASIS || blockname == CLASS.UNIFORM_OBJ || blockname == CLASS.UNIFORM_SHADOWMAP) return true;
         return false;
     }
 
@@ -75,13 +73,13 @@ export class ShaderFX{
     public static OPT_SHADOWMAP_SHADOW_ON = "ON";
     public static OPT_SHADOWMAP_SHADOW_OFF = "OFF";
 
-
     public static ATTR_aPosition = "aPosition";
     public static ATTR_aUV = "aUV";
     public static ATTR_aNormal = "aNormal";
 
-    public static UNIFORM_CAM = "UNIFORM_CAM";
+    public static UNIFORM_BASIS = "UNIFORM_BASIS";
     public static UNIFORM_OBJ = "UNIFORM_OBJ";
+    public static UNIFORM_LIGHT = "UNIFORM_LIGHT";
     public static UNIFORM_SHADOWMAP = "UNIFORM_SHADOWMAP";
     public static UNIFORM_SHADOWMAP_SAMPLER = "uShadowMap";
 

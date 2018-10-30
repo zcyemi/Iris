@@ -92,8 +92,6 @@ export class SampleGame{
 
         let tr= new Transform(null);
         tr.forward = vec3.down;
-        console.error(tr.up);
-        throw new Error('');
 
         //texture
         let tex = await glctx.createTextureImageAsync('res/images/tex0.png');

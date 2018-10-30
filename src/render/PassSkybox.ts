@@ -3,7 +3,6 @@ import { ShaderTags, Comparison, CullingMode, BlendOperator } from "../shaderfx/
 import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
 import { GLProgram } from "wglut";
-import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { ClearType } from "../Camera";
 import { CubeMapType, TextureCubeMap } from "../TextureCubeMap";
 import { Material } from "../Material";

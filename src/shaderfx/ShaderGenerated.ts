@@ -2,56 +2,59 @@ export class ShaderGen{
 	public static readonly SHADERFX_BASIS:string = `#define PI 3.1415926
 #define PI_2 6.2831852
 #define PI_HALF 1.5707963
-
-#include SHADERFX_OBJ
-#include SHADERFX_CAMERA
-vec3 ObjToWorldDir(in vec3 dir){
-    return normalize(dir * mat3(MATRIX_WORLD2OBJ));
-}
-
-float SAMPLE_DEPTH_TEXTURE(sampler2D depthtex,vec2 uv){
-    return texture(depthtex,uv).r;
-}
-
-float DECODE_VIEWDEPTH(float d){
-    return 1.0/ ((CAMERA_NEAR_INV - CAMERA_FAR_INV) * d  - CAMERA_NEAR_INV);
-}
-
-vec4 ClipToWorld(in vec4 clippoint){
-    return inverse(MATRIX_VP) * clippoint;
-}
-
-`;
-	public static readonly SHADERFX_CAMERA:string = `#include SHADERFX_OBJ
-uniform UNIFORM_CAM{
-    mat4 _world2view_;
-    mat4 _view2proj_;
-    vec4 _camerapos_;
-    vec4 _projparam_; //[near,far,1/near,1/far]
-    vec4 _screenparam_;//[width,height,1/wdith,1/height]
+uniform UNIFORM_OBJ{
+    mat4 _obj2world_;
 };
-#define MATRIX_V _world2view_
-#define MATRIX_P _view2proj_
+#define MATRIX_M _obj2world_
+uniform UNIFORM_BASIS{
+    //basic region
+    vec4 _screenparam_;//[width,height,1/wdith,1/height]
+    highp vec4 _time_;//[Time,deltaTime,sinTime,cosTime]
+    //camera
+    vec4 _camera_projparam_;//[near,far,1/near,1/far]
+    vec4 _camera_pos_;
+    mat4 _camera_mtx_view_;
+    mat4 _camera_mtx_proj_;
+    mat4 _camera_mtx_invproj_;
+    //Ambient And Fog
+    lowp vec4 _ambientcolor_;
+    vec4 _fogcolor_;
+    vec4 _fogparam_;
+};
+#define MATRIX_V _camera_mtx_view_
+#define MATRIX_P _camera_mtx_proj_
 #define MATRIX_VP MATRIX_P * MATRIX_V
 #define MATRIX_MV MATRIX_V * MATRIX_M
 #define MATRIX_IT_MV transpose(inverse(MATRIX_MV))
 #define MATRIX_MVP MATRIX_P * MATRIX_MV
+#define MATRIX_INV_P _camera_mtx_invproj_
 #define MATRIX_WORLD2OBJ inverse(MATRIX_M)
-#define CAMERA_POS _camerapos_
-#define CAMERA_NEAR _projparam_.x
-#define CAMERA_FAR _projparam_.y
-#define CAMERA_NEAR_INV _projparam_.z
-#define CAMERA_FAR_INV _projparam_.w
+#define CAMERA_POS _camera_pos_
+#define CAMERA_NEAR _camera_projparam_.x
+#define CAMERA_FAR _camera_projparam_.y
+#define CAMERA_NEAR_INV _camera_projparam_.z
+#define CAMERA_FAR_INV _camera_projparam_.w
 #define SCREEN_WIDTH _screenparam_.x
 #define SCREEN_HEIGHT _screenparam_.y
 #define SCREEN_WIDTH_INV _screenparam_.z
 #define SCREEN_HEIGHT_INV _screenparam_.w
-#`;
+vec3 ObjToWorldDir(in vec3 dir){
+    return normalize(dir * mat3(MATRIX_WORLD2OBJ));
+}
+float SAMPLE_DEPTH_TEXTURE(sampler2D depthtex,vec2 uv){
+    return texture(depthtex,uv).r;
+}
+float DECODE_VIEWDEPTH(float d){
+    return 1.0/ ((CAMERA_NEAR_INV - CAMERA_FAR_INV) * d  - CAMERA_NEAR_INV);
+}
+vec4 ClipToWorld(in vec4 clippoint){
+    return inverse(MATRIX_VP) * clippoint;
+}`;
 	public static readonly SHADERFX_LIGHT:string = `struct LIGHT_DATA{
     vec4 pos_type;
     vec4 col_intensity;
 };
-uniform LIGHT{
+uniform UNIFORM_LIGHT{
     LIGHT_DATA light_source[4];
     vec4 ambient_color;
 };
@@ -71,10 +74,6 @@ uniform LIGHT{
     float diff = max(.0,dot(-lightdir,normal));
     return albedo * lightColor * diff;
 }`;
-	public static readonly SHADERFX_OBJ:string = `uniform UNIFORM_OBJ{
-    mat4 _obj2world_;
-};
-#define MATRIX_M _obj2world_`;
 	public static readonly SHADERFX_SHADOWMAP:string = `#options SMCASCADE NONE TWO FOUR
 #options SHADOW ON OFF
 
@@ -432,7 +431,7 @@ void fragment(){
     fragColor = uColor;
 }`;
 	public static readonly UnlitTexture:string = `#version 300 es\nprecision mediump float;
-#include SHADERFX_CAMERA
+#include SHADERFX_BASIS
 #include SHADERFX_SHADOWMAP
 
 #queue opaque
@@ -456,7 +455,7 @@ void fragment(){
     fragColor = texture(uSampler,vUV);
 }`;
 	public static readonly uvValue:string = `#version 300 es\nprecision mediump float;
-#include SHADERFX_CAMERA
+#include SHADERFX_BASIS
 
 inout vec2 vUV;
 

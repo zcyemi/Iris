@@ -24,7 +24,7 @@ export class PassShadowMap extends RenderPass{
     private m_shader:Shader;
     private m_program:GLProgram;
 
-    private m_blockIndexCam:number;
+    private m_blockIndexBasis:number;
     private m_blockIndexObj:number;
 
     private m_smwidth:number;
@@ -65,9 +65,9 @@ export class PassShadowMap extends RenderPass{
         this.m_program = program;
 
         let ublocks = program.UniformBlock;
-        let indexCam = ublocks[ShaderFX.UNIFORM_CAM];
+        let indexCam = ublocks[ShaderFX.UNIFORM_BASIS];
         let indexObj = ublocks[ShaderFX.UNIFORM_OBJ];
-        this.m_blockIndexCam = indexCam;
+        this.m_blockIndexBasis = indexCam;
         this.m_blockIndexObj = indexObj;
 
         let size = config.shadowmapSize;
@@ -154,7 +154,7 @@ export class PassShadowMap extends RenderPass{
         let gl = pipe.GL;
         let glp = program.Program;
         gl.useProgram(glp);
-        gl.uniformBlockBinding(glp,this.m_blockIndexCam,CLASS.UNIFORMINDEX_CAM);
+        gl.uniformBlockBinding(glp,this.m_blockIndexBasis,CLASS.UNIFORMINDEX_BASIS);
         gl.uniformBlockBinding(glp,this.m_blockIndexObj,CLASS.UNIFORMINDEX_OBJ);
 
         let lights = scene.lights;
@@ -168,13 +168,14 @@ export class PassShadowMap extends RenderPass{
 
         //update camerabuffer
 
-        let datacam = pipe.shaderDataCam;
+        let databasic = pipe.shaderDataBasis.basic;
+        let datacam = pipe.shaderDataBasis.camrea;
         datacam.setCameraPos(cam.transform.position);
-        datacam.setClipPlane(cam.near,cam.far);
-        datacam.setMtxProj(cam.ProjMatrix);
-        datacam.setMtxView(cam.WorldMatrix);
-        datacam.setScreenSize(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight);
-        pipe.updateUniformBufferCamera(datacam);
+        datacam.setProjParam(cam.near,cam.far);
+        datacam.setCameraMtxProj(cam.ProjMatrix);
+        datacam.setCameraMtxView(cam.WorldMatrix);
+        databasic.setScreenParam(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight);
+        pipe.submitShaderDataBasis();
 
         //this.shadowGathering(lights[0]);
 
@@ -278,10 +279,10 @@ export class PassShadowMap extends RenderPass{
         let glctx = pipe.GLCtx;
         let gl = glctx.gl;
 
-        let camdata = pipe.shaderDataCam;
-        camdata.setMtxView(mtx[0]);
-        camdata.setMtxProj(mtx[1]);
-        pipe.updateUniformBufferCamera(camdata);
+        let camdata = pipe.shaderDataBasis.camrea;;
+        camdata.setCameraMtxView(mtx[0]);
+        camdata.setCameraMtxProj(mtx[1]);
+        pipe.submitShaderDataBasis();
 
         gl.viewport(vp.x,vp.y,vp.z,vp.w);
         let objdata = pipe.shaderDataObj;
@@ -339,9 +340,9 @@ export class PassShadowMap extends RenderPass{
             gl.uniformBlockBinding(glp,indexSM,CLASS.UNIFORMINDEX_SHADOWMAP);
         }
 
-        let indexCam = blocks[ShaderFX.UNIFORM_CAM];
-        if(indexCam != null){
-            gl.uniformBlockBinding(glp,indexCam,CLASS.UNIFORMINDEX_CAM);
+        let indexBasis = blocks[ShaderFX.UNIFORM_BASIS];
+        if(indexBasis != null){
+            gl.uniformBlockBinding(glp,indexBasis,CLASS.UNIFORMINDEX_BASIS);
         }
 
         let indexObj = blocks[ShaderFX.UNIFORM_OBJ];

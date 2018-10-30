@@ -3,7 +3,7 @@ import { Scene } from "../Scene";
 import { RenderQueue, Shader, ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
 import { Material } from "../Material";
 import { Mesh, MeshTopology } from "../Mesh";
-import { ShaderDataUniformCam, ShaderDataUniformObj } from "../shaderfx/ShaderFXLibs";
+import { ShaderDataUniformObj } from "../shaderfx/ShaderFXLibs";
 import { mat4, vec3, glmath } from "wglut";
 import { MeshRender } from "../MeshRender";
 import { ShaderSource } from "../shaderfx/ShaderSource";
@@ -62,8 +62,8 @@ export class PassGizmos extends RenderPass{
         
 
         const CLASS = PipelineBase;
-        const NAME_CAM = ShaderDataUniformCam.UNIFORM_CAM;
-        const NAME_OBJ = ShaderDataUniformObj.UNIFORM_OBJ;
+        const NAME_BASIS = ShaderFX.UNIFORM_BASIS;
+        const NAME_OBJ = ShaderFX.UNIFORM_OBJ;
 
         const pipeline = this.pipeline;
         const gl = pipeline.GL;
@@ -77,8 +77,8 @@ export class PassGizmos extends RenderPass{
         gl.useProgram(program.Program);
 
         const ublock = program.UniformBlock;
-        let indexCam = ublock[NAME_CAM];
-        if (indexCam != null) gl.uniformBlockBinding(glp, indexCam, CLASS.UNIFORMINDEX_CAM);
+        let indexCam = ublock[NAME_BASIS];
+        if (indexCam != null) gl.uniformBlockBinding(glp, indexCam, CLASS.UNIFORMINDEX_BASIS);
         let indexObj = ublock[NAME_OBJ];
         if (indexObj != null) gl.uniformBlockBinding(glp, indexObj, CLASS.UNIFORMINDEX_OBJ);
 

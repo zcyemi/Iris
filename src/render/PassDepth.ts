@@ -3,9 +3,10 @@ import { ShaderTags, Comparison, CullingMode, Shader } from "../shaderfx/Shader"
 import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
 import { GLProgram, vec3, glmath } from "wglut";
-import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
+import { ShaderDataUniformObj, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { BufferDebugInfo } from "./BufferDebugInfo";
 import { RenderPass } from "./RenderPass";
+import { ShaderFX } from "../shaderfx/ShaderFX";
 
 /**
  * Pre-rendering Depth Pass
@@ -44,9 +45,9 @@ export class PassDepth extends RenderPass{
         const glctx = pipe.GLCtx;
         const deftags = this.m_tags;
 
-        const NAME_CAM = ShaderDataUniformCam.UNIFORM_CAM;
-        const NAME_OBJ = ShaderDataUniformObj.UNIFORM_OBJ;
-        const NAME_LIGHT = ShaderDataUniformLight.UNIFORM_LIGHT;
+        const NAME_BASIS = ShaderFX.UNIFORM_BASIS;
+        const NAME_OBJ = ShaderFX.UNIFORM_OBJ;
+        const NAME_LIGHT = ShaderFX.UNIFORM_LIGHT;
 
         let cam = scene.camera;
 
@@ -58,13 +59,14 @@ export class PassDepth extends RenderPass{
         gl.colorMask(false,false,false,false);
 
         //cam
-        let datacam = pipe.shaderDataCam;
-        datacam.setMtxProj(cam.ProjMatrix);
-        datacam.setMtxView(cam.WorldMatrix);
+        let databasis = pipe.shaderDataBasis;
+        let datacam = databasis.camrea;
+        datacam.setCameraMtxProj(cam.ProjMatrix);
+        datacam.setCameraMtxView(cam.WorldMatrix);
         datacam.setCameraPos(cam.transform.position);
-        datacam.setScreenSize(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight);
-        datacam.setClipPlane(cam.near,cam.far);
-        pipe.updateUniformBufferCamera(datacam);
+        databasis.basic.setScreenParam(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight);
+        datacam.setProjParam(cam.near,cam.far);
+        pipe.submitShaderDataBasis();
 
         //state
         let state =pipe.stateCache;
@@ -81,8 +83,8 @@ export class PassDepth extends RenderPass{
         gl.useProgram(this.m_program.Program);
 
         let ublock = program.UniformBlock;
-        let indexCam = ublock[NAME_CAM];
-        gl.uniformBlockBinding(glp, indexCam, CLASS.UNIFORMINDEX_CAM);
+        let indexCam = ublock[NAME_BASIS];
+        gl.uniformBlockBinding(glp, indexCam, CLASS.UNIFORMINDEX_BASIS);
         let indexObj = ublock[NAME_OBJ];
         gl.uniformBlockBinding(glp, indexObj, CLASS.UNIFORMINDEX_OBJ);
 

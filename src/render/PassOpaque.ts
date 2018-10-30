@@ -1,9 +1,8 @@
 import { PipelineBase } from "../pipeline/PipelineBase";
 import { ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
-import { MeshRender } from "../MeshRender";
 import { GLProgram } from "wglut";
-import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
+import { ShaderDataUniformObj, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { ShaderFX } from "../shaderfx/ShaderFX";
 import { RenderPass } from "./RenderPass";
 
@@ -44,9 +43,9 @@ export class PassOpaque extends RenderPass{
         const glctx = pipe.GLCtx;
         const deftags = this.m_tags;
 
-        const NAME_CAM = ShaderDataUniformCam.UNIFORM_CAM;
-        const NAME_OBJ = ShaderDataUniformObj.UNIFORM_OBJ;
-        const NAME_LIGHT = ShaderDataUniformLight.UNIFORM_LIGHT;
+        const NAME_BASIS = ShaderFX.UNIFORM_BASIS;
+        const NAME_OBJ = ShaderFX.UNIFORM_OBJ;
+        const NAME_LIGHT = ShaderFX.UNIFORM_LIGHT;
         const NAME_SM = ShaderFX.UNIFORM_SHADOWMAP;
 
         let cam = scene.camera;
@@ -57,13 +56,14 @@ export class PassOpaque extends RenderPass{
        
 
         //cam
-        let datacam = pipe.shaderDataCam;
-        datacam.setMtxProj(cam.ProjMatrix);
-        datacam.setMtxView(cam.WorldMatrix);
+        let datacam = pipe.shaderDataBasis.camrea;
+        datacam.setCameraMtxProj(cam.ProjMatrix);
+        datacam.setCameraMtxView(cam.WorldMatrix);
         datacam.setCameraPos(cam.transform.position);
-        datacam.setScreenSize(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight);
-        datacam.setClipPlane(cam.near,cam.far);
-        pipe.updateUniformBufferCamera(datacam);
+        let databasic = pipe.shaderDataBasis.basic;
+        databasic.setScreenParam(pipe.mainFrameBufferWidth,pipe.mainFrameBufferHeight);
+        datacam.setProjParam(cam.near,cam.far);
+        pipe.submitShaderDataBasis();
 
         //light
         let light = scene.lights[0];

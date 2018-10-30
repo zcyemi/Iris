@@ -1,6 +1,6 @@
 import { GLContext, GLFrameBuffer, GLProgram, mat4, quat } from "wglut";
 import { Scene } from "../Scene";
-import { ShaderDataUniformCam, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
+import { ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight, FXDataBasis } from "../shaderfx/ShaderFXLibs";
 import { GraphicsRenderCreateInfo, GraphicsRender } from "../GraphicsRender";
 import { RenderNodeList } from "../RenderNodeList";
 import { BufferDebugInfo } from "../render/BufferDebugInfo";
@@ -20,7 +20,7 @@ import { Camera } from "../Camera";
 export class PipelineBase implements IRenderPipeline {
 
     public static readonly UNIFORMINDEX_OBJ: number = 0;
-    public static readonly UNIFORMINDEX_CAM: number = 1;
+    public static readonly UNIFORMINDEX_BASIS: number = 1;
     public static readonly UNIFORMINDEX_SHADOWMAP: number = 2;
     public static readonly UNIFORMINDEX_LIGHT: number = 3;
 
@@ -52,18 +52,20 @@ export class PipelineBase implements IRenderPipeline {
         return this.m_mainDepthFB;
     }
 
+    private m_uniformBufferBasis: WebGLBuffer;
+
+
     private m_uniformBufferObj: WebGLBuffer;
-    private m_uniformBufferCamera: WebGLBuffer;
     private m_uniformBufferShadowMap: WebGLBuffer;
     private m_uniformBufferLight: WebGLBuffer;
 
-    private m_shaderDataCam: ShaderDataUniformCam;
+    private m_shaderDataBasis: FXDataBasis;
     private m_shaderDataObj: ShaderDataUniformObj;
     private m_shaderDataShadowMap: ShaderDataUniformShadowMap;
     private m_shaderDataLight: ShaderDataUniformLight;
 
-    public get shaderDataCam(): ShaderDataUniformCam {
-        return this.m_shaderDataCam;
+    public get shaderDataBasis(): FXDataBasis {
+        return this.m_shaderDataBasis;
     }
     public get shaderDataObj(): ShaderDataUniformObj {
         return this.m_shaderDataObj;
@@ -147,25 +149,25 @@ export class PipelineBase implements IRenderPipeline {
             this.m_shaderDataObj = data;
             let buffer = gl.createBuffer();
             gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-            gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+            gl.bufferData(gl.UNIFORM_BUFFER, data.fxbuffer.raw, gl.DYNAMIC_DRAW);
             gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_OBJ, buffer);
             this.m_uniformBufferObj = buffer;
         }
-        if (this.m_uniformBufferCamera == null) {
-            let data = new ShaderDataUniformCam();
-            this.m_shaderDataCam = data;
+        if (this.m_uniformBufferBasis == null) {
+            let data = new FXDataBasis();
+            this.m_shaderDataBasis = data;
             let buffer = gl.createBuffer();
             gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-            gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
-            gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_CAM, buffer);
-            this.m_uniformBufferCamera = buffer;
+            gl.bufferData(gl.UNIFORM_BUFFER, data.fxbuffer.raw, gl.DYNAMIC_DRAW);
+            gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_BASIS, buffer);
+            this.m_uniformBufferBasis = buffer;
         }
         if (this.m_uniformBufferShadowMap == null) {
             let data = new ShaderDataUniformShadowMap();
             this.m_shaderDataShadowMap = data;
             let buffer = gl.createBuffer();
             gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-            gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+            gl.bufferData(gl.UNIFORM_BUFFER, data.fxbuffer.raw, gl.DYNAMIC_DRAW);
             gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_SHADOWMAP, buffer);
             this.m_uniformBufferShadowMap = buffer;
         }
@@ -174,7 +176,7 @@ export class PipelineBase implements IRenderPipeline {
             this.m_shaderDataLight = data;
             let buffer = gl.createBuffer();
             gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-            gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+            gl.bufferData(gl.UNIFORM_BUFFER, data.fxbuffer.raw, gl.DYNAMIC_DRAW);
             gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_LIGHT, buffer);
             this.m_uniformBufferLight = buffer;
         }
@@ -209,44 +211,39 @@ export class PipelineBase implements IRenderPipeline {
         this.glctx.drawTexFullscreen(this.m_mainFrameBuffer.colorTex0, false, false);
     }
 
-    public updateUniformCamera(camera:Camera){
-        const data = this.m_shaderDataCam;
+
+    public submitShaderDataBasis(){
+        const dataBasis = this.m_shaderDataBasis;
+        const gl = this.gl;
+        dataBasis.submitBuffer(gl,this.m_uniformBufferBasis);
+    }
+    public updateUniformCamera(camera:Camera,submit:boolean = false){
+        const data = this.m_shaderDataBasis.camrea;
         let ctrs = camera.transform;
         data.setCameraPos(ctrs.position);
-        data.setMtxProj(camera.ProjMatrix);
-        data.setMtxView(camera.WorldMatrix);
-        this.updateUniformBufferCamera(data);
-    }
+        data.setCameraMtxProj(camera.ProjMatrix);
+        data.setCameraMtxView(camera.WorldMatrix);
 
-    public updateUniformBufferCamera(data: ShaderDataUniformCam) {
-        const gl = this.gl;
-        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_uniformBufferCamera);
-        gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+        if(submit){
+            this.submitShaderDataBasis();
+        }
     }
-
     public updateUniformBufferObject(data: ShaderDataUniformObj) {
         const gl = this.gl;
-        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_uniformBufferObj);
-        gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+        data.submitBuffer(gl,this.m_uniformBufferObj);
     }
-
     public updateUniformBufferShadowMap(data: ShaderDataUniformShadowMap) {
         const gl = this.gl;
-        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_uniformBufferShadowMap);
-        gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+        data.submitBuffer(gl,this.m_uniformBufferShadowMap);
     }
-
     public updateUniformBufferLight(data: ShaderDataUniformLight) {
         const gl = this.gl;
-        gl.bindBuffer(gl.UNIFORM_BUFFER, this.m_uniformBufferLight);
-        gl.bufferData(gl.UNIFORM_BUFFER, data.rawBuffer, gl.DYNAMIC_DRAW);
+        data.submitBuffer(gl,this.m_uniformBufferLight);
     }
-
     public activeDefaultTexture() {
         const gl = this.gl;
         gl.activeTexture(gl.TEXTURE3);
         gl.bindTexture(gl.TEXTURE_2D, this.graphicRender.defaultTexture.rawtexture);
-
     }
 
     public addBufferDebugInfo(info: BufferDebugInfo) {
@@ -269,7 +266,6 @@ export class PipelineBase implements IRenderPipeline {
             this.m_mainFrameBufferBinded = true;
             forece = true;
         }
-
         if(this.m_mainFrameBufferResized || forece){
             this.gl.viewport(0, 0, mainfb.width, mainfb.height);
             this.m_mainFrameBufferResized = false;
@@ -312,12 +308,12 @@ export class PipelineBase implements IRenderPipeline {
 
     /**
      * Bind internal ShaderFX uniform block index to current program;
-     * UNIFORM_CAM, UNIFORM_OBJ, UNIFORM_LIGHT, UNIFORM_SM
+     * UNIFORM_BASIS, UNIFORM_OBJ, UNIFORM_LIGHT, UNIFORM_SM
      * @param program 
      */
     public uniformBindDefault(program: GLProgram) {
         const CLASS = PipelineBase;
-        const NAME_CAM = ShaderDataUniformCam.UNIFORM_CAM;
+        const NAME_BASIS = ShaderFX.UNIFORM_BASIS;
         const NAME_OBJ = ShaderDataUniformObj.UNIFORM_OBJ;
         const NAME_LIGHT = ShaderDataUniformLight.UNIFORM_LIGHT;
         const NAME_SM = ShaderFX.UNIFORM_SHADOWMAP;
@@ -325,8 +321,8 @@ export class PipelineBase implements IRenderPipeline {
         let ublock = program.UniformBlock;
         let glp = program.Program;
         //cam uniform buffer
-        let indexCam = ublock[NAME_CAM];
-        if (indexCam != null) gl.uniformBlockBinding(glp, indexCam, CLASS.UNIFORMINDEX_CAM);
+        let indexBasis = ublock[NAME_BASIS];
+        if (indexBasis != null) gl.uniformBlockBinding(glp, indexBasis, CLASS.UNIFORMINDEX_BASIS);
         //obj uniform buffer
         let indexObj = ublock[NAME_OBJ];
         if (indexObj != null) gl.uniformBlockBinding(glp, indexObj, CLASS.UNIFORMINDEX_OBJ);
@@ -421,12 +417,12 @@ export class PipelineBase implements IRenderPipeline {
         this.m_pipestateCache = null;
 
 
-        gl.deleteBuffer(this.m_uniformBufferCamera);
+        gl.deleteBuffer(this.m_uniformBufferBasis);
         gl.deleteBuffer(this.m_uniformBufferLight);
         gl.deleteBuffer(this.m_uniformBufferObj);
         gl.deleteBuffer(this.updateUniformBufferShadowMap);
 
-        this.m_uniformBufferCamera = null;
+        this.m_uniformBufferBasis = null;
         this.m_uniformBufferLight = null;
         this.m_uniformBufferObj= null;
         this.m_uniformBufferShadowMap = null;

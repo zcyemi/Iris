@@ -2,7 +2,7 @@ import { ShaderSource } from "./ShaderSource";
 import { ShaderFX, ShaderFile, ShaderInc } from "./ShaderFX";
 import { ShaderVariant } from "./ShaderVariant";
 import { mat4, GLContext, vec4, vec3 } from "wglut";
-import { ShaderDataArrayBuffer, ShaderDataFloat32Buffer } from "./ShaderBuffer";
+import { ShaderData, ShaderSubData } from "./ShaderBuffer";
 import { Shader } from "./Shader";
 
 export class ShaderFXLibs{
@@ -35,10 +35,6 @@ export class ShaderFXLibs{
     @ShaderFile("depth")
     public static SH_depth:ShaderSource;
 
-    @ShaderInc(ShaderFX.VARIANT_SHADERFX_OBJ)
-    public static SHADERFX_OBJ:ShaderVariant;
-    @ShaderInc(ShaderFX.VARIANT_SHADERFX_CAMERA)
-    public static SHADERFX_CAMERA:ShaderVariant;
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_BASIS)
     public static SHADERFX_BASIS:ShaderVariant;
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_LIGHT)
@@ -99,20 +95,10 @@ export class ShaderFXLibs{
     }
 
     public release(){
-
     }
 
     public reload(){
-        // for(let key in this){
-        //     let shader = this[key];
-        //     if(shader == null) continue;
-        //     if(shader instanceof Shader){
-        //         shader.release();
-        //         this[key] = null;
-        //     }
-        // }
     }
-
 
     public static readonly SH_PBR_BaseColorFactor:string = "uColor";
     public static readonly SH_PBR_BaseColorTexture:string = "uSampler";
@@ -122,141 +108,150 @@ export class ShaderFXLibs{
 
     public static readonly SH_PBR_EmissiveFactor:string = "uEmissive";
     public static readonly SH_PBR_EmissiveTexture:string = "uTexEmissive";
-    
 }
 
 /** Shader DataBuffer */
 
-export class ShaderDataUniformObj extends ShaderDataFloat32Buffer{
+export class ShaderDataUniformObj extends ShaderData{
     public static readonly UNIFORM_OBJ:string = "UNIFORM_OBJ";
-
     public constructor(){
-        let buffersize = 16;
+        let buffersize = 16*4;
         super(buffersize);
     }
-
     public setMtxModel(mtx:mat4){
-        this.setMat4(0,mtx);
+        this.buffer.setMat4(0,mtx);
     }
 }
 
-export class ShaderDataUniformCam extends ShaderDataFloat32Buffer{
-    public static readonly UNIFORM_CAM:string = "UNIFORM_CAM";
-
-
-    public constructor(){
-        let buffersize = 16*4 *2 + 16 + 16 + 16;
-        super(buffersize);
-    }
-
-    public setMtxView(mtx:mat4){
-        this.setMat4(0,mtx);
-    }
-    public setMtxProj(mtx:mat4){
-        this.setMat4(16,mtx);
-    }
-
-    public setCameraPos(pos:vec3){
-        this.setVec4(32,pos.vec4(1));
-    }
-
-    public setClipPlane(near:number,far:number){
-        this.setFloat(36,near);
-        this.setFloat(37,far);
-        this.setFloat(38,1.0/near);
-        this.setFloat(39,1.0/far);
-    }
-
-    public setScreenSize(width:number,height:number){
-        this.setFloat(40,width);
-        this.setFloat(41,height);
-        this.setFloat(42,1.0/width);
-        this.setFloat(43,1.0/height);
-    }
-    
-}
-
-export class ShaderDataUniformLight extends ShaderDataFloat32Buffer{
-    public static readonly UNIFORM_LIGHT:string = "LIGHT";
-
+export class ShaderDataUniformLight extends ShaderData{
+    public static readonly UNIFORM_LIGHT:string = "UNIFORM_LIGHT";
     public constructor (){
-        let buffersize = 8 *4+ 4;
+        let buffersize = (8 *4+ 4) *4;
         super(buffersize);
     }
-
     public setLightData(pos:vec3,type:number,index:number){
-        let offset = index * 8;
-        this.setVec3(offset,pos);
-        this.setFloat(offset+3,type);
+        let offset = index * 32;
+        const buffer = this.buffer;
+        buffer.setVec3(offset,pos);
+        buffer.setFloat(offset+12,type);
     }
-
     public setLightColorIntensity(col:vec3,intensity:number,index:number){
-        let offset = index * 8;
-        this.setVec3(offset+4,col);
-        this.setFloat(offset+7,intensity);
+        let offset = index * 32 + 16;
+        const buffer = this.buffer;
+        buffer.setVec3(offset,col);
+        buffer.setFloat(offset+12,intensity);
     }
-
     public setAmbientColor(ambient:vec4){
-        this.setVec4(32,ambient);
+        this.buffer.setVec4(128,ambient);
     }
-
 }
 
-export class ShaderDataUniformShadowMap extends ShaderDataArrayBuffer{
-
+export class ShaderDataUniformShadowMap extends ShaderData{
     public constructor(){
         let buffersize = 16 *4 *4 + 4;
         super(buffersize);
     }
     public setLightMtx(mtx:mat4,index:number){
-        this.setMat4(index *16 *4,mtx);
+        this.buffer.setMat4(index *64,mtx);
     }
-    
     public setShadowDistance(dist:null){
-
     }
-
     public setCascadeCount(count:number){
-
     }
 }
 
-export class ShaderFXBasis{
-    
-    private screenparam:vec4;
-    private time:vec4;
+export class FXDataBasis extends ShaderData{
+    public readonly basic:FXDataBasic;
+    public readonly camrea:FXDataCamera;
+    public readonly ambientfog:FXDataAmbientAndFog;
+    public constructor(){
+        super(32 + 224 + 48);
+        this.basic = new FXDataBasic(this);
+        this.camrea = new FXDataCamera(this);
+        this.ambientfog = new FXDataAmbientAndFog(this);
+    }
+    public updateDataBasic(data:FXDataBasic){
+        if(data.isSeperated){
+            this.buffer.setOfSubData(data);
+            data.setDirty = false;
+        }
+    }
+    public updateDataCamera(data:FXDataCamera){
+        if(data.isSeperated){
+            this.buffer.setOfSubData(data);
+            data.setDirty = false;
+        }
+    }
+    public updateDateAmbeintFog(data:FXDataAmbientAndFog){
+        if(data.isSeperated){
+            this.buffer.setOfSubData(data);
+            data.setDirty = false;
+        }
+    }
 }
 
-export class ShaderFXAmbientFog{
-    private ambientcolor:vec4;
-    private fogcolor:vec4;
-    private fogparam:vec4;
+export class FXDataBasic extends ShaderSubData{
+    //[0,16] vec4 _screenparam_
+    //[16,32] highp vec4 _time_
+    public constructor(data?:ShaderData){
+        super(data,32,0);
+    }
+    public setScreenParam(width:number,height:number){
+        this.view.setVec4(0,new vec4([width,height,1.0/width,1.0/height]));
+    }
+    public setTime(t:number,ts:number){
+        this.view.setVec4(16,new vec4([t,ts,Math.sin(t),Math.cos(t)]));
+    }
 }
 
-export class ShaderFXCamera{
-    private projparam:vec4;
-    private pos:vec4;
-    private mtxview:mat4;
-    private mtxproj:mat4;
-    private mtxinvproj:mat4;
-}
+export class FXDataCamera extends ShaderSubData{
+    //[0,16] vec4 _camera_projparam_;
+    //[16,32] vec4 _camera_pos_;
+    //[32,96] mat4 _camera_mtx_view_;
+    //[96,160] mat4 _camera_mtx_proj_;
+    //[160,224] mat4 _camera_mtx_invproj_;
 
-
-export class ShaderFXDataBuffer{
-    
-    private m_datadirty = false;
-
-    private m_updateall:boolean = false;
-    private m_offsetmin:number;
-    private m_offsetmax:number;
-
-    public submitChanges(gl:WebGL2RenderingContext,buffer:WebGLBuffer){
-        if(!this.m_datadirty) return;
-
-        if(this.m_updateall){
-            gl.bufferData(gl.UNIFORM_BUFFER,null,gl.DYNAMIC_DRAW);
+    public constructor(data?:ShaderData){
+        super(data,224,32);
+    }
+    public setProjParam(near:number,far:number){
+        this.view.setVec4(0,new vec4([near,far,1.0/near,1.0/far]));
+    }
+    public setCameraPos(pos:vec3){
+        this.view.setVec3(16,pos);
+    }
+    public setCameraMtxView(view:mat4){
+        this.view.setMat4(32,view);
+    }
+    public setCameraMtxProj(proj:mat4,invproj?:mat4){
+        const view = this.view;
+        view.setMat4(96,proj);
+        if(invproj == null){
+            view.setMat4(160,proj.inverse());
         }
         else{
+            view.setMat4(160,invproj);
         }
+    }
+}
+
+/**
+ * 
+ */
+export class FXDataAmbientAndFog extends ShaderSubData{
+    //[0,16] lowp vec4 _ambientcolor_;
+    //[16,32] vec4 _fogcolor_;
+    //[32,48] vec4 _fogparam_;
+    public constructor(data?:ShaderData){
+        super(data,48,256);
+    }
+    public setAmbientColor(col:vec4){
+        this.view.setVec4(0,col);
+    }
+    public setFogColor(col:vec4){
+        this.view.setVec4(16,col);
+    }
+    public setFogParam(param:vec4){
+        this.view.setVec4(32,param);
     }
 }
