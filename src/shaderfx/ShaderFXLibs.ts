@@ -170,29 +170,29 @@ export class ShaderDataUniformShadowMap extends ShaderData{
     }
 }
 
-export class FXDataBasis extends ShaderData{
-    public readonly basic:FXDataBasic;
-    public readonly camrea:FXDataCamera;
-    public readonly ambientfog:FXDataAmbientAndFog;
+export class ShaderDataBasis extends ShaderData{
+    public readonly render:ShaderDataRender;
+    public readonly camrea:ShaderDataCamera;
+    public readonly ambientfog:ShaderDataAmbientFog;
     public constructor(){
         super(32 + 224 + 48);
-        this.basic = new FXDataBasic(this);
-        this.camrea = new FXDataCamera(this);
-        this.ambientfog = new FXDataAmbientAndFog(this);
+        this.render = new ShaderDataRender(this);
+        this.camrea = new ShaderDataCamera(this);
+        this.ambientfog = new ShaderDataAmbientFog(this);
     }
-    public updateDataBasic(data:FXDataBasic){
+    public updateDataBasic(data:ShaderDataRender){
         if(data.isSeperated){
             this.buffer.setOfSubData(data);
             data.setDirty = false;
         }
     }
-    public updateDataCamera(data:FXDataCamera){
+    public updateDataCamera(data:ShaderDataCamera){
         if(data.isSeperated){
             this.buffer.setOfSubData(data);
             data.setDirty = false;
         }
     }
-    public updateDateAmbeintFog(data:FXDataAmbientAndFog){
+    public updateDateAmbeintFog(data:ShaderDataAmbientFog){
         if(data.isSeperated){
             this.buffer.setOfSubData(data);
             data.setDirty = false;
@@ -208,7 +208,7 @@ export class FXDataBasis extends ShaderData{
     }
 }
 
-export class FXDataBasic extends ShaderSubData{
+export class ShaderDataRender extends ShaderSubData{
     //[0,16] vec4 _screenparam_
     //[16,32] highp vec4 _time_
     public constructor(data?:ShaderData){
@@ -222,7 +222,7 @@ export class FXDataBasic extends ShaderSubData{
     }
 }
 
-export class FXDataCamera extends ShaderSubData{
+export class ShaderDataCamera extends ShaderSubData{
     //[0,16] vec4 _camera_pos_;
     //[16,80] mat4 _camera_mtx_view_;
     //[80,96] vec4 _camera_projparam_;
@@ -256,7 +256,7 @@ export class FXDataCamera extends ShaderSubData{
 /**
  * 
  */
-export class FXDataAmbientAndFog extends ShaderSubData{
+export class ShaderDataAmbientFog extends ShaderSubData{
     //[0,16] lowp vec4 _ambientcolor_;
     //[16,32] vec4 _fogcolor_;
     //[32,48] vec4 _fogparam_;

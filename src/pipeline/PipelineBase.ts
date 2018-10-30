@@ -1,6 +1,6 @@
 import { GLContext, GLFrameBuffer, GLProgram, mat4, quat } from "wglut";
 import { Scene } from "../Scene";
-import { ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight, FXDataBasis } from "../shaderfx/ShaderFXLibs";
+import { ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight, ShaderDataBasis } from "../shaderfx/ShaderFXLibs";
 import { GraphicsRenderCreateInfo, GraphicsRender } from "../GraphicsRender";
 import { RenderNodeList } from "../RenderNodeList";
 import { BufferDebugInfo } from "../render/BufferDebugInfo";
@@ -60,12 +60,12 @@ export class PipelineBase implements IRenderPipeline {
     private m_uniformBufferShadowMap: WebGLBuffer;
     private m_uniformBufferLight: WebGLBuffer;
 
-    private m_shaderDataBasis: FXDataBasis;
+    private m_shaderDataBasis: ShaderDataBasis;
     private m_shaderDataObj: ShaderDataUniformObj;
     private m_shaderDataShadowMap: ShaderDataUniformShadowMap;
     private m_shaderDataLight: ShaderDataUniformLight;
 
-    public get shaderDataBasis(): FXDataBasis {
+    public get shaderDataBasis(): ShaderDataBasis {
         return this.m_shaderDataBasis;
     }
     public get shaderDataObj(): ShaderDataUniformObj {
@@ -158,7 +158,7 @@ export class PipelineBase implements IRenderPipeline {
             this.m_uniformBufferObj = buffer;
         }
         if (this.m_uniformBufferBasis == null) {
-            let data = new FXDataBasis();
+            let data = new ShaderDataBasis();
             this.m_shaderDataBasis = data;
             let buffer = gl.createBuffer();
             gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
@@ -219,7 +219,7 @@ export class PipelineBase implements IRenderPipeline {
         const grender = this.graphicRender;
         const databasis = this.m_shaderDataBasis;
         
-        const databasic = databasis.basic;
+        const databasic = databasis.render;
         databasic.setTime(grender.time,this.graphicRender.deltaTime);
         if(this.m_shaderDataScreenResized){
             databasic.setScreenParam(this.mainFrameBufferWidth,this.mainFrameBufferHeight);
