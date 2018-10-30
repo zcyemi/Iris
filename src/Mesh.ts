@@ -55,9 +55,27 @@ export class MeshVertexDesc{
 }
 
 export class MeshIndicesDesc{
-    public indices: MeshVertexAttrDesc;
     public topology: MeshTopology;
     public indiceCount:number = 0;
+    public type:GLDataType;
+    public totalbytes:number;
+    public offset:number;
+
+    public constructor(topology:MeshTopology = MeshTopology.Triangles,indices:number = 0,type:GLDataType = GL.UNSIGNED_SHORT,offset:number = 0){
+        this.topology = topology;
+        this.indiceCount = indices;
+        this.type= type;
+        this.offset = offset;
+        this.totalbytes = indices *MeshBufferUtility.TypeSize(type);
+    }
+
+    public set(topology:MeshTopology = MeshTopology.Triangles,indices:number = 0,type:GLDataType = GL.UNSIGNED_SHORT,offset:number = 0){
+        this.topology = topology;
+        this.indiceCount = indices;
+        this.type= type;
+        this.offset = offset;
+        this.totalbytes = indices *MeshBufferUtility.TypeSize(type);
+    }
 }
 
 export type MeshDataBufferIndices = Uint16Array | Uint32Array | Uint8Array;
@@ -112,9 +130,13 @@ export class Mesh{
 
     public setIndices(data:MeshDataBufferIndices,type:GLDataType,mode:MeshTopology){
         this.m_dataIndices = data;
-        this.indiceDesc.indiceCount =data.length;
-        this.indiceDesc.topology = mode;
-        this.indiceDesc.indices = new MeshVertexAttrDesc(type,1,data.byteLength,0);
+        
+        let inddesc = this.indiceDesc;
+        inddesc.indiceCount =data.length;
+        inddesc.topology = mode;
+        inddesc.offset = 0;
+        inddesc.type = type;
+        inddesc.totalbytes = data.byteLength;
     }
 
     public static get Quad():Mesh{
@@ -146,10 +168,7 @@ export class Mesh{
         let vertexdesc = quad.vertexDesc;
         vertexdesc.position= new MeshVertexAttrDesc(GL.FLOAT,4,dataPosition.length*4);
         vertexdesc.uv = new MeshVertexAttrDesc(GL.FLOAT,2,dataUV.length*4);
-        let indicedesc = quad.indiceDesc;
-        indicedesc.topology = MeshTopology.Triangles;
-        indicedesc.indices = new MeshVertexAttrDesc(GL.UNSIGNED_SHORT,1,dataIndices.byteLength,0);
-        indicedesc.indiceCount = dataIndices.length;
+        quad.indiceDesc.set(MeshTopology.Triangles,dataIndices.length,GL.UNSIGNED_SHORT,0);
 
         quad.calculateNormal();
         return quad;
@@ -232,11 +251,7 @@ export class Mesh{
         vertexdesc.position= new MeshVertexAttrDesc(GL.FLOAT,4,dataposition.byteLength);
         vertexdesc.normal= new MeshVertexAttrDesc(GL.FLOAT,4,dataposition.byteLength);
         vertexdesc.uv= new MeshVertexAttrDesc(GL.FLOAT,2,datauv.byteLength);
-
-        let indicesdesc = sphere.indiceDesc;
-        indicesdesc.topology = MeshTopology.Triangles;
-        indicesdesc.indices = new MeshVertexAttrDesc(GL.UNSIGNED_SHORT,1,dataindices.byteLength,0);
-        indicesdesc.indiceCount = indices.length;
+        sphere.indiceDesc.set(MeshTopology.Triangles,indices.length,GL.UNSIGNED_SHORT,0);
 
         return sphere;
     }
@@ -298,10 +313,7 @@ export class Mesh{
         vertexdesc.position = new MeshVertexAttrDesc(GL.FLOAT,4,dataPosition.length *4);
         vertexdesc.uv = new MeshVertexAttrDesc(GL.FLOAT,2,dataUV.length*4);
 
-        let indicedesc = cube.indiceDesc;
-        indicedesc.topology = MeshTopology.Triangles;
-        indicedesc.indices = new MeshVertexAttrDesc(GL.UNSIGNED_SHORT,1,dataIndices.length *2,0);
-        indicedesc.indiceCount = dataIndices.length;
+        cube.indiceDesc.set(MeshTopology.Triangles,dataIndices.length,GL.UNSIGNED_SHORT,0);
 
         cube.calculateNormal();
         return cube;

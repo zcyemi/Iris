@@ -90,7 +90,7 @@ export class PassDepth extends RenderPass{
 
             gl.bindVertexArray(node.vertexArrayObj);
             let indicedesc = mesh.indiceDesc;
-            gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.indices.type, 0);
+            gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
             gl.bindVertexArray(null);
 
             mat.clean(gl);

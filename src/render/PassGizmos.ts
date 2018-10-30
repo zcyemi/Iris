@@ -89,7 +89,7 @@ export class PassGizmos extends RenderPass{
         gl.bindVertexArray(this.m_vao);
 
         const indiceDesc= mesh.indiceDesc;
-        gl.drawElements(indiceDesc.topology,indiceDesc.indiceCount,indiceDesc.indices.type,0);
+        gl.drawElements(indiceDesc.topology,indiceDesc.indiceCount,indiceDesc.type,indiceDesc.offset);
         gl.bindVertexArray(null);
 
     }

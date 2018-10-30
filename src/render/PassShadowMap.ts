@@ -279,7 +279,7 @@ export class PassShadowMap extends RenderPass{
 
             gl.bindVertexArray(node.vertexArrayObj);
             let indicesDesc = mesh.indiceDesc;
-            gl.drawElements(indicesDesc.topology,indicesDesc.indiceCount,indicesDesc.indices.type,0);
+            gl.drawElements(indicesDesc.topology,indicesDesc.indiceCount,indicesDesc.type,indicesDesc.offset);
             gl.bindVertexArray(null);
         }
     }
@@ -334,7 +334,7 @@ export class PassShadowMap extends RenderPass{
         gl.bindVertexArray(vao);
 
         let indices = mesh.indiceDesc;
-        gl.drawElements(gl.TRIANGLES,indices.indiceCount,indices.indices.type,0);
+        gl.drawElements(gl.TRIANGLES,indices.indiceCount,indices.type,indices.offset);
         gl.bindVertexArray(null);
 
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
