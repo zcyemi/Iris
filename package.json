@@ -19,6 +19,7 @@
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.11.4",
     "@types/webgl2": "0.0.4",
+    "assemblyscript": "github:AssemblyScript/assemblyscript",
     "browser-sync": "^2.24.7",
     "chai": "^4.2.0",
     "gulp": "^3.9.1",
