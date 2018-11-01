@@ -1,5 +1,5 @@
 import * as chai from 'chai';
-import { vec3, vec4, quat } from 'wglut'
+import { vec3, vec4, quat, mat4 } from 'wglut'
 const expect = chai.expect;
 
 export function pairwise(src:Array<any>,f:(s:any,t:any)=>void,dest:Array<any>){
@@ -13,6 +13,10 @@ export function expectPair(src:Array<any>,dest:Array<any>,torenlance:number = 0.
     pairwise(src,(s,t)=>{
         expect(s).closeTo(t,torenlance);
     },dest);
+}
+
+export function expectMat4(src:mat4,dst:mat4,torenlance:number = 0.001){
+    expectPair(src.raw,dst.raw,torenlance);
 }
 
 export function expectVec3(v1:vec3,v2:vec3,torenlance:number = 0.001){

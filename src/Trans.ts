@@ -22,6 +22,8 @@ export class Trans{
     private m_worldMtxDirty:boolean= false;
 
     private m_worldScaleDirty:boolean = false;
+    private m_worldPosDirty:boolean = false;
+    private m_worldRotaDirty:boolean = false;
 
     private m_up:vec3;
     private m_right:vec3;
@@ -44,10 +46,15 @@ export class Trans{
     public get localScale():vec3{ return this.m_localScale;}
     
     public get worldPosition():vec3{
-        if(this.m_worldScaleDirty)this.updateWorldMatrix(false,true);
+        if(this.m_worldPosDirty)this.updateWorldMatrix(false,true);
         return this.m_worldpos;
     }
-    public get worldRotation():quat{return this.m_worldRotation;}
+    public get worldRotation():quat{
+        if(this.m_worldRotaDirty){
+            this.updateWorldMatrix(false,true);
+        }
+        return this.m_worldRotation;
+    }
     public get worldScale():vec3{
         if(this.m_worldScaleDirty)this.updateWorldMatrix(false,true);
         return this.m_worldScale;
@@ -103,6 +110,7 @@ export class Trans{
             this.m_localMtxDirty = true;
             this.m_locaLTRSDirty = true;
             this.m_worldMtxDirty = true;
+            this.m_worldPosDirty = true;
         }
     }
 
@@ -138,6 +146,8 @@ export class Trans{
             this.m_localRotation.set(q);
             this.m_localMtxDirty = true;
             this.m_locaLTRSDirty = true;
+            this.m_worldMtxDirty = true;
+            this.m_worldRotaDirty = true;
         }
     }
 
@@ -149,7 +159,13 @@ export class Trans{
 
     private updateWorldMtx(){
         if(this.m_worldMtxDirty){
-            this.m_worldMtx.set(this.parentWorldMtx.mul(this.localMtx));
+            let p = this.parent;
+            if(p == null){
+                this.m_worldMtx.set(this.localMtx);
+            }
+            else{
+                this.m_worldMtx = p.worldMtx.mul(this.localMtx);
+            }
             this.m_worldMtxDirty = false;
         }
     }
@@ -165,13 +181,14 @@ export class Trans{
                 this.m_worldScale.set(this.m_localScale);
             }
             else{
-                this.m_worldMtx.set(p.worldMtx.mul(this.localMtx));
-                [this.m_worldpos,this.m_worldRotation,this.m_worldScale] = mat4.Decompose(this.m_worldMtx);
+                let wmtx = p.worldMtx.mul(this.localMtx);
+                this.m_worldMtx.set(wmtx);
+                [this.m_worldpos,this.m_worldRotation,this.m_worldScale] = mat4.Decompose(wmtx);
             }
 
             this.m_worldScaleDirty = false;
-        }
-        else{
+            this.m_worldPosDirty = false;
+            this.m_worldRotaDirty = false;
 
         }
 
@@ -186,6 +203,11 @@ export class Trans{
         if(index < 0) return false;
 
         trs.m_parent = null;
+        trs.m_worldMtxDirty = true;
+        trs.m_worldPosDirty = true;
+        trs.m_worldRotaDirty = true;
+        trs.m_worldScaleDirty = true;
+
         children.splice(index,1);
         return true;
     }
@@ -200,6 +222,11 @@ export class Trans{
         let index = children.indexOf(trs);
         if(index >=0) return true;
         trs.m_parent= this;
+        trs.m_worldMtxDirty = true;
+        trs.m_worldPosDirty = true;
+        trs.m_worldRotaDirty = true;
+        trs.m_worldScaleDirty = true;
+
         children.push(trs);
         return true;
     }
