@@ -19,10 +19,18 @@ export class Trans{
     private m_worldScale:vec3 = vec3.one;
     private m_worldMtx:mat4 = mat4.Identity;
     private m_worldMtxInv:mat4;
+
+    /**
+     * mark for any values changed of world.TRS
+     */
     private m_worldMtxDirty:boolean= false;
 
-    private m_worldScaleDirty:boolean = false;
+    /**
+     * This mark set to true when worldPosition changed.
+     * For setting local/world position, accessing worldPosition should not invoke @function <updateWorldMatrix> .
+     */
     private m_worldPosDirty:boolean = false;
+    private m_worldScaleDirty:boolean = false;
     private m_worldRotaDirty:boolean = false;
 
     private m_up:vec3;
@@ -46,17 +54,17 @@ export class Trans{
     public get localScale():vec3{ return this.m_localScale;}
     
     public get worldPosition():vec3{
-        if(this.m_worldPosDirty)this.updateWorldMatrix(false,true);
+        if(this.m_worldPosDirty)this.updateWorldMatrix(false);
         return this.m_worldpos;
     }
     public get worldRotation():quat{
         if(this.m_worldRotaDirty){
-            this.updateWorldMatrix(false,true);
+            this.updateWorldMatrix(false);
         }
         return this.m_worldRotation;
     }
     public get worldScale():vec3{
-        if(this.m_worldScaleDirty)this.updateWorldMatrix(false,true);
+        if(this.m_worldScaleDirty)this.updateWorldMatrix(false);
         return this.m_worldScale;
     }
     public get worldMtx():mat4{
@@ -170,7 +178,7 @@ export class Trans{
         }
     }
 
-    public updateWorldMatrix(pwmtxDirty:boolean,decompose:boolean = true){
+    public updateWorldMatrix(pwmtxDirty:boolean){
         let needUpdate = this.m_locaLTRSDirty || pwmtxDirty;
         if(needUpdate){
             let p = this.m_parent;
@@ -183,7 +191,16 @@ export class Trans{
             else{
                 let wmtx = p.worldMtx.mul(this.localMtx);
                 this.m_worldMtx.set(wmtx);
-                [this.m_worldpos,this.m_worldRotation,this.m_worldScale] = mat4.Decompose(wmtx);
+
+                if(!this.m_worldScaleDirty){
+                    [this.m_worldpos,this.m_worldRotation] = mat4.DecomposeTR(wmtx,this.m_worldScale);
+                }
+                else{
+
+                    console.log(wmtx);
+                    [this.m_worldpos,this.m_worldRotation,this.m_worldScale] = mat4.Decompose(wmtx);
+                    console.log(this.m_worldRotation.magnitude());
+                }
             }
 
             this.m_worldScaleDirty = false;

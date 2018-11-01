@@ -178,24 +178,24 @@ describe("Transform", () => {
         expectMat4(tc.worldMtx,tc.localMtx);
     })
 
-    // it("local-world-rotation", () => {
-    //     let tp = new Trans();
-    //     let tc = new Trans();
-    //     tc.parent = tp;
+    it("local-world-rotation", () => {
+        let tp = new Trans();
+        let tc = new Trans();
+        tc.parent = tp;
 
-    //     let rotac = quat.fromEulerDeg(30, 20, 70);
-    //     let rotap = quat.fromEulerDeg(-30, 20, 70);
+        let rotac = quat.fromEulerDeg(30, 20, 70);
+        let rotap = quat.fromEulerDeg(-30, 20, 70);
 
-    //     //tp.setPosition(vec3.Random());
-    //     //let s = new vec3([0.4093266829772244,-0.2521217534790319,-0.020216660723659352]);
-    //     tp.setScale(glmath.vec3(1,2,1));
-    //     tp.setRotation(rotap);
-    //     tc.setRotation(rotac, false);
+        tp.setPosition(vec3.Random());
+        tp.setScale(glmath.vec3(1,2,1));
+        tp.setRotation(rotap);
 
-    //     let dir = vec3.up;
-    //     let dirRota = tc.worldRotation.rota(dir.mulToRef(tc.worldScale)).normalize;
+        tc.setRotation(rotac, false);
 
-    //     let dirRotaVerify = tp.worldMtx.mul(tc.localMtx).mulvec(dir.vec4(0)).vec3().normalize;
-    // })
+        
+        console.log(tc.worldRotation.magnitude());
+
+
+    })
 
 });
