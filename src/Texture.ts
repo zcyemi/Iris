@@ -103,10 +103,10 @@ export class Texture {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, desc.min_filter);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, desc.wrap_s);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, desc.wrap_t);
-        gl.bindTexture(gl.TEXTURE_2D, null);
         if (desc.mipmap) {
             gl.generateMipmap(gl.TEXTURE_2D);
         }
+        gl.bindTexture(gl.TEXTURE_2D, null);
 
         this.m_raw = tex;
         this.m_width = width;
