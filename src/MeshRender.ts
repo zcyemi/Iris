@@ -61,36 +61,69 @@ export class MeshRender{
         let vao = gl.createVertexArray();
         gl.bindVertexArray(vao);
 
-
-        gl.bindBuffer(gl.ARRAY_BUFFER,mesh.bufferVertices);
-        if(vertdesc.position !=null){
-            let aPos = attrs[ShaderFX.ATTR_aPosition];
-            if(aPos !=null){
-                let posdesc = vertdesc.position;
-                gl.vertexAttribPointer(aPos,posdesc.size,gl.FLOAT,false,posdesc.size *4,posdesc.offset);
-                gl.enableVertexAttribArray(aPos);
+        if(mesh.seperatedBuffer){
+            if(vertdesc.position != null){
+                gl.bindBuffer(gl.ARRAY_BUFFER,mesh.bufferVertices);
+                let aPos = attrs[ShaderFX.ATTR_aPosition];
+                if(aPos != null){
+                    let posdesc = vertdesc.position;
+                    gl.vertexAttribPointer(aPos,posdesc.size,gl.FLOAT,false,posdesc.size *4,posdesc.offset);
+                    gl.enableVertexAttribArray(aPos);
+                }
             }
-        }
-        if(vertdesc.uv !=null){
-            let aUV = attrs[ShaderFX.ATTR_aUV];
-            if(aUV != null){
-                let uvdesc = vertdesc.uv;
-                gl.vertexAttribPointer(aUV,uvdesc.size,gl.FLOAT,false,uvdesc.size *4,uvdesc.offset);
-                gl.enableVertexAttribArray(aUV);
+            if(vertdesc.uv !=null){
+                gl.bindBuffer(gl.ARRAY_BUFFER,mesh.bufferUV);
+                let aUV = attrs[ShaderFX.ATTR_aUV];
+                if(aUV != null){
+                    let uvdesc = vertdesc.uv;
+                    gl.vertexAttribPointer(aUV,uvdesc.size,gl.FLOAT,false,uvdesc.size *4,uvdesc.offset);
+                    gl.enableVertexAttribArray(aUV);
+                }
             }
+            if(vertdesc.normal){
+                gl.bindBuffer(gl.ARRAY_BUFFER,mesh.bufferNormal)
+                let aNorm = attrs[ShaderFX.ATTR_aNormal];
+                if(aNorm !=null){
+                    let normdesc = vertdesc.normal;
+                    gl.vertexAttribPointer(aNorm,normdesc.size,gl.FLOAT,false,normdesc.size *4,normdesc.offset);
+                    gl.enableVertexAttribArray(aNorm);
+                }
+            }
+            gl.bindBuffer(gl.ARRAY_BUFFER,null);
         }
-
-        if(vertdesc.normal){
-            let aNorm = attrs[ShaderFX.ATTR_aNormal];
-            if(aNorm !=null){
-                let normdesc = vertdesc.normal;
-                gl.vertexAttribPointer(aNorm,normdesc.size,gl.FLOAT,false,normdesc.size *4,normdesc.offset);
-                gl.enableVertexAttribArray(aNorm);
+        else{
+            gl.bindBuffer(gl.ARRAY_BUFFER,mesh.bufferVertices);
+            if(vertdesc.position !=null){
+                let aPos = attrs[ShaderFX.ATTR_aPosition];
+                if(aPos !=null){
+                    let posdesc = vertdesc.position;
+                    gl.vertexAttribPointer(aPos,posdesc.size,gl.FLOAT,false,posdesc.size *4,posdesc.offset);
+                    gl.enableVertexAttribArray(aPos);
+                }
+            }
+            if(vertdesc.uv !=null){
+                let aUV = attrs[ShaderFX.ATTR_aUV];
+                if(aUV != null){
+                    let uvdesc = vertdesc.uv;
+                    gl.vertexAttribPointer(aUV,uvdesc.size,gl.FLOAT,false,uvdesc.size *4,uvdesc.offset);
+                    gl.enableVertexAttribArray(aUV);
+                }
+            }
+    
+            if(vertdesc.normal){
+                let aNorm = attrs[ShaderFX.ATTR_aNormal];
+                if(aNorm !=null){
+                    let normdesc = vertdesc.normal;
+                    gl.vertexAttribPointer(aNorm,normdesc.size,gl.FLOAT,false,normdesc.size *4,normdesc.offset);
+                    gl.enableVertexAttribArray(aNorm);
+                }
             }
         }
 
         //indices
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.bufferIndices);
+
+
         gl.bindVertexArray(null);
 
 

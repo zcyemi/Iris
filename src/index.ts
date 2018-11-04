@@ -31,6 +31,7 @@ export * from './Input';
 export * from './Light';
 export * from './Material';
 export * from './Mesh';
+export * from './DynamicMesh';
 export * from './Transform';
 export * from './Component';
 export * from './Scene';

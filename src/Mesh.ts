@@ -16,7 +16,7 @@ export class MeshVertexAttrDesc{
     /** Component size [1,2,3,4] */
     public size:number;
     public totalbytes:number;
-    public offset:number;
+    public offset:number = 0;
     
 
     /**
@@ -82,8 +82,11 @@ export type MeshDataBufferIndices = Uint16Array | Uint32Array | Uint8Array;
 export type MeshDataBuffer = ArrayBuffer | DataView | Float32Array | Float64Array | Int32Array | Int16Array | Int8Array | Uint16Array | Uint32Array | Uint8Array;
 
 export class Mesh{
-    public bufferVertices:WebGLBuffer;
+    public bufferVertices:WebGLBuffer; //Compound or Position
     public bufferIndices:WebGLBuffer;
+    public bufferUV:WebGLBuffer;
+    public bufferNormal:WebGLBuffer;
+
     public name:string;
     public readonly vertexDesc:MeshVertexDesc = new MeshVertexDesc();
     public readonly indiceDesc:MeshIndicesDesc = new MeshIndicesDesc();
@@ -92,15 +95,25 @@ export class Mesh{
     private static s_cube:Mesh;
     private static s_sphere:Mesh;
 
-    private m_dataPosition:MeshDataBuffer;
-    private m_dataUV:MeshDataBuffer;
-    private m_dataNormal:MeshDataBuffer;
-    private m_dataIndices:MeshDataBufferIndices;
+    protected m_dataPosition:MeshDataBuffer;
+    protected m_dataUV:MeshDataBuffer;
+    protected m_dataNormal:MeshDataBuffer;
+    protected m_dataIndices:MeshDataBufferIndices;
 
-    private m_bufferInited:boolean =false;
+    public get dataPosition():MeshDataBuffer{ return this.m_dataPosition;}
+    public get dataUV():MeshDataBuffer{ return this.m_dataUV;}
+    public get dataNormal():MeshDataBuffer{ return this.m_dataNormal;}
+    public get dataIndices():MeshDataBufferIndices{ return this.m_dataIndices;}
 
-    public constructor(name?:string){
+    protected m_bufferInited:boolean =false;
+    protected m_seperatedBuffer:boolean = false;
+    
+    public get seperatedBuffer():boolean { return this.m_seperatedBuffer;}
+    
+
+    public constructor(name?:string,serperatedBuffer:boolean = false){
         this.name = name;
+        this.m_seperatedBuffer= serperatedBuffer;
     }
 
     public get bufferInited():boolean{
@@ -490,5 +503,23 @@ export class MeshBufferUtility{
             return 1;
         }
         return 0;
+    }
+
+    public static IndicesBufferFillQuad(databuffer:MeshDataBufferIndices,quadsize:number,){
+        let itemlen = quadsize *6;
+        if(databuffer.length < itemlen) throw new Error('buffer size exceeded.');
+        
+        let index = 0;
+        let vindex = 0;
+        for(let i=0;i<quadsize;i++){
+            databuffer[index] = vindex;
+            databuffer[index+1] = vindex+1;
+            databuffer[index+2] = vindex+2;
+            databuffer[index+3] = vindex;
+            databuffer[index+4] = vindex+2;
+            databuffer[index+5] = vindex+3;
+            index +=6;
+            vindex+=4;
+        }
     }
 }

@@ -1,4 +1,4 @@
-import { MeshTopology, Mesh } from "./Mesh";
+import { MeshTopology, Mesh, MeshDataBufferIndices } from "./Mesh";
 import { vec3 } from "wglut";
 import { GLConst } from "./GL";
 
@@ -57,4 +57,6 @@ export class MeshBuilder{
 
         return mesh;
     }
+
+ 
 }

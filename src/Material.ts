@@ -1,4 +1,4 @@
-import { GLProgram, vec4 } from "wglut";
+import { GLProgram, vec4, vec3 } from "wglut";
 import { Shader, ShaderTags } from "./shaderfx/Shader";
 import { ShaderOptionsConfig, ShaderOptions } from "./shaderfx/ShaderVariant";
 import { Utility } from "./Utility";
@@ -190,6 +190,24 @@ export class Material{
         p.value = val;
     }
 
+    public setVec2(name:string,valx:number,valy:number){
+        let p = this.m_propertyBlock.getUniform(name);
+        if(p == null) return;
+        p.value = [valx,valy];
+    }
+
+    public setVec3(name:string,val:vec3){
+        let p = this.m_propertyBlock.getUniform(name);
+        if(p == null) return;
+        p.value = val.clone();
+    }
+
+    public setVec4(name:string,val:vec4){
+        let p = this.m_propertyBlock.getUniform(name);
+        if(p == null) return;
+        p.value = val;
+    }
+
     /**
      * Set uniform block binding
      * @param name 
@@ -356,6 +374,9 @@ export class Material{
         switch(type){
             case gl.FLOAT:
                 gl.uniform1f(loc,val);
+                break;
+            case gl.FLOAT_VEC2:
+                gl.uniform2fv(loc,val);
                 break;
             case gl.FLOAT_VEC3:
                 gl.uniform3fv(loc,val.raw);
