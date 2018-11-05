@@ -192,10 +192,13 @@ describe("Transform", () => {
 
         tc.setRotation(rotac, false);
 
-        
-        console.log(tc.worldRotation.magnitude());
+        expect(tc.worldRotation.magnitude()).closeTo(1.0,0.0001);
 
+        expectQuat(rotap,tp.worldRotation);
 
-    })
+        let rw = tc.worldRotation;
+        // console.log(rw);
+        // console.log(tp.worldRotation.mul(tc.localRoataion));
+    });
 
 });

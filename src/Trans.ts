@@ -37,6 +37,16 @@ export class Trans{
     private m_right:vec3;
     private m_forward:vec3; 
 
+    public get up():vec3{
+        return this.worldRotation.rota(vec3.up);
+    }
+    public get right():vec3{
+        return this.worldRotation.rota(vec3.right);
+    }
+    public get forward():vec3{
+        return this.worldRotation.rota(vec3.forward);
+    }
+
     //nodes
     private m_children:Trans[];
     private m_parent:Trans;
@@ -192,15 +202,8 @@ export class Trans{
                 let wmtx = p.worldMtx.mul(this.localMtx);
                 this.m_worldMtx.set(wmtx);
 
-                if(!this.m_worldScaleDirty){
-                    [this.m_worldpos,this.m_worldRotation] = mat4.DecomposeTR(wmtx,this.m_worldScale);
-                }
-                else{
-
-                    console.log(wmtx);
-                    [this.m_worldpos,this.m_worldRotation,this.m_worldScale] = mat4.Decompose(wmtx);
-                    console.log(this.m_worldRotation.magnitude());
-                }
+                let skew = vec3.zero;
+                mat4.DecomposeAffine(wmtx,this.m_worldpos,this.m_worldRotation,this.m_worldScale,skew);
             }
 
             this.m_worldScaleDirty = false;
