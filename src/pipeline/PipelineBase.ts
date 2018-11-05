@@ -223,7 +223,9 @@ export class PipelineBase implements IRenderPipeline {
      * draw main framebuffer to canvas buffer
      */
     public onRenderToCanvas() {
-        this.glctx.drawTexFullscreen(this.m_mainFrameBuffer.colorTex0, false, false);
+        const gl = this.gl;
+        gl.viewport(0,0,this.m_mainFrameBufferWidth,this.m_mainFrameBufferHeight);
+        this.drawFullScreenTex(this.m_mainFrameBuffer.colorTex0);
     }
 
     public updateShaderDataBasis(camera:Camera,submit:boolean =true){
@@ -384,7 +386,7 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     /** draw fullscreen tex */
-    public drawFullScreenTex(tex:Texture){
+    public drawFullScreenTex(tex:Texture| WebGLTexture){
         const mat =this.m_fullscreenMat;
         mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
         this.drawMeshRender(this.m_fullscreenRender);
