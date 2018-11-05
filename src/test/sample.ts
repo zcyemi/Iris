@@ -125,7 +125,7 @@ export class SampleGame{
 
         //camera
         let camera = Camera.persepctive(null, 60, 400.0 / 300.0, 0.5, 1000);
-        camera.transform.setPosition(glmath.vec3(0, 2, 5));
+        camera.transform.setPosition(glmath.vec3(0,-500, 5));
         //camera.transform.setLookAt(glmath.vec3(0,0,0));
         camera.transform.setLocalDirty();
         camera.ambientColor = Utility.colorRGBA(3, 110, 167, 15);

@@ -174,7 +174,7 @@ export class Transform{
         this.m_localTRSdirty =true;
         this.m_TRSDirty = true;
     }
-    /** set local rotation */
+    /** set local position */
     public setPosition(pos:vec3){
         this.m_localPosition.set(pos);
         this.m_localTRSdirty = true;
@@ -187,12 +187,6 @@ export class Transform{
         this.m_TRSDirty = true;
     }
 
-    public get forward():vec3{
-        if(this.m_forward == null){
-            this.m_forward = this.m_localRotation.rota(vec3.forward);
-        }
-        return this.m_forward;
-    }
 
     public get worldForward():vec3{
         return this.rotation.rota(vec3.forward);
@@ -204,6 +198,16 @@ export class Transform{
 
     public get worldRight():vec3{
         return this.rotation.rota(vec3.right);
+    }
+
+    /**
+     * local forward
+     */
+    public get forward():vec3{
+        if(this.m_forward == null){
+            this.m_forward = this.m_localRotation.rota(vec3.forward);
+        }
+        return this.m_forward;
     }
 
     public set forward(dir:vec3){
@@ -225,6 +229,9 @@ export class Transform{
         this.m_TRSDirty = true;
     }
 
+    /**
+     * local up
+     */
     public get up():vec3{
         if(this.m_up == null){
             this.m_up = this.m_localRotation.rota(vec3.up);
@@ -250,6 +257,9 @@ export class Transform{
         this.m_TRSDirty = true;
     }
 
+    /**
+     * local right
+     */
     public get right():vec3{
         if(this.m_right == null){
             this.m_right = this.m_localRotation.rota(vec3.right);

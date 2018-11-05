@@ -1,4 +1,4 @@
-import { vec3, glmath } from "wglut";
+import { vec3, glmath, vec4 } from "wglut";
 import { MapStr } from "./Utility";
 
 
@@ -11,7 +11,10 @@ export class InputSnapShot{
     public mouse:Array<boolean> = new Array(4);
     public mouseDown:Array<boolean> = new Array(4);
     public mouseUp:Array<boolean> = new Array(4);
-    public mousepos:vec3 = new vec3();
+    /**
+     * [posx,posy,deltax,deltay]
+     */
+    public mousepos:vec4 = new vec4();
 
     public mousewheel:boolean = false;
     public mousewheelDelta:number = 0;
@@ -40,7 +43,7 @@ export class InputSnapShot{
 }
 
 class InputCache{
-    private mousepos:vec3 = new vec3();
+    private mousepos:vec4 = new vec4();
     private mousebtn:Array<boolean> = new Array<boolean>(4);
 
     private mousedown:Array<boolean> = new Array<boolean>(4);
@@ -86,8 +89,12 @@ class InputCache{
 
     public setMousePos(e:MouseEvent){
         let mp = this.mousepos;
-        mp.x = e.offsetX;
-        mp.y = e.offsetY;
+        let x = e.offsetX;
+        let y = e.offsetY;
+        mp.z = x - mp.x;
+        mp.w = y - mp.y;
+        mp.x = x;
+        mp.y = y;
         this.m_mousePosDirty = true;
     }
 
