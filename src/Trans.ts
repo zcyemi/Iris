@@ -1,7 +1,10 @@
 import { vec3, mat4, quat } from "wglut";
 import { GameObject } from "./GameObject";
 
-
+/**
+ * WIP efactoring
+ * substitution of class Transform.
+ */
 export class Trans{
 
     //local space
@@ -201,9 +204,7 @@ export class Trans{
             else{
                 let wmtx = p.worldMtx.mul(this.localMtx);
                 this.m_worldMtx.set(wmtx);
-
-                let skew = vec3.zero;
-                mat4.DecomposeAffine(wmtx,this.m_worldpos,this.m_worldRotation,this.m_worldScale,skew);
+                mat4.DecomposeTRS(wmtx,this.m_worldpos,this.m_worldRotation,this.m_worldScale);
             }
 
             this.m_worldScaleDirty = false;

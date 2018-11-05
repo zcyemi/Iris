@@ -20,23 +20,22 @@ export class CameraFreeFly extends Component{
 
         let snapshot = Input.snapshot;
 
-
         if(snapshot.getKey('w')){
-            trs.applyTranslate(trs.forward.mulToRef(-0.3));
+            trs.applyTranslate(trs.worldForward.mulToRef(-0.3),false);
         }
         else if(snapshot.getKey('s')){
-            trs.applyTranslate(trs.forward.mulToRef(0.3))
+            trs.applyTranslate(trs.worldForward.mulToRef(0.3),false)
         }
         if(snapshot.getKey('d')){
-            trs.applyTranslate(trs.right.mulToRef(-0.3));
+            trs.applyTranslate(trs.worldRight.mulToRef(-0.3),false);
         }
         else if(snapshot.getKey('a')){
-            trs.applyTranslate(trs.right.mulToRef(0.3));
+            trs.applyTranslate(trs.worldRight.mulToRef(0.3),false);
         }
 
         if(snapshot.mousewheel){
             let offset = trs.forward.mulNumToRef(snapshot.mousewheelDelta *0.05);
-            trs.applyTranslate(offset);
+            trs.applyTranslate(offset,false);
         }
 
         if(snapshot.getMouseBtn(0)){

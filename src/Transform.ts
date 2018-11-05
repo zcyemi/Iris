@@ -1,4 +1,4 @@
-import { vec3, quat, mat4 } from "wglut";
+import { vec3, quat, mat4, mat3 } from "wglut";
 import { GameObject } from "./GameObject";
 
 export class Transform{
@@ -6,16 +6,17 @@ export class Transform{
     private m_localRotation:quat = quat.Identity;
     private m_localScale:vec3 = vec3.one;
 
-    private m_worldPositon:vec3;
-    private m_worldRotation:quat;
-    private m_worldScale:vec3;
+    private m_worldPositon:vec3 = vec3.zero;
+    private m_worldRotation:quat = quat.Identity;
+    private m_worldScale:vec3 = vec3.one;
 
     private m_localTRSdirty:boolean = true;
     private m_TRSDirty:boolean = false;
+    private m_needDecompose:boolean = false;
     /**
      * Snapshot of TRS dirty flag at the end of the last updated frame.
      */
-    private m_curTRSDirty:boolean = false;
+    private m_frameTRSDirty:boolean = false;
 
     private m_localMtx:mat4 = mat4.Identity;
 
@@ -24,9 +25,9 @@ export class Transform{
     /** worldToLocal mtx */
     private m_objMtxInv:mat4;
 
-    private m_right:vec3 = vec3.right.clone();
-    private m_forward:vec3 = vec3.forward.clone();
-    private m_up:vec3 = vec3.up.clone();
+    private m_right:vec3 = vec3.right;
+    private m_forward:vec3 = vec3.forward;
+    private m_up:vec3 = vec3.up;
 
     private m_children:Transform[];
     private m_parent:Transform;
@@ -59,7 +60,7 @@ export class Transform{
         this.m_localTRSdirty = false;
 
         this.m_localMtx = mat;
-        [this.m_localPosition,this.m_localRotation,this.m_localScale] = mat4.Decompose(mat);
+        mat4.DecomposeTRS(mat,this.m_localPosition,this.m_localRotation,this.m_localScale);
         this.m_TRSDirty = true;
     }
 
@@ -76,9 +77,7 @@ export class Transform{
      * Model matrix, MATRIX_M
      */
     public get objMatrix():mat4{
-        if(this.m_objMtx == null){
-            this.m_objMtx = this.calObjMatrix();
-        }
+        this.calObjMatrix();
         return this.m_objMtx;
     }
 
@@ -89,63 +88,54 @@ export class Transform{
         return this.m_objMtxInv;
     }
 
-    private calObjMatrix(decompose:boolean = false):mat4{
-        let mtx:mat4 = null;
-        if(this.parent == null){
-            mtx = this.localMatrix.clone();
-            this.m_worldPositon = this.m_localPosition.clone();
-            this.m_worldRotation = this.m_localRotation.clone();
-            this.m_worldScale = this.m_localScale.clone();
-        }
-        else{
-            mtx = this.parent.objMatrix.mul(this.localMatrix);
-            if(decompose){
-                [this.m_worldPositon,this.m_worldRotation,this.m_worldScale] = mat4.Decompose(mtx);
+    private calObjMatrix(decompose:boolean = false){
+        if(this.m_TRSDirty){
+            if(this.parent == null){
+                this.m_objMtx.set(this.localMatrix);
+                this.m_worldPositon = this.m_localPosition.clone();
+                this.m_worldRotation = this.m_localRotation.clone();
+                this.m_worldScale = this.m_localScale.clone();
+                this.m_needDecompose = false;
             }
             else{
-                this.m_worldPositon = null;
-                this.m_worldRotation = null;
-                this.m_worldScale = null;
+                let objmtx = this.parent.objMatrix.mul(this.localMatrix);
+                this.m_objMtx.set(objmtx);
+                this.m_needDecompose = true;
             }
+            this.m_objMtxInv = null;
+            this.m_TRSDirty = false;
         }
-        this.m_objMtxInv = null;
-        return mtx;
+        if(decompose && this.m_needDecompose){
+            let sk = vec3.zero;
+            let rotamtx = new mat3();
+            mat4.DecomposeAffine(this.m_objMtx,this.m_worldPositon,rotamtx,this.m_worldScale,sk);
+            this.m_worldRotation = quat.MtxToQuat(rotamtx);
+            this.m_needDecompose = false;
+        }
     }
 
     /**
      * world-space position
      */
     public get position():vec3{
-        let wpos = this.m_worldPositon;
-        if(wpos == null){
-            this.m_objMtx = this.calObjMatrix(true);
-            wpos =this.m_worldPositon;
-        }
-        return wpos;
+        this.calObjMatrix(true);
+        return this.m_worldPositon;
     }
 
     /**
      * world-space rotation
      */
     public get rotation():quat{
-        let wrota = this.m_worldRotation;
-        if(wrota == null){
-            this.m_objMtx = this.calObjMatrix(true);
-            wrota= this.m_worldRotation;
-        }
-        return wrota;
+        this.calObjMatrix(true);
+        return this.m_worldRotation;
     }
 
     /**
      * world-space scale
      */
-    public get scale():vec3{
-        let wscale = this.m_worldScale;
-        if(wscale == null){
-            this.m_objMtx = this.calObjMatrix(true);
-            wscale = this.m_worldScale;
-        }
-        return wscale;
+    public get lossyScale():vec3{
+        this.calObjMatrix(true);
+        return this.m_localScale;
     }
 
     public get children():Transform[]{
@@ -326,18 +316,14 @@ export class Transform{
      */
     public setObjMatrixDirty(pmtxdirty:boolean){
         let dirty = this.m_TRSDirty || pmtxdirty;
-        this.m_curTRSDirty = dirty;
-        this.m_TRSDirty = false;
+        this.m_frameTRSDirty = dirty;
         if(dirty){
-            this.m_objMtx = null;
-            this.m_worldPositon = null;
-            this.m_worldRotation = null;
-            this.m_worldScale = null;
+            this.m_TRSDirty = true;
+            this.calObjMatrix(false);
         }
-
     }
 
-    public get isDirty():boolean{ return this.m_localTRSdirty || this.m_curTRSDirty;}
+    public get isDirty():boolean{ return this.m_localTRSdirty || this.m_frameTRSDirty;}
 
     public setLookAt(target:vec3,worldup?:vec3){
         this.m_localTRSdirty= true;
@@ -367,12 +353,22 @@ export class Transform{
             this.setLocalDirty();
         }
         else{
-            let localoffset = this.worldToLocalMatrix.mulvec(offset.vec4(0));
-            this.localPosition.add(localoffset);
-            this.setLocalDirty();
+
+            let p = this.m_parent;
+            if(p == null){
+                this.localPosition.add(offset);
+                this.setLocalDirty();
+            }
+            else{
+                let m = p.worldToLocalMatrix;
+                let localoff = m.mulvec(offset.vec4(0));
+                this.localPosition.add(localoff);
+                this.setLocalDirty();
+            }
         }
 
     }
+
 
     /**
      * Apply rotation to current transform.

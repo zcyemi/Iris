@@ -123,6 +123,19 @@ export class SampleGame{
         let scene:Scene = new Scene();
         this.m_scene = scene;
 
+        //camera
+        let camera = Camera.persepctive(null, 60, 400.0 / 300.0, 0.5, 1000);
+        camera.transform.setPosition(glmath.vec3(0, 2, 5));
+        //camera.transform.setLookAt(glmath.vec3(0,0,0));
+        camera.transform.setLocalDirty();
+        camera.ambientColor = Utility.colorRGBA(3, 110, 167, 15);
+        camera.clearType = ClearType.Background;
+        camera.skybox = texcube;
+        camera.background = glmath.vec4(0, 1, 0, 1);
+        camera.gameobject.addComponent(new CameraFreeFly());
+        camera.gameobject.name = "camera";
+        this.m_camera = camera;
+        
 
         if(isgltf){
             let gobj = sceneBuilder.createScene();
@@ -137,25 +150,13 @@ export class SampleGame{
 
             gobj.transform.parent = scene.transform;
             gobj.transform.applyTranslate(glmath.vec3(0,15,0));
-    
+            camera.transform.parent= gobj.transform;
+        }
+        else{
+            camera.transform.parent= scene.transform;
         }
 
-        // this.m_scene = new Scene();
-        // let scene = this.m_scene;
 
-        //camera
-        let camera = Camera.persepctive(null,60,400.0/300.0,0.5,1000);
-        camera.transform.setPosition(glmath.vec3(0,2,5));
-        //camera.transform.setLookAt(glmath.vec3(0,0,0));
-        camera.transform.setLocalDirty();
-        camera.ambientColor = Utility.colorRGBA(3, 110, 167,15);
-        camera.clearType = ClearType.Background;
-        camera.skybox = texcube;
-        camera.background = glmath.vec4(0,1,0,1);
-        camera.gameobject.addComponent(new CameraFreeFly());
-        camera.transform.parent= scene.transform;
-        camera.gameobject.name = "camera";
-        this.m_camera = camera;
 
         //cube
         // let obj1 = new GameObject("cube");

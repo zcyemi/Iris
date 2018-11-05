@@ -181,7 +181,7 @@ class InputCache{
         }
 
         let keydirty = this.m_keydirty;
-        shot.hasKeyPressEvent = keydirty
+        shot.hasKeyPressEvent = keydirty;
         if(keydirty){
             //key press
             let skey = shot.key;
