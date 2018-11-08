@@ -1,0 +1,4 @@
+/tests/
+/res/
+rollup.config.ts
+gulpfile.js
