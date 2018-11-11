@@ -17,25 +17,25 @@ export class ShaderSource {
     private m_shaderTag: ShaderTags = null;
 
 
-    public name:string;
-    public optionsList:ShaderOptions[] = [];
+    public name: string;
+    public optionsList: ShaderOptions[] = [];
 
-    public constructor(vs: string, ps?: string,name?:string) {
+    public constructor(vs: string, ps?: string, name?: string) {
         this.ps = ps;
         this.vs = vs;
         this.name = name;
     }
 
-    public static create(unified:string,name?:string):ShaderSource{
-        let [vs,ps] = ShaderPreprocessor.processUnifiedSource(unified,name);
-        return new ShaderSource(vs,ps,name);
+    public static create(unified: string, name?: string): ShaderSource {
+        let [vs, ps] = ShaderPreprocessor.processUnifiedSource(unified, name);
+        return new ShaderSource(vs, ps, name);
     }
-    
-    public static async load(url:string,name?:string):Promise<ShaderSource>{
-        if(url == null || url === '') return null;
-        return new Promise<ShaderSource>(async (res,rej)=>{
-            let glsl = await GLUtility.HttpGet(url,"text");
-            let source = ShaderSource.create(glsl,name);
+
+    public static async load(url: string, name?: string): Promise<ShaderSource> {
+        if (url == null || url === '') return null;
+        return new Promise<ShaderSource>(async (res, rej) => {
+            let glsl = await GLUtility.HttpGet(url, "text");
+            let source = ShaderSource.create(glsl, name);
             res(source);
         })
     }
@@ -51,7 +51,7 @@ export class ShaderSource {
         return this.ps;
     }
 
-    public get tags():ShaderTags{
+    public get tags(): ShaderTags {
         return this.m_shaderTag;
     }
 
@@ -67,7 +67,7 @@ export class ShaderSource {
         return true;
     }
 
-    public addVariant(vname: string):boolean{
+    public addVariant(vname: string): boolean {
         if (this.variants == null) {
             this.variants = [];
             this.variants.push(vname);
@@ -82,12 +82,12 @@ export class ShaderSource {
         return false;
     }
 
-    private addOptions(variant:ShaderVariant){
+    private addOptions(variant: ShaderVariant) {
         let options = variant.options;
-        if(options == null) return;
+        if (options == null) return;
 
         let optlist = this.optionsList;
-        for(let i=0,len = options.length;i<len;i++){
+        for (let i = 0, len = options.length; i < len; i++) {
             optlist.push(options[i]);
         }
     }
@@ -97,19 +97,19 @@ export class ShaderSource {
         let lines = source.split('\n');
         for (let i = 0, len = lines.length; i < len; i++) {
             let line = lines[i];
-            
 
-            let pinclude = ShaderPreprocessor.processSourceInclude(line,variants);
-            if(pinclude!=null){
+
+            let pinclude = ShaderPreprocessor.processSourceInclude(line, variants);
+            if (pinclude != null) {
                 lines[i] = pinclude[0];
                 let vname = pinclude[1];
                 let added = this.addVariant(vname);
-                if(added) this.addOptions(variants[vname]);
+                if (added) this.addOptions(variants[vname]);
                 continue;
             }
 
             let poptions = ShaderPreprocessor.processOptions(line);
-            if(poptions != null){
+            if (poptions != null) {
                 lines[i] = poptions[0];
                 this.optionsList.push(poptions[1]);
                 continue;
@@ -127,15 +127,15 @@ export class ShaderSource {
         const regex2 = /#(ztest|zwrite|queue) ([\w]+)/;
         let match = line.match(regex2);
         if (match != null) {
-            if(tags == null){
+            if (tags == null) {
                 tags = new ShaderTags();
-                this.m_shaderTag= tags;
+                this.m_shaderTag = tags;
             }
             let tagtype = match[1].toLowerCase();
             let tagval = match[2].toUpperCase();
             switch (tagtype) {
                 case "ztest":
-                    this.setShaderTagProperty('ztest',tagval,Comparison);
+                    this.setShaderTagProperty('ztest', tagval, Comparison);
                     break;
                 case "zwrite":
                     {
@@ -154,20 +154,20 @@ export class ShaderSource {
                     break;
                 case "queue":
                     tagval = tagval.charAt(0).toUpperCase() + match[2].slice(1);
-                    this.setShaderTagProperty('queue',tagval,RenderQueue);
+                    this.setShaderTagProperty('queue', tagval, RenderQueue);
                     break;
                 case "cull":
                     {
                         let cullingmode = CullingMode.Back;
-                        switch(tagval){
+                        switch (tagval) {
                             case "ALL":
                                 cullingmode = CullingMode.FRONT_AND_BACK;
                                 break;
                             case "BACK":
-                                cullingmode= CullingMode.Back;
+                                cullingmode = CullingMode.Back;
                                 break;
                             case "FRONT":
-                                cullingmode =CullingMode.Front;
+                                cullingmode = CullingMode.Front;
                                 break;
                             case "NONE":
                                 cullingmode = CullingMode.None;
@@ -176,11 +176,11 @@ export class ShaderSource {
                                 throw new Error('invalid culling mode');
                         }
 
-                        if(tags.culling == null){
+                        if (tags.culling == null) {
                             tags.culling = cullingmode;
                         }
-                        else{
-                            if(tags.culling != cullingmode){
+                        else {
+                            if (tags.culling != cullingmode) {
                                 throw new Error(`culling mode confliect : ${cullingmode} ${tags.culling}`);
                             }
                         }
@@ -194,34 +194,34 @@ export class ShaderSource {
         const regexblend = /#blend ([\w]+) ([\w]+)[\s]*([\w]+)*/;
 
         match = line.match(regexblend);
-        if(match != null){
-            if(tags == null){
+        if (match != null) {
+            if (tags == null) {
                 tags = new ShaderTags();
-                this.m_shaderTag= tags;
+                this.m_shaderTag = tags;
             }
             let tarfs = match[1].toUpperCase();
             let tarfd = match[2].toUpperCase();
             let tarop = match[3].toLocaleUpperCase();
-            if(tarop == null){
+            if (tarop == null) {
                 tarop = 'ADD';
             }
-            else{
+            else {
                 let op = BlendOperator[tarop];
-                if(op == null) throw new Error(`invalid blend operator [${tarop}]`);
+                if (op == null) throw new Error(`invalid blend operator [${tarop}]`);
             }
 
             let fs = BlendFactor[tarfs];
             let fd = BlendFactor[tarfd];
 
-            if(fs == null) throw new Error(`invalid blend factor [${match[1]}]`);
-            if(fd == null) throw new Error(`invalid blend factor [${match[2]}]`);
+            if (fs == null) throw new Error(`invalid blend factor [${match[1]}]`);
+            if (fd == null) throw new Error(`invalid blend factor [${match[2]}]`);
 
             let newop = BlendFactor[tarop];
 
-            if(tags.blendOp != null && (tags.blendOp != newop || tags.blendFactorDst != fd || tags.blendFactorSrc != fs)){
+            if (tags.blendOp != null && (tags.blendOp != newop || tags.blendFactorDst != fd || tags.blendFactorSrc != fs)) {
                 throw new Error(`bleng tag conflict [${line}]`);
             }
-            else{
+            else {
                 tags.blendOp = newop;
                 tags.blendFactorSrc = fs;
                 tags.blendFactorDst = fd;
@@ -231,7 +231,7 @@ export class ShaderSource {
         return line;
     }
 
-    public setShaderTagProperty(pname:string,tagval:string,enumtype){
+    public setShaderTagProperty(pname: string, tagval: string, enumtype) {
         let tags = this.m_shaderTag;
         let val = enumtype[tagval];
         if (val == undefined) {
@@ -247,25 +247,22 @@ export class ShaderSource {
         }
     }
 
-    public injectCompileFlags(flags:string):[string,string]{
-        const prefix = '#version 300 es';
-        flags = prefix + '\n' + flags;
-        let vs =this.vs;
+    public injectCompileFlags(flags: string): [string, string] {
+        const prefix = '#version 300 es\n';
+        let vs = this.vs;
         let ps = this.pixel;
-        if(!vs.startsWith(prefix)){
-            vs = flags + vs;
+        if (!vs.startsWith(prefix)) {
+            vs = prefix + '#define SHADER_VS\r\n' + flags + vs;
         }
-        else{
-            vs = flags + vs.slice(15);
+        else {
+            vs = prefix + '#define SHADER_VS\r\n' + flags + vs.slice(15);
         }
-
-        if(!ps.startsWith(prefix)){
-            ps = flags + ps;
+        if (!ps.startsWith(prefix)) {
+            ps = prefix + '#define SHADER_PS\r\n' + flags + ps;
         }
-        else{
-            ps = flags + ps.slice(15);
+        else {
+            ps = prefix + '#define SHADER_PS\r\n' + flags + ps.slice(15);
         }
-
-        return [vs,ps];
+        return [vs, ps];
     }
 }

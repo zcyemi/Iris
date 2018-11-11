@@ -6,22 +6,17 @@ import { Material } from '../Material';
 import { Mesh } from '../Mesh';
 import { Camera, AmbientType, ClearType } from '../Camera';
 import { GraphicsRender } from '../GraphicsRender';
-import { ShaderFX } from '../shaderfx/ShaderFX';
 import { Light } from '../Light';
 import { DebugEntry } from '../DebugEntry';
 import { Utility, WindowUtility } from '../Utility';
 import { Input } from '../Input';
 import { SceneManager } from '../SceneManager';
-import { Component} from '../Component';
 import { CameraFreeFly } from '../CameraUtility';
 import { FrameTimer } from '../FrameTimer';
 import { TextureCubeMap } from '../TextureCubeMap';
 import { GLTFSceneBuilder } from '../GLTFSceneBuilder';
-import { ShaderFXLibs } from '../shaderfx/ShaderFXLibs';
 import { PipelineBase } from '../pipeline/PipelineBase';
 import { PipelineForwardZPrePass } from '../pipeline/PipelineForwardZPrePass';
-import { ShaderPreprocessor } from '../shaderfx/ShaderPreprocessor';
-import { ShaderGen } from '../shaderfx/ShaderGenerated';
 import { Transform } from '../Transform';
 
 export class SampleGame{

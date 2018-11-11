@@ -140,6 +140,10 @@ export class ShaderPreprocessor {
         return [f+e,c];
     }
 
+    public static TrimEmptyLine(str:string):string{
+        return str.replace(/^([\s]*)$/gm, '');
+    }
+
     /**
      * Process shader source #include macros
      * @param line 

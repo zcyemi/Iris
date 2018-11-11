@@ -1,6 +1,7 @@
 import { ShaderSource } from "./ShaderSource";
 import { GLProgram, GLContext } from "wglut";
 import { ShaderOptionsConfig } from "./ShaderVariant";
+import { ShaderPreprocessor } from "./ShaderPreprocessor";
 
 export enum RenderQueue{
     Opaque,
@@ -143,7 +144,7 @@ export class Shader{
         else{
             let source= this.source;
             let [vs,ps] =source.injectCompileFlags(optconfig.compileFlag);
-            let program = this.m_glctx.createProgram(vs,ps);
+            let program =  Shader.CreateProgram(this.m_glctx,vs,ps);
             if(program == null) throw new Error(`compile program failed`);
             this.m_compiledPrograms[hash] = program;
             console.log(`program hash ${hash}`);
@@ -151,10 +152,66 @@ export class Shader{
         }
     }
 
-
-
     public release(){
         this.m_glctx = null;
+    }
+    
+    public static ParseShaderInfo(source:string,info:string){
+        const regexp = /ERROR: 0:([\d]+):/g;
+        let split = source.split(/\r\n|\r|\n/);
+        let ary:RegExpExecArray = null;
+        while((ary = regexp.exec(info)) !== null){
+            console.error(split[Number(ary[1])-1]);
+        }
+    }
+
+    public static CreateProgram(glctx:GLContext,vsource:string,psource:string){
+        let gl = glctx.gl;
+        let vs = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(vs, vsource);
+        gl.compileShader(vs);
+
+        if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
+            console.error(vsource);
+            let infolog =  gl.getShaderInfoLog(vs);
+            console.error('compile vertex shader failed: ' +infolog);
+            Shader.ParseShaderInfo(vsource,infolog);
+            gl.deleteShader(vs);
+            return null;
+        }
+
+        let ps = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(ps, psource);
+        gl.compileShader(ps);
+
+        if (!gl.getShaderParameter(ps, gl.COMPILE_STATUS)) {
+            console.error(psource);
+            let infolog =  gl.getShaderInfoLog(ps);
+            console.error('compile fragment shader failed: ' + infolog);
+            Shader.ParseShaderInfo(psource,infolog);
+            gl.deleteShader(ps);
+            return null;
+        }
+
+        let program = gl.createProgram();
+        gl.attachShader(program, vs);
+        gl.attachShader(program, ps);
+        gl.linkProgram(program);
+
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.error('link shader program failed!:' + gl.getProgramInfoLog(program));
+            gl.deleteProgram(program);
+            gl.deleteShader(vs);
+            gl.deleteShader(ps);
+            return null;
+        }
+
+        if (program == null){
+            throw new Error('compile shader error');
+        }
+
+        let p = new GLProgram(gl, program);
+        return p;
     }
 }
 

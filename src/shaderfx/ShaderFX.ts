@@ -40,7 +40,7 @@ export class ShaderFX{
         let optconfig = new ShaderOptionsConfig(source.optionsList);
         let compileFlags = optconfig.compileFlag;
         let [vs,ps] = source.injectCompileFlags(compileFlags);
-        let p = glctx.createProgram(vs,ps);
+        let p =  Shader.CreateProgram(glctx,vs,ps);
         if(p == null) return null;
 
         let shader = new Shader(source,p,optconfig,glctx);
