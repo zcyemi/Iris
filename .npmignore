@@ -2,3 +2,13 @@
 /res/
 rollup.config.ts
 gulpfile.js
+
+node_modules/
+/.rpt2_cache/
+resource/*.*
+package-lock.json
+/package-lock.json
+res/iris.es.js
+res/iris.iife.js
+.vscode
+index.html
