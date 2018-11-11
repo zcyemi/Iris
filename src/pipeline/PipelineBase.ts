@@ -472,7 +472,7 @@ export class PipelineBase implements IRenderPipeline {
         gl.deleteBuffer(this.m_uniformBufferBasis);
         gl.deleteBuffer(this.m_uniformBufferLight);
         gl.deleteBuffer(this.m_uniformBufferObj);
-        gl.deleteBuffer(this.updateUniformBufferShadowMap);
+        gl.deleteBuffer(this.m_uniformBufferShadowMap);
 
         this.m_uniformBufferBasis = null;
         this.m_uniformBufferLight = null;
