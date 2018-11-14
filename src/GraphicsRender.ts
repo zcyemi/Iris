@@ -165,6 +165,9 @@ export class GraphicsRender{
 
         let gl =this.m_glctx.gl;
 
+        // gl.clearColor(0,0,0,1);
+        // gl.clear(gl.COLOR_BUFFER_BIT);
+
         let p = this.pipeline;
         if(p == null) return;
         p.exec(scene);

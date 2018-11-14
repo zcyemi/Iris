@@ -1,8 +1,6 @@
 import { vec3, vec4, mat4, mat3 } from "wglut";
 
-export type TypedArray = Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array | Uint8ClampedArray | Float32Array | Float64Array;
-
-export class ShaderBuffer{
+class ShaderBuffer{
     private minoff:number =0;
     private maxoff:number =0;
     private m_isdirty:boolean = false;
@@ -32,28 +30,14 @@ export class ShaderBuffer{
 
     }
     public set(fxbuffer:ShaderBuffer,off:number){
-        let bytearray = fxbuffer.byteArray;
-        this.byteArray.set(bytearray,off);
-        this.setMinMaxOffset(off,bytearray.byteLength);
+        this.byteArray.set(fxbuffer.byteArray,off);
     }
-    public setWithView(fxview:ShaderBufferView){
+    public setOfView(fxview:ShaderBufferView){
         this.set(fxview.buffer,fxview.viewbase);
-
     }
-    public setWithSubData(fxsubdata:ShaderSubData){
+    public setOfSubData(fxsubdata:ShaderSubData){
         this.set(fxsubdata.bufferView.buffer,fxsubdata.baseOffset);
     }
-    public setWithTypedArray(array:TypedArray,offset?:number){
-        var abuffer = array.buffer;
-        this.raw.set(new Uint8Array(abuffer),offset);
-        this.setMinMaxOffset(offset,array.byteLength);
-    }
-    public setWithArrayBuffer(array:ArrayBuffer,offset?:number){
-        if(array == null) return;
-        this.raw.set(new Uint8Array(array),offset);
-        this.setMinMaxOffset(offset,array.byteLength);
-    }
-
     private setMinMaxOffset(byteOffset:number,length:number){
         if(byteOffset < this.minoff) this.minoff = byteOffset;
         let max = byteOffset +length;

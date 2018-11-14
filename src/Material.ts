@@ -4,7 +4,6 @@ import { ShaderOptionsConfig, ShaderOptions } from "./shaderfx/ShaderVariant";
 import { Utility } from "./Utility";
 import { Texture } from "./Texture";
 import { ShaderFX } from "./shaderfx/ShaderFX";
-import { ShaderInstancedBuffer } from "./shaderfx/ShaderInstancedBuffer";
 
 export type MaterialProperty = {type:number,value:any};
 
@@ -12,7 +11,6 @@ export class MaterialPorpertyBlock{
     public uniforms:{[key:string]:MaterialProperty};
     /** default is null, perperty might be set with @function <setUniformBlock> or @function <setUniformBlockwitName> */
     public uniformsBlock:{[slot:number]:number};
-    public attrBuffer:{[key:number]:ShaderInstancedBuffer} = {};
     private m_program:GLProgram;
 
     public constructor(program?:GLProgram){
@@ -77,7 +75,7 @@ export class MaterialPorpertyBlock{
                 selfBlock[newindex] = slotindex;
             }
         }
-        
+
         for(let bname in uniformBlock){
             if(ShaderFX.isInternalUniformBlockName(bname)) continue;
 
@@ -208,12 +206,6 @@ export class Material{
         let p = this.m_propertyBlock.getUniform(name);
         if(p == null) return;
         p.value = val;
-    }
-
-    public setInstancedBuffer(name:string,buffer:ShaderInstancedBuffer):boolean{
-        let p = this.m_program.GetAttribute(name);
-        if(p == null) return false;
-        this.m_propertyBlock.attrBuffer[p] = buffer;
     }
 
     /**
@@ -355,18 +347,6 @@ export class Material{
             for(var key in puniformblocks){
                 let ind = Number(key);
                 gl.uniformBlockBinding(glp,ind,puniformblocks[ind]);
-            }
-        }
-
-        //instancing buffer
-        let attrBuffer= this.propertyBlock.attrBuffer;
-        for (const key in attrBuffer) {
-            if (attrBuffer.hasOwnProperty(key)) {
-                const instancedBuffer = attrBuffer[key];
-                instancedBuffer.submit(gl);
-                gl.bindBuffer(gl.ARRAY_BUFFER,instancedBuffer);
-                let index = Number(key);
-                gl.vertexAttribDivisor(index,instancedBuffer.instanceCount);
             }
         }
     }

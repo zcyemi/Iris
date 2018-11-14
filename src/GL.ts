@@ -9,12 +9,8 @@ export enum GLConst {
     UNSIGNED_SHORT = 5123,
     UNSIGNED_INT = 5125,
     FLOAT = 5126,
-}
 
-export enum GLDrawType{
-    STATIC_DRAW = 0x88E4,
-    STREAM_DRAW = 0x88E0,
-    DYNAMIC_DRAW = 0x88E8,
+
 }
 
 
@@ -25,10 +21,6 @@ export class GL{
     public static readonly UNSIGNED_SHORT:GLDataType = 5123;
     public static readonly UNSIGNED_INT:GLDataType = 5125;
     public static readonly FLOAT:GLDataType = 5126;
-
-    public static readonly STATIC_DRAW:GLDrawType = 0x88E4;
-    public static readonly STREAM_DRAW:GLDrawType = 0x88E0;
-    public static readonly DYNAMIC_DRAW:GLDrawType = 0x88E8;
 
     public static readonly NEAREST:number = 0x2600;
     public static readonly LINEAR:number  = 0x2601;
@@ -59,3 +51,4 @@ export class GL{
 
 
 export type GLDataType = GLConst.BYTE | GLConst.UNSIGNED_BYTE | GLConst.SHORT | GLConst.FLOAT | GLConst.UNSIGNED_BYTE | GLConst.UNSIGNED_INT | GLConst.UNSIGNED_SHORT;
+
