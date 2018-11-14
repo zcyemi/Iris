@@ -89,6 +89,19 @@ export class ShaderTags{
         if(this.blendFactorSrc == null) this.blendFactorSrc = BlendFactor.SRC_ALPHA;
         if(this.blendFactorDst == null) this.blendFactorDst = BlendFactor.ONE_MINUS_SRC_ALPHA;
     }
+
+    public toString():string{
+        return `
+            queue:${RenderQueue[this.queue]}
+            ztest:${Comparison[this.ztest]}
+            zwrite:${this.zwrite}
+            blend:${this.blend}
+            blendOp:${BlendOperator[this.blendOp]}
+            blendSrc:${BlendFactor[this.blendFactorSrc]}
+            blendDst:${BlendFactor[this.blendFactorDst]}
+            culling:${CullingMode[this.culling]}
+        `
+    }
 }
 
 export class ShaderProgram{

@@ -344,7 +344,7 @@ export class PipelineBase implements IRenderPipeline {
             let cobj = c.gameobject;
             if (!cobj.active) continue;
             let crender = cobj.render;
-            if (crender != null && crender.mesh != null) {
+            if (crender != null) {
                 drawlist.pushRenderNode(crender);
             }
             this.traversalRenderNode(drawlist, c);

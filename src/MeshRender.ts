@@ -9,7 +9,7 @@ export class MeshRender extends BaseRender{
     public mesh:Mesh;
     public object:GameObject;
 
-    public castShadow:boolean = true;
+    
 
     public _depthVal:number;
 
@@ -24,6 +24,7 @@ export class MeshRender extends BaseRender{
         super();
         this.mesh = mesh;
         this.material = mat;
+        this.castShadow = true;
     }
     
 
@@ -34,6 +35,12 @@ export class MeshRender extends BaseRender{
         }
 
         this.mesh = null;
+    }
+
+    public draw(gl:WebGL2RenderingContext){
+        let mesh = this.mesh;
+        const desc = mesh.indiceDesc;
+        gl.drawElements(desc.topology,desc.indiceCount,desc.type,desc.offset);
     }
     
     public refreshData(glctx:GLContext){
