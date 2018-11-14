@@ -22,9 +22,9 @@ void vertex(){
 #pragma ps fragment
 #ifdef SHADER_PS
 uniform sampler2D uSampler;
+uniform vec4 uColor;
 out vec4 fragColor;
 void fragment(){
-    vec4 col = texture(uSampler,vUV);
-    fragColor = col;
+    fragColor = texture(uSampler,vUV) * uColor;
 }
 #endif

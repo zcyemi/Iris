@@ -131,6 +131,7 @@ export class SampleGame{
             let sprobj = new GameObject('sprite1');
             let srender = sprobj.addRender(SpriteRender);
             srender.image = spr;
+            srender.color.w = 0.5;
 
             sprobj.transform.setPosition(glmath.vec3(0,1,-5));
             sprobj.transform.parent = scene.transform;
