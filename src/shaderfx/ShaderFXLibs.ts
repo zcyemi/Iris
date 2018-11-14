@@ -19,6 +19,7 @@ export class ShaderFXLibs{
     private m_depth:Shader;
     private m_shadermap:Shader;
     private m_blit:Shader;
+    private m_instancing_test:Shader;
 
     private m_pbrMetallicRoughness:Shader;
 
@@ -40,6 +41,9 @@ export class ShaderFXLibs{
     public static SH_shadowmap:ShaderSource;
     @ShaderFile("blit")
     public static SH_blit:ShaderSource;
+
+    @ShaderFile("instancing_test")
+    public static SH_instancing_test:ShaderSource;
 
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_BASIS)
     public static SHADERFX_BASIS:ShaderVariant;
@@ -112,6 +116,13 @@ export class ShaderFXLibs{
             this.m_blit = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_blit);
         }
         return this.m_blit;
+    }
+
+    public get shaderInstancingColor():Shader{
+        if(this.m_instancing_test == null){
+            this.m_instancing_test = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_instancing_test);
+        }
+        return this.m_instancing_test;
     }
 
     public release(){
@@ -192,19 +203,19 @@ export class ShaderDataBasis extends ShaderData{
     }
     public updateDataBasic(data:ShaderDataRender){
         if(data.isSeperated){
-            this.buffer.setOfSubData(data);
+            this.buffer.setWithSubData(data);
             data.setDirty = false;
         }
     }
     public updateDataCamera(data:ShaderDataCamera){
         if(data.isSeperated){
-            this.buffer.setOfSubData(data);
+            this.buffer.setWithSubData(data);
             data.setDirty = false;
         }
     }
     public updateDateAmbeintFog(data:ShaderDataAmbientFog){
         if(data.isSeperated){
-            this.buffer.setOfSubData(data);
+            this.buffer.setWithSubData(data);
             data.setDirty = false;
         }
     }

@@ -10,10 +10,7 @@ export class MeshRender{
     public object:GameObject;
 
     public castShadow:boolean = true;
-
     public _depthVal:number;
-
-
     private m_vao:WebGLVertexArrayObject;
 
     public get vertexArrayObj():WebGLVertexArrayObject{
@@ -122,10 +119,7 @@ export class MeshRender{
 
         //indices
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.bufferIndices);
-
-
         gl.bindVertexArray(null);
-
 
         return vao;
     }
