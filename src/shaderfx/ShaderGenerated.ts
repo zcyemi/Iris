@@ -171,7 +171,7 @@ out vec4 fragColor;
 void fragment(){
     fragColor = texture(uSampler,vUV);
 }`;
-	public static readonly depth:string = `#version 300 es\nprecision mediump float;
+	public static readonly depth:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #queue other
 #pragma vs vertex
@@ -184,7 +184,7 @@ void vertex(){
 
 void fragment(){
 }`;
-	public static readonly diffuse:string = `#version 300 es\nprecision mediump float;
+	public static readonly diffuse:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #include SHADERFX_LIGHT
 #include SHADERFX_LIGHTING
@@ -234,6 +234,26 @@ out vec4 fragColor;
 void fragment(){
     fragColor = vec4(1.0);
 }`;
+	public static readonly instancing_test:string = `#version 300 es\nprecision mediump float;
+#include SHADERFX_BASIS
+#queue opaque
+
+inout vec4 vColor;
+
+#pragma vs vertex
+in vec4 aPosition;
+in vec4 aColor; //instancing property
+void vertex(){
+    gl_Position = MATRIX_MVP * aPosition;
+    vColor = aColor;
+}
+
+#pragma ps fragment
+out vec4 fragColor;
+void fragment(){
+    fragColor = vColor;
+}
+`;
 	public static readonly pbrMetallicRoughness:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #include SHADERFX_LIGHT
@@ -450,7 +470,7 @@ void fragment(){
     fragColor = texture(uSampler,vec2(x,y));
     #endif
 }`;
-	public static readonly UnlitColor:string = `#version 300 es\nprecision mediump float;
+	public static readonly UnlitColor:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #queue opaque
 
@@ -489,7 +509,7 @@ out vec4 fragColor;
 void fragment(){
     fragColor = texture(uSampler,vUV);
 }`;
-	public static readonly uvValue:string = `#version 300 es\nprecision mediump float;
+	public static readonly uvValue:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 
 inout vec2 vUV;
