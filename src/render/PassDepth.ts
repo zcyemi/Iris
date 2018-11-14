@@ -84,7 +84,7 @@ export class PassDepth extends RenderPass{
             let mat = node.material;
             let mesh = node.mesh;
 
-            node.refershVertexArray(glctx);
+            node.refreshData(glctx);
             dataobj.setMtxModel(node.object.transform.objMatrix);
             pipe.updateUniformBufferObject(dataobj);
 

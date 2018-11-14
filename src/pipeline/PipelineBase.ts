@@ -431,7 +431,7 @@ export class PipelineBase implements IRenderPipeline {
         const gl = this.gl;
         let mat = meshrender.material;
         let mesh = meshrender.mesh;
-        meshrender.refershVertexArray(this.glctx);
+        meshrender.refreshData(this.glctx);
         let program = mat.program;
         gl.useProgram(program.Program);
         if(defUniformBlock){

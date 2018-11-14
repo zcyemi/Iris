@@ -70,7 +70,7 @@ export class PassOpaque extends RenderPass{
             let mesh = node.mesh;
 
             let program = mat.program;
-            node.refershVertexArray(glctx);
+            node.refreshData(glctx);
 
             if(program != curprogram){
                 let glp = program.Program;

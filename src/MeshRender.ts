@@ -3,10 +3,10 @@ import { Material } from "./Material";
 import { GameObject } from "./GameObject";
 import { GLContext, GLProgram } from "wglut";
 import { ShaderFX } from "./shaderfx/ShaderFX";
+import { BaseRender } from "./BaseRender";
 
-export class MeshRender{
+export class MeshRender extends BaseRender{
     public mesh:Mesh;
-    public material:Material;
     public object:GameObject;
 
     public castShadow:boolean = true;
@@ -21,6 +21,7 @@ export class MeshRender{
     }
 
     public constructor(mesh?:Mesh,mat?:Material){
+        super();
         this.mesh = mesh;
         this.material = mat;
     }
@@ -35,7 +36,7 @@ export class MeshRender{
         this.mesh = null;
     }
     
-    public refershVertexArray(glctx:GLContext){
+    public refreshData(glctx:GLContext){
 
         let vao = this.m_vao;
         if(vao != null) return;

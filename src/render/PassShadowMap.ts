@@ -271,7 +271,7 @@ export class PassShadowMap extends RenderPass{
             let mat = node.material;
             let mesh = node.mesh;
             if(mat == null || mesh == null) continue;
-            node.refershVertexArray(glctx);
+            node.refreshData(glctx);
 
             let trs = node.object.transform;
             objdata.setMtxModel(trs.objMatrix);
