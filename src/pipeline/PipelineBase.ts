@@ -344,7 +344,7 @@ export class PipelineBase implements IRenderPipeline {
             let cobj = c.gameobject;
             if (!cobj.active) continue;
             let crender = cobj.render;
-            if (crender != null && crender.mesh != null) {
+            if (crender != null) {
                 drawlist.pushRenderNode(crender);
             }
             this.traversalRenderNode(drawlist, c);
@@ -431,7 +431,7 @@ export class PipelineBase implements IRenderPipeline {
         const gl = this.gl;
         let mat = meshrender.material;
         let mesh = meshrender.mesh;
-        meshrender.refershVertexArray(this.glctx);
+        meshrender.refreshData(this.glctx);
         let program = mat.program;
         gl.useProgram(program.Program);
         if(defUniformBlock){

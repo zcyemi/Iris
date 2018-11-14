@@ -19,6 +19,8 @@ export class GraphicsRender{
     private m_creationInfo:GraphicsRenderCreateInfo;
     private m_defaultTexture:Texture;
 
+    public static globalRender:GraphicsRender;
+
     public static readonly TEXID_FB:number = 0;
     public static readonly TEXID_TEMP:number = 2;
     public static readonly TEXID_DEFAULT_TEX:number = 3;
@@ -59,6 +61,7 @@ export class GraphicsRender{
     }
 
     public constructor(canvas:HTMLCanvasElement,pipeline?:IRenderPipeline,creationInfo?:GraphicsRenderCreateInfo){
+        GraphicsRender.globalRender = this;
         this.canvas = canvas;
 
         if(creationInfo == null){

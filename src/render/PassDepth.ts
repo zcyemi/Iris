@@ -81,19 +81,20 @@ export class PassDepth extends RenderPass{
 
         for(let i=0;i<len;i++){
             let node = queue[i];
-            let mat = node.material;
-            let mesh = node.mesh;
 
-            node.refershVertexArray(glctx);
-            dataobj.setMtxModel(node.object.transform.objMatrix);
-            pipe.updateUniformBufferObject(dataobj);
+            if(node instanceof MeshRender){
+                let mat = node.material;
+                let mesh = node.mesh;
+                node.refreshData(glctx);
+                dataobj.setMtxModel(node.object.transform.objMatrix);
+                pipe.updateUniformBufferObject(dataobj);
+                gl.bindVertexArray(node.vertexArrayObj);
+                let indicedesc = mesh.indiceDesc;
+                gl.drawElements(indicedesc.topology, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
+                gl.bindVertexArray(null);
+                mat.clean(gl);
+            }
 
-            gl.bindVertexArray(node.vertexArrayObj);
-            let indicedesc = mesh.indiceDesc;
-            gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
-            gl.bindVertexArray(null);
-
-            mat.clean(gl);
         }
 
         gl.colorMask(true,true,true,true);

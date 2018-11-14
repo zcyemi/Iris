@@ -188,6 +188,8 @@ export class ShaderSource {
                 default:
                     throw new Error(`unknown shader tag [${line}]`);
             }
+
+ 
             line = '';
         }
 
@@ -195,17 +197,20 @@ export class ShaderSource {
 
         match = line.match(regexblend);
         if (match != null) {
+            console.log('process blend');
             if (tags == null) {
                 tags = new ShaderTags();
                 this.m_shaderTag = tags;
             }
+            tags.blend = true;
             let tarfs = match[1].toUpperCase();
             let tarfd = match[2].toUpperCase();
-            let tarop = match[3].toLocaleUpperCase();
+            let tarop = match[3];
             if (tarop == null) {
                 tarop = 'ADD';
             }
             else {
+                tarop = tarop.toUpperCase();
                 let op = BlendOperator[tarop];
                 if (op == null) throw new Error(`invalid blend operator [${tarop}]`);
             }

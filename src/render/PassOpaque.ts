@@ -5,6 +5,7 @@ import { GLProgram } from "wglut";
 import { ShaderDataUniformObj, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { ShaderFX } from "../shaderfx/ShaderFX";
 import { RenderPass } from "./RenderPass";
+import { MeshRender } from "../MeshRender";
 
 
 export class PassOpaque extends RenderPass{
@@ -66,31 +67,33 @@ export class PassOpaque extends RenderPass{
         const dataobj = pipe.shaderDataObj;
         for(let i=0;i<len;i++){
             let node = queue[i];
-            let mat = node.material;
-            let mesh = node.mesh;
-
-            let program = mat.program;
-            node.refershVertexArray(glctx);
-
-            if(program != curprogram){
-                let glp = program.Program;
-                gl.useProgram(glp);
-                pipe.uniformBindDefault(program);
-
-                curprogram = program;
+            if(node instanceof MeshRender){
+                let mat = node.material;
+                let mesh = node.mesh;
+    
+                let program = mat.program;
+                node.refreshData(glctx);
+    
+                if(program != curprogram){
+                    let glp = program.Program;
+                    gl.useProgram(glp);
+                    pipe.uniformBindDefault(program);
+    
+                    curprogram = program;
+                }
+                state.apply(mat.shaderTags);
+                mat.apply(gl);
+    
+                dataobj.setMtxModel(node.object.transform.objMatrix);
+                pipe.updateUniformBufferObject(dataobj);
+    
+                gl.bindVertexArray(node.vertexArrayObj);
+                let indicedesc = mesh.indiceDesc;
+                gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
+                gl.bindVertexArray(null);
+    
+                mat.clean(gl);
             }
-            //state.apply(mat.shaderTags);
-            mat.apply(gl);
-
-            dataobj.setMtxModel(node.object.transform.objMatrix);
-            pipe.updateUniformBufferObject(dataobj);
-
-            gl.bindVertexArray(node.vertexArrayObj);
-            let indicedesc = mesh.indiceDesc;
-            gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
-            gl.bindVertexArray(null);
-
-            mat.clean(gl);
         }
 
         gl.disable(gl.POLYGON_OFFSET_FILL);
