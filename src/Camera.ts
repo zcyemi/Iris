@@ -1,9 +1,9 @@
 import { Transform } from "./Transform";
 import { mat4, vec3, vec4, glmath } from "wglut";
 import { GameObject } from "./GameObject";
-import { TextureCubeMap } from "./TextureCubeMap";
 import { Component } from "./Component";
 import { Scene } from "./Scene";
+import { Skybox } from "./Skybox";
 
 
 export enum AmbientType{
@@ -44,7 +44,7 @@ export class Camera extends Component{
     private m_ambientType:AmbientType = AmbientType.AmbientColor;
     private m_clearType:ClearType = ClearType.Background;
 
-    private m_skybox:TextureCubeMap;
+    private m_skybox:Skybox;
 
     private m_dataTrsDirty:boolean = true;
     public get isDataTrsDirty():boolean{
@@ -117,11 +117,11 @@ export class Camera extends Component{
         }
     }
 
-    public get skybox():TextureCubeMap{
+    public get skybox():Skybox{
         return this.m_skybox;
     }
-    public set skybox(tex:TextureCubeMap){
-        this.m_skybox = tex;
+    public set skybox(skybox:Skybox){
+        this.m_skybox = skybox;
     }
 
     public get clearType():ClearType{
