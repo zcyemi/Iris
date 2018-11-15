@@ -56,21 +56,17 @@ export class PassSkybox extends RenderPass{
         if(texskybox.type != this.m_lastSkyboxType){
             let newtype = texskybox.type;
             this.m_lastSkyboxType = newtype;
-            mat.setFlag("ENVMAP_TYPE",newtype == SkyboxType.CubeMap? "CUBE":"TEX",true);
+            mat.setFlag("ENVMAP_TYPE",newtype,true);
 
             let rawtex = texskybox.rawTex;
-            if(rawtex == null) throw new Error('skybox texture is null!');
             mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,rawtex);
         }
 
-        if(texskybox.rawTex != this.m_lastTex){
+        let rawtex = texskybox.rawTex;
+        if(rawtex != null && rawtex != this.m_lastTex){
             let tex =texskybox.rawTex;
             this.m_lastTex = tex;
-            if(tex == null) throw new Error('skybox texture is null!');
             mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
-
-            console.log("set skybox",mat);
-
         }
 
         pipeline.drawMeshRender(skyboxrender);

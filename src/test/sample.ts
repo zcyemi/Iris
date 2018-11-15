@@ -109,8 +109,10 @@ export class SampleGame{
         console.log(texcube);
 
         let tex360 = await Texture.loadTexture2D('res/envmap/day360.jpg',glctx,false);
-        skybox = Skybox.createFromTex360(tex360);
+        //skybox = Skybox.createFromTex360(tex360);
         //skybox = Skybox.createFromCubeMap(texcube);
+
+        skybox = Skybox.createFromProcedural();
 
         let scene:Scene = new Scene();
         this.m_scene = scene;

@@ -1,13 +1,14 @@
 import { Texture } from "./Texture";
 import { TextureCubeMap } from "./TextureCubeMap";
+import { vec3 } from "wglut";
 
 
 
 export enum SkyboxType{
-    CubeMap,
-    Tex360,
-    Procedural,
-    Custom,
+    CubeMap="CUBE",
+    Tex360="TEX",
+    Procedural="PCG",
+    Custom="CUSTOM",
 }
 
 
@@ -19,7 +20,7 @@ export class Skybox {
     public get type():SkyboxType{ return this.m_type;}
     public get rawTex():Texture{return this.m_rawtex;}
 
-    private constructor(type:SkyboxType) {
+    protected constructor(type:SkyboxType) {
         this.m_type =type;
     }
 
@@ -42,3 +43,4 @@ export class Skybox {
         return sb;
     }
 }
+
