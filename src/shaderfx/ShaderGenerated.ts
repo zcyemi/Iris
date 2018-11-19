@@ -407,7 +407,6 @@ void fragment(){
     float d = shadowDep;// lcpos.z;
     fragColor = vec4(lcpos.z -1.0,0,0,1.0);
 }`;
-	public static readonly sky:string = ``;
 	public static readonly skybox:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #options ENVMAP_TYPE CUBE TEX PCG
