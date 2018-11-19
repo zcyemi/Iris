@@ -1,76 +1,21 @@
 import {GLContext, GLUtility } from 'wglut';
-import { Texture } from './Texture';
+import { Texture, TextureCreationDesc } from './Texture';
 
-
-export enum CubeMapType{
-    Cube,
-    Texture360
-}
-
-export class TextureCubeMap{
-    
-    private m_rawTex:WebGLTexture;
-    private m_type:CubeMapType;
+/**
+ * TEXTURE_CUBE_MAP wrapped by Texture
+ */
+export class TextureCubeMap extends Texture{
 
     public get gltex():WebGLTexture{
-        return this.m_rawTex;
+        return this.m_raw;
     }
 
-    public get cubemapType():CubeMapType{
-        return this.m_type;
-    }
-
-    private constructor(type:CubeMapType){
-        this.m_type = type;
-    }
-
-    public release(glctx:GLContext){
-        if(this.m_rawTex){
-            glctx.gl.deleteTexture(this.m_rawTex);
-            this.m_rawTex = null;
-        }
-        return;
-    }
-
-    public static loadCubeMapTex(url:string,glctx:GLContext):Promise<TextureCubeMap>{
-        if(url == null) return null;
-        return new Promise<TextureCubeMap>(async (res,rej)=>{
-            let img = await GLUtility.loadImage(url);
-            if(img == null){
-                rej('load image failed!');
-                return;
-            }
-
-            let texcube:TextureCubeMap = null;
-
-            try{
-                let gl = glctx.gl;
-                let gltex2d = gl.createTexture();
-
-                gl.activeTexture(Texture.TEMP_TEXID);
-                gl.bindTexture(gl.TEXTURE_2D,gltex2d);
-                gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
-                gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
-                gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-                gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
-                gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-                gl.bindTexture(gl.TEXTURE_2D,null);
-    
-                texcube = new TextureCubeMap(CubeMapType.Texture360);
-                texcube.m_rawTex = gltex2d;
-            }
-            catch(e){
-                rej(e);
-            }
-
-            res(texcube);
-            return;
-
-        });
+    public constructor(tex?:WebGLTexture,width:number =0,height:number = 0,desc?:TextureCreationDesc){
+        super(tex,width,height,desc);
     }
 
     /**
-     * 
+     * create cubemap texture with six-faces images
      * @param urls [Front,Back,Up,Down,Right,Left]
      * @param glctx 
      */
@@ -97,6 +42,9 @@ export class TextureCubeMap{
                 let gltexcube = gl.createTexture();
                 gl.activeTexture(Texture.TEMP_TEXID);
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP,gltexcube);
+
+                let imgw:number = imgs[0].width;
+                let imgh:number = imgs[0].height;
                 for(let i=0;i<6;i++){
                     let img = imgs[i];
                     gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X +i,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
@@ -107,9 +55,8 @@ export class TextureCubeMap{
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_R,gl.CLAMP_TO_EDGE);
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP,null);
-    
-                texcube = new TextureCubeMap(CubeMapType.Cube);
-                texcube.m_rawTex = gltexcube;
+                texcube = new TextureCubeMap(gltexcube,imgw,imgh,new TextureCreationDesc(gl.RGB,gl.RGB,false,gl.LINEAR,gl.LINEAR));
+                texcube.m_raw = gltexcube;
             }
             catch(e){
                 rej(e);

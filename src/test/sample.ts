@@ -20,6 +20,7 @@ import { PipelineForwardZPrePass } from '../pipeline/PipelineForwardZPrePass';
 import { Transform } from '../Transform';
 import { SpriteRender } from '../SpriteRender';
 import { Texture } from '../Texture';
+import { Skybox } from '../Skybox';
 
 export class SampleGame{
     
@@ -94,18 +95,24 @@ export class SampleGame{
         //texture
         let tex = await glctx.createTextureImageAsync('res/images/tex0.png');
 
-        // let cubepaths:string[] = [
-        //     "res/envmap/peak/peaks_ft.jpg",
-        //     "res/envmap/peak/peaks_bk.jpg",
-        //     "res/envmap/peak/peaks_up.jpg",
-        //     "res/envmap/peak/peaks_dn.jpg",
-        //     "res/envmap/peak/peaks_rt.jpg",
-        //     "res/envmap/peak/peaks_lf.jpg",
-        // ];
-        // let texcube = await TextureCubeMap.loadCubeMap(cubepaths,glctx);
+        let skybox:Skybox = null;
 
-        let texcube = await TextureCubeMap.loadCubeMapTex('res/envmap/day360.jpg',glctx);
+        let cubepaths:string[] = [
+            "res/envmap/peak/peaks_ft.jpg",
+            "res/envmap/peak/peaks_bk.jpg",
+            "res/envmap/peak/peaks_up.jpg",
+            "res/envmap/peak/peaks_dn.jpg",
+            "res/envmap/peak/peaks_rt.jpg",
+            "res/envmap/peak/peaks_lf.jpg",
+        ];
+        let texcube = await TextureCubeMap.loadCubeMap(cubepaths,glctx);
+        console.log(texcube);
 
+        let tex360 = await Texture.loadTexture2D('res/envmap/day360.jpg',glctx,false);
+        //skybox = Skybox.createFromTex360(tex360);
+        //skybox = Skybox.createFromCubeMap(texcube);
+
+        skybox = Skybox.createFromProcedural();
 
         let scene:Scene = new Scene();
         this.m_scene = scene;
@@ -117,7 +124,7 @@ export class SampleGame{
         camera.transform.setLocalDirty();
         camera.ambientColor = Utility.colorRGBA(3, 110, 167, 15);
         camera.clearType = ClearType.Skybox;
-        camera.skybox = texcube;
+        camera.skybox = skybox;
         camera.background = glmath.vec4(0, 1, 0, 1);
         camera.gameobject.addComponent(new CameraFreeFly());
         camera.gameobject.name = "camera";

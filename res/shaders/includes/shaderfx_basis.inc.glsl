@@ -1,6 +1,8 @@
 #define PI 3.1415926
 #define PI_2 6.2831852
 #define PI_HALF 1.5707963
+#define EPSILON 1e-5
+
 uniform UNIFORM_OBJ{
     mat4 _obj2world_;
 };
@@ -52,3 +54,6 @@ float DECODE_VIEWDEPTH(float d){
 vec4 ClipToWorld(in vec4 clippoint){
     return inverse(MATRIX_VP) * clippoint;
 }
+
+
+#define saturate(x) clamp(x,0.0,1.0)

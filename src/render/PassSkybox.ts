@@ -1,22 +1,20 @@
 import { PipelineBase } from "../pipeline/PipelineBase";
-import { ShaderTags, Comparison, CullingMode, BlendOperator } from "../shaderfx/Shader";
+import { ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
-import { GLProgram } from "wglut";
 import { ClearType } from "../Camera";
-import { CubeMapType, TextureCubeMap } from "../TextureCubeMap";
 import { Material } from "../Material";
 import { Mesh } from "../Mesh";
 import { ShaderFX } from "../shaderfx/ShaderFX";
 import { RenderPass } from "./RenderPass";
-import { Texture } from "../Texture";
+import { SkyboxType } from "../Skybox";
 
 export class PassSkybox extends RenderPass{
     private m_tags:ShaderTags;
 
     private m_skyrender:MeshRender;
 
-    private m_lastCubeType: CubeMapType = CubeMapType.Texture360;
+    private m_lastSkyboxType: SkyboxType = SkyboxType.Tex360;
     private m_lastTex:WebGLTexture;
 
     public constructor(pipeline:PipelineBase){
@@ -55,18 +53,20 @@ export class PassSkybox extends RenderPass{
         const skyboxrender = this.m_skyrender;
         const mat = skyboxrender.material;
         let texskybox = camera.skybox;
-        if(texskybox.cubemapType != this.m_lastCubeType){
-            let newtype = texskybox.cubemapType;
-            this.m_lastCubeType = newtype;
-            mat.setFlag("ENVMAP_TYPE",newtype == CubeMapType.Cube? "CUBE":"TEX",true);
-            mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,texskybox.gltex);
+        if(texskybox.type != this.m_lastSkyboxType){
+            let newtype = texskybox.type;
+            this.m_lastSkyboxType = newtype;
+            mat.setFlag("ENVMAP_TYPE",newtype,true);
+
+            let rawtex = texskybox.rawTex;
+            mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,rawtex);
         }
 
-        if(texskybox.gltex != this.m_lastTex){
-            let tex =texskybox.gltex;
+        let rawtex = texskybox.rawTex;
+        if(rawtex != null && rawtex != this.m_lastTex){
+            let tex =texskybox.rawTex;
             this.m_lastTex = tex;
             mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
-
         }
 
         pipeline.drawMeshRender(skyboxrender);

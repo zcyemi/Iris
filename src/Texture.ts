@@ -41,11 +41,11 @@ export class Texture {
 
     public static TEMP_TEXID: number;
 
-    private m_raw: WebGLTexture;
-    private m_width: number;
-    private m_height: number;
+    protected m_raw: WebGLTexture;
+    protected m_width: number;
+    protected m_height: number;
 
-    private m_desc: TextureCreationDesc;
+    protected m_desc: TextureCreationDesc;
 
     public get rawtexture(): WebGLTexture {
         return this.m_raw;
@@ -61,10 +61,14 @@ export class Texture {
         this.m_desc = desc == null ? null : desc.clone();
     }
 
-
-    public release(glctx: GLContext) {
-
+    public release(glctx:GLContext){
+        if(this.m_raw){
+            glctx.gl.deleteTexture(this.m_raw);
+            this.m_raw = null;
+        }
+        return;
     }
+
 
     public static createTexture2D(width: number, height: number, desc: TextureCreationDesc, glctx: GLContext): Texture {
         let gl = glctx.gl;
