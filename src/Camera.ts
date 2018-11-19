@@ -1,9 +1,8 @@
-import { Transform } from "./Transform";
-import { mat4, vec3, vec4, glmath } from "wglut";
 import { GameObject } from "./GameObject";
 import { Component } from "./Component";
 import { Scene } from "./Scene";
 import { Skybox } from "./Skybox";
+import { mat4, vec4, glmath } from "./math/GLMath";
 
 
 export enum AmbientType{

@@ -1,9 +1,10 @@
 import { Mesh } from "./Mesh";
 import { Material } from "./Material";
 import { GameObject } from "./GameObject";
-import { GLContext, GLProgram } from "wglut";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 import { BaseRender } from "./BaseRender";
+import { GLContext } from "./gl/GLContext";
+import { GLProgram } from "./gl/GLProgram";
 
 export class MeshRender extends BaseRender{
     public mesh:Mesh;

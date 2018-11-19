@@ -1,4 +1,4 @@
-import { vec3, glmath, vec4 } from "wglut";
+import { vec3, glmath, vec4 } from "./math/GLMath";
 import { MapStr } from "./Utility";
 
 

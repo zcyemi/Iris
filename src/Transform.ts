@@ -1,4 +1,4 @@
-import { vec3, quat, mat4, mat3 } from "wglut";
+import { vec3, quat, mat4, mat3 } from "./math/GLMath";
 import { GameObject } from "./GameObject";
 
 export class Transform{

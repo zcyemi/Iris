@@ -1,6 +1,4 @@
-import { PipelineBase } from "../pipeline/PipelineBase";
 import { Scene } from "../Scene";
-import { MeshRender } from "../MeshRender";
 import { RenderPass } from "./RenderPass";
 
 
@@ -15,7 +13,8 @@ export class PassDebug extends RenderPass{
             let info = debugInfo[i];
             let rawtex =info.rawTexture;
             if(rawtex != null){
-                glctx.drawTex(rawtex,false,false,info.drawRect);
+                //TODO
+                //glctx.drawTex(rawtex,false,false,info.drawRect);
             }
         }
     }

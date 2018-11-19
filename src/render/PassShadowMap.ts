@@ -2,7 +2,7 @@ import { PipelineBase } from "../pipeline/PipelineBase";
 import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
 import { Shader } from "../shaderfx/Shader";
-import { GLProgram, glmath, vec3, mat4, vec4 } from "wglut";
+import { glmath, vec3, mat4, vec4 } from "../math/GLMath";
 import { ShaderFX, ShaderFile } from "../shaderfx/ShaderFX";
 import { ShadowCascade, ShadowConfig } from "./Shadow";
 import { Texture, TextureCreationDesc } from "../Texture";
@@ -14,6 +14,7 @@ import { ShaderSource } from "../shaderfx/ShaderSource";
 import { Material } from "../Material";
 import { RenderPass } from "./RenderPass";
 import { BaseRender } from "../BaseRender";
+import { GLProgram } from "../gl/GLProgram";
 
 export class PassShadowMap extends RenderPass {
     private m_shader: Shader;

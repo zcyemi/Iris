@@ -1,4 +1,3 @@
-import { GLContext,GLUtility, quat, glmath, vec3, GLTFtool, vec4} from 'wglut';
 import { Scene } from '../Scene';
 import { GameObject } from '../GameObject';
 import { MeshRender } from '../MeshRender';
@@ -21,6 +20,9 @@ import { Transform } from '../Transform';
 import { SpriteRender } from '../SpriteRender';
 import { Texture } from '../Texture';
 import { Skybox } from '../Skybox';
+import { GLContext } from '../gl/GLContext';
+import { GLUtility } from '../gl/GLUtility';
+import { vec3, glmath } from '../math/GLMath';
 
 export class SampleGame{
     

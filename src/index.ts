@@ -1,5 +1,3 @@
-export * from 'wglut';
-
 export * from './DebugEntry';
 export * from './GraphicsRender';
 export * from './pipeline/IRenderPipeline';

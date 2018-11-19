@@ -1,12 +1,9 @@
 import { PipelineBase } from "../pipeline/PipelineBase";
 import { ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
-import { GLProgram } from "wglut";
-import { ShaderDataUniformObj, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
-import { ShaderFX } from "../shaderfx/ShaderFX";
+import { GLProgram } from "../gl/GLProgram";
 import { RenderPass } from "./RenderPass";
 import { MeshRender } from "../MeshRender";
-
 
 export class PassOpaque extends RenderPass{
 

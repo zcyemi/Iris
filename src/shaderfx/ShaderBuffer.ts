@@ -1,4 +1,4 @@
-import { vec3, vec4, mat4, mat3 } from "wglut";
+import { vec3, vec4, mat4, mat3 } from "../math/GLMath";
 
 class ShaderBuffer{
     private minoff:number =0;

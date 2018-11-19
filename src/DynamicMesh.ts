@@ -1,5 +1,5 @@
 import { Mesh, MeshDataBuffer } from "./Mesh";
-import { GLContext } from "wglut";
+import { GLContext } from "./gl/GLContext";
 
 
 export class DynamicMesh extends Mesh{

@@ -1,6 +1,6 @@
-import { int, GLUtility } from "wglut";
 import { Utility } from "../Utility";
 import { ShaderPreprocessor } from "./ShaderPreprocessor";
+import { GLUtility } from "../gl/GLUtility";
 
 export type IncludeIndex = {key:string,line:number};
 export class ShaderVariant{
@@ -99,7 +99,7 @@ export class ShaderOptions{
 }
 
 export class ShaderOptionsConfig{
-    private m_hashCode:int = 0;
+    private m_hashCode:number = 0;
     private m_dirty:boolean = false;
 
     private m_optmap:{[flag:string]:string} = {};
@@ -151,7 +151,7 @@ export class ShaderOptionsConfig{
         return true;
     }
 
-    public get hashCode():int{
+    public get hashCode():number{
         if(this.m_dirty){
             this.compileOptions();
         }

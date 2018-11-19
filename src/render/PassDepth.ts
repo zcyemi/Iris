@@ -2,11 +2,11 @@ import { PipelineBase } from "../pipeline/PipelineBase";
 import { ShaderTags, Comparison, CullingMode, Shader } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
-import { GLProgram, vec3, glmath } from "wglut";
-import { ShaderDataUniformObj, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { BufferDebugInfo } from "./BufferDebugInfo";
 import { RenderPass } from "./RenderPass";
 import { ShaderFX } from "../shaderfx/ShaderFX";
+import { GLProgram } from "../gl/GLProgram";
+import { glmath } from "../math/GLMath";
 
 /**
  * Pre-rendering Depth Pass

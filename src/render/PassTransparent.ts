@@ -1,7 +1,7 @@
 import { PipelineBase } from "../pipeline/PipelineBase";
 import { ShaderTags, Comparison, CullingMode, BlendOperator } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
-import { GLProgram } from "wglut";
+import { GLProgram } from "../gl/GLProgram";
 import { RenderPass } from "./RenderPass";
 import { MeshRender } from "../MeshRender";
 

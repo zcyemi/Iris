@@ -1,5 +1,5 @@
 import { ShaderTags, BlendFactor, BlendOperator, CullingMode, Comparison } from "./shaderfx/Shader";
-import { GLContext } from "wglut";
+import { GLContext } from "./gl/GLContext";
 
 export class PipelineStateCache{
 

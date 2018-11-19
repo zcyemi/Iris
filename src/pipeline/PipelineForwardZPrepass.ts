@@ -8,7 +8,7 @@ import { PipelineBase } from "./PipelineBase";
 import { TextureCreationDesc, Texture } from "../Texture";
 import { Scene } from "../Scene";
 import { Comparison } from "../shaderfx/Shader";
-import { GL } from "../GL";
+import { GL } from "../gl/GL";
 import { RenderPass } from "../render/RenderPass";
 
 export class PipelineForwardZPrePass extends PipelineBase {

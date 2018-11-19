@@ -1,5 +1,6 @@
-import {GLContext, GLUtility } from 'wglut';
 import { Texture, TextureCreationDesc } from './Texture';
+import { GLUtility } from './gl/GLUtility';
+import { GLContext } from './gl/GLContext';
 
 /**
  * TEXTURE_CUBE_MAP wrapped by Texture

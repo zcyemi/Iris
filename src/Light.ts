@@ -1,5 +1,5 @@
 import { GameObject } from "./GameObject";
-import { vec4, vec3, mat4 } from "wglut";
+import { vec3 } from "./math/GLMath";
 import { Component } from "./Component";
 import { Scene } from "./Scene";
 

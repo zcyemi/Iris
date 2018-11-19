@@ -1,7 +1,7 @@
 import { ShaderSource } from "./ShaderSource";
-import { GLProgram, GLContext } from "wglut";
 import { ShaderOptionsConfig } from "./ShaderVariant";
-import { ShaderPreprocessor } from "./ShaderPreprocessor";
+import { GLProgram } from "../gl/GLProgram";
+import { GLContext } from "../gl/GLContext";
 
 export enum RenderQueue{
     Opaque,
