@@ -1,6 +1,5 @@
 import { Texture } from "./Texture";
 import { TextureCubeMap } from "./TextureCubeMap";
-import { vec3 } from "wglut";
 
 
 

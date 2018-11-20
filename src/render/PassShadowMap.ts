@@ -2,7 +2,7 @@ import { PipelineBase } from "../pipeline/PipelineBase";
 import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
 import { Shader } from "../shaderfx/Shader";
-import { GLProgram, glmath, vec3, mat4, vec4 } from "wglut";
+import { glmath, vec3, mat4, vec4 } from "../math/GLMath";
 import { ShaderFX, ShaderFile } from "../shaderfx/ShaderFX";
 import { ShadowCascade, ShadowConfig } from "./Shadow";
 import { Texture, TextureCreationDesc } from "../Texture";
@@ -14,6 +14,7 @@ import { ShaderSource } from "../shaderfx/ShaderSource";
 import { Material } from "../Material";
 import { RenderPass } from "./RenderPass";
 import { BaseRender } from "../BaseRender";
+import { GLProgram } from "../gl/GLProgram";
 
 export class PassShadowMap extends RenderPass {
     private m_shader: Shader;
@@ -279,10 +280,10 @@ export class PassShadowMap extends RenderPass {
                 objdata.setMtxModel(trs.objMatrix);
                 pipe.updateUniformBufferObject(objdata);
 
-                gl.bindVertexArray(node.vertexArrayObj);
+                node.bindVertexArray(gl);
                 let indicesDesc = mesh.indiceDesc;
                 gl.drawElements(indicesDesc.topology, indicesDesc.indiceCount, indicesDesc.type, indicesDesc.offset);
-                gl.bindVertexArray(null);
+                node.unbindVertexArray(gl);
             }
         }
     }

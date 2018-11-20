@@ -3,8 +3,9 @@ import { Mesh } from "./Mesh";
 import { Material } from "./Material";
 import { GraphicsRender } from "./GraphicsRender";
 import { Texture } from "./Texture";
-import { GLContext, vec4 } from "wglut";
 import { ShaderFX } from "./shaderfx/ShaderFX";
+import { vec4 } from "./math/GLMath";
+import { GLContext } from "./gl/GLContext";
 
 
 export class SpriteRender extends MeshRender{

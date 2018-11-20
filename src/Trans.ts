@@ -1,4 +1,4 @@
-import { vec3, mat4, quat } from "wglut";
+import { vec3, mat4, quat } from "./math/GLMath";
 import { GameObject } from "./GameObject";
 
 /**

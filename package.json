@@ -11,9 +11,7 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "wglut": "^0.1.3"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/chai": "^4.1.6",
     "@types/mocha": "^5.2.5",

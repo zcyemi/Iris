@@ -1,4 +1,3 @@
-import { GLContext, vec4, GLFrameBuffer } from "wglut";
 import { ShaderFXLibs } from "./shaderfx/ShaderFXLibs";
 import { ShadowConfig } from "./render/Shadow";
 import { Delayter } from "./Utility";
@@ -6,6 +5,7 @@ import { Texture } from "./Texture";
 import { Material } from "./Material";
 import { IRenderPipeline } from "./pipeline/IRenderPipeline";
 import { Input } from "./Input";
+import { GLContext } from "./gl/GLContext";
 
 export class GraphicsRenderCreateInfo{
     public colorFormat:number = 0x8058;

@@ -1,9 +1,10 @@
-import { GLProgram, vec4, vec3 } from "wglut";
+import { vec4, vec3 } from "./math/GLMath";
 import { Shader, ShaderTags } from "./shaderfx/Shader";
 import { ShaderOptionsConfig, ShaderOptions } from "./shaderfx/ShaderVariant";
 import { Utility } from "./Utility";
 import { Texture } from "./Texture";
 import { ShaderFX } from "./shaderfx/ShaderFX";
+import { GLProgram } from "./gl/GLProgram";
 
 export type MaterialProperty = {type:number,value:any};
 

@@ -1,30 +1,37 @@
 import { Mesh } from "./Mesh";
 import { Material } from "./Material";
 import { GameObject } from "./GameObject";
-import { GLContext, GLProgram } from "wglut";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 import { BaseRender } from "./BaseRender";
+import { GLContext } from "./gl/GLContext";
+import { GLProgram } from "./gl/GLProgram";
+import { Program } from "estree";
 
 export class MeshRender extends BaseRender{
     public mesh:Mesh;
     public object:GameObject;
 
-    
-
     public _depthVal:number;
 
-
+    private m_dynamic:boolean =false;
     private m_vao:WebGLVertexArrayObject;
+    private m_vaoProgamId:number = -1;
 
-    public get vertexArrayObj():WebGLVertexArrayObject{
-        return this.m_vao;
+    public get dynamic():boolean{
+        return this.m_dynamic;
     }
 
-    public constructor(mesh?:Mesh,mat?:Material){
+    /**
+     * @param mesh 
+     * @param mat 
+     * @param dynamic dynamic meshRender will not generate VertexArrayObject
+     */
+    public constructor(mesh?:Mesh,mat?:Material,dynamic:boolean = false){
         super();
         this.mesh = mesh;
         this.material = mat;
         this.castShadow = true;
+        this.m_dynamic = dynamic;
     }
     
 
@@ -44,30 +51,70 @@ export class MeshRender extends BaseRender{
     }
     
     public refreshData(glctx:GLContext){
-
-        let vao = this.m_vao;
-        if(vao != null) return;
-
         let mesh =this.mesh;
         let mat = this.material;
         if(mat == null || mat.program == null){
             throw new Error("material or program is null");
         }
 
-        this.m_vao = MeshRender.CreateVertexArrayObj(glctx,mesh,mat.program);
+        if(this.m_dynamic){
+            if(!mesh.bufferInited){
+                mesh.refreshMeshBuffer(glctx);
+            }
+        }
+        else{
+            let vao = this.m_vao;
+            if(vao != null){
+                let curid = mat.program.id;
+                if(curid == this.m_vaoProgamId) return;
+    
+                console.log("program changes");
+                glctx.gl.deleteVertexArray(this.m_vao);
+                this.m_vaoProgamId = -1;
+            }
+    
+            this.m_vao = MeshRender.CreateVertexArrayObj(glctx,mesh,mat.program);
+            this.m_vaoProgamId = mat.program.id;
+        }
     }
 
-    public static CreateVertexArrayObj(glctx:GLContext,mesh:Mesh,program:GLProgram):WebGLVertexArrayObject{
-        if(!mesh.bufferInited){
-            mesh.refreshMeshBuffer(glctx);
+    /**
+     * Bind meshbuffers
+     * dynamic meshrender: bindBuffer
+     * static meshrender: bindVertexArray
+     * @param gl 
+     */
+    public bindVertexArray(gl:WebGL2RenderingContext){
+        if(this.m_dynamic){
+            MeshRender.bindBuffers(gl,this.mesh,this.material.program);
         }
+        else{
+            gl.bindVertexArray(this.m_vao);
+        }
+    }
 
-        if(program == null) throw new Error("program is null"); 
-        let attrs = program.Attributes;
-        let vertdesc = mesh.vertexDesc;
-        let gl = glctx.gl;
-        let vao = gl.createVertexArray();
-        gl.bindVertexArray(vao);
+    /**
+     * Unbind meshbuffers
+     * dynamic meshrender: unbindBuffer
+     * static meshrender: unbindVertexArray
+     * @param gl 
+     */
+    public unbindVertexArray(gl:WebGL2RenderingContext,unbindBuffer:boolean = true){
+        if(this.m_dynamic){
+            if(unbindBuffer){
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,null);
+                gl.bindBuffer(gl.ARRAY_BUFFER,null);
+            }
+        }
+        else{
+            gl.bindVertexArray(null);
+        }
+    }
+
+
+    private static bindBuffers(gl:WebGL2RenderingContext,mesh:Mesh,program:GLProgram){
+        const vertdesc = mesh.vertexDesc;
+        const attrs = program.Attributes;
 
         if(mesh.seperatedBuffer){
             if(vertdesc.position != null){
@@ -128,12 +175,21 @@ export class MeshRender extends BaseRender{
             }
         }
 
-        //indices
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.bufferIndices);
+    }
 
+    public static CreateVertexArrayObj(glctx:GLContext,mesh:Mesh,program:GLProgram):WebGLVertexArrayObject{
+        if(!mesh.bufferInited){
+            mesh.refreshMeshBuffer(glctx);
+        }
+        if(program == null) throw new Error("program is null"); 
 
+        let gl = glctx.gl;
+        let vao = gl.createVertexArray();
+
+        gl.bindVertexArray(vao);
+        MeshRender.bindBuffers(gl,mesh,program);
         gl.bindVertexArray(null);
-
 
         return vao;
     }

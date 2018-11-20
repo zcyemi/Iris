@@ -1,4 +1,4 @@
-import { mat4 } from "wglut";
+import { mat4 } from "../math/GLMath";
 
 export enum ShadowCascade{
     NoCascade = 1,

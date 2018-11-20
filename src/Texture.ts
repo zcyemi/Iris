@@ -1,5 +1,5 @@
-import { GLContext } from "wglut";
-import { GL } from "./GL";
+import { GLContext } from "./gl/GLContext";
+import { GL } from "./gl/GL";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 
 export class TextureCreationDesc {

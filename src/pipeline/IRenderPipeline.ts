@@ -1,5 +1,5 @@
 import { GraphicsRender, GraphicsRenderCreateInfo } from "../GraphicsRender";
-import { GLContext } from "wglut";
+import { GLContext } from "../gl/GLContext";
 
 
 export interface IRenderPipeline{

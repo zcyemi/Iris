@@ -1,6 +1,6 @@
 import { GameObject } from "./GameObject";
-import { GLContext } from "wglut";
 import { Material } from "./Material";
+import { GLContext } from "./gl/GLContext";
 
 
 export abstract class BaseRender{

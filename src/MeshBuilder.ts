@@ -1,6 +1,6 @@
-import { MeshTopology, Mesh, MeshDataBufferIndices } from "./Mesh";
-import { vec3 } from "wglut";
-import { GLConst } from "./GL";
+import { MeshTopology, Mesh } from "./Mesh";
+import { vec3 } from "./math/GLMath";
+import { GLConst } from "./gl/GL";
 
 
 export class MeshBuilder{

@@ -1,7 +1,7 @@
 import { PipelineBase } from "../pipeline/PipelineBase";
 import { ShaderTags, Comparison, CullingMode, BlendOperator } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
-import { GLProgram } from "wglut";
+import { GLProgram } from "../gl/GLProgram";
 import { RenderPass } from "./RenderPass";
 import { MeshRender } from "../MeshRender";
 
@@ -64,10 +64,12 @@ export class PassTransparent extends RenderPass{
                 mat.apply(gl);
                 dataobj.setMtxModel(node.object.transform.objMatrix);
                 pipe.updateUniformBufferObject(dataobj);
-                gl.bindVertexArray(node.vertexArrayObj);
+
+                node.bindVertexArray(gl);
                 let indicedesc = mesh.indiceDesc;
                 gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
-                gl.bindVertexArray(null);
+                node.unbindVertexArray(gl);
+
                 mat.clean(gl);
             }
         

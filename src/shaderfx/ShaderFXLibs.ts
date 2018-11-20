@@ -1,9 +1,10 @@
 import { ShaderSource } from "./ShaderSource";
 import { ShaderFX, ShaderFile, ShaderInc } from "./ShaderFX";
 import { ShaderVariant } from "./ShaderVariant";
-import { mat4, GLContext, vec4, vec3 } from "wglut";
 import { ShaderData, ShaderSubData } from "./ShaderBuffer";
 import { Shader } from "./Shader";
+import { vec3, vec4, mat4 } from "../math/GLMath";
+import { GLContext } from "../gl/GLContext";
 
 export class ShaderFXLibs{
     private glctx:GLContext;

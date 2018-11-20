@@ -1,4 +1,3 @@
-import { GLContext, GLFrameBuffer, GLProgram, mat4, quat } from "wglut";
 import { Scene } from "../Scene";
 import { ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight, ShaderDataBasis } from "../shaderfx/ShaderFXLibs";
 import { GraphicsRenderCreateInfo, GraphicsRender } from "../GraphicsRender";
@@ -17,6 +16,10 @@ import { MeshRender } from "../MeshRender";
 import { Material } from "../Material";
 import { Camera } from "../Camera";
 import { Input } from "../Input";
+import { GLContext } from "../gl/GLContext";
+import { GLFrameBuffer } from "../gl/GLFrameBuffer";
+import { GLProgram } from "../gl/GLProgram";
+import { mat4 } from "../math/GLMath";
 
 export class PipelineBase implements IRenderPipeline {
 
@@ -443,11 +446,12 @@ export class PipelineBase implements IRenderPipeline {
             dataobj.setMtxModel(objmtx);
             this.updateUniformBufferObject(dataobj);
         }
-        let vao = meshrender.vertexArrayObj;
-        gl.bindVertexArray(vao);
+
+        meshrender.bindVertexArray(gl);
         let indicedesc = mesh.indiceDesc;
         gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type,indicedesc.offset);
-        gl.bindVertexArray(null);
+        meshrender.unbindVertexArray(gl);
+
         mat.clean(gl);
     }
 

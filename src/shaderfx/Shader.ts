@@ -1,7 +1,7 @@
 import { ShaderSource } from "./ShaderSource";
-import { GLProgram, GLContext } from "wglut";
 import { ShaderOptionsConfig } from "./ShaderVariant";
-import { ShaderPreprocessor } from "./ShaderPreprocessor";
+import { GLProgram } from "../gl/GLProgram";
+import { GLContext } from "../gl/GLContext";
 
 export enum RenderQueue{
     Opaque,
@@ -178,7 +178,7 @@ export class Shader{
         }
     }
 
-    public static CreateProgram(glctx:GLContext,vsource:string,psource:string){
+    public static CreateProgram(glctx:GLContext,vsource:string,psource:string):GLProgram{
         let gl = glctx.gl;
         let vs = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vs, vsource);

@@ -1,4 +1,4 @@
-import { vec4, glmath } from "wglut";
+import { vec4, glmath } from "./math/GLMath";
 
 
 export type MapStr<T> = {[key:string]:T};

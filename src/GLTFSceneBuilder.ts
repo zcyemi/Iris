@@ -1,13 +1,14 @@
-import { GLTFdata, GLContext, GLTFnode, quat, GLTFfile, vec4, glmath, vec3, mat4 } from "wglut";
-import { Scene } from "./Scene";
 import { GameObject } from "./GameObject";
 import { Mesh, MeshDataBuffer, MeshVertexAttrDesc, MeshDataBufferIndices, MeshBufferUtility } from "./Mesh";
 import { MeshRender } from "./MeshRender";
-import { GL, GLDataType } from "./GL";
+import { GL } from "./gl/GL";
 import { Material } from "./Material";
 import { ShaderFXLibs } from "./shaderfx/ShaderFXLibs";
-import { Shader, ShaderTags, CullingMode, BlendFactor, BlendOperator, RenderQueue } from "./shaderfx/Shader";
+import { Shader, ShaderTags, CullingMode, BlendOperator, RenderQueue } from "./shaderfx/Shader";
 import { Texture } from "./Texture";
+import { GLTFdata, GLTFfile, GLTFnode } from "./gl/GLTFtool";
+import { GLContext } from "./gl/GLContext";
+import { glmath, quat, mat4, vec4 } from "./math/GLMath";
 
 
 export class GLTFSceneBuilder{
