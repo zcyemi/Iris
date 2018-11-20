@@ -178,7 +178,7 @@ export class Shader{
         }
     }
 
-    public static CreateProgram(glctx:GLContext,vsource:string,psource:string){
+    public static CreateProgram(glctx:GLContext,vsource:string,psource:string):GLProgram{
         let gl = glctx.gl;
         let vs = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vs, vsource);

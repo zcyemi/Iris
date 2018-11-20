@@ -88,10 +88,12 @@ export class PassDepth extends RenderPass{
                 node.refreshData(glctx);
                 dataobj.setMtxModel(node.object.transform.objMatrix);
                 pipe.updateUniformBufferObject(dataobj);
-                gl.bindVertexArray(node.vertexArrayObj);
+                
+                node.bindVertexArray(gl);
                 let indicedesc = mesh.indiceDesc;
                 gl.drawElements(indicedesc.topology, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
-                gl.bindVertexArray(null);
+                node.unbindVertexArray(gl);
+
                 mat.clean(gl);
             }
 

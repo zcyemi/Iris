@@ -446,11 +446,12 @@ export class PipelineBase implements IRenderPipeline {
             dataobj.setMtxModel(objmtx);
             this.updateUniformBufferObject(dataobj);
         }
-        let vao = meshrender.vertexArrayObj;
-        gl.bindVertexArray(vao);
+
+        meshrender.bindVertexArray(gl);
         let indicedesc = mesh.indiceDesc;
         gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type,indicedesc.offset);
-        gl.bindVertexArray(null);
+        meshrender.unbindVertexArray(gl);
+
         mat.clean(gl);
     }
 

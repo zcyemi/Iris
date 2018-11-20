@@ -280,10 +280,10 @@ export class PassShadowMap extends RenderPass {
                 objdata.setMtxModel(trs.objMatrix);
                 pipe.updateUniformBufferObject(objdata);
 
-                gl.bindVertexArray(node.vertexArrayObj);
+                node.bindVertexArray(gl);
                 let indicesDesc = mesh.indiceDesc;
                 gl.drawElements(indicesDesc.topology, indicesDesc.indiceCount, indicesDesc.type, indicesDesc.offset);
-                gl.bindVertexArray(null);
+                node.unbindVertexArray(gl);
             }
         }
     }

@@ -64,10 +64,12 @@ export class PassTransparent extends RenderPass{
                 mat.apply(gl);
                 dataobj.setMtxModel(node.object.transform.objMatrix);
                 pipe.updateUniformBufferObject(dataobj);
-                gl.bindVertexArray(node.vertexArrayObj);
+
+                node.bindVertexArray(gl);
                 let indicedesc = mesh.indiceDesc;
                 gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
-                gl.bindVertexArray(null);
+                node.unbindVertexArray(gl);
+
                 mat.clean(gl);
             }
         

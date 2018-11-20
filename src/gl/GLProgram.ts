@@ -1,5 +1,8 @@
 
 
+
+    
+
 export class GLProgram{
 
     public Program: WebGLProgram;
@@ -12,6 +15,16 @@ export class GLProgram{
 
     public extras?:any;
 
+    private m_id?:number;
+    private static s_id:number = 0;
+    public get id():number{
+        if(this.m_id == null){
+            GLProgram.s_id++;
+            this.m_id = GLProgram.s_id;
+        }
+        return this.m_id;
+    }
+
     public GetUniform(key:string):WebGLUniformLocation | null{
         return this.Uniforms[key];
     }
@@ -19,6 +32,7 @@ export class GLProgram{
     public GetAttribute(key:string):any{
         return this.Attributes[key];
     }
+
 
     public constructor(gl: WebGL2RenderingContext, program: WebGLProgram) {
         this.Program = program;
