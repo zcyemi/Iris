@@ -1,3 +1,4 @@
+import { Texture } from "../Texture";
 
 type OnFrameFunc = (t:number)=>void;
 
@@ -84,5 +85,50 @@ export class GLUtility{
             };
             img.src = url;
         });
+    }
+
+
+    public static saveTextureToImage(gl:WebGL2RenderingContext,texture:Texture,tempframebfufer:WebGLFramebuffer):HTMLImageElement{
+        if (texture == null || tempframebfufer == null) return null;
+
+        let curfb = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+        let curtex = gl.getParameter(gl.TEXTURE_BINDING_2D);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, tempframebfufer);
+        
+        let rawtex = texture.rawtexture;
+        gl.bindTexture(gl.TEXTURE_2D, rawtex);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, rawtex, 0);
+
+        let image = GLUtility.saveFrameBufferToImage(texture.width,texture.height,gl,tempframebfufer);
+
+        gl.bindTexture(gl.TEXTURE_2D, curtex);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, curfb);
+
+        return image;
+    }
+
+    public static saveFrameBufferToImageData(width:number,height:number,gl:WebGL2RenderingContext,targetframebuffer:WebGLFramebuffer):string{
+        let w = width;
+        let h = height;
+        let data = new Uint8Array(w * h * 4);
+        gl.readPixels(0,0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, data);
+
+        let tempcanvas = document.createElement('canvas');
+        tempcanvas.width = w;
+        tempcanvas.height = h;
+
+        var ctx2d = <CanvasRenderingContext2D>tempcanvas.getContext('2d');
+        var imgdata = ctx2d.createImageData(w, h);
+        imgdata.data.set(data);
+        ctx2d.putImageData(imgdata, 0, 0);
+
+        return tempcanvas.toDataURL();
+    }
+
+    public static saveFrameBufferToImage(width:number,height:number,gl:WebGL2RenderingContext,targetframebuffer:WebGLFramebuffer):HTMLImageElement{
+        let image = new Image();
+        image.src = GLUtility.saveFrameBufferToImageData(width,height,gl,targetframebuffer);
+        return image;
     }
 }
