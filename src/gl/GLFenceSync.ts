@@ -23,6 +23,10 @@ export class GLFenceSync{
         this.m_autoCheck = autoCheckEmit;
     }
 
+    public get pending():boolean{
+        return this.m_callback != null;
+    }
+
     public emit(onsignaled:()=>void){
         if(this.m_released) throw new Error('glFenceSync has beend releasd!');
         if(onsignaled == null) throw new Error('sync callback must not be error.');

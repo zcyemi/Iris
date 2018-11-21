@@ -8,6 +8,9 @@ export * from './gl/GLProgram';
 export * from './gl/GLTFtool';
 export * from './gl/GLUtility';
 
+export * from './gl/GLFenceSync';
+export * from './gl/GLPixelPack';
+
 export * from './DebugEntry';
 export * from './GraphicsRender';
 export * from './pipeline/IRenderPipeline';
