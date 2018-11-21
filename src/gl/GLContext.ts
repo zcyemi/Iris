@@ -2,8 +2,11 @@ import { GLProgram } from "./GLProgram";
 import { GLFrameBuffer } from "./GLFrameBuffer";
 import { GLPipelineState } from "./GLPipelineState";
 import { vec4 } from "../math/GLMath";
+import { GLFenceSync } from "./GLFenceSync";
 
 export class GLContext {
+
+    private m_glFenceSynces:GLFenceSync[] = [];
 
     public gl: WebGL2RenderingContext;
     private constructor(wgl: WebGL2RenderingContext) {
@@ -200,4 +203,50 @@ export class GLContext {
         if (state == null) return;
         state.restore(this.gl);
     }
+
+    /**
+     * Do not call this function explicitly
+     * @param fs 
+     */
+    public registFenceSync(fs:GLFenceSync){
+        this.m_glFenceSynces.push(fs);
+    }
+
+    /**
+     * Do not call this function explicitly
+     * @param fs 
+     */
+    public unregistFenceSync(fs:GLFenceSync):boolean{
+        let syncs = this.m_glFenceSynces;
+
+        let index = syncs.indexOf(fs);
+        if(index >=0 ){
+            syncs.splice(index,1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * check statu of all registed GLFenceScene
+     */
+    public checkAllFenceSync(){
+        let syncs = this.m_glFenceSynces;
+        let len = syncs.length;
+        if(len == 0) return;
+        let remains:GLFenceSync[] = [];
+
+        let changed = false;
+        for(let t=0;t< len;t++){
+            let s = syncs[t];
+            if(!s.checkSignaled(true)){
+                changed = true;
+                remains.push(s);
+            }
+        }
+        if(changed){
+            this.m_glFenceSynces = remains;
+        }
+    }
+
 }
