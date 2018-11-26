@@ -15,6 +15,10 @@ export class PipelineStateCache{
         this.m_curtags = new ShaderTags();
     }
 
+    /**
+     * Reset the pipeline to the given state.
+     * @param tags 
+     */
     public reset(tags:ShaderTags){
         this.m_lastTags = null;
 

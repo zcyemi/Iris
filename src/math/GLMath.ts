@@ -11,6 +11,10 @@ export class glmath {
         return new vec4([x, y, z, w]);
     }
 
+    public static vec2(x:number,y:number):vec2{
+        return new vec2([x,y]);
+    }
+
     public static quat(x: number, y: number, z: number, w: number) {
         return new quat([x, y, z, w]);
     }
