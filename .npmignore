@@ -14,3 +14,8 @@ res/iris.iife.js
 gulpfile.js
 index.html
 rollup.config.ts
+
+/res/gltf/
+/res/images/
+/res/shaders/
+/res/envmap/
