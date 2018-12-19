@@ -1,5 +1,5 @@
 import { ShaderTags, BlendFactor, BlendOperator, CullingMode, Comparison } from "./shaderfx/Shader";
-import { GLContext } from "wglut";
+import { GLContext } from "./gl/GLContext";
 
 export class PipelineStateCache{
 
@@ -15,6 +15,10 @@ export class PipelineStateCache{
         this.m_curtags = new ShaderTags();
     }
 
+    /**
+     * Reset the pipeline to the given state.
+     * @param tags 
+     */
     public reset(tags:ShaderTags){
         this.m_lastTags = null;
 
@@ -179,6 +183,20 @@ export class PipelineStateCache{
         if(blend != curtags.blend){
             if(blend){
                 gl.enable(gl.BLEND);
+
+                let tagBlendOp = tags.blendOp;
+                if(curtags.blendOp !=tagBlendOp){
+                    curtags.blendOp = tagBlendOp;
+                    gl.blendEquation(tagBlendOp);
+                }
+
+                let tagBlendSrc = tags.blendFactorSrc;
+                let tagBlendDst = tags.blendFactorDst;
+                if(curtags.blendFactorSrc != tagBlendSrc || curtags.blendFactorDst != tagBlendDst){
+                    curtags.blendFactorDst = tagBlendDst;
+                    curtags.blendFactorSrc = tagBlendSrc;
+                    gl.blendFunc(tagBlendSrc,tagBlendDst);
+                }
             }
             else{
                 gl.disable(gl.BLEND);

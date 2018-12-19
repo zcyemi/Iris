@@ -1,9 +1,10 @@
 import { ShaderSource } from "./ShaderSource";
 import { ShaderFX, ShaderFile, ShaderInc } from "./ShaderFX";
 import { ShaderVariant } from "./ShaderVariant";
-import { mat4, GLContext, vec4, vec3 } from "wglut";
 import { ShaderData, ShaderSubData } from "./ShaderBuffer";
 import { Shader } from "./Shader";
+import { vec3, vec4, mat4 } from "../math/GLMath";
+import { GLContext } from "../gl/GLContext";
 
 export class ShaderFXLibs{
     private glctx:GLContext;
@@ -19,6 +20,7 @@ export class ShaderFXLibs{
     private m_depth:Shader;
     private m_shadermap:Shader;
     private m_blit:Shader;
+    private m_sprite:Shader;
 
     private m_pbrMetallicRoughness:Shader;
 
@@ -40,6 +42,8 @@ export class ShaderFXLibs{
     public static SH_shadowmap:ShaderSource;
     @ShaderFile("blit")
     public static SH_blit:ShaderSource;
+    @ShaderFile("sprite")
+    public static SH_sprite:ShaderSource;
 
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_BASIS)
     public static SHADERFX_BASIS:ShaderVariant;
@@ -112,6 +116,13 @@ export class ShaderFXLibs{
             this.m_blit = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_blit);
         }
         return this.m_blit;
+    }
+
+    public get shaderSprite():Shader{
+        if(this.m_sprite == null){
+            this.m_sprite = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_sprite);
+        }
+        return this.m_sprite;
     }
 
     public release(){

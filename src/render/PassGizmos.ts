@@ -1,10 +1,9 @@
 import { PipelineBase } from "../pipeline/PipelineBase";
 import { Scene } from "../Scene";
-import { RenderQueue, Shader, ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
+import { Shader, ShaderTags, Comparison } from "../shaderfx/Shader";
 import { Material } from "../Material";
 import { Mesh, MeshTopology } from "../Mesh";
-import { ShaderDataUniformObj } from "../shaderfx/ShaderFXLibs";
-import { mat4, vec3, glmath } from "wglut";
+import { mat4, glmath } from "../math/GLMath";
 import { MeshRender } from "../MeshRender";
 import { ShaderSource } from "../shaderfx/ShaderSource";
 import { ShaderFile, ShaderFX } from "../shaderfx/ShaderFX";

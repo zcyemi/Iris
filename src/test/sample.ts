@@ -1,4 +1,3 @@
-import { GLContext,GLUtility, quat, glmath, vec3, GLTFtool, vec4} from 'wglut';
 import { Scene } from '../Scene';
 import { GameObject } from '../GameObject';
 import { MeshRender } from '../MeshRender';
@@ -18,6 +17,12 @@ import { GLTFSceneBuilder } from '../GLTFSceneBuilder';
 import { PipelineBase } from '../pipeline/PipelineBase';
 import { PipelineForwardZPrePass } from '../pipeline/PipelineForwardZPrePass';
 import { Transform } from '../Transform';
+import { SpriteRender } from '../SpriteRender';
+import { Texture } from '../Texture';
+import { Skybox } from '../Skybox';
+import { GLContext } from '../gl/GLContext';
+import { GLUtility } from '../gl/GLUtility';
+import { vec3, glmath } from '../math/GLMath';
 
 export class SampleGame{
     
@@ -92,117 +97,56 @@ export class SampleGame{
         //texture
         let tex = await glctx.createTextureImageAsync('res/images/tex0.png');
 
-        // let cubepaths:string[] = [
-        //     "res/envmap/peak/peaks_ft.jpg",
-        //     "res/envmap/peak/peaks_bk.jpg",
-        //     "res/envmap/peak/peaks_up.jpg",
-        //     "res/envmap/peak/peaks_dn.jpg",
-        //     "res/envmap/peak/peaks_rt.jpg",
-        //     "res/envmap/peak/peaks_lf.jpg",
-        // ];
-        // let texcube = await TextureCubeMap.loadCubeMap(cubepaths,glctx);
+        let skybox:Skybox = null;
 
-        let texcube = await TextureCubeMap.loadCubeMapTex('res/envmap/day360.jpg',glctx);
+        let cubepaths:string[] = [
+            "res/envmap/peak/peaks_ft.jpg",
+            "res/envmap/peak/peaks_bk.jpg",
+            "res/envmap/peak/peaks_up.jpg",
+            "res/envmap/peak/peaks_dn.jpg",
+            "res/envmap/peak/peaks_rt.jpg",
+            "res/envmap/peak/peaks_lf.jpg",
+        ];
+        let texcube = await TextureCubeMap.loadCubeMap(cubepaths,glctx);
+        console.log(texcube);
 
+        let tex360 = await Texture.loadTexture2D('res/envmap/day360.jpg',glctx,false);
+        //skybox = Skybox.createFromTex360(tex360);
+        //skybox = Skybox.createFromCubeMap(texcube);
 
-        let gltf = await GLTFtool.LoadGLTFBinary('res/gltf/scene.glb');
-
-
-
-        let sceneBuilder = new GLTFSceneBuilder(gltf,glctx,this.m_graphicsRender.shaderLib);
-
-        //let tex = (await sceneBuilder.getImage(1));
-
-        const isgltf:boolean =true;
+        skybox = Skybox.createFromProcedural();
 
         let scene:Scene = new Scene();
         this.m_scene = scene;
 
         //camera
         let camera = Camera.persepctive(null, 60, 400.0 / 300.0, 0.5, 1000);
-        camera.transform.setPosition(glmath.vec3(0,-500, 5));
+        camera.transform.setPosition(glmath.vec3(0,0, 5));
         //camera.transform.setLookAt(glmath.vec3(0,0,0));
         camera.transform.setLocalDirty();
         camera.ambientColor = Utility.colorRGBA(3, 110, 167, 15);
-        camera.clearType = ClearType.Background;
-        camera.skybox = texcube;
+        camera.clearType = ClearType.Skybox;
+        camera.skybox = skybox;
         camera.background = glmath.vec4(0, 1, 0, 1);
         camera.gameobject.addComponent(new CameraFreeFly());
         camera.gameobject.name = "camera";
+        camera.transform.parent= scene.transform;
         this.m_camera = camera;
         
 
-        if(isgltf){
-            let gobj = sceneBuilder.createScene();
-            gobj.name = "gltfscene";
+        {
 
-            let skyboxobj = gobj.getChildByName('sky_sky_0');
-            if(skyboxobj!=null){
-                let skyrender = skyboxobj.render;
-                skyrender.castShadow = false;
-                skyrender.material.setShader(grender.shaderLib.shaderUnlitTexture);
-            }
+            let spr = await Texture.loadTexture2D('res/images/img0.png',glctx,true);
+            let sprobj = new GameObject('sprite1');
+            let srender = sprobj.addRender(SpriteRender);
+            srender.image = spr;
+            srender.color.w = 0.5;
 
-            gobj.transform.parent = scene.transform;
-            gobj.transform.applyTranslate(glmath.vec3(0,15,0));
-            camera.transform.parent= gobj.transform;
+            sprobj.transform.setPosition(glmath.vec3(0,1,-5));
+            sprobj.transform.parent = scene.transform;
+
+            console.log(sprobj.render.material.shaderTags);
         }
-        else{
-            camera.transform.parent= scene.transform;
-        }
-
-
-
-        //cube
-        // let obj1 = new GameObject("cube");
-        // this.m_obj1 = obj1;
-        // obj1.transform.localPosition = glmath.vec3(0,5,-5);
-        // obj1.transform.localScale = vec3.one;
-        // let matDiffuse = new Material(grender.shaderLib.shaderDiffuse);
-        // matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
-        // matDiffuse.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
-        // obj1.render = new MeshRender(Mesh.Cube,matDiffuse);
-        // // obj1.addComponent(<Component>{
-        // //     onUpdate:function(scene:Scene){
-        // //         let dt = Input.snapshot.deltaTime;
-        // //         dt *= 30.0;
-        // //         const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
-        // //         let trs = this.gameobject.transform;
-        // //         trs.applyRotate(rota);
-        // //     }
-        // // })
-        // obj1.transform.parent = scene.transform;
-
-
-        // let obj3 = new GameObject("cube");
-        // obj3.transform.localPosition = glmath.vec3(3,5,-5);
-        // obj3.transform.localScale = vec3.one;
-        // matDiffuse.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,0,1));
-        // matDiffuse.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
-        // obj3.render = new MeshRender(Mesh.Sphere,matDiffuse);
-        // // obj1.addComponent(<Component>{
-        // //     onUpdate:function(scene:Scene){
-        // //         let dt = Input.snapshot.deltaTime;
-        // //         dt *= 30.0;
-        // //         const rota = quat.fromEulerDeg(dt,-dt,-2 * dt);
-        // //         let trs = this.gameobject.transform;
-        // //         trs.applyRotate(rota);
-        // //     }
-        // // })
-        // obj3.transform.parent = scene.transform;
-
-
-        // //plane
-        // let obj2 = new GameObject();
-        // this.m_obj2 = obj2;
-        // obj2.transform.localPosition = glmath.vec3(0,0,-5);
-        // obj2.transform.localScale = glmath.vec3(20,20,1);
-        // obj2.transform.localRotation = quat.axisRotationDeg(vec3.right,90);
-        // let obj2mat = new Material(grender.shaderLib.shaderUnlitTexture)
-        // obj2mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
-        // obj2mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
-        // obj2.render = new MeshRender(Mesh.Quad, obj2mat);
-        // obj2.transform.parent = scene.transform;
 
         //directional light
         let lightobj = new GameObject();

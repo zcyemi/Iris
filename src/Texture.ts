@@ -1,5 +1,5 @@
-import { GLContext } from "wglut";
-import { GL } from "./GL";
+import { GLContext } from "./gl/GLContext";
+import { GL } from "./gl/GL";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 
 export class TextureCreationDesc {
@@ -28,9 +28,9 @@ export class TextureCreationDesc {
         this.wrap_t = wrap_t;
     }
 
-    public clone(){
+    public clone() {
         let c = Object.create(TextureCreationDesc.prototype);
-        for(let p in this){
+        for (let p in this) {
             c[p] = this[p];
         }
         return c;
@@ -41,30 +41,34 @@ export class Texture {
 
     public static TEMP_TEXID: number;
 
-    private m_raw: WebGLTexture;
-    private m_width: number;
-    private m_height: number;
+    protected m_raw: WebGLTexture;
+    protected m_width: number;
+    protected m_height: number;
 
-    private m_desc: TextureCreationDesc;
+    protected m_desc: TextureCreationDesc;
 
     public get rawtexture(): WebGLTexture {
         return this.m_raw;
     }
 
-    public get width():number{ return this.m_width;}
-    public get height():number{return this.m_height;}
+    public get width(): number { return this.m_width; }
+    public get height(): number { return this.m_height; }
 
     public constructor(tex?: WebGLTexture, width: number = 0, heigt: number = 0, desc?: TextureCreationDesc) {
         this.m_raw = tex;
         this.m_width = width;
         this.m_height = heigt;
-        this.m_desc = desc == null? null: desc.clone();
+        this.m_desc = desc == null ? null : desc.clone();
     }
-
 
     public release(glctx:GLContext){
-        
+        if(this.m_raw){
+            glctx.gl.deleteTexture(this.m_raw);
+            this.m_raw = null;
+        }
+        return;
     }
+
 
     public static createTexture2D(width: number, height: number, desc: TextureCreationDesc, glctx: GLContext): Texture {
         let gl = glctx.gl;
@@ -84,6 +88,38 @@ export class Texture {
 
         let texture = new Texture(tex, width, height, desc);
         return texture;
+    }
+
+    public static loadTexture2D(url: string, glctx: GLContext, alpha: boolean = true): Promise<Texture> {
+
+        return new Promise<Texture>((res, rej) => {
+            var img = new Image();
+            const gl = glctx.gl;
+            img.onload = () => {
+                let tex = gl.createTexture();
+                try {
+                    var desc = new TextureCreationDesc(alpha? gl.RGBA:gl.RGB, alpha? gl.RGBA : gl.RGB, false, gl.LINEAR, gl.LINEAR);
+                    gl.bindTexture(gl.TEXTURE_2D, tex);
+                    gl.texImage2D(gl.TEXTURE_2D, 0, desc.format, desc.internalformat, gl.UNSIGNED_BYTE, img);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, desc.mag_filter);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, desc.min_filter);
+
+                    gl.generateMipmap(gl.TEXTURE_2D);
+                    gl.bindTexture(gl.TEXTURE_2D, null);
+                    res(new Texture(tex, img.width, img.height, desc));
+                }
+                catch (e) {
+                    gl.deleteTexture(tex);
+                    rej(e);
+                }
+
+            };
+            img.onerror = (ev: Event | string) => {
+                rej(ev);
+            }
+            img.src = url;
+        });
+
     }
 
     public resize(width: number, height: number, glctx: GLContext) {

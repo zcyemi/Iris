@@ -1,8 +1,9 @@
 import { PipelineBase } from "../pipeline/PipelineBase";
 import { ShaderTags, Comparison, CullingMode, BlendOperator } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
-import { GLProgram } from "wglut";
+import { GLProgram } from "../gl/GLProgram";
 import { RenderPass } from "./RenderPass";
+import { MeshRender } from "../MeshRender";
 
 export class PassTransparent extends RenderPass{
     private m_tags:ShaderTags;
@@ -41,33 +42,37 @@ export class PassTransparent extends RenderPass{
 
         const dataobj = pipe.shaderDataObj;
 
+        // gl.enable(gl.BLEND);
+        // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
         for(let i=0;i<len;i++){
             let node = queue[i];
-            let mat = node.material;
-            let mesh = node.mesh;
 
-            let program = mat.program;
-            node.refershVertexArray(glctx);
+            if(node instanceof MeshRender){
+                let mat = node.material;
+                let mesh = node.mesh;
+                let program = mat.program;
+                node.refreshData(glctx);
+    
+                if(program != curprogram){
+                    let glp = program.Program;
+                    gl.useProgram(glp);
+                    pipe.uniformBindDefault(program);
+                    curprogram = program;
+                }
+                state.apply(mat.shaderTags);
+                mat.apply(gl);
+                dataobj.setMtxModel(node.object.transform.objMatrix);
+                pipe.updateUniformBufferObject(dataobj);
 
-            if(program != curprogram){
-                let glp = program.Program;
-                gl.useProgram(glp);
-                pipe.uniformBindDefault(program);
-                curprogram = program;
+                node.bindVertexArray(gl);
+                let indicedesc = mesh.indiceDesc;
+                gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
+                node.unbindVertexArray(gl);
+
+                mat.clean(gl);
             }
-
-            //state.apply(mat.shaderTags);
-            mat.apply(gl);
-
-            dataobj.setMtxModel(node.object.transform.objMatrix);
-            pipe.updateUniformBufferObject(dataobj);
-
-            gl.bindVertexArray(node.vertexArrayObj);
-            let indicedesc = mesh.indiceDesc;
-            gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
-            gl.bindVertexArray(null);
-
-            mat.clean(gl);
+        
         }
     }
 

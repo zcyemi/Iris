@@ -2,11 +2,11 @@ import { PipelineBase } from "../pipeline/PipelineBase";
 import { ShaderTags, Comparison, CullingMode, Shader } from "../shaderfx/Shader";
 import { Scene } from "../Scene";
 import { MeshRender } from "../MeshRender";
-import { GLProgram, vec3, glmath } from "wglut";
-import { ShaderDataUniformObj, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { BufferDebugInfo } from "./BufferDebugInfo";
 import { RenderPass } from "./RenderPass";
 import { ShaderFX } from "../shaderfx/ShaderFX";
+import { GLProgram } from "../gl/GLProgram";
+import { glmath } from "../math/GLMath";
 
 /**
  * Pre-rendering Depth Pass
@@ -81,19 +81,22 @@ export class PassDepth extends RenderPass{
 
         for(let i=0;i<len;i++){
             let node = queue[i];
-            let mat = node.material;
-            let mesh = node.mesh;
 
-            node.refershVertexArray(glctx);
-            dataobj.setMtxModel(node.object.transform.objMatrix);
-            pipe.updateUniformBufferObject(dataobj);
+            if(node instanceof MeshRender){
+                let mat = node.material;
+                let mesh = node.mesh;
+                node.refreshData(glctx);
+                dataobj.setMtxModel(node.object.transform.objMatrix);
+                pipe.updateUniformBufferObject(dataobj);
+                
+                node.bindVertexArray(gl);
+                let indicedesc = mesh.indiceDesc;
+                gl.drawElements(indicedesc.topology, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
+                node.unbindVertexArray(gl);
 
-            gl.bindVertexArray(node.vertexArrayObj);
-            let indicedesc = mesh.indiceDesc;
-            gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
-            gl.bindVertexArray(null);
+                mat.clean(gl);
+            }
 
-            mat.clean(gl);
         }
 
         gl.colorMask(true,true,true,true);

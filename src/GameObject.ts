@@ -2,21 +2,32 @@ import { Transform } from "./Transform";
 import { MeshRender } from "./MeshRender";
 import { Component } from "./Component";
 import { Scene } from "./Scene";
+import { BaseRender } from "./BaseRender";
 
 export class GameObject{
 
     public name:string;
     public transform:Transform;
     public components:Component[];
-    private m_render:MeshRender;
+    private m_render:BaseRender;
 
-    public set render(r:MeshRender){
-        r.object = this;
-        this.m_render = r;
-    }
-    public get render():MeshRender{
+
+    public get render():BaseRender{
         return this.m_render;
     }
+
+    public set render(v:BaseRender){
+        v['m_object'] = this;
+        this.m_render = v;
+    }
+
+    public addRender<T extends BaseRender>(t:new()=>T):T{
+        let render = new t();
+        render['m_object'] = this;
+        this.m_render = render;
+        return render;
+    }
+
     
     public active:boolean = true;
 

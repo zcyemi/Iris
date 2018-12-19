@@ -1,8 +1,4 @@
-/tests/
-/res/
-rollup.config.ts
-gulpfile.js
-
+dist/
 node_modules/
 /.rpt2_cache/
 resource/*.*
@@ -11,4 +7,10 @@ package-lock.json
 res/iris.es.js
 res/iris.iife.js
 .vscode
+/yarn.lock
+
+
+/tests/
+gulpfile.js
 index.html
+rollup.config.ts

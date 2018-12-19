@@ -1,5 +1,5 @@
 import { Texture } from "../Texture";
-import { vec4 } from "wglut";
+import { vec4 } from "../math/GLMath";
 
 
 export class BufferDebugInfo{

@@ -1,4 +1,4 @@
-import { vec4, glmath } from "wglut";
+import { vec4, glmath } from "./math/GLMath";
 
 
 export type MapStr<T> = {[key:string]:T};
@@ -93,6 +93,30 @@ export class Utility {
 	public static colorRGBA(r:number,g:number,b:number,a:number):vec4{
 		return glmath.vec4(r,g,b,a).div(255.0);
 	}
+
+	public static byteDataToImageData(width:number,height:number,data:Uint8Array):string{
+		let tempcanvas = document.createElement('canvas');
+        tempcanvas.width = width;
+        tempcanvas.height = height;
+		var ctx2d = <CanvasRenderingContext2D>tempcanvas.getContext('2d');
+        var imgdata = ctx2d.createImageData(width,height);
+		imgdata.data.set(data);
+		ctx2d.putImageData(imgdata, 0, 0);
+		return tempcanvas.toDataURL();
+	}
+
+	public static byteDataToImage(width:number,height:number,data:Uint8Array,cb:(img:HTMLImageElement)=>void){
+		let src = Utility.byteDataToImageData(width,height,data);
+		var img =new Image();
+		img.onload = ()=>{
+			cb(img);
+		}
+		img.onerror = ()=>{
+			cb(null);
+		};
+		img.src = src;
+	}
+
 }
 
 

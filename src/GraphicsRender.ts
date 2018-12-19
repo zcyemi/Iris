@@ -1,4 +1,3 @@
-import { GLContext, vec4, GLFrameBuffer } from "wglut";
 import { ShaderFXLibs } from "./shaderfx/ShaderFXLibs";
 import { ShadowConfig } from "./render/Shadow";
 import { Delayter } from "./Utility";
@@ -6,6 +5,7 @@ import { Texture } from "./Texture";
 import { Material } from "./Material";
 import { IRenderPipeline } from "./pipeline/IRenderPipeline";
 import { Input } from "./Input";
+import { GLContext } from "./gl/GLContext";
 
 export class GraphicsRenderCreateInfo{
     public colorFormat:number = 0x8058;
@@ -18,6 +18,8 @@ export class GraphicsRender{
     private canvas:HTMLCanvasElement;
     private m_creationInfo:GraphicsRenderCreateInfo;
     private m_defaultTexture:Texture;
+
+    public static globalRender:GraphicsRender;
 
     public static readonly TEXID_FB:number = 0;
     public static readonly TEXID_TEMP:number = 2;
@@ -59,6 +61,7 @@ export class GraphicsRender{
     }
 
     public constructor(canvas:HTMLCanvasElement,pipeline?:IRenderPipeline,creationInfo?:GraphicsRenderCreateInfo){
+        GraphicsRender.globalRender = this;
         this.canvas = canvas;
 
         if(creationInfo == null){

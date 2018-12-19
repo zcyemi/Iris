@@ -1,9 +1,10 @@
-import { GLProgram, vec4, vec3 } from "wglut";
+import { vec4, vec3 } from "./math/GLMath";
 import { Shader, ShaderTags } from "./shaderfx/Shader";
 import { ShaderOptionsConfig, ShaderOptions } from "./shaderfx/ShaderVariant";
 import { Utility } from "./Utility";
 import { Texture } from "./Texture";
 import { ShaderFX } from "./shaderfx/ShaderFX";
+import { GLProgram } from "./gl/GLProgram";
 
 export type MaterialProperty = {type:number,value:any};
 
@@ -384,9 +385,36 @@ export class Material{
             case gl.FLOAT_VEC4:
                 gl.uniform4fv(loc,val.raw);
                 break;
-            case gl.SAMPLER_2D:
-                let texCount = this.m_applyTexCount;
+            case gl.SAMPLER_CUBE:
                 if(val != null){
+                    let texCount = this.m_applyTexCount;
+                    let tex:WebGLTexture = null;
+                    if(val instanceof Texture){
+                        tex = val.rawtexture;
+                    }
+                    else if(val instanceof WebGLTexture){
+                        tex= val;
+                    }
+                    if(tex == null){
+                        //raw texture is null or onloading...
+                        //TODO no internal texture_cube_map_support
+                        //gl.uniform1i(loc,Material.DEF_TEXID_NUM);
+                        return;
+                    }
+                    gl.activeTexture(gl.TEXTURE4 + texCount);
+                    gl.bindTexture(gl.TEXTURE_CUBE_MAP,tex);
+                    gl.uniform1i(loc,4 + texCount);
+                }
+                else{
+                    //texture is null
+                    //use default white texture
+                    //TODO no internal texture_cube_map_support
+                    //gl.uniform1i(loc,Material.DEF_TEXID_NUM);
+                }
+                break;
+            case gl.SAMPLER_2D:
+                if(val != null){
+                    let texCount = this.m_applyTexCount;
                     let tex:WebGLTexture = null;
                     if(val instanceof Texture){
                         tex = val.rawtexture;
@@ -402,6 +430,7 @@ export class Material{
                     gl.activeTexture(gl.TEXTURE4 + texCount);
                     gl.bindTexture(gl.TEXTURE_2D,tex);
                     gl.uniform1i(loc,4 + texCount);
+                    this.m_applyTexCount = texCount+1;
                 }
                 else{
                     //texture is null

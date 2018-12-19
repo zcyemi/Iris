@@ -1,6 +1,6 @@
 import { ShaderVariant, ShaderOptionsConfig } from "./ShaderVariant";
 import { ShaderSource } from "./ShaderSource";
-import { GLContext } from "wglut";
+import { GLContext } from "../gl/GLContext";
 import { Shader, ShaderTags } from "./Shader";
 import { ShaderGen } from "./ShaderGenerated";
 export class ShaderFX{

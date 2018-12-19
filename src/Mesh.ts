@@ -1,5 +1,6 @@
-import { vec3, vec4, GLContext, GLTFdata, glmath, quat } from "wglut";
-import { GL, GLDataType, GLConst } from "./GL";
+import { GL, GLDataType, GLConst } from "./gl/GL";
+import { vec3 } from "./math/GLMath";
+import { GLContext } from "./gl/GLContext";
 
 export enum MeshTopology{
     Triangles = 4,

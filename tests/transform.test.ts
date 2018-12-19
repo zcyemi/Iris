@@ -1,8 +1,7 @@
 import { Trans } from '../src/Trans';
-import { vec3, quat, mat4, glmath } from 'wglut';
-
 import { expectVec3, expectQuat, expectPair, expectMat4 } from './testhelper';
 import { expect } from 'chai';
+import { quat, vec3, mat4, glmath } from '../src/math/GLMath';
 
 describe("Transform", () => {
 
