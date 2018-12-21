@@ -41,15 +41,24 @@ export * from './GameObject';
 export * from './Input';
 export * from './Light';
 export * from './Material';
-export * from './Mesh';
-export * from './DynamicMesh';
+
 export * from './Transform';
 export * from './Component';
 export * from './Scene';
 export * from './SceneManager';
 export * from './GLTFSceneBuilder';
 
+export * from './Mesh';
+export * from './MeshRender';
+export * from './MeshBuilder';
+export * from './DynamicMesh';
+
+export * from './Texture'
+export * from './TextureCubeMap';
+export * from './TextureSampler';
+
 export * from './Utility';
 
 //TODO move sample to another repo
 export * from './test/sample';
+
