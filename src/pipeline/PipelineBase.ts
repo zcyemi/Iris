@@ -107,9 +107,6 @@ export class PipelineBase implements IRenderPipeline {
     protected m_mainFrameBufferWidth: number = 0;
     protected m_mainFrameBufferHeight: number = 0;
 
-    /** for viewport update in @function <bindTargetFrameBuffer> */
-    private m_mainFrameBufferResized:boolean = true;
-
     /** for shderDataBasis screnparam */
     private m_shaderDataScreenResized:boolean= false;
 
@@ -214,7 +211,9 @@ export class PipelineBase implements IRenderPipeline {
         this.m_mainFrameBufferWidth = width;
         this.m_mainFrameBufferHeight = height;
         this.m_mainFrameBufferAspect = width / height;
-        this.m_mainFrameBufferResized = true;
+
+        const gl = this.gl;
+        gl.viewport(0,0,width,height);
 
         this.m_shaderDataScreenResized  = true;
     }
@@ -315,9 +314,8 @@ export class PipelineBase implements IRenderPipeline {
             forece = true;
         }
 
-        if(this.m_mainFrameBufferResized || setvp){
+        if(setvp){
             this.gl.viewport(0, 0, mainfb.width, mainfb.height);
-            this.m_mainFrameBufferResized = false;
         }
 
 

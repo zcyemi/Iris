@@ -137,12 +137,14 @@ export class GraphicsRender{
 
         if(!this.m_valid) return;
 
+        const self =this;
+
         
         let delay = this.m_creationInfo.frameBufferResizeDelay;
         if(delay == 0){
             canvas.width = w;
             canvas.height = h;
-            this.m_renderPipeline.resizeFrameBuffer(w,h);
+            self.doResizeFrameBuffer(w,h);
             return;
         }
         else{
@@ -151,9 +153,13 @@ export class GraphicsRender{
             delayter.emit(()=>{
                 canvas.width = w;
                 canvas.height = h;
-                this.m_renderPipeline.resizeFrameBuffer(w,h);
+                self.doResizeFrameBuffer(w,h);
             })
         }
+    }
+
+    private doResizeFrameBuffer(w:number,h:number){
+        this.m_renderPipeline.resizeFrameBuffer(w,h);
     }
 
     /**

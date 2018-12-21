@@ -13,7 +13,6 @@ import { SceneManager } from '../SceneManager';
 import { CameraFreeFly } from '../CameraUtility';
 import { FrameTimer } from '../FrameTimer';
 import { TextureCubeMap } from '../TextureCubeMap';
-import { GLTFSceneBuilder } from '../GLTFSceneBuilder';
 import { PipelineBase } from '../pipeline/PipelineBase';
 import { PipelineForwardZPrePass } from '../pipeline/PipelineForwardZPrePass';
 import { Transform } from '../Transform';

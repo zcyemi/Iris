@@ -80,6 +80,7 @@ export class PipelineForwardZPrePass extends PipelineBase {
 
 
     public exec(scene: Scene) {
+        if(scene == null) return;
         let cam = scene.mainCamera;
         if (cam == null) return;
         cam.aspect = this.mainFrameBufferAspect;
