@@ -47,6 +47,19 @@ export class GL{
     public static readonly REPEAT:number = 0x2901;
     public static readonly CLAMP_TO_EDGE:number = 0x812F;
     public static readonly MIRRORED_REPEAT:number = 0x8370;
+
+    public static readonly TEXTURE_COMPARE_MODE = 0x884C;
+    public static readonly TEXTURE_COMPARE_FUNC = 0x884D;
+    public static readonly COMPARE_REF_TO_TEXTURE = 0x884E;
+
+    public static readonly SAMPLER_2D = 0x8B5E;
+    public static readonly SAMPLER_3D = 0x8B5F;
+    public static readonly SAMPLER_2D_SHADOW = 0x8B62;
+    public static readonly SAMPLER_2D_ARRAY = 0x8DC1;
+    public static readonly SAMPLER_2D_ARRAY_SHADOW = 0x8DC4;
+    public static readonly SAMPLER_CUBE_SHADOW = 0x8DC5;
+
+
 }
 
 
