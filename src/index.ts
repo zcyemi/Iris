@@ -59,6 +59,8 @@ export * from './TextureSampler';
 
 export * from './Utility';
 
+export * from './Skybox';
+
 //TODO move sample to another repo
 export * from './test/sample';
 
