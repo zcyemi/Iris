@@ -47,7 +47,7 @@ export class PassSkybox extends RenderPass{
         if(camera.clearType != ClearType.Skybox || camera.skybox == null) return;
 
         let pipeline = this.pipeline;
-        pipeline.bindTargetFrameBuffer();
+        pipeline.bindTargetFrameBuffer(false,false);
         pipeline.stateCache.reset(this.m_tags);
 
         const skyboxrender = this.m_skyrender;

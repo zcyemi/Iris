@@ -90,10 +90,10 @@ export class PassShadowMap extends RenderPass {
         this.m_smfb = smfb;
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, smfb);
         gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, smtex.rawtexture, 0);
-        let status = gl.checkFramebufferStatus(gl.DRAW_FRAMEBUFFER);
-        if (status != gl.FRAMEBUFFER_COMPLETE) {
-            console.error('fb status incomplete ' + status.toString(16));
-        }
+        // let status = gl.checkFramebufferStatus(gl.DRAW_FRAMEBUFFER);
+        // if (status != gl.FRAMEBUFFER_COMPLETE) {
+        //     console.error('fb status incomplete ' + status.toString(16));
+        // }
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
 
 
@@ -162,7 +162,7 @@ export class PassShadowMap extends RenderPass {
         let smdata = this.pipeline.shaderDataShadowMap;
         pipe.updateUniformBufferShadowMap(smdata);
 
-        pipe.bindTargetFrameBuffer(true);
+        pipe.bindTargetFrameBuffer(true,true);
     }
 
     private renderLightShadowMap(light: Light, camera: Camera, queue: BaseRender[], config: ShadowConfig) {

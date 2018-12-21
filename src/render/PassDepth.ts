@@ -117,7 +117,7 @@ export class PassDepth extends RenderPass{
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER,null);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
 
-        pipe.bindTargetFrameBuffer(true);
+        pipe.bindTargetFrameBuffer(true,false);
 
         this.m_bufferDebugInfo.setTexture(pipe.mainDepthTexture); 
 

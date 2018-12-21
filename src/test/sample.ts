@@ -108,7 +108,6 @@ export class SampleGame{
             "res/envmap/peak/peaks_lf.jpg",
         ];
         let texcube = await TextureCubeMap.loadCubeMap(cubepaths,glctx);
-        console.log(texcube);
 
         let tex360 = await Texture.loadTexture2D('res/envmap/day360.jpg',glctx,false);
         //skybox = Skybox.createFromTex360(tex360);
@@ -133,9 +132,7 @@ export class SampleGame{
         camera.transform.parent= scene.transform;
         this.m_camera = camera;
         
-
         {
-
             let spr = await Texture.loadTexture2D('res/images/img0.png',glctx,true);
             let sprobj = new GameObject('sprite1');
             let srender = sprobj.addRender(SpriteRender);
@@ -145,7 +142,7 @@ export class SampleGame{
             sprobj.transform.setPosition(glmath.vec3(0,1,-5));
             sprobj.transform.parent = scene.transform;
 
-            console.log(sprobj.render.material.shaderTags);
+            // console.log(sprobj.render.material.shaderTags);
         }
 
         //directional light

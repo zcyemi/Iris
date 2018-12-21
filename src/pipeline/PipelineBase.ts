@@ -307,17 +307,20 @@ export class PipelineBase implements IRenderPipeline {
         curinfo = curinfo.splice(index, 1);
     }
 
-    public bindTargetFrameBuffer(forece: boolean = false) {
+    public bindTargetFrameBuffer(forece:boolean,setvp:boolean) {
         let mainfb = this.m_mainFrameBuffer;
         if (!this.m_mainFrameBufferBinded || forece ){
             mainfb.bind(this.gl);
             this.m_mainFrameBufferBinded = true;
             forece = true;
         }
-        if(this.m_mainFrameBufferResized || forece){
+
+        if(this.m_mainFrameBufferResized || setvp){
             this.gl.viewport(0, 0, mainfb.width, mainfb.height);
             this.m_mainFrameBufferResized = false;
         }
+
+
     }
 
     public UnBindTargetFrameBuffer() {
