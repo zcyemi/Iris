@@ -17,27 +17,11 @@ export class TextureCubeMap extends Texture{
 
     /**
      * create cubemap texture with six-faces images
-     * @param urls [Front,Back,Up,Down,Right,Left]
+     * @param imgs 
      * @param glctx 
      */
-    public static async loadCubeMap(urls:string[],glctx:GLContext):Promise<TextureCubeMap>{
-        if(urls == null || urls.length != 6) return null;
-        return new Promise<TextureCubeMap>(async(res,rej)=>{
-
-            let imgpromises:Promise<HTMLImageElement>[] = [];
-            var imgurls = urls;
-            for(var i=0;i<6;i++){
-                imgpromises.push(GLUtility.loadImage(imgurls[i]));
-            }
-
-            let imgs = await Promise.all(imgpromises);
-            if(imgs.length != 6){
-                rej('load image failed!');
-                return;
-            }
-
-            let texcube:TextureCubeMap = null;
-
+    public static loadCubeMapImage(imgs:HTMLImageElement[],glctx:GLContext):TextureCubeMap| null{
+        let texcube:TextureCubeMap = null;
             try{
                 let gl = glctx.gl;
                 let gltexcube = gl.createTexture();
@@ -58,11 +42,35 @@ export class TextureCubeMap extends Texture{
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP,null);
                 texcube = new TextureCubeMap(gltexcube,imgw,imgh,new TextureCreationDesc(gl.RGB,gl.RGB,false,gl.LINEAR,gl.LINEAR));
                 texcube.m_raw = gltexcube;
+                return texcube;
             }
             catch(e){
-                rej(e);
+                console.error(e);
+                return null;
+            }
+    }
+
+    /**
+     * create cubemap texture with six-faces images
+     * @param urls [Front,Back,Up,Down,Right,Left]
+     * @param glctx 
+     */
+    public static async loadCubeMap(urls:string[],glctx:GLContext):Promise<TextureCubeMap>{
+        if(urls == null || urls.length != 6) return null;
+        return new Promise<TextureCubeMap>(async(res,rej)=>{
+
+            let imgpromises:Promise<HTMLImageElement>[] = [];
+            var imgurls = urls;
+            for(var i=0;i<6;i++){
+                imgpromises.push(GLUtility.loadImage(imgurls[i]));
+            }
+
+            let imgs = await Promise.all(imgpromises);
+            if(imgs.length != 6){
+                rej('load image failed!');
                 return;
             }
+            let texcube:TextureCubeMap| null = TextureCubeMap.loadCubeMapImage(imgs,glctx);
             res(texcube);
         });
     }

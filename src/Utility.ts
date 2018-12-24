@@ -117,6 +117,20 @@ export class Utility {
 		img.src = src;
 	}
 
+	public static async loadImage(url:string):Promise<HTMLImageElement>{
+        if(url == null) return null;
+        return new Promise<HTMLImageElement>((res,rej)=>{
+            var img =new Image();
+            img.onload = ()=>{
+                res(img);
+            }
+            img.onerror = ()=>{
+                rej('image load failed');
+            };
+            img.src = url;
+        });
+    }
+
 }
 
 

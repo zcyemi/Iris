@@ -1,6 +1,7 @@
 import { GLContext } from "./gl/GLContext";
-import { GL } from "./gl/GL";
+import { GL, GLConst } from "./gl/GL";
 import { ShaderFX } from "./shaderfx/ShaderFX";
+import { format } from "url";
 
 export class TextureCreationDesc {
     public format: number;
@@ -10,6 +11,14 @@ export class TextureCreationDesc {
     public mag_filter: number;
     public wrap_s: number;
     public wrap_t: number;
+
+    public static get DefaultRGBA():TextureCreationDesc{
+        return new TextureCreationDesc(GL.RGBA,GL.RGBA);
+    }
+
+    public static get DefaultRGB():TextureCreationDesc{
+        return new TextureCreationDesc(GL.RGB,GL.RGB);
+    }
 
     public constructor(
         fmt: number,
@@ -90,22 +99,38 @@ export class Texture {
         return texture;
     }
 
+    public static createTexture2DImage(img:HTMLImageElement,desc:TextureCreationDesc,glctx:GLContext):Texture{
+        const gl = glctx.gl;
+        let tex = gl.createTexture();
+        try {
+            gl.bindTexture(gl.TEXTURE_2D, tex);
+            gl.texImage2D(gl.TEXTURE_2D, 0, desc.format, desc.internalformat, gl.UNSIGNED_BYTE, img);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, desc.mag_filter);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, desc.min_filter);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, desc.wrap_s);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, desc.wrap_t);
+            if(desc.mipmap){
+                gl.generateMipmap(gl.TEXTURE_2D);
+            }
+            gl.generateMipmap(gl.TEXTURE_2D);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            return new Texture(tex, img.width, img.height, desc);
+        }
+        catch (e) {
+            gl.deleteTexture(tex);
+            return null;
+        }
+    }
+
     public static loadTexture2D(url: string, glctx: GLContext, alpha: boolean = true): Promise<Texture> {
 
         return new Promise<Texture>((res, rej) => {
             var img = new Image();
             const gl = glctx.gl;
             img.onload = () => {
-                let tex = gl.createTexture();
                 try {
-                    var desc = new TextureCreationDesc(alpha? gl.RGBA:gl.RGB, alpha? gl.RGBA : gl.RGB, false, gl.LINEAR, gl.LINEAR);
-                    gl.bindTexture(gl.TEXTURE_2D, tex);
-                    gl.texImage2D(gl.TEXTURE_2D, 0, desc.format, desc.internalformat, gl.UNSIGNED_BYTE, img);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, desc.mag_filter);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, desc.min_filter);
-
-                    gl.generateMipmap(gl.TEXTURE_2D);
-                    gl.bindTexture(gl.TEXTURE_2D, null);
+                    let desc = alpha? TextureCreationDesc.DefaultRGBA: TextureCreationDesc.DefaultRGB;
+                    var tex = Texture.createTexture2DImage(img,desc,glctx);
                     res(new Texture(tex, img.width, img.height, desc));
                 }
                 catch (e) {

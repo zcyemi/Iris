@@ -15,6 +15,11 @@ export enum GLConst {
 
 
 export class GL{
+
+    public static readonly RGB:number= 0x1907;
+    public static readonly RGBA:number = 0x1908;
+    
+
     public static readonly BYTE:GLDataType = 5120;
     public static readonly UNSIGNED_BYTE:GLDataType = 5121;
     public static readonly SHORT:GLDataType = 5122;
