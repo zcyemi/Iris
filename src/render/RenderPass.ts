@@ -17,6 +17,7 @@ export abstract class RenderPass {
     }
 
     public static Release(pass:RenderPass):null{
+        if(pass == null) return;
         pass.release();
         return null;
     }

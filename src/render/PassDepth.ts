@@ -49,8 +49,10 @@ export class PassDepth extends RenderPass{
         const NAME_OBJ = ShaderFX.UNIFORM_OBJ;
 
         let cam = scene.mainCamera;
+        let nodelist = pipe.nodeList;
+        if(nodelist == null) return;
 
-        let queue = pipe.nodeList.nodeOpaque;
+        let queue = nodelist.nodeOpaque;
         if(queue.length == 0) return;
 
         //diable color buffer
