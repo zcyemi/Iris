@@ -317,8 +317,6 @@ export class PipelineBase implements IRenderPipeline {
         if(setvp){
             this.gl.viewport(0, 0, mainfb.width, mainfb.height);
         }
-
-
     }
 
     public UnBindTargetFrameBuffer() {
