@@ -45,6 +45,7 @@ export * from './Material';
 export * from './Transform';
 export * from './Component';
 export * from './Scene';
+export * from './SceneBuilder';
 export * from './SceneManager';
 export * from './GLTFSceneBuilder';
 

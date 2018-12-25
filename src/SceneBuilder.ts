@@ -16,6 +16,7 @@ export interface SceneBuildNodeBase{
     render?:BaseRender;
     trs?:SceneBuilderTRS;
     children?:SceneBuildNodes;
+    oncreate?:(g:GameObject)=>void;
 }
 
 export type SceneBuildNodes = {[name:string]:SceneBuildNodeBase};
@@ -47,13 +48,15 @@ export class SceneBuilder{
         if(gobj == null) gobj = new GameObject();
         
         let comp = node.comp;
-        comp.forEach(c=>gobj.addComponent(c));
+        if(comp != null)comp.forEach(c=>gobj.addComponent(c));
         if(node.trs!= null) SceneBuilder.applyTRS(gobj,node.trs);
 
         let render = node.render;
         if(render != null){
             gobj.render = render;
         }
+
+        if(node.oncreate != null) node.oncreate(gobj);
 
         let children = node.children;
         if(children != null){

@@ -48,7 +48,7 @@ export class Light extends Component{
         }
     }
 
-    private constructor(type:LightType,intensity?:number,color?:vec3){
+    public constructor(type:LightType,intensity?:number,color?:vec3){
         super();
         this.lightType = type;
         if(intensity) this.intensity = intensity;
