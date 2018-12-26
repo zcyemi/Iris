@@ -5,7 +5,7 @@ import { Shader } from "../shaderfx/Shader";
 import { glmath, vec3, mat4, vec4 } from "../math/GLMath";
 import { ShaderFX, ShaderFile } from "../shaderfx/ShaderFX";
 import { ShadowCascade, ShadowConfig } from "./Shadow";
-import { Texture, TextureCreationDesc } from "../Texture";
+import { Texture2D, Texture2DCreationDesc } from "../Texture2D";
 import { Light, LightType } from "../Light";
 import { Camera } from "../Camera";
 import { BufferDebugInfo } from "./BufferDebugInfo";
@@ -27,11 +27,11 @@ export class PassShadowMap extends RenderPass {
     private m_smwidth: number;
     private m_smheight: number;
 
-    private m_smtex: Texture;
+    private m_smtex: Texture2D;
     private m_smfb: WebGLFramebuffer;
 
     //ShadowGathering
-    private m_shadowTexture: Texture;
+    private m_shadowTexture: Texture2D;
     private m_shadowFB: WebGLFramebuffer;
     private m_quadMesh: Mesh;
     private m_quadVAO: WebGLVertexArrayObject;
@@ -78,18 +78,18 @@ export class PassShadowMap extends RenderPass {
 
         //depth texture and framebuffer
 
-        let smtexdesc = new TextureCreationDesc(null, gl.DEPTH_COMPONENT24, false, gl.NEAREST, gl.NEAREST);
-        let smtex = Texture.createTexture2D(smwidth, smheight, smtexdesc, glctx);
+        let smtexdesc = new Texture2DCreationDesc(null, gl.DEPTH_COMPONENT24, false, gl.NEAREST, gl.NEAREST);
+        let smtex = Texture2D.createTexture2D(smwidth, smheight, smtexdesc, glctx);
         this.m_smtex = smtex;
 
 
         gl.activeTexture(gl.TEXTURE12);
-        gl.bindTexture(gl.TEXTURE_2D, smtex.rawtexture);
+        gl.bindTexture(gl.TEXTURE_2D, smtex.getRawTexture());
 
         let smfb = gl.createFramebuffer();
         this.m_smfb = smfb;
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, smfb);
-        gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, smtex.rawtexture, 0);
+        gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, smtex.getRawTexture(), 0);
         // let status = gl.checkFramebufferStatus(gl.DRAW_FRAMEBUFFER);
         // if (status != gl.FRAMEBUFFER_COMPLETE) {
         //     console.error('fb status incomplete ' + status.toString(16));
@@ -118,13 +118,13 @@ export class PassShadowMap extends RenderPass {
         this.m_quadVAO = MeshRender.CreateVertexArrayObj(glctx, this.m_quadMesh, gatherProj);
 
 
-        let texdesc = new TextureCreationDesc(gl.RGB, gl.RGB8, false, gl.LINEAR, gl.LINEAR);
-        let stex = Texture.createTexture2D(pipe.mainFrameBufferWidth, pipe.mainFrameBufferHeight, texdesc, glctx);
+        let texdesc = new Texture2DCreationDesc(gl.RGB, gl.RGB8, false, gl.LINEAR, gl.LINEAR);
+        let stex = Texture2D.createTexture2D(pipe.mainFrameBufferWidth, pipe.mainFrameBufferHeight, texdesc, glctx);
         this.m_shadowTexture = stex;
 
         let sfb = gl.createFramebuffer();
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, sfb);
-        gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, stex.rawtexture, 0);
+        gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, stex.getRawTexture(), 0);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
         this.m_shadowFB = sfb;
 

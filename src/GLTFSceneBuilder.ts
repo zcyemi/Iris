@@ -5,7 +5,7 @@ import { GL } from "./gl/GL";
 import { Material } from "./Material";
 import { ShaderFXLibs } from "./shaderfx/ShaderFXLibs";
 import { Shader, ShaderTags, CullingMode, BlendOperator, RenderQueue } from "./shaderfx/Shader";
-import { Texture } from "./Texture";
+import { Texture2D } from "./Texture2D";
 import { GLTFdata, GLTFfile, GLTFnode } from "./gl/GLTFtool";
 import { GLContext } from "./gl/GLContext";
 import { glmath, quat, mat4, vec4 } from "./math/GLMath";
@@ -26,7 +26,7 @@ export class GLTFSceneBuilder{
     private buffersDesc:{[index:number]:MeshVertexAttrDesc} = {};
 
     private materials:{[index:number]:Material} = {};
-    private images:{[index:number]:Texture} = {};
+    private images:{[index:number]:Texture2D} = {};
 
     public constructor(gltfdata:GLTFdata,glctx:GLContext,shaderlib:ShaderFXLibs){
         this.m_gltfData = gltfdata;
@@ -355,7 +355,7 @@ export class GLTFSceneBuilder{
         let rawBuffer = this.m_gltfData.rawBinary;
         let uint8array = new Uint8Array(rawBuffer,_bufferview.byteOffset,_bufferview.byteLength);
 
-        let texture = Texture.createTextureSync(uint8array,_image.mimeType,this.m_glctx);
+        let texture = Texture2D.createTextureSync(uint8array,_image.mimeType,this.m_glctx);
         this.images[index] = texture;
         return texture;
     }

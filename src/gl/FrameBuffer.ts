@@ -1,13 +1,14 @@
-import { Texture } from "../Texture";
+import { Texture2D } from "../Texture2D";
 import { RenderTexture } from "../RenderTexture";
 import { GLContext } from "./GLContext";
+
 
 
 
 export class FrameBuffer{
 
     private m_rawobj:WebGLFramebuffer;
-    private m_texbinding:{[attatch:number]:}
+    private m_texbinding:{[attatch:number]:Texture2D} = {};
     
     private constructor(){
 
@@ -22,11 +23,12 @@ export class FrameBuffer{
         return fb;
     }
 
-    public static createFromTexture(glctx:GLContext,tex:Texture):FrameBuffer{
+    public static createFromTexture(glctx:GLContext,tex:Texture2D):FrameBuffer{
         const gl = glctx.getWebGLRenderingContext();
 
-        let 
-
+        let glfb = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER,glfb);
+        gl.bindFramebuffer(gl.FRAMEBUFFER,null);
         return null;
     }
 

@@ -54,7 +54,8 @@ export * from './MeshRender';
 export * from './MeshBuilder';
 export * from './DynamicMesh';
 
-export * from './Texture'
+export * from './Texture';
+export * from './Texture2D';
 export * from './TextureCubeMap';
 export * from './TextureSampler';
 

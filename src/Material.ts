@@ -2,11 +2,12 @@ import { vec4, vec3 } from "./math/GLMath";
 import { Shader, ShaderTags } from "./shaderfx/Shader";
 import { ShaderOptionsConfig, ShaderOptions } from "./shaderfx/ShaderVariant";
 import { Utility } from "./Utility";
-import { Texture } from "./Texture";
+import { Texture2D } from "./Texture2D";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 import { GLProgram } from "./gl/GLProgram";
 import { TextureSampler } from "./TextureSampler";
 import { GL } from "./gl/GL";
+import { ITexture } from "./Texture";
 
 export type MaterialProperty = {type:number,value:any,extra?:TextureSampler};
 
@@ -187,7 +188,7 @@ export class Material{
         p.value = color;
     }
 
-    public setTexture(name:string,tex:WebGLTexture | Texture){
+    public setTexture(name:string,tex:WebGLTexture | ITexture){
         let p = this.m_propertyBlock.getUniform(name);
         if(p == null) return;
         p.value = tex;
@@ -417,8 +418,8 @@ export class Material{
                 if(val != null){
                     let texCount = this.m_applyTexCount;
                     let tex:WebGLTexture = null;
-                    if(val instanceof Texture){
-                        tex = val.rawtexture;
+                    if(val.getRawTexture != undefined){
+                        tex = val.getRawTexture();
                     }
                     else if(val instanceof WebGLTexture){
                         tex= val;
@@ -450,8 +451,8 @@ export class Material{
                 if(val != null){
                     let texCount = this.m_applyTexCount;
                     let tex:WebGLTexture = null;
-                    if(val instanceof Texture){
-                        tex = val.rawtexture;
+                    if(val instanceof Texture2D){
+                        tex = val.getRawTexture();
                     }
                     else if(val instanceof WebGLTexture){
                         tex= val;

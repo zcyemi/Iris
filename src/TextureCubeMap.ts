@@ -1,20 +1,39 @@
-import { Texture, TextureCreationDesc } from './Texture';
+import { Texture2D, Texture2DCreationDesc } from './Texture2D';
 import { GLUtility } from './gl/GLUtility';
 import { GLContext } from './gl/GLContext';
+import { ITexture } from './Texture';
 
 /**
  * TEXTURE_CUBE_MAP wrapped by Texture
  */
-export class TextureCubeMap extends Texture{
+export class TextureCubeMap implements ITexture{
+    private m_raw:WebGLTexture;
+    protected m_width: number;
+    protected m_height: number;
+    protected m_desc: Texture2DCreationDesc;
 
-    public get gltex():WebGLTexture{
+    public getDesc():Texture2DCreationDesc{
+        return this.m_desc;
+    }
+    public getRawTexture():WebGLTexture{
         return this.m_raw;
     }
 
-    public constructor(tex?:WebGLTexture,width:number =0,height:number = 0,desc?:TextureCreationDesc){
-        super(tex,width,height,desc);
+    public constructor(tex?:WebGLTexture,width:number =0,height:number = 0,desc?:Texture2DCreationDesc){
+        this.m_raw = tex;
+        this.m_width = width;
+        this.m_height = height;
+        this.m_desc = desc == null ? null : desc.clone();
     }
 
+    public release(glctx:GLContext){
+        if(this.m_raw != null){
+            glctx.gl.deleteTexture(this.m_raw);
+            this.m_raw = null;
+        }
+        return;
+    }
+    
     /**
      * create cubemap texture with six-faces images
      * @param imgs 
@@ -25,7 +44,7 @@ export class TextureCubeMap extends Texture{
             try{
                 let gl = glctx.gl;
                 let gltexcube = gl.createTexture();
-                gl.activeTexture(Texture.TEMP_TEXID);
+                gl.activeTexture(Texture2D.TEMP_TEXID);
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP,gltexcube);
 
                 let imgw:number = imgs[0].width;
@@ -40,7 +59,7 @@ export class TextureCubeMap extends Texture{
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_R,gl.CLAMP_TO_EDGE);
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP,null);
-                texcube = new TextureCubeMap(gltexcube,imgw,imgh,new TextureCreationDesc(gl.RGB,gl.RGB,false,gl.LINEAR,gl.LINEAR));
+                texcube = new TextureCubeMap(gltexcube,imgw,imgh,new Texture2DCreationDesc(gl.RGB,gl.RGB,false,gl.LINEAR,gl.LINEAR));
                 texcube.m_raw = gltexcube;
                 return texcube;
             }

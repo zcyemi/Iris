@@ -1,4 +1,4 @@
-import { Texture } from "../Texture";
+import { Texture2D } from "../Texture2D";
 
 type OnFrameFunc = (t:number)=>void;
 
@@ -88,7 +88,7 @@ export class GLUtility{
     }
 
 
-    public static saveTextureToImage(gl:WebGL2RenderingContext,texture:Texture,tempframebfufer:WebGLFramebuffer):HTMLImageElement{
+    public static saveTextureToImage(gl:WebGL2RenderingContext,texture:Texture2D,tempframebfufer:WebGLFramebuffer):HTMLImageElement{
         if (texture == null || tempframebfufer == null) return null;
 
         let curfb = gl.getParameter(gl.FRAMEBUFFER_BINDING);
@@ -96,7 +96,7 @@ export class GLUtility{
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, tempframebfufer);
         
-        let rawtex = texture.rawtexture;
+        let rawtex = texture.getRawTexture();
         gl.bindTexture(gl.TEXTURE_2D, rawtex);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, rawtex, 0);
 

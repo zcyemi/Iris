@@ -1,7 +1,7 @@
 import { ShaderFXLibs } from "./shaderfx/ShaderFXLibs";
 import { ShadowConfig } from "./render/Shadow";
 import { Delayter } from "./Utility";
-import { Texture } from "./Texture";
+import { Texture2D } from "./Texture2D";
 import { Material } from "./Material";
 import { IRenderPipeline } from "./pipeline/IRenderPipeline";
 import { Input } from "./Input";
@@ -17,7 +17,7 @@ export class GraphicsRender{
     private m_glctx:GLContext;
     private canvas:HTMLCanvasElement;
     private m_creationInfo:GraphicsRenderCreateInfo;
-    private m_defaultTexture:Texture;
+    private m_defaultTexture:Texture2D;
 
     public static globalRender:GraphicsRender;
 
@@ -56,7 +56,7 @@ export class GraphicsRender{
         return this.m_glctx;
     }
 
-    public get defaultTexture():Texture{
+    public get defaultTexture():Texture2D{
         return this.m_defaultTexture;
     }
 
@@ -81,11 +81,11 @@ export class GraphicsRender{
         let gl = glctx.gl;
 
         Material.DEF_TEXID_NUM = GraphicsRender.TEXID_DEFAULT_TEX;
-        Texture.TEMP_TEXID = gl.TEXTURE2;
+        Texture2D.TEMP_TEXID = gl.TEXTURE2;
         
-        this.m_defaultTexture = Texture.crateEmptyTexture(2,2,glctx);
+        this.m_defaultTexture = Texture2D.crateEmptyTexture(2,2,glctx);
         gl.activeTexture(gl.TEXTURE3);
-        gl.bindTexture(gl.TEXTURE_2D,this.m_defaultTexture.rawtexture);
+        gl.bindTexture(gl.TEXTURE_2D,this.m_defaultTexture.getRawTexture());
         gl.frontFace(gl.CCW);
         this.setPipeline(pipeline);
     }

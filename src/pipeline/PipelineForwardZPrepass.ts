@@ -5,7 +5,7 @@ import { PassGizmos } from "../render/PassGizmos";
 import { PassDepth } from "../render/PassDepth";
 import { PassShadowMap } from "../render/PassShadowMap";
 import { PipelineBase } from "./PipelineBase";
-import { TextureCreationDesc, Texture } from "../Texture";
+import { Texture2DCreationDesc, Texture2D } from "../Texture2D";
 import { Scene } from "../Scene";
 import { Comparison } from "../shaderfx/Shader";
 import { GL } from "../gl/GL";
@@ -46,14 +46,14 @@ export class PipelineForwardZPrePass extends PipelineBase {
 
     private createMainDepthFB(width: number, height: number) {
         let bufferinfo = this.m_mainFrameBufferInfo;
-        let depthtexdesc = new TextureCreationDesc(null, bufferinfo.depthFormat, false, GL.NEAREST, GL.NEAREST);
-        let tex = Texture.createTexture2D(width, height, depthtexdesc, this.glctx);
+        let depthtexdesc = new Texture2DCreationDesc(null, bufferinfo.depthFormat, false, GL.NEAREST, GL.NEAREST);
+        let tex = Texture2D.createTexture2D(width, height, depthtexdesc, this.glctx);
         this.m_mainDepthTexture = tex;
         let gl = this.gl;
         if (this.m_mainDepthFB == null) {
             let fb = gl.createFramebuffer();
             gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, fb);
-            gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, tex.rawtexture, 0);
+            gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, tex.getRawTexture(), 0);
             gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
             this.m_mainDepthFB = fb;
         }
@@ -73,7 +73,7 @@ export class PipelineForwardZPrePass extends PipelineBase {
         depthtex.resize(width, height, glctx);
         let fb = gl.createFramebuffer();
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, fb);
-        gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthtex.rawtexture, 0);
+        gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthtex.getRawTexture(), 0);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
         this.m_mainDepthFB = fb;
     }

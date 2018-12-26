@@ -4,7 +4,7 @@ import { GraphicsRenderCreateInfo, GraphicsRender } from "../GraphicsRender";
 import { RenderNodeList } from "../RenderNodeList";
 import { BufferDebugInfo } from "../render/BufferDebugInfo";
 import { PassDebug } from "../render/PassDebug";
-import { Texture } from "../Texture";
+import { Texture2D } from "../Texture2D";
 import { ShadowMapData } from "../render/Shadow";
 import { PipelineStateCache } from "../PipelineStateCache";
 import { Transform } from "../Transform";
@@ -47,9 +47,9 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     //Copy of depth texture
-    protected m_mainDepthTexture: Texture;
+    protected m_mainDepthTexture: Texture2D;
     protected m_mainDepthFB: WebGLFramebuffer;
-    public get mainDepthTexture(): Texture {
+    public get mainDepthTexture(): Texture2D {
         return this.m_mainDepthTexture;
     }
     public get mainDepthFrameBuffer(): WebGLFramebuffer {
@@ -290,7 +290,7 @@ export class PipelineBase implements IRenderPipeline {
     public activeDefaultTexture() {
         const gl = this.gl;
         gl.activeTexture(gl.TEXTURE3);
-        gl.bindTexture(gl.TEXTURE_2D, this.graphicRender.defaultTexture.rawtexture);
+        gl.bindTexture(gl.TEXTURE_2D, this.graphicRender.defaultTexture.getRawTexture());
     }
 
     public addBufferDebugInfo(info: BufferDebugInfo) {
@@ -388,7 +388,7 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     /** draw fullscreen tex */
-    public drawFullScreenTex(tex:Texture| WebGLTexture){
+    public drawFullScreenTex(tex:Texture2D| WebGLTexture){
         const mat =this.m_fullscreenMat;
         mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
         this.drawMeshRender(this.m_fullscreenRender);

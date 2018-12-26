@@ -17,7 +17,7 @@ import { PipelineBase } from '../pipeline/PipelineBase';
 import { PipelineForwardZPrePass } from '../pipeline/PipelineForwardZPrePass';
 import { Transform } from '../Transform';
 import { SpriteRender } from '../SpriteRender';
-import { Texture } from '../Texture';
+import { Texture2D } from '../Texture2D';
 import { Skybox } from '../Skybox';
 import { GLContext } from '../gl/GLContext';
 import { GLUtility } from '../gl/GLUtility';
@@ -108,7 +108,7 @@ export class SampleGame{
         ];
         let texcube = await TextureCubeMap.loadCubeMap(cubepaths,glctx);
 
-        let tex360 = await Texture.loadTexture2D('res/envmap/day360.jpg',glctx,false);
+        let tex360 = await Texture2D.loadTexture2D('res/envmap/day360.jpg',glctx,false);
         //skybox = Skybox.createFromTex360(tex360);
         //skybox = Skybox.createFromCubeMap(texcube);
 
@@ -132,7 +132,7 @@ export class SampleGame{
         this.m_camera = camera;
         
         {
-            let spr = await Texture.loadTexture2D('res/images/img0.png',glctx,true);
+            let spr = await Texture2D.loadTexture2D('res/images/img0.png',glctx,true);
             let sprobj = new GameObject('sprite1');
             let srender = sprobj.addRender(SpriteRender);
             srender.image = spr;
