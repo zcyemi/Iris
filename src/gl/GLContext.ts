@@ -24,6 +24,10 @@ export class GLContext {
         return new GLContext(g);
     }
 
+    public getWebGLRenderingContext():WebGL2RenderingContext{
+         return this.gl;
+    }
+
     public createProgram(vsource: string, psource: string): GLProgram | null {
 
         let gl = this.gl;
