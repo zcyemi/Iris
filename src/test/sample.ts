@@ -22,6 +22,7 @@ import { Skybox } from '../Skybox';
 import { GLContext } from '../gl/GLContext';
 import { GLUtility } from '../gl/GLUtility';
 import { vec3, glmath } from '../math/GLMath';
+import { GL } from '../gl/GL';
 
 export class SampleGame{
     
@@ -94,7 +95,7 @@ export class SampleGame{
         tr.forward = vec3.down;
 
         //texture
-        let tex = await glctx.createTextureImageAsync('res/images/tex0.png');
+        let tex = await Texture2D.loadTexture2D('res/images/tex0.png',grender.glctx,true);
 
         let skybox:Skybox = null;
 

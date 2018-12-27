@@ -3,10 +3,6 @@ import { ITexture, TextureCreationDesc } from "./Texture";
 import { Texture2D } from "./Texture2D";
 import { FrameBuffer } from "./gl/FrameBuffer";
 
-
-
-
-
 export class RenderTexture implements ITexture{
 
     private m_valid:boolean;

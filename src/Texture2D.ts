@@ -2,11 +2,7 @@ import { GLContext } from "./gl/GLContext";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 import { ITexture, TextureCreationDesc, TextureDescUtility } from "./Texture";
 
-
-
-
 export class Texture2D implements ITexture {
-
     public static TEMP_TEXID: number;
 
     protected m_raw: WebGLTexture;
@@ -39,7 +35,6 @@ export class Texture2D implements ITexture {
         }
         return;
     }
-
 
     public static createTexture2D(width: number, height: number, desc: TextureCreationDesc, glctx: GLContext): Texture2D {
         let gl = glctx.gl;
@@ -90,7 +85,6 @@ export class Texture2D implements ITexture {
     }
 
     public static loadTexture2D(url: string, glctx: GLContext, alpha: boolean = true): Promise<Texture2D> {
-
         return new Promise<Texture2D>((res, rej) => {
             var img = new Image();
             const gl = glctx.gl;
@@ -111,7 +105,6 @@ export class Texture2D implements ITexture {
             }
             img.src = url;
         });
-
     }
 
     public resize(width: number, height: number, glctx: GLContext) {
@@ -202,5 +195,4 @@ export class Texture2D implements ITexture {
             })
         })
     }
-
 }
