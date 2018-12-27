@@ -1,63 +1,9 @@
 import { GLContext } from "./gl/GLContext";
-import { GL } from "./gl/GL";
 import { ShaderFX } from "./shaderfx/ShaderFX";
-import { ITexture } from "./Texture";
-import { undefinedOr } from "./Utility";
+import { ITexture, TextureCreationDesc, TextureDescUtility } from "./Texture";
 
 
 
-export interface TextureCreationDesc {
-    format?: number;
-    internalformat?: number;
-    mipmap?: boolean;
-    min_filter?: number;
-    mag_filter?: number;
-    wrap_s?: number;
-    wrap_t?: number;
-}
-
-
-export class Texture2DCreationDesc implements TextureCreationDesc {
-    public format: number;
-    public internalformat: number;
-    public mipmap?: boolean = false;
-    public min_filter?: number;
-    public mag_filter?: number;
-    public wrap_s?: number;
-    public wrap_t?: number;
-
-    public static get DefaultRGBA():Texture2DCreationDesc{
-        let desc = new Texture2DCreationDesc();
-        desc.format = GL.RGBA;
-        desc.internalformat =GL.RGBA;
-        desc.fillDefault();
-        return desc;
-    }
-
-    public static get DefaultRGB():Texture2DCreationDesc{
-        let desc = new Texture2DCreationDesc();
-        desc.format = GL.RGB;
-        desc.internalformat =GL.RGB;
-        desc.fillDefault();
-        return desc;
-    }
-
-    public fillDefault(){
-        this.wrap_s = undefinedOr(this.wrap_s,GL.CLAMP_TO_EDGE);
-        this.wrap_t = undefinedOr(this.wrap_t,GL.CLAMP_TO_EDGE);
-        this.min_filter = undefinedOr(this.min_filter,GL.LINEAR);
-        this.mag_filter = undefinedOr(this.mag_filter,GL.LINEAR);
-        this.mipmap = undefinedOr(this.mipmap,false);
-    }
-
-    public clone() {
-        let c = Object.create(Texture2DCreationDesc.prototype);
-        for (let p in this) {
-            c[p] = this[p];
-        }
-        return c;
-    }
-}
 
 export class Texture2D implements ITexture {
 
@@ -66,9 +12,9 @@ export class Texture2D implements ITexture {
     protected m_raw: WebGLTexture;
     protected m_width: number;
     protected m_height: number;
-    protected m_desc: Texture2DCreationDesc;
+    protected m_desc: TextureCreationDesc;
 
-    public getDesc():Texture2DCreationDesc{
+    public getDesc():TextureCreationDesc{
         return this.m_desc;
     }
 
@@ -83,7 +29,7 @@ export class Texture2D implements ITexture {
         this.m_raw = tex;
         this.m_width = width;
         this.m_height = heigt;
-        this.m_desc = desc == null ? null : desc.clone();
+        this.m_desc = desc == null ? null : TextureDescUtility.clone(desc);
     }
 
     public release(glctx:GLContext){
@@ -95,8 +41,10 @@ export class Texture2D implements ITexture {
     }
 
 
-    public static createTexture2D(width: number, height: number, desc: Texture2DCreationDesc, glctx: GLContext): Texture2D {
+    public static createTexture2D(width: number, height: number, desc: TextureCreationDesc, glctx: GLContext): Texture2D {
         let gl = glctx.gl;
+
+        TextureDescUtility.fillDefault(desc);
 
         let tex = gl.createTexture();
         gl.activeTexture(ShaderFX.GL_TEXTURE_TEMP);
@@ -118,6 +66,9 @@ export class Texture2D implements ITexture {
     public static createTexture2DImage(img:HTMLImageElement,desc:TextureCreationDesc,glctx:GLContext):Texture2D{
         const gl = glctx.gl;
         let tex = gl.createTexture();
+
+        TextureDescUtility.fillDefault(desc);
+
         try {
             gl.bindTexture(gl.TEXTURE_2D, tex);
             gl.texImage2D(gl.TEXTURE_2D, 0, desc.format, desc.internalformat, gl.UNSIGNED_BYTE, img);
@@ -145,7 +96,7 @@ export class Texture2D implements ITexture {
             const gl = glctx.gl;
             img.onload = () => {
                 try {
-                    let desc = alpha? Texture2DCreationDesc.DefaultRGBA: Texture2DCreationDesc.DefaultRGB;
+                    let desc = alpha? TextureDescUtility.DefaultRGBA: TextureDescUtility.DefaultRGB;
                     var tex = Texture2D.createTexture2DImage(img,desc,glctx);
                     res(new Texture2D(tex, img.width, img.height, desc));
                 }

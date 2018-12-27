@@ -1,6 +1,6 @@
 import { GLContext } from "./gl/GLContext";
-import { ITexture } from "./Texture";
-import { Texture2DCreationDesc } from "./Texture2D";
+import { ITexture, TextureCreationDesc } from "./Texture";
+
 
 
 export interface RenderTextureCreationDesc{
@@ -13,9 +13,9 @@ export class RenderTexture implements ITexture{
 
     private m_valid:boolean = true;
     private m_raw:WebGLTexture;
-    private m_desc:Texture2DCreationDesc;
+    private m_desc:TextureCreationDesc;
 
-    public getDesc():Texture2DCreationDesc{
+    public getDesc():TextureCreationDesc{
         return this.m_desc;
     }
 

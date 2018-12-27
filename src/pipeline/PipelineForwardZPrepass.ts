@@ -5,11 +5,13 @@ import { PassGizmos } from "../render/PassGizmos";
 import { PassDepth } from "../render/PassDepth";
 import { PassShadowMap } from "../render/PassShadowMap";
 import { PipelineBase } from "./PipelineBase";
-import { Texture2DCreationDesc, Texture2D } from "../Texture2D";
+import { Texture2D } from "../Texture2D";
 import { Scene } from "../Scene";
 import { Comparison } from "../shaderfx/Shader";
 import { GL } from "../gl/GL";
 import { RenderPass } from "../render/RenderPass";
+import { TextureCreationDesc } from "../Texture";
+
 
 export class PipelineForwardZPrePass extends PipelineBase {
 
@@ -46,7 +48,12 @@ export class PipelineForwardZPrePass extends PipelineBase {
 
     private createMainDepthFB(width: number, height: number) {
         let bufferinfo = this.m_mainFrameBufferInfo;
-        let depthtexdesc = new Texture2DCreationDesc(null, bufferinfo.depthFormat, false, GL.NEAREST, GL.NEAREST);
+        let depthtexdesc:TextureCreationDesc ={
+            internalformat: bufferinfo.depthFormat,
+            mipmap:false,
+            min_filter: GL.NEAREST,
+            mag_filter: GL.NEAREST,
+        };
         let tex = Texture2D.createTexture2D(width, height, depthtexdesc, this.glctx);
         this.m_mainDepthTexture = tex;
         let gl = this.gl;

@@ -1,7 +1,7 @@
-import { Texture2D, Texture2DCreationDesc } from './Texture2D';
+import { Texture2D } from './Texture2D';
 import { GLUtility } from './gl/GLUtility';
 import { GLContext } from './gl/GLContext';
-import { ITexture } from './Texture';
+import { ITexture, TextureCreationDesc, TextureDescUtility } from './Texture';
 
 /**
  * TEXTURE_CUBE_MAP wrapped by Texture
@@ -10,20 +10,20 @@ export class TextureCubeMap implements ITexture{
     private m_raw:WebGLTexture;
     protected m_width: number;
     protected m_height: number;
-    protected m_desc: Texture2DCreationDesc;
+    protected m_desc: TextureCreationDesc;
 
-    public getDesc():Texture2DCreationDesc{
+    public getDesc():TextureCreationDesc{
         return this.m_desc;
     }
     public getRawTexture():WebGLTexture{
         return this.m_raw;
     }
 
-    public constructor(tex?:WebGLTexture,width:number =0,height:number = 0,desc?:Texture2DCreationDesc){
+    public constructor(tex?:WebGLTexture,width:number =0,height:number = 0,desc?:TextureCreationDesc){
         this.m_raw = tex;
         this.m_width = width;
         this.m_height = height;
-        this.m_desc = desc == null ? null : desc.clone();
+        this.m_desc = desc == null ? null : TextureDescUtility.clone(desc);
     }
 
     public release(glctx:GLContext){
@@ -59,7 +59,15 @@ export class TextureCubeMap implements ITexture{
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_R,gl.CLAMP_TO_EDGE);
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP,null);
-                texcube = new TextureCubeMap(gltexcube,imgw,imgh,new Texture2DCreationDesc(gl.RGB,gl.RGB,false,gl.LINEAR,gl.LINEAR));
+
+                let desc:TextureCreationDesc = {
+                    format: gl.RGB,
+                    internalformat:gl.RGB,
+                    mipmap:false,
+                    min_filter : gl.LINEAR,
+                    mag_filter: gl.LINEAR
+                };
+                texcube = new TextureCubeMap(gltexcube,imgw,imgh,desc);
                 texcube.m_raw = gltexcube;
                 return texcube;
             }

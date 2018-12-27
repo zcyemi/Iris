@@ -5,7 +5,7 @@ import { Shader } from "../shaderfx/Shader";
 import { glmath, vec3, mat4, vec4 } from "../math/GLMath";
 import { ShaderFX, ShaderFile } from "../shaderfx/ShaderFX";
 import { ShadowCascade, ShadowConfig } from "./Shadow";
-import { Texture2D, Texture2DCreationDesc } from "../Texture2D";
+import { Texture2D } from "../Texture2D";
 import { Light, LightType } from "../Light";
 import { Camera } from "../Camera";
 import { BufferDebugInfo } from "./BufferDebugInfo";
@@ -15,6 +15,7 @@ import { Material } from "../Material";
 import { RenderPass } from "./RenderPass";
 import { BaseRender } from "../BaseRender";
 import { GLProgram } from "../gl/GLProgram";
+import { TextureCreationDesc } from "../Texture";
 
 export class PassShadowMap extends RenderPass {
     private m_shader: Shader;
@@ -78,7 +79,12 @@ export class PassShadowMap extends RenderPass {
 
         //depth texture and framebuffer
 
-        let smtexdesc = new Texture2DCreationDesc(null, gl.DEPTH_COMPONENT24, false, gl.NEAREST, gl.NEAREST);
+        let smtexdesc:TextureCreationDesc = {
+            internalformat: gl.DEPTH_COMPONENT24,
+            mipmap:false,
+            mag_filter:gl.NEAREST,
+            min_filter:gl.NEAREST
+        };
         let smtex = Texture2D.createTexture2D(smwidth, smheight, smtexdesc, glctx);
         this.m_smtex = smtex;
 
@@ -118,7 +124,13 @@ export class PassShadowMap extends RenderPass {
         this.m_quadVAO = MeshRender.CreateVertexArrayObj(glctx, this.m_quadMesh, gatherProj);
 
 
-        let texdesc = new Texture2DCreationDesc(gl.RGB, gl.RGB8, false, gl.LINEAR, gl.LINEAR);
+        let texdesc:TextureCreationDesc = {
+            format: gl.RGB,
+            internalformat:gl.RGB8,
+            mipmap:false,
+            min_filter: gl.LINEAR,
+            mag_filter:gl.LINEAR
+        };
         let stex = Texture2D.createTexture2D(pipe.mainFrameBufferWidth, pipe.mainFrameBufferHeight, texdesc, glctx);
         this.m_shadowTexture = stex;
 

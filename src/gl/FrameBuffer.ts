@@ -3,9 +3,7 @@ import { RenderTexture } from "../RenderTexture";
 import { GLContext } from "./GLContext";
 import { ShaderFX } from "../shaderfx/ShaderFX";
 
-
 export type FrameBufferTex = Texture2D | RenderTexture;
-
 
 interface FrameBufferCreateDesc{
     depthTex?:FrameBufferTex,
@@ -15,9 +13,6 @@ interface FrameBufferCreateDesc{
     colorTex2?:FrameBufferTex,
     colorTex3?:FrameBufferTex,
 }
-
-
-
 
 export class FrameBuffer{
 
