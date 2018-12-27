@@ -3,24 +3,26 @@ import { RenderTexture } from "../RenderTexture";
 import { GLContext } from "./GLContext";
 import { ShaderFX } from "../shaderfx/ShaderFX";
 
-export type FrameBufferTex = Texture2D;
 
 interface FrameBufferCreateDesc{
-    depthTex?:FrameBufferTex,
-    depthStencil?:FrameBufferTex,
-    colorTex0?:FrameBufferTex,
-    colorTex1?:FrameBufferTex,
-    colorTex2?:FrameBufferTex,
-    colorTex3?:FrameBufferTex,
+    depthTex?:Texture2D,
+    depthStencil?:Texture2D,
+    colorTex0?:Texture2D,
+    colorTex1?:Texture2D,
+    colorTex2?:Texture2D,
+    colorTex3?:Texture2D,
 }
 
 export class FrameBuffer{
 
     private m_rawobj:WebGLFramebuffer;
-    private m_texbinding:{[attatch:number]:FrameBufferTex} = {};
+    private m_texbinding:{[attatch:number]:Texture2D} = {};
     private m_coltex:Texture2D;
+    private m_width:number;
+    private m_height:number;
 
     public get coltex():Texture2D{ return this.m_coltex;}
+
     
     private constructor(){
 
@@ -33,7 +35,6 @@ export class FrameBuffer{
         fb.m_rawobj = glfb;
         return fb;
     }
-    
 
     public static create(glctx:GLContext,width:number,height:number,texdesc: {colFmt?:number,depthFmt?:number,depthstencilFmt?:number}){
         const gl = glctx.getWebGLRenderingContext();
@@ -44,15 +45,21 @@ export class FrameBuffer{
 
         gl.activeTexture(ShaderFX.GL_TEXTURE_TEMP);
         if(texdesc.colFmt != undefined){
-            let coltex = Texture2D.createTexture2D(width,height,null,glctx);
+            let coltex = Texture2D.createTexture2D(width,height,{
+                internalformat: texdesc.colFmt,
+            },glctx);
             fb.bindTexutre(glctx,coltex,gl.COLOR_ATTACHMENT0);
         }
         if(texdesc.depthFmt != undefined){
-            let deptex = Texture2D.createTexture2D(width,height,null,glctx);
+            let deptex = Texture2D.createTexture2D(width,height,{
+                internalformat: texdesc.depthFmt
+            },glctx);
             fb.bindTexutre(glctx,deptex,gl.DEPTH_ATTACHMENT)
         }
         else if(texdesc.depthstencilFmt != undefined){
-            let dstex = Texture2D.createTexture2D(width,height,null,glctx);
+            let dstex = Texture2D.createTexture2D(width,height,{
+                internalformat:texdesc.depthstencilFmt
+            },glctx);
             fb.bindTexutre(glctx,dstex,gl.DEPTH_STENCIL_ATTACHMENT)
         }
         gl.bindFramebuffer(gl.FRAMEBUFFER,null);
@@ -75,21 +82,70 @@ export class FrameBuffer{
         fb.bindTexutre(glctx,desc.colorTex3,gl.COLOR_ATTACHMENT3);
 
         gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+
         return fb;
     }
 
+    public resize(glctx:GLContext,width:number,height:number):boolean{
+        if(width == null || height == null){
+            throw new Error("resize framebuffer invalid param!");
+        }
+        if(this.m_width == width && this.m_height == height) return false;
 
-    public bindTexutre(glctx:GLContext,tex:FrameBufferTex,attatch:number){
+        const gl = glctx.gl;
+        let fbtex = this.m_texbinding;
+
+        const fb = this.m_rawobj;
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER,fb);
+        for (const key in fbtex) {
+            if (fbtex.hasOwnProperty(key)) {
+                const tex = fbtex[key];
+                if(tex != null){
+                    tex.resize(width,height,glctx);
+                    gl.framebufferTexture2D(gl.FRAMEBUFFER,Number.parseInt(key),gl.TEXTURE_2D,tex.getRawTexture(),0);
+                }
+            }
+        }
+        gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+    
+        this.m_width = width;
+        this.m_height = height;
+        return true;
+    }
+
+
+    public bindTexutre(glctx:GLContext,tex:Texture2D,attatch:number){
         if(tex ==null) return;
         const gl = glctx.gl;
-        gl.framebufferTexture2D(gl.FRAMEBUFFER,attatch,gl.TEXTURE_2D,tex,0);
-        this.m_texbinding[attatch] = tex;
+        gl.framebufferTexture2D(gl.FRAMEBUFFER,attatch,gl.TEXTURE_2D,tex.getRawTexture(),0);
+        this.m_texbinding[attatch] = tex
         if(attatch == gl.COLOR_ATTACHMENT0){
             this.m_coltex = tex;
         }
+
+        this.m_width = tex.width;
+        this.m_height = tex.height;
     }
 
     public release(glctx:GLContext){
+        const gl = glctx.gl;
+        gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+        gl.deleteFramebuffer(this.m_rawobj);
+        this.m_rawobj = null;
 
+        let fbtex = this.m_texbinding;
+        for (const key in fbtex) {
+            if (fbtex.hasOwnProperty(key)) {
+                let tex = fbtex[key];
+                if(tex != null) tex.release(glctx);
+                fbtex[key] = null;
+            }
+        }
+
+        this.m_texbinding = {};
+        this.m_coltex = null;
+        this.m_width = null;
+        this.m_height = null;
     }
 }

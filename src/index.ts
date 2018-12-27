@@ -7,6 +7,7 @@ export * from './gl/GLPipelineState';
 export * from './gl/GLProgram';
 export * from './gl/GLTFtool';
 export * from './gl/GLUtility';
+export * from './gl/FrameBuffer';
 
 export * from './gl/GLFenceSync';
 export * from './gl/GLPixelPack';
@@ -16,6 +17,9 @@ export * from './GraphicsRender';
 export * from './pipeline/IRenderPipeline';
 export * from './pipeline/PipelineBase';
 export * from './pipeline/PipelineForwardZPrePass';
+export * from './pipeline/StackedPipeline';
+export * from './pipeline/RenderModel';
+export * from './pipeline/RenderPipeline';
 
 export * from './render/PassDebug';
 export * from './render/PassGizmos';

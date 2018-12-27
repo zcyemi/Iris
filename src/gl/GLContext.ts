@@ -12,6 +12,16 @@ export class GLContext {
     private constructor(wgl: WebGL2RenderingContext) {
         this.gl = wgl;
     }
+
+
+    public get canvasWidth():number{
+        return this.gl.canvas.clientWidth;
+    }
+
+    public get canvasHeight():number{
+        return this.gl.canvas.clientHeight;
+    }
+
     public static createFromGL(wgl: WebGL2RenderingContext): GLContext {
         return new GLContext(wgl);
     }

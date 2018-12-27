@@ -3,6 +3,8 @@ import { mat4 } from "../math/GLMath";
 import { BaseRender } from "../BaseRender";
 import { PipelineBase } from "./PipelineBase";
 import { ShaderDataBasis, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
+import { FrameBuffer } from "../gl/FrameBuffer";
+import { GLContext } from "../gl/GLContext";
 
 
 /**
@@ -25,6 +27,8 @@ export class RenderModel{
     private m_shaderDataShadowMap: ShaderDataUniformShadowMap;
     private m_shaderDataLight: ShaderDataUniformLight;
 
+    private m_mainFramebuffer:FrameBuffer;
+
 
     public constructor(pipeline:PipelineBase){
 
@@ -41,6 +45,9 @@ export class RenderModel{
 
     public updateUniformRender(render?:BaseRender){
 
+    }
+
+    public release(glctx:GLContext){
     }
 
 }
