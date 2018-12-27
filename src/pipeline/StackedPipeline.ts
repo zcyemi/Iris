@@ -9,6 +9,7 @@ import { PassShadowMap } from "../render/PassShadowMap";
 import { PassSkybox } from "../render/PassSkybox";
 import { FrameBuffer } from "../gl/FrameBuffer";
 import { RenderModel } from "./RenderModel";
+import { ReleaseGraphicObj } from "../IGraphicObj";
 
 type PassCtor<T> = new(pipeline:IRenderPipeline)=>T;
 
@@ -57,8 +58,8 @@ export class StackedPipeline implements IRenderPipeline{
     }
     release() {
         const glctx =this.m_glctx;
-        this.m_model.release(glctx);
-        this.m_mainfb.release(glctx);
+        this.m_model = ReleaseGraphicObj(this.m_model,glctx);
+        this.m_mainfb = ReleaseGraphicObj(this.m_mainfb,glctx);
         this.m_glctx =null;
     }
 

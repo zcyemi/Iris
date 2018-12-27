@@ -5,12 +5,13 @@ import { PipelineBase } from "./PipelineBase";
 import { ShaderDataBasis, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { FrameBuffer } from "../gl/FrameBuffer";
 import { GLContext } from "../gl/GLContext";
+import { IGraphicObj } from "../IGraphicObj";
 
 
 /**
  * @todo add internal res to graphics render
  */
-export class RenderModel{
+export class RenderModel implements IGraphicObj{
     
     public static readonly UNIFORMINDEX_OBJ: number = 0;
     public static readonly UNIFORMINDEX_BASIS: number = 1;
