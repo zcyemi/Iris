@@ -1,4 +1,5 @@
 import { vec4, glmath } from "./math/GLMath";
+import { isNull } from "util";
 
 
 export type MapStr<T> = {[key:string]:T};
@@ -158,3 +159,6 @@ export class WindowUtility{
 }
 
 
+export function undefinedOr(x:any,y:any){
+	return x == undefined ? y: x;
+}

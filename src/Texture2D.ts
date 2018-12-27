@@ -2,39 +2,52 @@ import { GLContext } from "./gl/GLContext";
 import { GL } from "./gl/GL";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 import { ITexture } from "./Texture";
+import { undefinedOr } from "./Utility";
 
-export class Texture2DCreationDesc {
+
+
+export interface TextureCreationDesc {
+    format?: number;
+    internalformat?: number;
+    mipmap?: boolean;
+    min_filter?: number;
+    mag_filter?: number;
+    wrap_s?: number;
+    wrap_t?: number;
+}
+
+
+export class Texture2DCreationDesc implements TextureCreationDesc {
     public format: number;
     public internalformat: number;
-    public mipmap: boolean = false;
-    public min_filter: number;
-    public mag_filter: number;
-    public wrap_s: number;
-    public wrap_t: number;
+    public mipmap?: boolean = false;
+    public min_filter?: number;
+    public mag_filter?: number;
+    public wrap_s?: number;
+    public wrap_t?: number;
 
     public static get DefaultRGBA():Texture2DCreationDesc{
-        return new Texture2DCreationDesc(GL.RGBA,GL.RGBA);
+        let desc = new Texture2DCreationDesc();
+        desc.format = GL.RGBA;
+        desc.internalformat =GL.RGBA;
+        desc.fillDefault();
+        return desc;
     }
 
     public static get DefaultRGB():Texture2DCreationDesc{
-        return new Texture2DCreationDesc(GL.RGB,GL.RGB);
+        let desc = new Texture2DCreationDesc();
+        desc.format = GL.RGB;
+        desc.internalformat =GL.RGB;
+        desc.fillDefault();
+        return desc;
     }
 
-    public constructor(
-        fmt: number,
-        internalfmt: number,
-        mipmap: boolean = false,
-        min_filter: number = GL.LINEAR,
-        mag_filter: number = GL.LINEAR,
-        wrap_s: number = GL.CLAMP_TO_EDGE,
-        wrap_t: number = GL.CLAMP_TO_EDGE) {
-        this.format = fmt;
-        this.internalformat = internalfmt;
-        this.mipmap = mipmap;
-        this.min_filter = min_filter;
-        this.mag_filter = mag_filter;
-        this.wrap_s = wrap_s;
-        this.wrap_t = wrap_t;
+    public fillDefault(){
+        this.wrap_s = undefinedOr(this.wrap_s,GL.CLAMP_TO_EDGE);
+        this.wrap_t = undefinedOr(this.wrap_t,GL.CLAMP_TO_EDGE);
+        this.min_filter = undefinedOr(this.min_filter,GL.LINEAR);
+        this.mag_filter = undefinedOr(this.mag_filter,GL.LINEAR);
+        this.mipmap = undefinedOr(this.mipmap,false);
     }
 
     public clone() {
@@ -66,7 +79,7 @@ export class Texture2D implements ITexture {
     public get width(): number { return this.m_width; }
     public get height(): number { return this.m_height; }
 
-    public constructor(tex?: WebGLTexture, width: number = 0, heigt: number = 0, desc?: Texture2DCreationDesc) {
+    public constructor(tex?: WebGLTexture, width: number = 0, heigt: number = 0, desc?: TextureCreationDesc) {
         this.m_raw = tex;
         this.m_width = width;
         this.m_height = heigt;
@@ -102,7 +115,7 @@ export class Texture2D implements ITexture {
         return texture;
     }
 
-    public static createTexture2DImage(img:HTMLImageElement,desc:Texture2DCreationDesc,glctx:GLContext):Texture2D{
+    public static createTexture2DImage(img:HTMLImageElement,desc:TextureCreationDesc,glctx:GLContext):Texture2D{
         const gl = glctx.gl;
         let tex = gl.createTexture();
         try {
