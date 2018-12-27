@@ -3,7 +3,7 @@ import { RenderTexture } from "../RenderTexture";
 import { GLContext } from "./GLContext";
 import { ShaderFX } from "../shaderfx/ShaderFX";
 
-export type FrameBufferTex = Texture2D | RenderTexture;
+export type FrameBufferTex = Texture2D;
 
 interface FrameBufferCreateDesc{
     depthTex?:FrameBufferTex,
@@ -18,6 +18,9 @@ export class FrameBuffer{
 
     private m_rawobj:WebGLFramebuffer;
     private m_texbinding:{[attatch:number]:FrameBufferTex} = {};
+    private m_coltex:Texture2D;
+
+    public get coltex():Texture2D{ return this.m_coltex;}
     
     private constructor(){
 
@@ -52,9 +55,7 @@ export class FrameBuffer{
             let dstex = Texture2D.createTexture2D(width,height,null,glctx);
             fb.bindTexutre(glctx,dstex,gl.DEPTH_STENCIL_ATTACHMENT)
         }
-
         gl.bindFramebuffer(gl.FRAMEBUFFER,null);
-
 
         return fb;
     }
@@ -83,14 +84,9 @@ export class FrameBuffer{
         const gl = glctx.gl;
         gl.framebufferTexture2D(gl.FRAMEBUFFER,attatch,gl.TEXTURE_2D,tex,0);
         this.m_texbinding[attatch] = tex;
-    }
-    
-
-
-
-    public createFromRenderTex(glctx:GLContext,rtex:RenderTexture):FrameBuffer{
-
-        return null;
+        if(attatch == gl.COLOR_ATTACHMENT0){
+            this.m_coltex = tex;
+        }
     }
 
     public release(glctx:GLContext){
