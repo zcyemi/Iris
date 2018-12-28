@@ -16,7 +16,7 @@ export class GLFrameBuffer{
     private m_valid:boolean = false;
 
     public static create(retain:boolean,glctx:GLContext,colorInternalFormat:number,depthInternalFormat?:number,width?:number,height?:number,glfb?:GLFrameBuffer):GLFrameBuffer|null{
-        let gl = glctx.gl;
+        let gl = glctx.getWebGLRenderingContext();
         if(width == null) width = gl.canvas.width;
         if(height == null) height = gl.canvas.height;
 
@@ -78,7 +78,7 @@ export class GLFrameBuffer{
     }
 
     public release(glctx:GLContext){
-        let gl = glctx.gl;
+        let gl = glctx.getWebGLRenderingContext();
         gl.deleteFramebuffer(this.frambuffer);
         this.frambuffer = null;
 

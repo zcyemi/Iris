@@ -399,9 +399,8 @@ export class Mesh{
     public refreshMeshBuffer(glctx:GLContext){
         if(this.m_bufferInited) return;
 
-        let gl = glctx.gl;
-        let buffervert = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER,buffervert);
+        let buffervert = glctx.createBuffer();
+        glctx.bindBuffer(GL.ARRAY_BUFFER,buffervert);
         this.bufferVertices = buffervert;
 
         let dataTotalSize = this.vertexDesc.totalByteSize;
@@ -429,17 +428,17 @@ export class Mesh{
             offset = MeshBufferUtility.copyBuffer(totalDataView,this.m_dataNormal,offset);
             offset = Math.ceil(offset/4.0)*4;
         }
-        gl.bufferData(gl.ARRAY_BUFFER,totalData,gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER,null);
+        glctx.bufferData(GL.ARRAY_BUFFER,totalData,GL.STATIC_DRAW);
+        glctx.bindBuffer(GL.ARRAY_BUFFER,null);
 
         //Indices
         let dataIndices = this.m_dataIndices;
         let hasIndices = dataIndices != null && dataIndices.length !=0;
         if(hasIndices){
-            let bufferIndices = gl.createBuffer();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,bufferIndices);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,dataIndices,gl.STATIC_DRAW);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,null);
+            let bufferIndices = glctx.createBuffer();
+            glctx.bindBuffer(GL.ELEMENT_ARRAY_BUFFER,bufferIndices);
+            glctx.bufferData(GL.ELEMENT_ARRAY_BUFFER,dataIndices,GL.STATIC_DRAW);
+            glctx.bindBuffer(GL.ELEMENT_ARRAY_BUFFER,null);
 
             this.bufferIndices = bufferIndices;
         }

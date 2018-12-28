@@ -13,7 +13,7 @@ export class GLContext {
     private m_drawfb:FrameBuffer;
     private m_viewport:number[] = [0,0,0,0];
 
-    public gl: WebGL2RenderingContext;
+    private gl: WebGL2RenderingContext;
     private constructor(wgl: WebGL2RenderingContext) {
         this.gl = wgl;
         this.viewport(0,0,wgl.canvas.clientWidth,wgl.canvas.clientHeight);
@@ -169,6 +169,10 @@ export class GLContext {
         return this.gl.createBuffer();
     }
 
+    public deleteBuffer(buffer: WebGLBuffer | null){
+        this.gl.deleteBuffer(buffer);
+    }
+
     public createBufferAndBind(target:number){
         const gl = this.gl;
         let buffer= gl.createBuffer();
@@ -201,6 +205,38 @@ export class GLContext {
     }
     public getSyncParameter(sync: WebGLSync, pname: number): any{
         return this.gl.getSyncParameter(sync,pname);
+    }
+
+    public deleteTexture(texture: WebGLTexture | null){
+        this.gl.deleteTexture(texture);
+    }
+    public createTexture(): WebGLTexture{
+        return this.gl.createTexture();
+    }
+
+    public createVertexArray(): WebGLVertexArrayObject | null{
+        return this.gl.createVertexArray();
+    }
+    public deleteVertexArray(vertexArray: WebGLVertexArrayObject | null){
+        this.gl.deleteVertexArray(vertexArray);
+    }
+    public isVertexArray(vertexArray: WebGLVertexArrayObject | null): boolean{
+        return this.gl.isVertexArray(vertexArray);
+    }
+    public bindVertexArray(array: WebGLVertexArrayObject | null){
+        this.gl.bindVertexArray(array);
+    }
+    public depthFunc(func: number){
+        this.gl.depthFunc(func);
+    }
+    public depthMask(flag: boolean){
+        this.gl.depthMask(flag);
+    }
+    public depthRange(zNear: number, zFar: number){
+        this.gl.depthRange(zNear,zFar);
+    }
+    public enable(cap: number){
+        this.gl.enable(cap);
     }
 
     /**

@@ -12,6 +12,7 @@ import { RenderTexture } from "../RenderTexture";
 import { ReleaseGraphicObj } from "../IGraphicObj";
 import { GLContext } from "../gl/GLContext";
 import { GraphicsRenderCreateInfo } from "../GraphicsRender";
+import { GL } from "../gl/GL";
 
 
 export class PipelineForwardZPrePass extends PipelineBase {
@@ -29,10 +30,10 @@ export class PipelineForwardZPrePass extends PipelineBase {
 
     public onInitGL(){
         super.onInitGL();
-        let gl = this.glctx.gl;
-        gl.depthMask(true);
-        gl.depthFunc(gl.LEQUAL);
-        gl.enable(gl.DEPTH_TEST);
+        const glctx = this.glctx;
+        glctx.depthMask(true);
+        glctx.depthFunc(GL.LEQUAL);
+        glctx.enable(GL.DEPTH_TEST);
 
         let fb = this.mainFBaspect;
         this.m_depthRT = RenderTexture.create(this.glctx,fb.width,fb.height,{

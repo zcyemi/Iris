@@ -22,8 +22,17 @@ export type GLSizeOrData = number | GLData;
 
 export class GL{
 
-    public static readonly ARRAY_BUFFER:number =0x8892;
-    public static readonly ELEMENT_ARRAY_BUFFER:number = 0x8893;
+    public static readonly ARRAY_BUFFER: number = 0x8892;
+    public static readonly ELEMENT_ARRAY_BUFFER: number = 0x8893;
+
+    public static readonly PIXEL_PACK_BUFFER = 0x88EB;
+    public static readonly PIXEL_UNPACK_BUFFER = 0x88EC;
+    public static readonly PIXEL_PACK_BUFFER_BINDING = 0x88ED;
+    public static readonly PIXEL_UNPACK_BUFFER_BINDING = 0x88EF;
+    public static readonly COPY_READ_BUFFER = 0x8F36;
+    public static readonly COPY_WRITE_BUFFER = 0x8F37;
+    public static readonly COPY_READ_BUFFER_BINDING = 0x8F36;
+    public static readonly COPY_WRITE_BUFFER_BINDING = 0x8F37;
 
     public static readonly STATIC_DRAW:number = 0x88E4;
     public static readonly STREAM_DRAW:number = 0x88E0;
@@ -105,6 +114,24 @@ export class GL{
     public static readonly CONDITION_SATISFIED = 0x911C;
     public static readonly WAIT_FAILED = 0x911D;
     public static readonly SYNC_FLUSH_COMMANDS_BIT = 0x00000001;
+
+    public static readonly NEVER = 0x0200;
+    public static readonly ALWAYS = 0x0207;
+    public static readonly LESS = 0x0201;
+    public static readonly EQUAL = 0x0202;
+    public static readonly LEQUAL = 0x0203;
+    public static readonly GREATER = 0x0204;
+    public static readonly GEQUAL = 0x0206;
+    public static readonly NOTEQUAL = 0x0205;
+
+    public static readonly BLEND = 0x0BE2;
+    public static readonly DEPTH_TEST = 0x0B71;
+    public static readonly DITHER = 0x0BD0;
+    public static readonly POLYGON_OFFSET_FILL = 0x8037;
+    public static readonly SAMPLE_ALPHA_TO_COVERAGE = 0x809E;
+    public static readonly SAMPLE_COVERAGE = 0x80A0;
+    public static readonly SCISSOR_TEST = 0x0C11;
+    public static readonly STENCIL_TEST = 0x0B90;
 
     public static isDepthFmt(fmt:number){
         return GL.s_depth_fmt.indexOf(fmt) >=0;

@@ -116,7 +116,7 @@ export class PipelineBase implements IRenderPipeline {
 
     public onSetupRender(glctx:GLContext,bufferinfo: GraphicsRenderCreateInfo) {
         this.glctx = glctx;
-        this.gl = glctx.gl;
+        this.gl = glctx.getWebGLRenderingContext();
         this.m_mainfbInfo = bufferinfo;
 
         if(!this.m_inited){
@@ -412,12 +412,13 @@ export class PipelineBase implements IRenderPipeline {
      * @param defUniformBlock 
      */
     public drawMeshRender(meshrender:MeshRender,objmtx?:mat4,defUniformBlock:boolean = true){
-        const gl = this.gl;
+        const glctx= this.glctx;
+        const gl = glctx.getWebGLRenderingContext();
         let mat = meshrender.material;
         let mesh = meshrender.mesh;
         meshrender.refreshData(this.glctx);
         let program = mat.program;
-        gl.useProgram(program.Program);
+        glctx.useProgram(program.Program);
         if(defUniformBlock){
             this.uniformBindDefault(program);
         }
@@ -428,11 +429,10 @@ export class PipelineBase implements IRenderPipeline {
             this.updateUniformBufferObject(dataobj);
         }
 
-        meshrender.bindVertexArray(gl);
+        meshrender.bindVertexArray(glctx);
         let indicedesc = mesh.indiceDesc;
         gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type,indicedesc.offset);
-        meshrender.unbindVertexArray(gl);
-
+        meshrender.unbindVertexArray(glctx);
         mat.clean(gl);
     }
 
@@ -440,17 +440,16 @@ export class PipelineBase implements IRenderPipeline {
         if(!this.m_inited) return;
         
         let glctx = this.glctx;
-        let gl = glctx.gl;
 
         this.m_bufferDebugInfo = [];
 
         this.mainFBaspect = ReleaseGraphicObj(this.mainFBaspect,glctx);
         this.m_pipestateCache = ReleaseGraphicObj(this.m_pipestateCache,glctx);
 
-        gl.deleteBuffer(this.m_uniformBufferBasis);
-        gl.deleteBuffer(this.m_uniformBufferLight);
-        gl.deleteBuffer(this.m_uniformBufferObj);
-        gl.deleteBuffer(this.m_uniformBufferShadowMap);
+        glctx.deleteBuffer(this.m_uniformBufferBasis);
+        glctx.deleteBuffer(this.m_uniformBufferLight);
+        glctx.deleteBuffer(this.m_uniformBufferObj);
+        glctx.deleteBuffer(this.m_uniformBufferShadowMap);
 
         this.m_uniformBufferBasis = null;
         this.m_uniformBufferLight = null;

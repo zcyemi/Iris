@@ -30,14 +30,14 @@ export class Texture2D implements ITexture {
 
     public release(glctx:GLContext){
         if(this.m_raw !=null){
-            glctx.gl.deleteTexture(this.m_raw);
+            glctx.deleteTexture(this.m_raw);
             this.m_raw = null;
         }
         return;
     }
 
     public static createTexture2D(width: number, height: number, desc: TextureCreationDesc, glctx: GLContext): Texture2D {
-        let gl = glctx.gl;
+        let gl = glctx.getWebGLRenderingContext();
 
         TextureDescUtility.fillDefault(desc);
 
@@ -59,7 +59,7 @@ export class Texture2D implements ITexture {
     }
 
     public static createTexture2DImage(img:HTMLImageElement,desc:TextureCreationDesc,glctx:GLContext):Texture2D{
-        const gl = glctx.gl;
+        const gl = glctx.getWebGLRenderingContext();
         let tex = gl.createTexture();
 
         TextureDescUtility.fillDefault(desc);
@@ -87,7 +87,7 @@ export class Texture2D implements ITexture {
     public static loadTexture2D(url: string, glctx: GLContext, alpha: boolean = true): Promise<Texture2D> {
         return new Promise<Texture2D>((res, rej) => {
             var img = new Image();
-            const gl = glctx.gl;
+            const gl = glctx.getWebGLRenderingContext();
             img.onload = () => {
                 try {
                     let desc = alpha? TextureDescUtility.DefaultRGBA: TextureDescUtility.DefaultRGB;
@@ -110,7 +110,7 @@ export class Texture2D implements ITexture {
     public resize(width: number, height: number, glctx: GLContext) {
         if (width == this.m_width && height == this.m_height) return;
 
-        let gl = glctx.gl;
+        let gl = glctx.getWebGLRenderingContext();
 
         gl.deleteTexture(this.m_raw);
 
@@ -138,7 +138,7 @@ export class Texture2D implements ITexture {
         if (width < 2 || height < 2) {
             throw new Error('invalid texture size');
         }
-        let gl = glctx.gl;
+        let gl = glctx.getWebGLRenderingContext();
         let tex = gl.createTexture();
         gl.activeTexture(Texture2D.TEMP_TEXID);
         gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -158,7 +158,7 @@ export class Texture2D implements ITexture {
         var image = new Image();
         var tex = new Texture2D(null);
         image.onload = () => {
-            let gl = glctx.gl;
+            let gl = glctx.getWebGLRenderingContext();
             let rawtex = gl.createTexture();
             gl.activeTexture(Texture2D.TEMP_TEXID);
             gl.bindTexture(gl.TEXTURE_2D, rawtex);

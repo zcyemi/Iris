@@ -272,10 +272,10 @@ export class PassShadowMap extends RenderPass {
     private renderShadowCascade(vp: vec4, queue: BaseRender[], lmtxVP: mat4) {
         let pipe = this.pipeline;
         let glctx = pipe.GLCtx;
-        let gl = glctx.gl;
+        let gl = glctx.getWebGLRenderingContext();
 
         gl.uniformMatrix4fv(this.m_uniformLightVP, false, lmtxVP.raw);
-        gl.viewport(vp.x, vp.y, vp.z, vp.w);
+        glctx.viewport(vp.x, vp.y, vp.z, vp.w);
         let objdata = pipe.shaderDataObj;
 
         let queueLen = queue.length;
@@ -292,10 +292,10 @@ export class PassShadowMap extends RenderPass {
                 objdata.setMtxModel(trs.objMatrix);
                 pipe.updateUniformBufferObject(objdata);
 
-                node.bindVertexArray(gl);
+                node.bindVertexArray(glctx);
                 let indicesDesc = mesh.indiceDesc;
                 gl.drawElements(indicesDesc.topology, indicesDesc.indiceCount, indicesDesc.type, indicesDesc.offset);
-                node.unbindVertexArray(gl);
+                node.unbindVertexArray(glctx);
             }
         }
     }

@@ -130,7 +130,7 @@ export class FrameBuffer implements IGraphicObj{
 
     public bindTexutre(glctx:GLContext,tex:Texture2D,attatch:number){
         if(tex ==null) return;
-        const gl = glctx.gl;
+        const gl = glctx.getWebGLRenderingContext();
         gl.framebufferTexture2D(gl.FRAMEBUFFER,attatch,gl.TEXTURE_2D,tex.getRawTexture(),0);
         this.m_texbinding[attatch] = tex
         if(attatch == gl.COLOR_ATTACHMENT0){
@@ -148,7 +148,7 @@ export class FrameBuffer implements IGraphicObj{
     }
 
     public release(glctx:GLContext){
-        const gl = glctx.gl;
+        const gl = glctx.getWebGLRenderingContext();
         gl.bindFramebuffer(gl.FRAMEBUFFER,null);
         gl.deleteFramebuffer(this.m_rawobj);
         this.m_rawobj = null;

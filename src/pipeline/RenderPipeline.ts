@@ -32,11 +32,11 @@ export class RenderPipeline implements IRenderPipeline{
 
     }
 
-    private m_gl:WebGL2RenderingContext;
+    private m_glctx:GLContext;
 
     public onSetupRender(glctx:GLContext,info:GraphicsRenderCreateInfo){
         this.m_nodelist = new DoubleBuffered(new RenderNodeList(),new RenderNodeList());
-        this.m_gl = glctx.gl;
+        this.m_glctx = glctx;
     }
 
     public onInitGL(){};
@@ -71,35 +71,38 @@ export class RenderPipeline implements IRenderPipeline{
 
 
     public drawMeshWithMat(mesh:Mesh,mat:Material,vao:WebGLVertexArrayObject,objmtx?:mat4){
-        const gl = this.m_gl;
+        const glctx = this.m_glctx;
         const model =this.m_model;
         const program = mat.program;
-        gl.useProgram(program);
+        glctx.useProgram(program);
         model.bindUniform(program);
+
+        const gl = glctx.getWebGLRenderingContext();
+
         mat.apply(gl);
         model.updateUniformMtx(objmtx);
-        gl.bindVertexArray(vao);
+        glctx.bindVertexArray(vao);
         let ind = mesh.indiceDesc;
         gl.drawElements(ind.topology,ind.indiceCount,ind.type,ind.offset);
-        gl.bindVertexArray(null);
+        glctx.bindVertexArray(null);
         mat.clean(gl);
     }
 
     public drawMeshRender(meshrender:MeshRender,objmtx?:mat4){
-        const gl = this.m_gl;
+        const glctx = this.m_glctx;
         const model =this.m_model;
         const mesh = meshrender.mesh;
         const mat = meshrender.material;
         const program = mat.program;
-        gl.useProgram(program);
+        glctx.useProgram(program);
         model.bindUniform(program);
+        const gl = glctx.getWebGLRenderingContext();
         mat.apply(gl);
         model.updateUniformRender(meshrender);
-
-        meshrender.bindVertexArray(gl);
+        meshrender.bindVertexArray(glctx);
         let ind = mesh.indiceDesc;
         gl.drawElements(ind.topology,ind.indiceCount,ind.type,ind.offset);
-        meshrender.unbindVertexArray(gl);
+        meshrender.unbindVertexArray(glctx);
         mat.clean(gl);
     }
 

@@ -6,6 +6,7 @@ import { BaseRender } from "./BaseRender";
 import { GLContext } from "./gl/GLContext";
 import { GLProgram } from "./gl/GLProgram";
 import { Program } from "estree";
+import { GL } from "./gl/GL";
 
 export class MeshRender extends BaseRender{
     public mesh:Mesh;
@@ -37,7 +38,7 @@ export class MeshRender extends BaseRender{
 
     public release(glctx:GLContext){
         if(this.m_vao != null){
-            glctx.gl.deleteVertexArray(this.m_vao);
+            glctx.deleteVertexArray(this.m_vao);
             this.m_vao = null;
         }
 
@@ -67,9 +68,7 @@ export class MeshRender extends BaseRender{
             if(vao != null){
                 let curid = mat.program.id;
                 if(curid == this.m_vaoProgamId) return;
-    
-                console.log("program changes");
-                glctx.gl.deleteVertexArray(this.m_vao);
+                glctx.deleteVertexArray(this.m_vao);
                 this.m_vaoProgamId = -1;
             }
     
@@ -82,14 +81,14 @@ export class MeshRender extends BaseRender{
      * Bind meshbuffers
      * dynamic meshrender: bindBuffer
      * static meshrender: bindVertexArray
-     * @param gl 
+     * @param glctx 
      */
-    public bindVertexArray(gl:WebGL2RenderingContext){
+    public bindVertexArray(glctx:GLContext){
         if(this.m_dynamic){
-            MeshRender.bindBuffers(gl,this.mesh,this.material.program);
+            MeshRender.bindBuffers(glctx,this.mesh,this.material.program);
         }
         else{
-            gl.bindVertexArray(this.m_vao);
+            glctx.bindVertexArray(this.m_vao);
         }
     }
 
@@ -97,24 +96,26 @@ export class MeshRender extends BaseRender{
      * Unbind meshbuffers
      * dynamic meshrender: unbindBuffer
      * static meshrender: unbindVertexArray
-     * @param gl 
+     * @param glctx
      */
-    public unbindVertexArray(gl:WebGL2RenderingContext,unbindBuffer:boolean = true){
+    public unbindVertexArray(glctx:GLContext,unbindBuffer:boolean = true){
         if(this.m_dynamic){
             if(unbindBuffer){
-                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,null);
-                gl.bindBuffer(gl.ARRAY_BUFFER,null);
+                glctx.bindBuffer(GL.ELEMENT_ARRAY_BUFFER,null);
+                glctx.bindBuffer(GL.ARRAY_BUFFER,null);
             }
         }
         else{
-            gl.bindVertexArray(null);
+            glctx.bindVertexArray(null);
         }
     }
 
 
-    private static bindBuffers(gl:WebGL2RenderingContext,mesh:Mesh,program:GLProgram){
+    private static bindBuffers(glctx:GLContext,mesh:Mesh,program:GLProgram){
         const vertdesc = mesh.vertexDesc;
         const attrs = program.Attributes;
+
+        const gl = glctx.getWebGLRenderingContext();
 
         if(mesh.seperatedBuffer){
             if(vertdesc.position != null){
@@ -184,12 +185,11 @@ export class MeshRender extends BaseRender{
         }
         if(program == null) throw new Error("program is null"); 
 
-        let gl = glctx.gl;
-        let vao = gl.createVertexArray();
+        let vao = glctx.createVertexArray();
 
-        gl.bindVertexArray(vao);
-        MeshRender.bindBuffers(gl,mesh,program);
-        gl.bindVertexArray(null);
+        glctx.bindVertexArray(vao);
+        MeshRender.bindBuffers(glctx,mesh,program);
+        glctx.bindVertexArray(null);
 
         return vao;
     }

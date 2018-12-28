@@ -78,7 +78,7 @@ export class GraphicsRender{
         this.m_shaderFXlib = new ShaderFXLibs(glctx);
 
         //default texture
-        let gl = glctx.gl;
+        let gl = glctx.getWebGLRenderingContext();
 
         Material.DEF_TEXID_NUM = GraphicsRender.TEXID_DEFAULT_TEX;
         Texture2D.TEMP_TEXID = gl.TEXTURE2;
@@ -171,8 +171,6 @@ export class GraphicsRender{
         if(this.pause || this.m_frameBufferInvalid) return;
         this.m_time += dt;
         this.m_dt = dt;
-
-        let gl =this.m_glctx.gl;
 
         // gl.clearColor(0,0,0,1);
         // gl.clear(gl.COLOR_BUFFER_BIT);

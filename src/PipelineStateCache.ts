@@ -12,7 +12,7 @@ export class PipelineStateCache implements IGraphicObj{
     private gl:WebGL2RenderingContext;
 
     public constructor(glctx:GLContext){
-        this.gl = glctx.gl;
+        this.gl = glctx.getWebGLRenderingContext();
         this.m_curtags = new ShaderTags();
     }
 

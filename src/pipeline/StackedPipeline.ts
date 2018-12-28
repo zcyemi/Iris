@@ -42,8 +42,7 @@ export class StackedPipeline implements IRenderPipeline{
     
     resizeFrameBuffer(width: number, height: number) {
         if(this.m_mainfb.resize(this.m_glctx,width,height)){
-            const gl = this.m_glctx.gl;
-            gl.viewport(0,0,width,height);
+            this.m_glctx.viewport(0,0,width,height);
         }
 
     }

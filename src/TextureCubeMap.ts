@@ -28,7 +28,7 @@ export class TextureCubeMap implements ITexture{
 
     public release(glctx:GLContext){
         if(this.m_raw != null){
-            glctx.gl.deleteTexture(this.m_raw);
+            glctx.deleteTexture(this.m_raw);
             this.m_raw = null;
         }
         return;
@@ -42,7 +42,7 @@ export class TextureCubeMap implements ITexture{
     public static loadCubeMapImage(imgs:HTMLImageElement[],glctx:GLContext):TextureCubeMap| null{
         let texcube:TextureCubeMap = null;
             try{
-                let gl = glctx.gl;
+                let gl = glctx.getWebGLRenderingContext();
                 let gltexcube = gl.createTexture();
                 gl.activeTexture(Texture2D.TEMP_TEXID);
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP,gltexcube);
