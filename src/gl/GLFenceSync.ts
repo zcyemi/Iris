@@ -36,7 +36,7 @@ export class GLFenceSync{
         }
         
         this.m_callback = onsignaled;
-        const gl = this.glctx.gl;
+        const gl = this.glctx.getWebGLRenderingContext();
         this.m_signaled = false;
         this.m_syncObj = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE,0);
 

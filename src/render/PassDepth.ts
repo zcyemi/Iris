@@ -57,7 +57,7 @@ export class PassDepth extends RenderPass{
 
         //diable color buffer
 
-        gl.colorMask(false,false,false,false);
+        glctx.colorEnable(false);
 
         //state
         let state =pipe.stateCache;
@@ -71,13 +71,13 @@ export class PassDepth extends RenderPass{
         let program = this.m_program;
 
         let glp = program.Program;
-        gl.useProgram(this.m_program.Program);
+        glctx.useProgram(program);
 
         let ublock = program.UniformBlock;
         let indexCam = ublock[NAME_BASIS];
-        gl.uniformBlockBinding(glp, indexCam, CLASS.UNIFORMINDEX_BASIS);
+        glctx.uniformBlockBinding(glp, indexCam, CLASS.UNIFORMINDEX_BASIS);
         let indexObj = ublock[NAME_OBJ];
-        gl.uniformBlockBinding(glp, indexObj, CLASS.UNIFORMINDEX_OBJ);
+        glctx.uniformBlockBinding(glp, indexObj, CLASS.UNIFORMINDEX_OBJ);
 
         const dataobj = pipe.shaderDataObj;
 
@@ -101,8 +101,7 @@ export class PassDepth extends RenderPass{
 
         }
 
-        gl.colorMask(true,true,true,true);
-
+        glctx.colorEnable(true);
 
         //copy depth buffer to seperated depth texture
 
@@ -110,13 +109,12 @@ export class PassDepth extends RenderPass{
         glctx.bindReadFrameBuffer(mainfb);
         glctx.bindDrawFrameBuffer(pipe.depthRT.internalFB);
 
-
         let w = mainfb.width;
         let h = mainfb.height;
-        gl.blitFramebuffer(0,0,w,h,0,0,w,h,gl.DEPTH_BUFFER_BIT,gl.NEAREST);
+        glctx.blitFramebuffer(0,0,w,h,0,0,w,h,gl.DEPTH_BUFFER_BIT,gl.NEAREST);
 
-        gl.bindFramebuffer(gl.READ_FRAMEBUFFER,null);
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);
+        glctx.bindReadFrameBuffer(null);
+        glctx.bindDrawFrameBuffer(null);
 
         pipe.bindTargetFrameBuffer(true,false);
 

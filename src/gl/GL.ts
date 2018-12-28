@@ -1,3 +1,4 @@
+import { type } from "os";
 
 
 
@@ -14,8 +15,19 @@ export enum GLConst {
 }
 
 
+export type GLData = Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array |
+Uint32Array | Uint8ClampedArray | Float32Array | Float64Array | DataView | ArrayBuffer | null;
+export type GLSizeOrData = number | GLData;
+
+
 export class GL{
 
+    public static readonly ARRAY_BUFFER:number =0x8892;
+    public static readonly ELEMENT_ARRAY_BUFFER:number = 0x8893;
+
+    public static readonly STATIC_DRAW:number = 0x88E4;
+    public static readonly STREAM_DRAW:number = 0x88E0;
+    public static readonly DYNAMIC_DRAW:number = 0x88E8;
 
     public static readonly RGB:number= 0x1907;
     public static readonly RGBA:number = 0x1908;

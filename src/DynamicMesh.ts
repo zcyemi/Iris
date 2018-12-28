@@ -1,5 +1,6 @@
 import { Mesh, MeshDataBuffer } from "./Mesh";
 import { GLContext } from "./gl/GLContext";
+import { GL } from "./gl/GL";
 
 
 export class DynamicMesh extends Mesh{
@@ -11,50 +12,46 @@ export class DynamicMesh extends Mesh{
     public refreshMeshBuffer(glctx:GLContext){
         if(this.m_bufferInited) return;
 
-        let gl = glctx.gl;
 
         if(this.m_seperatedBuffer){
             let vertexdesc = this.vertexDesc;
             
             let posdesc = vertexdesc.position;
             if(posdesc != null){
-                let buffer = gl.createBuffer();
-                gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+                let buffer = glctx.createBufferAndBind(GL.ARRAY_BUFFER);
                 let datapos = this.m_dataPosition;
-                if(datapos) gl.bufferData(gl.ARRAY_BUFFER,datapos,gl.DYNAMIC_DRAW);
+                if(datapos) glctx.bufferData(GL.ARRAY_BUFFER,datapos,GL.DYNAMIC_DRAW);
                 this.bufferVertices = buffer;
                 posdesc.offset = 0;
             }
 
             let uvdesc = vertexdesc.uv;
             if(uvdesc !=null){
-                let buffer = gl.createBuffer();
-                gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+                let buffer = glctx.createBufferAndBind(GL.ARRAY_BUFFER);
                 let datauv = this.m_dataUV;
-                if(datauv) gl.bufferData(gl.ARRAY_BUFFER,datauv,gl.DYNAMIC_DRAW);
+                if(datauv) glctx.bufferData(GL.ARRAY_BUFFER,datauv,GL.DYNAMIC_DRAW);
                 this.bufferUV = buffer;
                 posdesc.offset = 0;
             }
 
             let normaldesc = vertexdesc.normal;
             if(normaldesc != null){
-                let buffer = gl.createBuffer();
-                gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+                let buffer = glctx.createBufferAndBind(GL.ARRAY_BUFFER);
                 let datanormal = this.m_dataNormal;
-                if(datanormal) gl.bufferData(gl.ARRAY_BUFFER,datanormal,gl.DYNAMIC_DRAW);
+                if(datanormal) glctx.bufferData(GL.ARRAY_BUFFER,datanormal,GL.DYNAMIC_DRAW);
                 this.bufferNormal = buffer;
                 posdesc.offset = 0;
             }
-            gl.bindBuffer(gl.ARRAY_BUFFER,null);
+            glctx.bindBuffer(GL.ARRAY_BUFFER,null);
             
             //indices
             let dataIndices = this.m_dataIndices;
             let hasIndices = dataIndices != null && dataIndices.length !=0;
             if(hasIndices){
-                let buffer = gl.createBuffer();
-                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,buffer);
-                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,dataIndices,gl.STATIC_DRAW);
-                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,null);
+                let buffer = glctx.createBuffer();
+                glctx.bindBuffer(GL.ELEMENT_ARRAY_BUFFER,buffer);
+                glctx.bufferData(GL.ELEMENT_ARRAY_BUFFER,dataIndices,GL.STATIC_DRAW);
+                glctx.bindBuffer(GL.ELEMENT_ARRAY_BUFFER,null);
                 this.bufferIndices = buffer;
             }
         }

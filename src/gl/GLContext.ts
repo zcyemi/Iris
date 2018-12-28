@@ -3,6 +3,7 @@ import { GLFrameBuffer } from "./GLFrameBuffer";
 import { GLPipelineState } from "./GLPipelineState";
 import { GLFenceSync } from "./GLFenceSync";
 import { FrameBuffer } from "./FrameBuffer";
+import { GL, GLSizeOrData } from "./GL";
 
 export class GLContext {
     private m_glFenceSynces:GLFenceSync[] = [];
@@ -113,6 +114,17 @@ export class GLContext {
         return true;
     }
 
+    public blitFramebuffer(srcX0: number, srcY0: number, srcX1: number, srcY1: number, dstX0: number, dstY0: number,
+        dstX1: number, dstY1: number, mask: number, filter: number) {
+        let readfb = this.m_readfb;
+        let drawfb =this.m_drawfb;
+        if(readfb == drawfb){
+            throw new Error('blitFrameBuffer error: read/draw framebuffer are equal!');
+        }
+        const gl = this.gl;
+        gl.blitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+    }
+
     public viewport(x:number,y:number,w:number,h:number){
         let vp = this.m_viewport;
         if(vp[2] == w && vp[3] == h && vp[0] == x && vp[1] == y) return;
@@ -132,6 +144,44 @@ export class GLContext {
     public restorePipeline(state: GLPipelineState) {
         if (state == null) return;
         state.restore(this.gl);
+    }
+
+    public colorMask(red: GLboolean, green: GLboolean, blue: GLboolean, alpha: GLboolean){
+        this.gl.colorMask(red,green,blue,alpha);
+    }
+    public colorEnable(enable:boolean){
+        this.gl.colorMask(enable,enable,enable,enable);
+    }
+
+    public useProgram(program:WebGLProgram | null){
+        this.gl.useProgram(program);
+    }
+
+    public useGLProgram(program:GLProgram){
+        this.gl.useProgram(program.Program);
+    }
+
+    public uniformBlockBinding(program: WebGLProgram, uniformBlockIndex: number, uniformBlockBinding: number):void{
+        this.gl.uniformBlockBinding(program,uniformBlockIndex,uniformBlockBinding);
+    }
+
+    public createBuffer():WebGLBuffer{
+        return this.gl.createBuffer();
+    }
+
+    public createBufferAndBind(target:number){
+        const gl = this.gl;
+        let buffer= gl.createBuffer();
+        gl.bindBuffer(target,buffer);
+        return buffer;
+    }
+
+    public bindBuffer(target:number,buffer:WebGLBuffer| null){
+        this.gl.bindBuffer(target,buffer);
+    }
+
+    public bufferData(target:number,sizeOrData:GLSizeOrData,usage:number){
+        this.gl.bufferData(target,sizeOrData,usage);
     }
 
     /**

@@ -106,10 +106,8 @@ export class FrameBuffer implements IGraphicObj{
         }
         if(this.m_width == width && this.m_height == height) return false;
 
-        const gl = glctx.gl;
+        const gl = glctx.getWebGLRenderingContext();
         let fbtex = this.m_texbinding;
-
-        const fb = this.m_rawobj;
 
         let curfb = glctx.bindingFBO;
         glctx.bindFramebuffer(this);
