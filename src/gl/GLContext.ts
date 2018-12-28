@@ -184,6 +184,25 @@ export class GLContext {
         this.gl.bufferData(target,sizeOrData,usage);
     }
 
+    public fenceSync(condition: number, flags: number):WebGLSync{
+        return this.gl.fenceSync(condition,flags);
+    }
+    public isSync(sync: WebGLSync | null): boolean{
+        return this.gl.isSync(sync);
+    }
+    public deleteSync(sync: WebGLSync | null){
+        this.gl.deleteSync(sync);
+    }
+    public clientWaitSync(sync: WebGLSync, flags: number, timeout: number): number{
+        return this.gl.clientWaitSync(sync,flags,timeout);
+    }
+    public waitSync(sync: WebGLSync, flags: number, timeout: number){
+        this.gl.waitSync(sync,flags,timeout);
+    }
+    public getSyncParameter(sync: WebGLSync, pname: number): any{
+        return this.gl.getSyncParameter(sync,pname);
+    }
+
     /**
      * Do not call this function explicitly
      * @param fs 

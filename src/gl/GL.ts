@@ -92,6 +92,19 @@ export class GL{
     public static readonly SAMPLER_2D_ARRAY_SHADOW = 0x8DC4;
     public static readonly SAMPLER_CUBE_SHADOW = 0x8DC5;
 
+    public static readonly OBJECT_TYPE = 0x9112;
+    public static readonly SYNC_CONDITION = 0x9113;
+    public static readonly SYNC_STATUS = 0x9114;
+    public static readonly SYNC_FLAGS = 0x9115;
+    public static readonly SYNC_FENCE = 0x9116;
+    public static readonly SYNC_GPU_COMMANDS_COMPLETE = 0x9117;
+    public static readonly UNSIGNALED = 0x9118;
+    public static readonly SIGNALED = 0x9119;
+    public static readonly ALREADY_SIGNALED  =0x911A;
+    public static readonly TIMEOUT_EXPIRED = 0x911B;
+    public static readonly CONDITION_SATISFIED = 0x911C;
+    public static readonly WAIT_FAILED = 0x911D;
+    public static readonly SYNC_FLUSH_COMMANDS_BIT = 0x00000001;
 
     public static isDepthFmt(fmt:number){
         return GL.s_depth_fmt.indexOf(fmt) >=0;
