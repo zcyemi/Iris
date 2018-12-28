@@ -20,6 +20,7 @@ import { GLContext } from "../gl/GLContext";
 import { GLFrameBuffer } from "../gl/GLFrameBuffer";
 import { GLProgram } from "../gl/GLProgram";
 import { mat4 } from "../math/GLMath";
+import { FrameBuffer } from "../gl/FrameBuffer";
 
 export class PipelineBase implements IRenderPipeline {
 
@@ -92,20 +93,20 @@ export class PipelineBase implements IRenderPipeline {
         return this.m_nodelistCur;
     }
 
-    protected m_mainFrameBuffer: GLFrameBuffer;
+    protected m_mainFrameBuffer: FrameBuffer;
     protected m_mainFrameBufferInfo: GraphicsRenderCreateInfo;
     protected m_mainFrameBufferBinded: boolean = false;
 
-    public get mainFrameBufferWidth(): number { return this.m_mainFrameBufferWidth; }
-    public get mainFrameBufferHeight(): number { return this.m_mainFrameBufferHeight; }
-    public get mainFrameBufferAspect(): number { return this.m_mainFrameBufferAspect; }
-    public get mainFrameBuffer(): GLFrameBuffer { return this.m_mainFrameBuffer; }
+    public get mainFrameBufferWidth(): number { return this.m_mainFrameBuffer.width }
+    public get mainFrameBufferHeight(): number { return this.m_mainFrameBuffer.height; }
+    public get mainFrameBufferAspect(): number {
+        let fb = this.m_mainFrameBuffer;
+        return fb.width/ fb.height;
+     }
+    public get mainFrameBuffer(): FrameBuffer { return this.m_mainFrameBuffer; }
 
     public get stateCache(): PipelineStateCache { return this.m_pipestateCache; }
 
-    protected m_mainFrameBufferAspect: number = 1.0;
-    protected m_mainFrameBufferWidth: number = 0;
-    protected m_mainFrameBufferHeight: number = 0;
 
     /** for shderDataBasis screnparam */
     private m_shaderDataScreenResized:boolean= false;
@@ -133,11 +134,9 @@ export class PipelineBase implements IRenderPipeline {
         let glctx = this.glctx;
         let bufferinfo = this.m_mainFrameBufferInfo;
         this.m_pipestateCache = new PipelineStateCache(glctx);
-        let fb = this.glctx.createFrameBuffer(true, bufferinfo.colorFormat, bufferinfo.depthFormat);
+        let fb = FrameBuffer.create(glctx,glctx.canvasWidth,glctx.canvasHeight,{colFmt:bufferinfo.colorFormat,
+        depthFmt:bufferinfo.depthFormat});
         this.m_mainFrameBuffer = fb;
-        this.m_mainFrameBufferWidth = fb.width;
-        this.m_mainFrameBufferHeight = fb.height;
-        this.m_mainFrameBufferAspect = fb.width / fb.height;
         this.createUniformBuffers();
 
         this.m_passDebug = new PassDebug(this);
@@ -206,12 +205,7 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     public resizeFrameBuffer(width: number, height: number) {
-        let bufferInfo = this.m_mainFrameBufferInfo;
-        this.m_mainFrameBuffer = this.glctx.createFrameBuffer(false, bufferInfo.colorFormat, bufferInfo.depthFormat, width, height, this.m_mainFrameBuffer);
-        this.m_mainFrameBufferWidth = width;
-        this.m_mainFrameBufferHeight = height;
-        this.m_mainFrameBufferAspect = width / height;
-
+        this.m_mainFrameBuffer.resize(this.glctx,width,height);
         const gl = this.gl;
         gl.viewport(0,0,width,height);
 
@@ -226,8 +220,8 @@ export class PipelineBase implements IRenderPipeline {
      */
     public onRenderToCanvas() {
         const gl = this.gl;
-        gl.viewport(0,0,this.m_mainFrameBufferWidth,this.m_mainFrameBufferHeight);
-        this.drawFullScreenTex(this.m_mainFrameBuffer.colorTex0);
+        gl.viewport(0,0,this.m_mainFrameBuffer.width,this.m_mainFrameBuffer.height);
+        this.drawFullScreenTex(this.m_mainFrameBuffer.coltex);
     }
 
     public updateShaderDataBasis(camera:Camera,submit:boolean =true){

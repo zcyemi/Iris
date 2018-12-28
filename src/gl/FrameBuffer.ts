@@ -21,6 +21,9 @@ export class FrameBuffer{
     private m_width:number;
     private m_height:number;
 
+    public get width():number{return this.m_width;}
+    public get height():number{ return this.m_height;}
+
     public get coltex():Texture2D{ return this.m_coltex;}
 
     
