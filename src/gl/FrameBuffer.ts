@@ -2,6 +2,7 @@ import { Texture2D } from "../Texture2D";
 import { RenderTexture } from "../RenderTexture";
 import { GLContext } from "./GLContext";
 import { ShaderFX } from "../shaderfx/ShaderFX";
+import { IGraphicObj } from "../IGraphicObj";
 
 
 interface FrameBufferCreateDesc{
@@ -13,11 +14,12 @@ interface FrameBufferCreateDesc{
     colorTex3?:Texture2D,
 }
 
-export class FrameBuffer{
+export class FrameBuffer implements IGraphicObj{
 
     private m_rawobj:WebGLFramebuffer;
     private m_texbinding:{[attatch:number]:Texture2D} = {};
     private m_coltex:Texture2D;
+    private m_depthtex:Texture2D;
     private m_width:number;
     private m_height:number;
 
@@ -25,7 +27,16 @@ export class FrameBuffer{
     public get height():number{ return this.m_height;}
 
     public get coltex():Texture2D{ return this.m_coltex;}
+    public get depthtex():Texture2D{ return this.m_depthtex;}
 
+    public get attachments():{[attatch:number]:Texture2D}{
+        return this.m_texbinding;
+    }
+
+    
+    public get rawobj():WebGLFramebuffer{
+        return this.m_rawobj;
+    }
     
     private constructor(){
 
@@ -100,7 +111,8 @@ export class FrameBuffer{
 
         const fb = this.m_rawobj;
 
-        gl.bindFramebuffer(gl.FRAMEBUFFER,fb);
+        let curfb = glctx.bindingFBO;
+        glctx.bindFramebuffer(this);
         for (const key in fbtex) {
             if (fbtex.hasOwnProperty(key)) {
                 const tex = fbtex[key];
@@ -110,7 +122,7 @@ export class FrameBuffer{
                 }
             }
         }
-        gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+        glctx.bindFramebuffer(curfb);
     
         this.m_width = width;
         this.m_height = height;
@@ -125,6 +137,12 @@ export class FrameBuffer{
         this.m_texbinding[attatch] = tex
         if(attatch == gl.COLOR_ATTACHMENT0){
             this.m_coltex = tex;
+        }
+        else if(attatch == gl.DEPTH_ATTACHMENT){
+            this.m_depthtex = tex;
+        }
+        else if(attatch == gl.DEPTH_STENCIL_ATTACHMENT){
+            this.m_depthtex = tex;
         }
 
         this.m_width = tex.width;

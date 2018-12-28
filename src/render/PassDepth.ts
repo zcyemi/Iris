@@ -33,7 +33,7 @@ export class PassDepth extends RenderPass{
         this.m_program = shader.defaultProgram;
 
         //debug depth texture
-        let debuginfo = new BufferDebugInfo(pipeline.mainDepthTexture,glmath.vec4(0,0,200,200));
+        let debuginfo = new BufferDebugInfo(pipeline.depthRT,glmath.vec4(0,0,200,200));
         this.m_bufferDebugInfo = debuginfo;
         pipeline.addBufferDebugInfo(debuginfo);
     }
@@ -107,9 +107,8 @@ export class PassDepth extends RenderPass{
         //copy depth buffer to seperated depth texture
 
         let mainfb = pipe.mainFrameBuffer;
-        
-        gl.bindFramebuffer(gl.READ_FRAMEBUFFER,mainfb.frambuffer);
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,pipe.mainDepthFrameBuffer);
+        glctx.bindReadFrameBuffer(mainfb);
+        glctx.bindDrawFrameBuffer(pipe.depthRT.internalFB);
 
 
         let w = mainfb.width;
@@ -121,7 +120,7 @@ export class PassDepth extends RenderPass{
 
         pipe.bindTargetFrameBuffer(true,false);
 
-        this.m_bufferDebugInfo.setTexture(pipe.mainDepthTexture); 
+        this.m_bufferDebugInfo.setTexture(pipe.depthRT.getRawTexture()); 
 
     }
 }

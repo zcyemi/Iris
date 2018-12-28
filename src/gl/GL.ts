@@ -16,9 +16,25 @@ export enum GLConst {
 
 export class GL{
 
+
     public static readonly RGB:number= 0x1907;
     public static readonly RGBA:number = 0x1908;
-    
+
+    public static readonly DEPTH_COMPONENT = 0x1902;
+
+    public static readonly DEPTH_COMPONENT16 = 0x81A5;
+    public static readonly DEPTH_COMPONENT24 = 0x81A6;
+    public static readonly DEPTH_COMPONENT32F = 0x8CAC;
+
+    public static readonly DEPTH_STENCIL = 0x84F9;
+    public static readonly DEPTH24_STENCIL8 = 0x88F0;
+
+    public static readonly STENCIL_INDEX = 0x1901;
+    public static readonly STENCIL_INDEX8 = 0x8D48;
+
+    private static readonly s_depth_fmt: number[] = [GL.DEPTH_COMPONENT16, GL.DEPTH_COMPONENT24, GL.DEPTH_COMPONENT32F, GL.DEPTH_COMPONENT];
+    private static readonly s_stencil_fmt: number[] = [GL.STENCIL_INDEX8, GL.STENCIL_INDEX];
+    private static readonly s_depth_stencil_fmt: number[] = [GL.DEPTH24_STENCIL8, GL.DEPTH_STENCIL]; 
 
     public static readonly BYTE:GLDataType = 5120;
     public static readonly UNSIGNED_BYTE:GLDataType = 5121;
@@ -64,6 +80,16 @@ export class GL{
     public static readonly SAMPLER_2D_ARRAY_SHADOW = 0x8DC4;
     public static readonly SAMPLER_CUBE_SHADOW = 0x8DC5;
 
+
+    public static isDepthFmt(fmt:number){
+        return GL.s_depth_fmt.indexOf(fmt) >=0;
+    }
+    public static isDepthStencilFmt(fmt:number){
+        return GL.s_depth_stencil_fmt.indexOf(fmt) >=0;
+    }
+    public static isStencilFmt(fmt:number){
+        return GL.s_stencil_fmt.indexOf(fmt) >=0;
+    }
 
 }
 

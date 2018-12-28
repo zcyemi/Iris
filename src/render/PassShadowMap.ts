@@ -117,7 +117,7 @@ export class PassShadowMap extends RenderPass {
         let gatherProj = gathermat.program;
         this.m_gatherMat = gathermat;
 
-        gathermat.setTexture("uDepthTexure", pipe.mainDepthTexture);
+        gathermat.setTexture("uDepthTexure", pipe.depthRT);
         gathermat.setTexture("uShadowMap", this.m_smtex);
 
         this.m_quadMesh = Mesh.Quad;
@@ -131,7 +131,7 @@ export class PassShadowMap extends RenderPass {
             min_filter: gl.LINEAR,
             mag_filter:gl.LINEAR
         };
-        let stex = Texture2D.createTexture2D(pipe.mainFrameBufferWidth, pipe.mainFrameBufferHeight, texdesc, glctx);
+        let stex = Texture2D.createTexture2D(pipe.mainFBwidth, pipe.mainFBheight, texdesc, glctx);
         this.m_shadowTexture = stex;
 
         let sfb = gl.createFramebuffer();

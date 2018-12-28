@@ -39,6 +39,8 @@ export class RenderPipeline implements IRenderPipeline{
         this.m_gl = glctx.gl;
     }
 
+    public onInitGL(){};
+
     public resizeFrameBuffer(){
 
     }

@@ -15,12 +15,12 @@ import { Mesh } from "../Mesh";
 import { MeshRender } from "../MeshRender";
 import { Material } from "../Material";
 import { Camera } from "../Camera";
-import { Input } from "../Input";
 import { GLContext } from "../gl/GLContext";
-import { GLFrameBuffer } from "../gl/GLFrameBuffer";
 import { GLProgram } from "../gl/GLProgram";
 import { mat4 } from "../math/GLMath";
 import { FrameBuffer } from "../gl/FrameBuffer";
+import { ReleaseGraphicObj } from "../IGraphicObj";
+import { RenderTexture } from "../RenderTexture";
 
 export class PipelineBase implements IRenderPipeline {
 
@@ -37,6 +37,8 @@ export class PipelineBase implements IRenderPipeline {
     protected glctx: GLContext;
     protected gl: WebGL2RenderingContext;
     private m_pipestateCache: PipelineStateCache;
+    public get stateCache(): PipelineStateCache { return this.m_pipestateCache; }
+
     protected m_inited:boolean = false;
 
     public graphicRender: GraphicsRender;
@@ -48,14 +50,9 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     //Copy of depth texture
-    protected m_mainDepthTexture: Texture2D;
-    protected m_mainDepthFB: WebGLFramebuffer;
-    public get mainDepthTexture(): Texture2D {
-        return this.m_mainDepthTexture;
-    }
-    public get mainDepthFrameBuffer(): WebGLFramebuffer {
-        return this.m_mainDepthFB;
-    }
+
+    protected m_depthRT:RenderTexture;
+    public get depthRT():RenderTexture{ return this.m_depthRT;}
 
     private m_uniformBufferBasis: WebGLBuffer;
 
@@ -93,19 +90,16 @@ export class PipelineBase implements IRenderPipeline {
         return this.m_nodelistCur;
     }
 
-    protected m_mainFrameBuffer: FrameBuffer;
-    protected m_mainFrameBufferInfo: GraphicsRenderCreateInfo;
-    protected m_mainFrameBufferBinded: boolean = false;
+    protected mainFBaspect: FrameBuffer;
+    protected m_mainfbInfo: GraphicsRenderCreateInfo;
 
-    public get mainFrameBufferWidth(): number { return this.m_mainFrameBuffer.width }
-    public get mainFrameBufferHeight(): number { return this.m_mainFrameBuffer.height; }
+    public get mainFBwidth(): number { return this.mainFBaspect.width }
+    public get mainFBheight(): number { return this.mainFBaspect.height; }
     public get mainFrameBufferAspect(): number {
-        let fb = this.m_mainFrameBuffer;
+        let fb = this.mainFBaspect;
         return fb.width/ fb.height;
      }
-    public get mainFrameBuffer(): FrameBuffer { return this.m_mainFrameBuffer; }
-
-    public get stateCache(): PipelineStateCache { return this.m_pipestateCache; }
+    public get mainFrameBuffer(): FrameBuffer { return this.mainFBaspect; }
 
 
     /** for shderDataBasis screnparam */
@@ -123,20 +117,22 @@ export class PipelineBase implements IRenderPipeline {
     public onSetupRender(glctx:GLContext,bufferinfo: GraphicsRenderCreateInfo) {
         this.glctx = glctx;
         this.gl = glctx.gl;
-        this.m_mainFrameBufferInfo = bufferinfo;
+        this.m_mainfbInfo = bufferinfo;
 
-        this.init();
+        if(!this.m_inited){
+            this.onInitGL();
+            this.m_inited =true;
+        }
+        
     }
 
-    public init(){
-        if(this.m_inited) return;
-
-        let glctx = this.glctx;
-        let bufferinfo = this.m_mainFrameBufferInfo;
+    public onInitGL(){
+        const glctx = this.glctx;
+        const bufferinfo = this.m_mainfbInfo;
         this.m_pipestateCache = new PipelineStateCache(glctx);
         let fb = FrameBuffer.create(glctx,glctx.canvasWidth,glctx.canvasHeight,{colFmt:bufferinfo.colorFormat,
         depthFmt:bufferinfo.depthFormat});
-        this.m_mainFrameBuffer = fb;
+        this.mainFBaspect = fb;
         this.createUniformBuffers();
 
         this.m_passDebug = new PassDebug(this);
@@ -148,11 +144,9 @@ export class PipelineBase implements IRenderPipeline {
         if(this.m_fullscreenRender == null){
             this.m_fullscreenRender = new MeshRender(Mesh.Quad,this.m_fullscreenMat);
         }
-
-
-        this.m_inited= true;
-
     }
+
+
 
     private createUniformBuffers() {
         const CLASS = PipelineBase;
@@ -205,7 +199,7 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     public resizeFrameBuffer(width: number, height: number) {
-        this.m_mainFrameBuffer.resize(this.glctx,width,height);
+        this.mainFBaspect.resize(this.glctx,width,height);
         const gl = this.gl;
         gl.viewport(0,0,width,height);
 
@@ -220,8 +214,8 @@ export class PipelineBase implements IRenderPipeline {
      */
     public onRenderToCanvas() {
         const gl = this.gl;
-        gl.viewport(0,0,this.m_mainFrameBuffer.width,this.m_mainFrameBuffer.height);
-        this.drawFullScreenTex(this.m_mainFrameBuffer.coltex);
+        gl.viewport(0,0,this.mainFBaspect.width,this.mainFBaspect.height);
+        this.drawFullScreenTex(this.mainFBaspect.coltex);
     }
 
     public updateShaderDataBasis(camera:Camera,submit:boolean =true){
@@ -231,7 +225,7 @@ export class PipelineBase implements IRenderPipeline {
         const databasic = databasis.render;
         databasic.setTime(grender.time,this.graphicRender.deltaTime);
         if(this.m_shaderDataScreenResized){
-            databasic.setScreenParam(this.mainFrameBufferWidth,this.mainFrameBufferHeight);
+            databasic.setScreenParam(this.mainFBwidth,this.mainFBheight);
             this.m_shaderDataScreenResized = false;
         }
 
@@ -301,24 +295,18 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     public bindTargetFrameBuffer(forece:boolean,setvp:boolean) {
-        let mainfb = this.m_mainFrameBuffer;
-        if (!this.m_mainFrameBufferBinded || forece ){
-            mainfb.bind(this.gl);
-            this.m_mainFrameBufferBinded = true;
-            forece = true;
-        }
-
-        if(setvp){
-            this.gl.viewport(0, 0, mainfb.width, mainfb.height);
-        }
+        const glctx = this.glctx;
+        const fb = this.mainFBaspect;
+        if(glctx.bindFramebuffer(this.mainFBaspect)){
+            glctx.viewport(0,0,fb.width,fb.height);
+        } 
     }
 
     public UnBindTargetFrameBuffer() {
-        if (!this.m_mainFrameBufferBinded) return;
-
-        let gl = this.gl;
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        this.m_mainFrameBufferBinded = false;
+        const glctx = this.glctx;
+        if(glctx.bindFramebuffer(null)){
+            glctx.viewport(0,0,glctx.canvasWidth,glctx.canvasHeight);
+        }
     }
 
     public generateDrawList(scene: Scene): RenderNodeList {
@@ -455,16 +443,9 @@ export class PipelineBase implements IRenderPipeline {
         let gl = glctx.gl;
 
         this.m_bufferDebugInfo = [];
-        
-        this.m_mainFrameBuffer.release(glctx);
-        this.m_mainFrameBufferWidth = 0;
-        this.m_mainFrameBufferHeight = 0;
-        this.m_mainFrameBufferAspect = 1.0;
-        this.m_mainFrameBuffer = null;
 
-        this.m_pipestateCache.release();
-        this.m_pipestateCache = null;
-
+        this.mainFBaspect = ReleaseGraphicObj(this.mainFBaspect,glctx);
+        this.m_pipestateCache = ReleaseGraphicObj(this.m_pipestateCache,glctx);
 
         gl.deleteBuffer(this.m_uniformBufferBasis);
         gl.deleteBuffer(this.m_uniformBufferLight);
@@ -488,8 +469,6 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     public reload() {
-        this.release();
-        this.init();
     }
 
 }

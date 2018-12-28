@@ -1,24 +1,28 @@
 import { GLProgram } from "./GLProgram";
 import { GLFrameBuffer } from "./GLFrameBuffer";
 import { GLPipelineState } from "./GLPipelineState";
-import { vec4 } from "../math/GLMath";
 import { GLFenceSync } from "./GLFenceSync";
+import { FrameBuffer } from "./FrameBuffer";
 
 export class GLContext {
     private m_glFenceSynces:GLFenceSync[] = [];
 
+    private m_curfb:FrameBuffer;
+    private m_readfb:FrameBuffer;
+    private m_drawfb:FrameBuffer;
+    private m_viewport:number[] = [0,0,0,0];
+
     public gl: WebGL2RenderingContext;
     private constructor(wgl: WebGL2RenderingContext) {
         this.gl = wgl;
+        this.viewport(0,0,wgl.canvas.clientWidth,wgl.canvas.clientHeight);
     }
 
-    public get canvasWidth():number{
-        return this.gl.canvas.clientWidth;
-    }
-
-    public get canvasHeight():number{
-        return this.gl.canvas.clientHeight;
-    }
+    public get canvasWidth():number{return this.gl.canvas.clientWidth;}
+    public get canvasHeight():number{return this.gl.canvas.clientHeight;}
+    public get bindingFBO():FrameBuffer{ return this.m_curfb;}
+    public get bindingReadFBO():FrameBuffer {return this.m_readfb;}
+    public get bindingDrawFBO():FrameBuffer{ return this.m_drawfb;}
 
     public static createFromGL(wgl: WebGL2RenderingContext): GLContext {
         return new GLContext(wgl);
@@ -83,6 +87,42 @@ export class GLContext {
 
     public createFrameBuffer(retain: boolean, colorInternalFormat: number, depthInternalFormat?: number, width?: number, height?: number,glfb?:GLFrameBuffer): GLFrameBuffer | null {
         return GLFrameBuffer.create(retain, this, colorInternalFormat, depthInternalFormat, width, height,glfb);
+    }
+
+    public bindFramebuffer(fb:FrameBuffer):boolean{
+        if(this.m_curfb == fb) return false;
+        const gl = this.gl;
+        gl.bindFramebuffer(gl.FRAMEBUFFER,fb != null? fb.rawobj:null);
+        this.m_curfb = fb;
+        return true;
+    }
+
+    public bindReadFrameBuffer(fb:FrameBuffer):boolean{
+        if(this.m_readfb == fb) return false;
+        const gl = this.gl;
+        gl.bindFramebuffer(gl.READ_FRAMEBUFFER,fb != null? fb.rawobj:null);
+        this.m_readfb = fb;
+        return true;
+    }
+
+    public bindDrawFrameBuffer(fb:FrameBuffer):boolean{
+        if(this.m_drawfb == fb) return false;
+        const gl = this.gl;
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,fb != null? fb.rawobj:null);
+        this.m_drawfb = fb;
+        return true;
+    }
+
+    public viewport(x:number,y:number,w:number,h:number){
+        let vp = this.m_viewport;
+        if(vp[2] == w && vp[3] == h && vp[0] == x && vp[1] == y) return;
+
+        const gl = this.gl;
+        gl.viewport(x,y,w,h);
+        vp[0] = x;
+        vp[1] = y;
+        vp[2] = w;
+        vp[3] = h;
     }
 
     public savePipeline(...type: number[]): GLPipelineState {

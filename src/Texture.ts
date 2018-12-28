@@ -9,6 +9,12 @@ export interface ITexture{
     release(glctx:GLContext);
 }
 
+export enum TextureType{
+    Color,
+    Depth,
+    DepthStencil,
+}
+
 
 
 export interface TextureCreationDesc {
@@ -65,5 +71,11 @@ export class TextureDescUtility{
             c[p] = desc[p];
         }
         return c;
+    }
+
+    public static getTexFmtType(internalformat:number):TextureType{
+        if(GL.isDepthFmt(internalformat)) return TextureType.Depth;
+        if(GL.isDepthStencilFmt(internalformat)) return TextureType.DepthStencil;
+        return TextureType.Color;
     }
 }

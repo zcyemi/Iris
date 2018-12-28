@@ -37,6 +37,8 @@ export class StackedPipeline implements IRenderPipeline{
         this.m_glctx = glctx;
     }
 
+    public onInitGL(){};
+
     
     resizeFrameBuffer(width: number, height: number) {
         if(this.m_mainfb.resize(this.m_glctx,width,height)){

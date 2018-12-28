@@ -10,6 +10,7 @@ export interface IRenderPipeline{
     onRenderToCanvas();
     
     onSetupRender(glctx:GLContext,info:GraphicsRenderCreateInfo);
+    onInitGL();
     reload();
     release();
 }

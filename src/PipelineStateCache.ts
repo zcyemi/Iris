@@ -1,7 +1,8 @@
 import { ShaderTags, BlendFactor, BlendOperator, CullingMode, Comparison } from "./shaderfx/Shader";
 import { GLContext } from "./gl/GLContext";
+import { IGraphicObj } from "./IGraphicObj";
 
-export class PipelineStateCache{
+export class PipelineStateCache implements IGraphicObj{
 
     private readonly m_curtags:ShaderTags;
 
