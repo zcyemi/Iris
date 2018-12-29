@@ -4,6 +4,7 @@ import { GLPipelineState } from "./GLPipelineState";
 import { GLFenceSync } from "./GLFenceSync";
 import { FrameBuffer } from "./FrameBuffer";
 import { GL, GLSizeOrData } from "./GL";
+import { MeshIndicesDesc } from "../Mesh";
 
 export class GLContext {
     private m_glFenceSynces:GLFenceSync[] = [];
@@ -281,6 +282,9 @@ export class GLContext {
     public bindBufferRange(target: number, index: number, buffer: WebGLBuffer | null, offset: number, size: number){
         this.gl.bindBufferRange(target,index,buffer,offset,size);
     }
-
+    
+    public drawElementIndices(desc:MeshIndicesDesc){
+        this.gl.drawElements(desc.topology,desc.indiceCount,desc.type,desc.offset);
+    }
 
 }

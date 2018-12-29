@@ -45,16 +45,8 @@ export class RenderPipeline implements IRenderPipeline{
 
     }
 
-    public onTraversalNodes(data:any){
-        if(data == null || !(data instanceof Scene)) return;
-        const nodelist = this.m_nodelist;
-        nodelist.swap();
-        PipelineUtility.generateDrawList(data,nodelist.front);
-    }
-
     public exec(data:any){
         if(data == null) return;
-        this.onTraversalNodes(data);
     }
 
     public onRenderToCanvas(){
@@ -66,50 +58,6 @@ export class RenderPipeline implements IRenderPipeline{
     }
 
     public release(){
-
-    }
-
-
-    public drawMeshWithMat(mesh:Mesh,mat:Material,vao:WebGLVertexArrayObject,objmtx?:mat4){
-        const glctx = this.m_glctx;
-        const model =this.m_model;
-        const program = mat.program;
-        glctx.useProgram(program);
-        model.bindUniform(program);
-
-        const gl = glctx.getWebGLRenderingContext();
-
-        mat.apply(gl);
-        model.updateUniformMtx(objmtx);
-        glctx.bindVertexArray(vao);
-        let ind = mesh.indiceDesc;
-        gl.drawElements(ind.topology,ind.indiceCount,ind.type,ind.offset);
-        glctx.bindVertexArray(null);
-        mat.clean(gl);
-    }
-
-    public drawMeshRender(meshrender:MeshRender,objmtx?:mat4){
-        const glctx = this.m_glctx;
-        const model =this.m_model;
-        const mesh = meshrender.mesh;
-        const mat = meshrender.material;
-        const program = mat.program;
-        glctx.useProgram(program);
-        model.bindUniform(program);
-        const gl = glctx.getWebGLRenderingContext();
-        mat.apply(gl);
-        model.updateUniformRender(meshrender);
-        meshrender.bindVertexArray(glctx);
-        let ind = mesh.indiceDesc;
-        gl.drawElements(ind.topology,ind.indiceCount,ind.type,ind.offset);
-        meshrender.unbindVertexArray(glctx);
-        mat.clean(gl);
-    }
-
-    /**
-     * @todo
-     */
-    public drawFullscreenTex(){
 
     }
 
