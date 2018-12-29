@@ -69,9 +69,6 @@ export class PipelineForwardZPrePass extends PipelineBase {
         this.bindTargetFrameBuffer(false,false);
 
         let gl = this.gl;
-        gl.clearColor(1, 0, 0, 1);
-        gl.clearDepth(10.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         //do rendering
 

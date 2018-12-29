@@ -14,6 +14,8 @@ interface FrameBufferCreateDesc{
     colorTex3?:Texture2D,
 }
 
+export interface FrameBufferTexDesc {colFmt?:number,depthFmt?:number,depthstencilFmt?:number};
+
 export class FrameBuffer implements IGraphicObj{
 
     private m_rawobj:WebGLFramebuffer;
@@ -50,7 +52,7 @@ export class FrameBuffer implements IGraphicObj{
         return fb;
     }
 
-    public static create(glctx:GLContext,width:number,height:number,texdesc: {colFmt?:number,depthFmt?:number,depthstencilFmt?:number}){
+    public static create(glctx:GLContext,width:number,height:number,texdesc: FrameBufferTexDesc){
         const gl = glctx.getWebGLRenderingContext();
         let glfb = gl.createFramebuffer();
         let fb = new FrameBuffer();
@@ -121,7 +123,7 @@ export class FrameBuffer implements IGraphicObj{
             }
         }
         glctx.bindFramebuffer(curfb);
-    
+
         this.m_width = width;
         this.m_height = height;
         return true;
@@ -132,7 +134,7 @@ export class FrameBuffer implements IGraphicObj{
         if(tex ==null) return;
         const gl = glctx.getWebGLRenderingContext();
         gl.framebufferTexture2D(gl.FRAMEBUFFER,attatch,gl.TEXTURE_2D,tex.getRawTexture(),0);
-        this.m_texbinding[attatch] = tex
+        this.m_texbinding[attatch] = tex;
         if(attatch == gl.COLOR_ATTACHMENT0){
             this.m_coltex = tex;
         }

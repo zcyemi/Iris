@@ -1,7 +1,7 @@
 import { GLContext } from "./gl/GLContext";
 import { ITexture, TextureCreationDesc, TextureType, TextureDescUtility } from "./Texture";
 import { Texture2D } from "./Texture2D";
-import { FrameBuffer } from "./gl/FrameBuffer";
+import { FrameBuffer, FrameBufferTexDesc } from "./gl/FrameBuffer";
 
 
 
@@ -50,12 +50,26 @@ export class RenderTexture implements ITexture{
     }
 
     public static create(glctx:GLContext,width:number,height:number,desc:TextureCreationDesc):RenderTexture{
-        let fb = FrameBuffer.create(glctx,width,height,{colFmt: desc.internalformat});
+        let internalfmt = desc.internalformat;
+        let texfmt = TextureDescUtility.getTexFmtType(desc.internalformat);
+        let fbdesc:FrameBufferTexDesc = {};
+        switch(texfmt){
+            case TextureType.Color:
+            fbdesc.colFmt = internalfmt;
+            break;
+            case TextureType.Depth:
+            fbdesc.depthFmt = internalfmt;
+            break;
+            case TextureType.DepthStencil:
+            fbdesc.depthstencilFmt = internalfmt;
+            break;
+        }
+        let fb = FrameBuffer.create(glctx,width,height,fbdesc);
         let rt =new RenderTexture();
         rt.m_fb = fb;
         rt.m_desc = desc;
         rt.m_valid = true;
-        rt.m_rawtex = rt.internalGetFBtex(TextureDescUtility.getTexFmtType(desc.internalformat));
+        rt.m_rawtex = rt.internalGetFBtex(texfmt);
         return rt;
     }
 

@@ -71,7 +71,7 @@ export class PassDepth extends RenderPass{
         let program = this.m_program;
 
         let glp = program.Program;
-        glctx.useProgram(program);
+        glctx.useGLProgram(program);
 
         let ublock = program.UniformBlock;
         let indexCam = ublock[NAME_BASIS];

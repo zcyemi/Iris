@@ -22,6 +22,10 @@ export type GLSizeOrData = number | GLData;
 
 export class GL{
 
+    public static readonly DEPTH_BUFFER_BIT = 0x00000100;
+    public static readonly STENCIL_BUFFER_BIT = 0x00000400;
+    public static readonly COLOR_BUFFER_BIT = 0x00004000;
+
     public static readonly ARRAY_BUFFER: number = 0x8892;
     public static readonly ELEMENT_ARRAY_BUFFER: number = 0x8893;
 

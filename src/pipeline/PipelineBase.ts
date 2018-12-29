@@ -188,8 +188,6 @@ export class PipelineBase implements IRenderPipeline {
             gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_LIGHT, buffer);
             this.m_uniformBufferLight = buffer;
         }
-
-        console.log('create uniform buffers');
     }
 
     public renderBufferDebug() {

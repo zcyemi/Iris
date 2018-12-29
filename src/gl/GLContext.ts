@@ -238,6 +238,12 @@ export class GLContext {
     public enable(cap: number){
         this.gl.enable(cap);
     }
+    public clear(mask:number){
+        this.gl.clear(mask);
+    }
+    public clearColor(r:number,g:number,b:number,a:number){
+        this.gl.clearColor(r,g,b,a);
+    }
 
     /**
      * Do not call this function explicitly
