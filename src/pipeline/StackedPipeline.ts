@@ -13,16 +13,19 @@ import { ReleaseGraphicObj } from "../IGraphicObj";
 import { RenderNodeList } from "../RenderNodeList";
 import { Scene } from "../Scene";
 import { PipelineUtility } from "./PipelineUtility";
+import { PipelineClearInfo } from "./RenderPipeline";
 
 type PassCtor<T> = new(pipeline:IRenderPipeline)=>T;
 
 
 class StackedPipelineBuildOptions{
     passes: PassCtor<any>[];
+    clearinfo?:PipelineClearInfo;
 }
 
 export class StackedPipeline implements IRenderPipeline{
     public graphicRender:GraphicsRender;
+    public clearInfo?:PipelineClearInfo;
 
     private m_buildopt:StackedPipelineBuildOptions;
     private m_mainfb:FrameBuffer;
@@ -32,17 +35,18 @@ export class StackedPipeline implements IRenderPipeline{
 
     protected m_renderNodeList:RenderNodeList;
     protected m_renderPass:RenderPass[];
-
+    
 
     public constructor (buildopt:StackedPipelineBuildOptions){
         this.m_buildopt = buildopt;
-        this.m_model = new RenderModel(this);
+        this.clearInfo = buildopt.clearinfo;
     }
 
     onSetupRender(glctx:GLContext, info:GraphicsRenderCreateInfo){
         let fb = FrameBuffer.create(glctx,glctx.canvasWidth,glctx.canvasHeight,{colFmt:info.colorFormat,depthFmt:info.depthFormat});
         this.m_mainfb =fb;
         this.m_glctx = glctx;
+        this.m_model = new RenderModel(this);
         this.m_renderNodeList = new RenderNodeList();
         this.onInitGL();
     }

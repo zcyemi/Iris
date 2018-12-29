@@ -23,6 +23,7 @@ import { GLContext } from '../gl/GLContext';
 import { GLUtility } from '../gl/GLUtility';
 import { vec3, glmath } from '../math/GLMath';
 import { GL } from '../gl/GL';
+import { StackedPipeline } from '../pipeline/StackedPipeline';
 
 export class SampleGame{
     private m_canvas:HTMLCanvasElement;
@@ -30,14 +31,14 @@ export class SampleGame{
     private m_timer:FrameTimer = new FrameTimer(false);
 
     private static Instance:SampleGame;
-    private m_pipeline:PipelineBase;
+
+    private m_pipeline:StackedPipeline;
+    private m_scene:Scene;
 
     public constructor(canvas:HTMLCanvasElement){
         SampleGame.Instance = this;
         this.m_canvas = canvas;
-        let pipe = new PipelineForwardZPrePass();
-        this.m_pipeline = pipe;
-        let grender = new GraphicsRender(canvas,pipe);
+        let grender = new GraphicsRender(canvas);
         let sc = grender.shadowConfig;
         sc.shadowDistance = 20;
         this.m_graphicsRender = grender;
@@ -48,11 +49,24 @@ export class SampleGame{
 
         this.resizeCanvas();
         WindowUtility.setOnResizeFunc(this.resizeCanvas.bind(this));
+
+        let pipeline= new StackedPipeline({
+            passes: [
+
+            ],
+        });
+        grender.setPipeline(pipeline);
+        this.m_pipeline = pipeline;
+
+        this.m_scene = new Scene();
+        
     }
 
     public resizeCanvas(){
         const canvas = this.m_canvas;
-        this.m_graphicsRender.resizeCanvas(canvas.clientWidth,canvas.clientHeight);
+        let grender =this.m_graphicsRender;
+        if(grender == null) return;
+        grender.resizeCanvas(canvas.clientWidth,canvas.clientHeight);
     }
 
     public onFrame(ts:number){
@@ -62,15 +76,8 @@ export class SampleGame{
         Input.onFrame(dt);
 
         let gredner = this.m_graphicsRender;
-
-        let glctx = gredner.glctx;
-        let gl = glctx.getWebGLRenderingContext();
-
-        glctx.clearColor(0,1,0,1);
-        glctx.clear(GL.COLOR_BUFFER_BIT);
-
-        //gredner.render(scene,dt);
-        //gredner.renderToCanvas();
+        gredner.render(this.m_scene,dt);
+        gredner.renderToCanvas();
     }
 
 

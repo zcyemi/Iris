@@ -5,12 +5,18 @@ import { PipelineUtility } from "./PipelineUtility";
 import { type } from "os";
 import { Mesh } from "../Mesh";
 import { Material } from "../Material";
-import { mat4 } from "../math/GLMath";
+import { mat4, vec4 } from "../math/GLMath";
 import { RenderModel } from "./RenderModel";
 import { MeshRender } from "../MeshRender";
 import { IRenderPipeline } from "./IRenderPipeline";
 import { GraphicsRender, GraphicsRenderCreateInfo } from "../GraphicsRender";
 import { GLContext } from "../gl/GLContext";
+
+
+export interface PipelineClearInfo{
+    color?:vec4;
+    depth?:number;
+}
 
 
 /**
