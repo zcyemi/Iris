@@ -244,19 +244,9 @@ export class GLContext {
     public clearColor(r:number,g:number,b:number,a:number){
         this.gl.clearColor(r,g,b,a);
     }
-
-    /**
-     * Do not call this function explicitly
-     * @param fs 
-     */
     public registFenceSync(fs:GLFenceSync){
         this.m_glFenceSynces.push(fs);
     }
-
-    /**
-     * Do not call this function explicitly
-     * @param fs 
-     */
     public unregistFenceSync(fs:GLFenceSync):boolean{
         let syncs = this.m_glFenceSynces;
 
@@ -267,10 +257,6 @@ export class GLContext {
         }
         return false;
     }
-
-    /**
-     * check statu of all registed GLFenceScene
-     */
     public checkAllFenceSync(){
         let syncs = this.m_glFenceSynces;
         let len = syncs.length;
@@ -289,5 +275,12 @@ export class GLContext {
             this.m_glFenceSynces = remains;
         }
     }
+    public bindBufferBase(target: number, index: number, buffer: WebGLBuffer | null){
+        this.gl.bindBufferBase(target,index,buffer);
+    }
+    public bindBufferRange(target: number, index: number, buffer: WebGLBuffer | null, offset: number, size: number){
+        this.gl.bindBufferRange(target,index,buffer,offset,size);
+    }
+
 
 }

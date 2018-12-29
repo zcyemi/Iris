@@ -28,6 +28,7 @@ export class GL{
 
     public static readonly ARRAY_BUFFER: number = 0x8892;
     public static readonly ELEMENT_ARRAY_BUFFER: number = 0x8893;
+    public static readonly UNIFORM_BUFFER:number = 0x8A11;
 
     public static readonly PIXEL_PACK_BUFFER = 0x88EB;
     public static readonly PIXEL_UNPACK_BUFFER = 0x88EC;

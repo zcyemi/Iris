@@ -5,34 +5,28 @@ import { PipelineBase } from "./PipelineBase";
 import { ShaderDataBasis, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { FrameBuffer } from "../gl/FrameBuffer";
 import { GLContext } from "../gl/GLContext";
-import { IGraphicObj } from "../IGraphicObj";
+import { IGraphicObj, ReleaseGraphicObj } from "../IGraphicObj";
+import { IRenderPipeline } from "./IRenderPipeline";
+import { ShaderUniformBuffer } from "../shaderfx/ShaderUniformBuffer";
 
 
 /**
  * @todo add internal res to graphics render
  */
 export class RenderModel implements IGraphicObj{
-    
-    public static readonly UNIFORMINDEX_OBJ: number = 0;
-    public static readonly UNIFORMINDEX_BASIS: number = 1;
-    public static readonly UNIFORMINDEX_SHADOWMAP: number = 2;
-    public static readonly UNIFORMINDEX_LIGHT: number = 3;
-    public static readonly UNIFORMINDEX_SHADER:number = 4;
 
-    private m_uniformBufferObj: WebGLBuffer;
-    private m_uniformBufferShadowMap: WebGLBuffer;
-    private m_uniformBufferLight: WebGLBuffer;
+    private m_uniformBasis:ShaderUniformBuffer<ShaderDataBasis>;
+    private m_uniformObj:ShaderUniformBuffer<ShaderDataUniformObj>;
+    private m_uniformLight:ShaderUniformBuffer<ShaderDataUniformLight>;
+    private m_uniformShadowMap:ShaderUniformBuffer<ShaderDataUniformShadowMap>;
 
-    private m_shaderDataBasis: ShaderDataBasis;
-    private m_shaderDataObj: ShaderDataUniformObj;
-    private m_shaderDataShadowMap: ShaderDataUniformShadowMap;
-    private m_shaderDataLight: ShaderDataUniformLight;
+    public constructor(pipeline:IRenderPipeline){
+        const glctx = pipeline.graphicRender.glctx;
 
-    private m_mainFramebuffer:FrameBuffer;
-
-
-    public constructor(pipeline:PipelineBase){
-
+        this.m_uniformObj = new ShaderUniformBuffer(glctx,ShaderDataUniformObj,0);
+        this.m_uniformBasis = new ShaderUniformBuffer(glctx,ShaderDataBasis,1);
+        this.m_uniformShadowMap = new ShaderUniformBuffer(glctx,ShaderDataUniformShadowMap,2);
+        this.m_uniformLight = new ShaderUniformBuffer(glctx,ShaderDataUniformLight,3);
     }
 
 
@@ -49,6 +43,10 @@ export class RenderModel implements IGraphicObj{
     }
 
     public release(glctx:GLContext){
+        this.m_uniformObj = ReleaseGraphicObj(this.m_uniformObj,glctx);
+        this.m_uniformBasis = ReleaseGraphicObj(this.m_uniformBasis,glctx);
+        this.m_uniformLight = ReleaseGraphicObj(this.m_uniformLight,glctx);
+        this.m_uniformShadowMap = ReleaseGraphicObj(this.m_uniformShadowMap,glctx);
     }
 
 }

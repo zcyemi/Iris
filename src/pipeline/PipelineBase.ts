@@ -146,8 +146,6 @@ export class PipelineBase implements IRenderPipeline {
         }
     }
 
-
-
     private createUniformBuffers() {
         const CLASS = PipelineBase;
         let gl = this.gl;
