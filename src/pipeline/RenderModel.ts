@@ -14,6 +14,7 @@ import { Material } from "../Material";
 import { Mesh } from "../Mesh";
 import { ITexture } from "../Texture";
 import { Camera } from "../Camera";
+import { PipelineClearInfo } from "./RenderPipeline";
 
 
 /**
@@ -148,6 +149,17 @@ export class RenderModel implements IGraphicObj{
         glctx.drawElementIndices(mesh.indiceDesc);
         glctx.bindVertexArray(null);
         mat.clean(gl);
+    }
+
+    public clearFrameBufferTarget(clearinfo:PipelineClearInfo,fb:FrameBuffer){
+        if(clearinfo == null )return;
+        const glctx = this.m_glctx;
+        glctx.bindFramebuffer(fb);
+        let ccol = clearinfo.color;
+        if(ccol) glctx.clearColorAry(ccol.raw);
+        let depth = clearinfo.depth;
+        if(depth !=null) glctx.clearDepth(depth);
+        glctx.clear(clearinfo.clearMask);
     }
 
     public release(glctx:GLContext){

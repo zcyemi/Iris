@@ -92,15 +92,7 @@ export class StackedPipeline implements IRenderPipeline{
         const glctx = this.m_glctx;
         model.uniformBasis.uploadBufferData(glctx);
 
-        const clearinfo =this.clearInfo;
-        if(clearinfo != null){
-            glctx.bindFramebuffer(this.m_mainfb);
-            let ccol = clearinfo.color;
-            if(ccol) glctx.clearColorAry(ccol.raw);
-            let depth = clearinfo.depth;
-            if(depth !=null) glctx.clearDepth(depth);
-            glctx.clear(clearinfo.clearMask);;
-        }
+        model.clearFrameBufferTarget(this.clearInfo,this.m_mainfb);
 
         let nodeList = this.m_renderNodeList;
         nodeList.reset();
@@ -114,7 +106,6 @@ export class StackedPipeline implements IRenderPipeline{
         
     }
     onRenderToCanvas(){
-        //render to canvas;
         const glctx =this.m_glctx;
         glctx.bindFramebuffer(null);
         const mainfb = this.m_mainfb;
