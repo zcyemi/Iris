@@ -177,7 +177,7 @@ out vec4 fragColor;
 void fragment(){
     fragColor = texture(uSampler,vUV);
 }`;
-	public static readonly depth:string = `#version 300 es\nprecision mediump float;
+	public static readonly depth:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #queue other
 #pragma vs vertex
@@ -190,7 +190,7 @@ void vertex(){
 
 void fragment(){
 }`;
-	public static readonly diffuse:string = `#version 300 es\nprecision mediump float;
+	public static readonly diffuse:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #include SHADERFX_LIGHT
 #include SHADERFX_LIGHTING
@@ -731,21 +731,22 @@ void fragment(){
 }
 #endif
 `;
-	public static readonly UnlitColor:string = `#version 300 es\nprecision mediump float;
+	public static readonly UnlitColor:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #queue opaque
 
 #pragma vs vertex
 in vec4 aPosition;
 void vertex(){
-    gl_Position = MATRIX_MVP * aPosition;
+    vec4 pos = aPosition;
+    gl_Position = MATRIX_MVP * pos;
 }
 
 #pragma ps fragment
 uniform vec4 uColor;
 out vec4 fragColor;
 void fragment(){
-    fragColor = uColor;
+    fragColor = vec4(1.0,1.0,0,1.0);
 }`;
 	public static readonly UnlitTexture:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
@@ -770,7 +771,7 @@ out vec4 fragColor;
 void fragment(){
     fragColor = texture(uSampler,vUV);
 }`;
-	public static readonly uvValue:string = `#version 300 es\nprecision mediump float;
+	public static readonly uvValue:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 
 inout vec2 vUV;

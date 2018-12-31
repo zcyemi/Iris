@@ -16,55 +16,56 @@ import { GLContext } from "../gl/GLContext";
 export interface PipelineClearInfo{
     color?:vec4;
     depth?:number;
+    clearMask:number;
 }
 
 
-/**
- * @todo
- * dependencies
- * @class <GLFramebuffer>
- * @class <RenderTexture>
- * 
- */
-export class RenderPipeline implements IRenderPipeline{
+// /**
+//  * @todo
+//  * dependencies
+//  * @class <GLFramebuffer>
+//  * @class <RenderTexture>
+//  * 
+//  */
+// export class RenderPipeline implements IRenderPipeline{
 
-    protected m_nodelist:DoubleBuffered<RenderNodeList>;
-    protected m_model:RenderModel;
+//     protected m_nodelist:DoubleBuffered<RenderNodeList>;
+//     protected m_model:RenderModel;
 
-    public get graphicRender():GraphicsRender{
-        return null;
-    }
-    public set graphicRender(val:GraphicsRender){
+//     public get graphicRender():GraphicsRender{
+//         return null;
+//     }
+//     public set graphicRender(val:GraphicsRender){
 
-    }
+//     }
 
-    private m_glctx:GLContext;
+//     private m_glctx:GLContext;
 
-    public onSetupRender(glctx:GLContext,info:GraphicsRenderCreateInfo){
-        this.m_nodelist = new DoubleBuffered(new RenderNodeList(),new RenderNodeList());
-        this.m_glctx = glctx;
-    }
+//     public onSetupRender(glctx:GLContext,info:GraphicsRenderCreateInfo){
+//         this.m_nodelist = new DoubleBuffered(new RenderNodeList(),new RenderNodeList());
+//         this.m_glctx = glctx;
+//     }
 
-    public onInitGL(){};
+//     public onInitGL(){};
 
-    public resizeFrameBuffer(){
+//     public resizeFrameBuffer(){
 
-    }
+//     }
 
-    public exec(data:any){
-        if(data == null) return;
-    }
+//     public exec(data:any){
+//         if(data == null) return;
+//     }
 
-    public onRenderToCanvas(){
+//     public onRenderToCanvas(){
 
-    }
+//     }
 
-    public reload(){
+//     public reload(){
 
-    }
+//     }
 
-    public release(){
+//     public release(){
 
-    }
+//     }
 
-}
+// }

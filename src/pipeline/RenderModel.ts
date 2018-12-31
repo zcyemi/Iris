@@ -13,6 +13,7 @@ import { ShaderFX } from "../shaderfx/ShaderFX";
 import { Material } from "../Material";
 import { Mesh } from "../Mesh";
 import { ITexture } from "../Texture";
+import { Camera } from "../Camera";
 
 
 /**
@@ -28,6 +29,17 @@ export class RenderModel implements IGraphicObj{
 
     private m_matFullscreen:Material;
     private m_renderFullscreen:MeshRender;
+
+    private m_screenAspect:number;
+
+
+    
+    public get uniformBasis():ShaderUniformBuffer<ShaderDataBasis>{return this.m_uniformBasis;}
+    public get uniformObj():ShaderUniformBuffer<ShaderDataUniformObj>{return this.m_uniformObj;}
+    public get uniformLight():ShaderUniformBuffer<ShaderDataUniformLight>{return this.m_uniformLight;}
+    public get uniformShadowMap():ShaderUniformBuffer<ShaderDataUniformShadowMap>{return this.m_uniformShadowMap;}
+
+
 
     public constructor(pipeline:IRenderPipeline){
         const glctx = pipeline.graphicRender.glctx;
@@ -63,6 +75,32 @@ export class RenderModel implements IGraphicObj{
         //ShadowMap todo
     }
 
+    public updateUnifromScreenParam(w:number,h:number){
+        let uniformBasis = this.m_uniformBasis;
+        let data = uniformBasis.data;
+        data.render.setScreenParam(w,h);
+        this.m_screenAspect =w*1.0 / h;
+    }
+
+    public updateUniformBasis(cam:Camera){
+        let uniformBasis = this.m_uniformBasis;
+        let data = uniformBasis.data;
+
+        let datacamera = data.camrea;
+        if(cam.isDataTrsDirty){
+            datacamera.setCameraMtxView(cam.WorldMatrix);
+            datacamera.setCameraPos(cam.transform.position);
+            cam.isDataTrsDirty = false;
+        }
+
+        if(cam.aspect != this.m_screenAspect) cam.aspect= this.m_screenAspect;
+        if(cam.isDataProjDirty){
+            datacamera.setCameraMtxProj(cam.ProjMatrix);
+            datacamera.setProjParam(cam.near,cam.far);
+            cam.isDataProjDirty = false;
+        }
+
+    }
 
     public updateUniformObjMtx(objmtx:mat4){
         let uniformObj = this.m_uniformObj;
@@ -87,7 +125,9 @@ export class RenderModel implements IGraphicObj{
         glctx.useGLProgram(glp);
         this.bindDefaultUniform(glp);
         mat.apply(gl);
-        if(objmtx != null)this.updateUniformObjMtx(objmtx);
+        if(objmtx != null){
+            this.updateUniformObjMtx(objmtx);
+        }
 
         meshrender.bindVertexArray(glctx);
         glctx.drawElementIndices(mesh.indiceDesc);

@@ -21,8 +21,12 @@ import { mat4 } from "../math/GLMath";
 import { FrameBuffer } from "../gl/FrameBuffer";
 import { ReleaseGraphicObj } from "../IGraphicObj";
 import { RenderTexture } from "../RenderTexture";
+import { RenderModel } from "./RenderModel";
 
 export class PipelineBase implements IRenderPipeline {
+
+    public model:RenderModel;
+
 
     public static readonly UNIFORMINDEX_OBJ: number = 0;
     public static readonly UNIFORMINDEX_BASIS: number = 1;
@@ -34,7 +38,7 @@ export class PipelineBase implements IRenderPipeline {
     public get GLCtx(): GLContext { return this.glctx; }
     public get GL(): WebGL2RenderingContext { return this.gl; }
 
-    protected glctx: GLContext;
+    public glctx: GLContext;
     protected gl: WebGL2RenderingContext;
     private m_pipestateCache: PipelineStateCache;
     public get stateCache(): PipelineStateCache { return this.m_pipestateCache; }

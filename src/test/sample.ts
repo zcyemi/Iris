@@ -24,6 +24,11 @@ import { GLUtility } from '../gl/GLUtility';
 import { vec3, glmath } from '../math/GLMath';
 import { GL } from '../gl/GL';
 import { StackedPipeline } from '../pipeline/StackedPipeline';
+import { SceneBuilder } from '../SceneBuilder';
+import { ShaderFX } from '../shaderfx/ShaderFX';
+import { PassOpaque } from '../render/PassOpaque';
+import { PassSkybox } from '../render/PassSkybox';
+import { PassTest } from '../render/PassTest';
 
 export class SampleGame{
     private m_canvas:HTMLCanvasElement;
@@ -34,6 +39,7 @@ export class SampleGame{
 
     private m_pipeline:StackedPipeline;
     private m_scene:Scene;
+    private m_sceneMgr:SceneManager;
 
     public constructor(canvas:HTMLCanvasElement){
         SampleGame.Instance = this;
@@ -47,19 +53,49 @@ export class SampleGame{
         GLUtility.setTargetFPS(60);
         GLUtility.registerOnFrame(this.onFrame.bind(this));
 
-        this.resizeCanvas();
+        
         WindowUtility.setOnResizeFunc(this.resizeCanvas.bind(this));
 
         let pipeline= new StackedPipeline({
             passes: [
-
+                PassTest,
+                PassSkybox,
             ],
+            clearinfo: {
+                clearMask: GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT,
+                color: glmath.vec4(0,0,0,1),
+                depth: 1000
+            }
         });
         grender.setPipeline(pipeline);
         this.m_pipeline = pipeline;
 
-        this.m_scene = new Scene();
+        this.m_scene = SceneBuilder.Build({
+            "children":{
+                "camera":{
+                    comp:[
+                        Camera.persepctive(null,60.0,1.0,0.1,50),
+                        new CameraFreeFly()
+                    ],
+                    oncreate:(g)=>{
+                        let camera = g.getComponent(Camera);
+                        camera.clearType = ClearType.Skybox;
+                        camera.skybox = Skybox.createFromProcedural();
+                    }
+                },
+                "cube":{
+                    trs: {pos:[10,0,10]},
+                    oncreate:(g)=>{
+                        let cmat =new Material(grender.shaderLib.shaderUnlitColor);
+                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,0,0,1));
+                        g.render = new MeshRender(Mesh.Cube,cmat)
+                    }
+                }
+            }
+        })
+        this.m_sceneMgr = new SceneManager();
         
+        this.resizeCanvas();
     }
 
     public resizeCanvas(){
@@ -74,10 +110,13 @@ export class SampleGame{
         let delta = this.m_timer.tick(ts);
         let dt = delta /1000;
         Input.onFrame(dt);
+        
+        this.m_sceneMgr.onFrame(this.m_scene);
 
         let gredner = this.m_graphicsRender;
         gredner.render(this.m_scene,dt);
         gredner.renderToCanvas();
+
     }
 
 

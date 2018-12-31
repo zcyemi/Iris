@@ -75,10 +75,10 @@ export class GameObject{
         comps.push(c);
     }
 
-    public getComponent<T extends Component>(t:new()=>T){
+    public getComponent<T extends Component>(t:new()=>T):T{
         let comps = this.components;
         for(let i=0,len = comps.length;i<len;i++){
-            if(comps[i] instanceof t) return comps[i];
+            if(comps[i] instanceof t) return <T>comps[i];
         }
         return null;
     }

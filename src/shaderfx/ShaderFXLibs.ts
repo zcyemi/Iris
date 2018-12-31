@@ -148,6 +148,7 @@ export class ShaderDataUniformObj extends ShaderData{
     public constructor(){
         let buffersize = 16*4;
         super(buffersize);
+        this.buffer.setMat4(0,mat4.Identity);
     }
     public setMtxModel(mtx:mat4){
         this.buffer.setMat4(0,mtx);

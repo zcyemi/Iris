@@ -22,7 +22,7 @@ export class ShaderUniformBuffer<T extends ShaderData> implements IGraphicObj{
         let buffer = glctx.createBufferAndBind(GL.UNIFORM_BUFFER);
         glctx.bufferData(GL.UNIFORM_BUFFER,data.fxbuffer.raw,GL.DYNAMIC_DRAW);
         glctx.bindBufferBase(GL.UNIFORM_BUFFER,uniformIndex,buffer);
-        this.m_glbuffer;
+        this.m_glbuffer = buffer;
         this.m_uniformIndex = uniformIndex;
         this.m_data = data;
         this.name = uniform_name;

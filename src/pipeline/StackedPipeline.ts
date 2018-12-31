@@ -26,10 +26,14 @@ class StackedPipelineBuildOptions{
 export class StackedPipeline implements IRenderPipeline{
     public graphicRender:GraphicsRender;
     public clearInfo?:PipelineClearInfo;
+    public get model():RenderModel{ return this.m_model;}
+    public get nodeList():RenderNodeList{return this.m_renderNodeList;}
+    public get mainFrameBuffer():FrameBuffer{return this.m_mainfb;}
 
     private m_buildopt:StackedPipelineBuildOptions;
     private m_mainfb:FrameBuffer;
     private m_glctx:GLContext;
+    public get glctx():GLContext{ return this.m_glctx;}
 
     protected m_model:RenderModel;
 
@@ -69,6 +73,7 @@ export class StackedPipeline implements IRenderPipeline{
     resizeFrameBuffer(width: number, height: number) {
         if(this.m_mainfb.resize(this.m_glctx,width,height)){
             this.m_glctx.viewport(0,0,width,height);
+            this.m_model.updateUnifromScreenParam(width,height);
         }
     }
 
@@ -77,6 +82,24 @@ export class StackedPipeline implements IRenderPipeline{
 
         if(!(data instanceof Scene)){
             return;
+        }
+
+        const camera = data.mainCamera;
+        if(camera == null) return;
+
+        const model = this.m_model;
+        model.updateUniformBasis(camera);
+        const glctx = this.m_glctx;
+        model.uniformBasis.uploadBufferData(glctx);
+
+        const clearinfo =this.clearInfo;
+        if(clearinfo != null){
+            glctx.bindFramebuffer(this.m_mainfb);
+            let ccol = clearinfo.color;
+            if(ccol) glctx.clearColorAry(ccol.raw);
+            let depth = clearinfo.depth;
+            if(depth !=null) glctx.clearDepth(depth);
+            glctx.clear(clearinfo.clearMask);;
         }
 
         let nodeList = this.m_renderNodeList;

@@ -13,6 +13,7 @@ export class GLContext {
     private m_readfb:FrameBuffer;
     private m_drawfb:FrameBuffer;
     private m_viewport:number[] = [0,0,0,0];
+    private m_clearDepth:number;
 
     private gl: WebGL2RenderingContext;
     private constructor(wgl: WebGL2RenderingContext) {
@@ -239,12 +240,28 @@ export class GLContext {
     public enable(cap: number){
         this.gl.enable(cap);
     }
+
+    public disable(cap:number){
+        this.gl.disable(cap);
+    }
+
     public clear(mask:number){
         this.gl.clear(mask);
     }
     public clearColor(r:number,g:number,b:number,a:number){
         this.gl.clearColor(r,g,b,a);
     }
+
+    public clearColorAry(raw:number[]){
+        this.gl.clearColor(raw[0],raw[1],raw[2],raw[3]);
+    }
+
+    public clearDepth(depth:number){
+        if(this.m_clearDepth == depth) return;
+        this.gl.clearDepth(depth);
+        this.m_clearDepth = depth;
+    }
+
     public registFenceSync(fs:GLFenceSync){
         this.m_glFenceSynces.push(fs);
     }
@@ -285,6 +302,10 @@ export class GLContext {
     
     public drawElementIndices(desc:MeshIndicesDesc){
         this.gl.drawElements(desc.topology,desc.indiceCount,desc.type,desc.offset);
+    }
+
+    public polygonOffset(factor:number,units:number){
+        this.gl.polygonOffset(factor,units);
     }
 
 }

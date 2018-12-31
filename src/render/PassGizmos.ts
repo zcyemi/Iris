@@ -51,45 +51,45 @@ export class PassGizmos extends RenderPass{
     }
 
     public render(scene?:Scene){
-        if(!this.enable) return;
+        // if(!this.enable) return;
 
-        const mesh =this.m_mesh;
-        if(mesh == null) return;
+        // const mesh =this.m_mesh;
+        // if(mesh == null) return;
 
-        const CLASS = PipelineBase;
-        const NAME_BASIS = ShaderFX.UNIFORM_BASIS;
-        const NAME_OBJ = ShaderFX.UNIFORM_OBJ;
+        // const CLASS = PipelineBase;
+        // const NAME_BASIS = ShaderFX.UNIFORM_BASIS;
+        // const NAME_OBJ = ShaderFX.UNIFORM_OBJ;
 
-        const pipeline = this.pipeline;
-        const gl = pipeline.GL;
+        // const pipeline = this.pipeline;
+        // const gl = pipeline.GL;
 
-        pipeline.stateCache.apply(this.m_tags);
+        // pipeline.stateCache.apply(this.m_tags);
         
-        let mat = this.m_material;
-        let program = mat.program;
+        // let mat = this.m_material;
+        // let program = mat.program;
 
-        let glp = program.Program;
-        gl.useProgram(program.Program);
+        // let glp = program.Program;
+        // gl.useProgram(program.Program);
 
-        const ublock = program.UniformBlock;
-        let indexCam = ublock[NAME_BASIS];
-        if (indexCam != null) gl.uniformBlockBinding(glp, indexCam, CLASS.UNIFORMINDEX_BASIS);
-        let indexObj = ublock[NAME_OBJ];
-        if (indexObj != null) gl.uniformBlockBinding(glp, indexObj, CLASS.UNIFORMINDEX_OBJ);
+        // const ublock = program.UniformBlock;
+        // let indexCam = ublock[NAME_BASIS];
+        // if (indexCam != null) gl.uniformBlockBinding(glp, indexCam, CLASS.UNIFORMINDEX_BASIS);
+        // let indexObj = ublock[NAME_OBJ];
+        // if (indexObj != null) gl.uniformBlockBinding(glp, indexObj, CLASS.UNIFORMINDEX_OBJ);
 
-        mat.apply(gl);
+        // mat.apply(gl);
 
-        let dataobj = pipeline.shaderDataObj;
+        // let dataobj = pipeline.shaderDataObj;
 
-        const mtx = mat4.Identity;
-        dataobj.setMtxModel(mtx);
-        pipeline.updateUniformBufferObject(dataobj);
+        // const mtx = mat4.Identity;
+        // dataobj.setMtxModel(mtx);
+        // pipeline.updateUniformBufferObject(dataobj);
 
-        gl.bindVertexArray(this.m_vao);
+        // gl.bindVertexArray(this.m_vao);
 
-        const indiceDesc= mesh.indiceDesc;
-        gl.drawElements(indiceDesc.topology,indiceDesc.indiceCount,indiceDesc.type,indiceDesc.offset);
-        gl.bindVertexArray(null);
+        // const indiceDesc= mesh.indiceDesc;
+        // gl.drawElements(indiceDesc.topology,indiceDesc.indiceCount,indiceDesc.type,indiceDesc.offset);
+        // gl.bindVertexArray(null);
 
     }
 
