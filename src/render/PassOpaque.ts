@@ -17,14 +17,14 @@ export class PassOpaque extends RenderPass{
         let deftags = new ShaderTags();
         deftags.blendOp = null;
         deftags.blend = false;
-        deftags.zwrite = false;
+        deftags.zwrite = true;
         deftags.ztest = Comparison.LEQUAL;
-        deftags.culling = CullingMode.Back;
-        deftags.fillDefaultVal();
+        deftags.culling = null;
         this.m_tags =deftags;
 
-        pipeline.glctx.polygonOffset(-1,-1);
+        pipeline.glctx.enable(GL.DEPTH_TEST);
 
+        //pipeline.glctx.polygonOffset(-1,-1);
     }
 
     public render(scene:Scene){
@@ -32,13 +32,20 @@ export class PassOpaque extends RenderPass{
 
         const pipe = this.pipeline;
         const glctx = pipe.glctx;
-        const deftags = this.m_tags;
 
         let cam = scene.mainCamera;
         if(queue.length == 0) return;
-        glctx.enable(GL.POLYGON_OFFSET_FILL);
 
         const model = pipe.model;
+
+        // glctx.enable(GL.POLYGON_OFFSET_FILL);
+
+        const deftags = this.m_tags;
+        glctx.pipelineState(deftags);
+
+        glctx.depthMask(true);
+
+        glctx.bindFramebuffer(pipe.mainFrameBuffer);
 
         //light
         let light = scene.lights[0];
@@ -51,12 +58,6 @@ export class PassOpaque extends RenderPass{
             bufferLight.uploadBufferData(glctx);
         }
 
-
-        //pipe.activeDefaultTexture();
-
-        //do draw
-
-
         const len = queue.length;
         for(let t=0;t<len;t++){
             const node = queue[t];
@@ -64,41 +65,6 @@ export class PassOpaque extends RenderPass{
                 model.drawMeshRender(node,node.object.transform.objMatrix);
             }
         }
-
-
-        // let len = queue.length;
-        // let curprogram:GLProgram = null;
-        // const dataobj = pipe.shaderDataObj;
-        // for(let i=0;i<len;i++){
-        //     let node = queue[i];
-        //     if(node instanceof MeshRender){
-        //         let mat = node.material;
-        //         let mesh = node.mesh;
-    
-        //         let program = mat.program;
-        //         node.refreshData(glctx);
-    
-        //         if(program != curprogram){
-        //             let glp = program.Program;
-        //             gl.useProgram(glp);
-        //             pipe.uniformBindDefault(program);
-    
-        //             curprogram = program;
-        //         }
-        //         state.apply(mat.shaderTags);
-        //         mat.apply(gl);
-    
-        //         dataobj.setMtxModel(node.object.transform.objMatrix);
-        //         pipe.updateUniformBufferObject(dataobj);
-    
-        //         node.bindVertexArray(glctx);
-        //         let indicedesc = mesh.indiceDesc;
-        //         gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
-        //         node.unbindVertexArray(glctx);
-    
-        //         mat.clean(gl);
-        //     }
-        // }
 
         // gl.disable(gl.POLYGON_OFFSET_FILL);
     }

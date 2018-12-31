@@ -126,7 +126,7 @@ export class GraphicsRender{
     public resizeCanvas(w:number,h:number){
         let canvas = this.canvas;
         if(canvas.width == w && canvas.width == h) return;
-        
+
         if(w <=0 || h <=0){
             this.m_frameBufferInvalid = true
             return;

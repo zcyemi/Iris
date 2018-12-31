@@ -5,6 +5,7 @@ import { GLFenceSync } from "./GLFenceSync";
 import { FrameBuffer } from "./FrameBuffer";
 import { GL, GLSizeOrData } from "./GL";
 import { MeshIndicesDesc } from "../Mesh";
+import { ShaderTags, Comparison, BlendOperator, BlendFactor } from "../shaderfx/Shader";
 
 export class GLContext {
     private m_glFenceSynces:GLFenceSync[] = [];
@@ -15,10 +16,13 @@ export class GLContext {
     private m_viewport:number[] = [0,0,0,0];
     private m_clearDepth:number;
 
+    private m_pipelineState:ShaderTags;
+
     private gl: WebGL2RenderingContext;
     private constructor(wgl: WebGL2RenderingContext) {
         this.gl = wgl;
         this.viewport(0,0,wgl.canvas.clientWidth,wgl.canvas.clientHeight);
+        this.m_pipelineState = new ShaderTags();
     }
 
     public get canvasWidth():number{return this.gl.canvas.clientWidth;}
@@ -229,9 +233,15 @@ export class GLContext {
         this.gl.bindVertexArray(array);
     }
     public depthFunc(func: number){
+        let state =this.m_pipelineState;
+        if(state.ztest == func) return;
+        state.ztest = func;
         this.gl.depthFunc(func);
     }
     public depthMask(flag: boolean){
+        let state =this.m_pipelineState;
+        if(state.zwrite == flag) return;
+        state.zwrite = flag;
         this.gl.depthMask(flag);
     }
     public depthRange(zNear: number, zFar: number){
@@ -243,6 +253,58 @@ export class GLContext {
 
     public disable(cap:number){
         this.gl.disable(cap);
+    }
+
+
+    public pipelineBlend(enable:boolean){
+        let state = this.m_pipelineState;
+        if(state.blend == enable) return;
+        state.blend = enable;
+        if(enable){
+            this.gl.enable(GL.BLEND);
+        }
+        else{
+            this.gl.disable(GL.BLEND);
+        }
+    }
+
+    public pipelineBlendParam(op:BlendOperator|number,srcfactor:BlendFactor |number,dstfactor:BlendFactor| number){
+        const gl =this.gl;
+        const state = this.m_pipelineState;
+        if(state.blendOp != op){
+            gl.blendEquation(op);
+            state.blendOp = op;
+        }
+        if(state.blendFactorSrc != srcfactor || state.blendFactorDst != dstfactor){
+            gl.blendFunc(srcfactor,dstfactor);
+            state.blendFactorDst = dstfactor;
+            state.blendFactorSrc = srcfactor;
+        }
+    }
+
+    public cullFace(mode:number){
+        let state = this.m_pipelineState;
+        if(state.culling == mode) return;
+        state.culling = mode;
+        this.gl.cullFace(mode);
+    }
+
+    public pipelineState(tag:ShaderTags){
+        if(tag == null) return;
+
+        if(tag.ztest != null) this.depthFunc(tag.ztest);
+        if(tag.zwrite !=null) this.depthMask(tag.zwrite);
+
+        const blend = tag.blend;
+        if(blend !=null){
+            this.pipelineBlend(blend);
+            if(blend){
+                this.pipelineBlendParam(tag.blendOp,tag.blendFactorSrc,tag.blendFactorDst);
+            }
+        }
+        if(tag.culling != null){
+            this.cullFace(tag.culling);
+        }
     }
 
     public clear(mask:number){

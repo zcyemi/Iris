@@ -75,6 +75,8 @@ export class StackedPipeline implements IRenderPipeline{
             this.m_glctx.viewport(0,0,width,height);
             this.m_model.updateUnifromScreenParam(width,height);
         }
+        else{
+        }
     }
 
     exec(data: any) {

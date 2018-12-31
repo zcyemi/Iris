@@ -130,7 +130,7 @@ export class FrameBuffer implements IGraphicObj{
     }
 
 
-    public bindTexutre(glctx:GLContext,tex:Texture2D,attatch:number){
+    private bindTexutre(glctx:GLContext,tex:Texture2D,attatch:number){
         if(tex ==null) return;
         const gl = glctx.getWebGLRenderingContext();
         gl.framebufferTexture2D(gl.FRAMEBUFFER,attatch,gl.TEXTURE_2D,tex.getRawTexture(),0);
@@ -144,9 +144,6 @@ export class FrameBuffer implements IGraphicObj{
         else if(attatch == gl.DEPTH_STENCIL_ATTACHMENT){
             this.m_depthtex = tex;
         }
-
-        this.m_width = tex.width;
-        this.m_height = tex.height;
     }
 
     public release(glctx:GLContext){

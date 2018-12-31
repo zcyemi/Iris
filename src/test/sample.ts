@@ -21,7 +21,7 @@ import { Texture2D } from '../Texture2D';
 import { Skybox } from '../Skybox';
 import { GLContext } from '../gl/GLContext';
 import { GLUtility } from '../gl/GLUtility';
-import { vec3, glmath } from '../math/GLMath';
+import { vec3, glmath, quat } from '../math/GLMath';
 import { GL } from '../gl/GL';
 import { StackedPipeline } from '../pipeline/StackedPipeline';
 import { SceneBuilder } from '../SceneBuilder';
@@ -58,7 +58,7 @@ export class SampleGame{
 
         let pipeline= new StackedPipeline({
             passes: [
-                PassTest,
+                PassOpaque,
                 PassSkybox,
             ],
             clearinfo: {
@@ -78,23 +78,35 @@ export class SampleGame{
                         new CameraFreeFly()
                     ],
                     oncreate:(g)=>{
+                        g.transform.applyTranslate(glmath.vec3(0,3.0,0));
                         let camera = g.getComponent(Camera);
                         camera.clearType = ClearType.Skybox;
                         camera.skybox = Skybox.createFromProcedural();
                     }
                 },
                 "cube":{
-                    trs: {pos:[10,0,10]},
+                    trs: {pos:[2,1,-5]},
                     oncreate:(g)=>{
+                        g.transform.applyRotate(quat.Random());
                         let cmat =new Material(grender.shaderLib.shaderUnlitColor);
                         cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,0,0,1));
                         g.render = new MeshRender(Mesh.Cube,cmat)
                     }
+                },
+                "plane": {
+                    oncreate:(g)=>{
+                        g.transform.applyRotate(quat.fromEulerDeg(90,0,0));
+                        g.transform.applyScale(glmath.vec3(20,20,1));
+                        let cmat = new Material(grender.shaderLib.shaderDiffuse);
+                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1.0));
+                        g.render = new MeshRender(Mesh.Quad,cmat);
+                    }
                 }
             }
         })
+
         this.m_sceneMgr = new SceneManager();
-        
+
         this.resizeCanvas();
     }
 
