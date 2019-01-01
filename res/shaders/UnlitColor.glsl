@@ -14,5 +14,5 @@ void vertex(){
 uniform vec4 uColor;
 out vec4 fragColor;
 void fragment(){
-    fragColor = vec4(1.0,1.0,0,1.0);
+    fragColor = uColor;
 }

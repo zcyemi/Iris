@@ -91,6 +91,7 @@ export class StackedPipeline implements IRenderPipeline{
 
         const model = this.m_model;
         model.updateUniformBasis(camera);
+        model.updateUniformLightData(data);
         const glctx = this.m_glctx;
         model.uniformBasis.uploadBufferData(glctx);
 

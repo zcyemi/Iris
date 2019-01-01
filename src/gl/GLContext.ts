@@ -79,6 +79,8 @@ export class GLContext {
         gl.linkProgram(program);
 
         if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.error(vsource);
+            console.error(psource);
             console.error('link shader program failed!:' + gl.getProgramInfoLog(program));
             gl.deleteProgram(program);
             gl.deleteShader(vs);

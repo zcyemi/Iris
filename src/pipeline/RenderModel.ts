@@ -15,6 +15,7 @@ import { Mesh } from "../Mesh";
 import { ITexture } from "../Texture";
 import { Camera } from "../Camera";
 import { PipelineClearInfo } from "./RenderPipeline";
+import { Scene } from "../Scene";
 
 
 /**
@@ -100,6 +101,30 @@ export class RenderModel implements IGraphicObj{
             datacamera.setProjParam(cam.near,cam.far);
             cam.isDataProjDirty = false;
         }
+    }
+
+    public updateUniformLightData(scene:Scene):boolean{
+        if(!scene.lightDataDirty) return false;
+
+        let uniformLight =this.m_uniformLight;
+        
+        let data = uniformLight.data;
+        
+        const lightNum = scene.lightCount;
+        const alllights = scene.lightDataList;
+        data.setLightCount(lightNum);
+        for(var t= 0;t<lightNum;t++){
+            let light = alllights[t];
+            data.setLightData(light.lightPosData,light.lightType,t);
+            data.setLightColorIntensity(light.lightColor,light.intensity,t);
+        }
+
+        uniformLight.uploadBufferData(this.m_glctx);
+        scene.lightDataDirty = false;
+
+        console.log("upload light data");
+
+        return true;
 
     }
 

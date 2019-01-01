@@ -21,7 +21,7 @@ import { Texture2D } from '../Texture2D';
 import { Skybox } from '../Skybox';
 import { GLContext } from '../gl/GLContext';
 import { GLUtility } from '../gl/GLUtility';
-import { vec3, glmath, quat } from '../math/GLMath';
+import { vec3, glmath, quat, vec4 } from '../math/GLMath';
 import { GL } from '../gl/GL';
 import { StackedPipeline } from '../pipeline/StackedPipeline';
 import { SceneBuilder } from '../SceneBuilder';
@@ -29,6 +29,7 @@ import { ShaderFX } from '../shaderfx/ShaderFX';
 import { PassOpaque } from '../render/PassOpaque';
 import { PassSkybox } from '../render/PassSkybox';
 import { PassTest } from '../render/PassTest';
+import { PassGizmos } from '../render/PassGizmos';
 
 export class SampleGame{
     private m_canvas:HTMLCanvasElement;
@@ -60,6 +61,7 @@ export class SampleGame{
             passes: [
                 PassOpaque,
                 PassSkybox,
+                PassGizmos,
             ],
             clearinfo: {
                 clearMask: GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT,
@@ -88,8 +90,17 @@ export class SampleGame{
                     trs: {pos:[2,1,-5]},
                     oncreate:(g)=>{
                         g.transform.applyRotate(quat.Random());
-                        let cmat =new Material(grender.shaderLib.shaderUnlitColor);
-                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,0,0,1));
+                        let cmat =new Material(grender.shaderLib.shaderDiffuse);
+                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
+                        g.render = new MeshRender(Mesh.Cube,cmat)
+                    }
+                },
+                "cube_1":{
+                    trs: {pos:[-1,1,3]},
+                    oncreate:(g)=>{
+                        g.transform.applyRotate(quat.Random());
+                        let cmat =new Material(grender.shaderLib.shaderDiffuse);
+                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.7,0.7,0.7,1.0));
                         g.render = new MeshRender(Mesh.Cube,cmat)
                     }
                 },
@@ -98,8 +109,20 @@ export class SampleGame{
                         g.transform.applyRotate(quat.fromEulerDeg(90,0,0));
                         g.transform.applyScale(glmath.vec3(20,20,1));
                         let cmat = new Material(grender.shaderLib.shaderDiffuse);
-                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1.0));
+                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,1,1.0));
                         g.render = new MeshRender(Mesh.Quad,cmat);
+                    }
+                },
+                "pointlight_1":{
+                    trs:{ pos:[3,3,3]},
+                    oncreate:(g)=>{
+                        let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(1.0,0,0));
+                    }
+                },
+                "pointlight_2":{
+                    trs:{ pos:[-3,5,-5]},
+                    oncreate:(g)=>{
+                        let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(0,1.0,0));
                     }
                 }
             }

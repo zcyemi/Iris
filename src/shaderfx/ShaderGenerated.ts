@@ -63,10 +63,13 @@ vec4 ClipToWorld(in vec4 clippoint){
     vec4 pos_type;
     vec4 col_intensity;
 };
-uniform UNIFORM_LIGHT{
+layout (std140) uniform UNIFORM_LIGHT{
     LIGHT_DATA light_source[4];
     vec4 ambient_color;
+    mediump uint light_num;
 };
+
+#define LIGHT_NUM light_num
 #define LIGHT_COLOR0 light_source[0].col_intensity.xyz
 #define LIGHT_COLOR1 light_source[1].col_intensity.xyz
 #define LIGHT_COLOR2 light_source[2].col_intensity.xyz
@@ -82,6 +85,15 @@ uniform UNIFORM_LIGHT{
 	public static readonly SHADERFX_LIGHTING:string = `vec3 LightModel_Lambert(vec3 lightdir,vec3 lightColor,vec3 normal,vec3 albedo){
     float diff = max(.0,dot(-lightdir,normal));
     return albedo * lightColor * diff;
+}
+
+
+vec3 Sample_PointLight(vec3 wpos,uint index){
+    LIGHT_DATA ldata = light_source[index];
+
+    float dist = length(wpos - ldata.pos_type.xyz);
+
+    return step(dist,9.0) * ldata.col_intensity.xyz;
 }`;
 	public static readonly SHADERFX_SHADOWMAP:string = `#options SMCASCADE NONE TWO FOUR
 #options SHADOW ON OFF
@@ -190,24 +202,26 @@ void vertex(){
 
 void fragment(){
 }`;
-	public static readonly diffuse:string = `#version 300 es\nprecision mediump float;
+	public static readonly diffuse:string = `#version 300 es\n#pragma optimize (off)
+#pragma debug (on)
+precision mediump float;
 #include SHADERFX_BASIS
 #include SHADERFX_LIGHT
 #include SHADERFX_LIGHTING
 
-#queue opaque
-#pragma vs vertex
-#pragma ps fragment
-
-in vec4 aPosition;
-in vec2 aUV;
-in vec4 aNormal;
-
 struct V2F{
     vec3 pos;
     vec3 normal;
+    vec3 wpos;
 };
 inout V2F v2f;
+
+#queue opaque
+#pragma vs vertex
+#ifdef SHADER_VS
+in vec4 aPosition;
+in vec2 aUV;
+in vec4 aNormal;
 
 void vertex(){
     vec4 wpos = MATRIX_M * aPosition;
@@ -215,14 +229,27 @@ void vertex(){
     vec4 pos = MATRIX_VP * wpos;
     gl_Position = pos;
     v2f.normal = ObjToWorldDir(aNormal.xyz);
+    v2f.wpos = wpos.xyz;
 }
+#endif
 
+#pragma ps fragment
+#ifdef SHADER_PS
 out lowp vec4 fragColor;
 uniform vec4 uColor;
 void fragment(){
-    vec3 lcolor = LightModel_Lambert(LIGHT_DIR0,LIGHT_COLOR0,v2f.normal,uColor.xyz);
-    fragColor = vec4(lcolor +0.1,1.0);
-}`;
+
+    
+    //vec3 lcolor = LightModel_Lambert(LIGHT_DIR0,LIGHT_COLOR0,v2f.normal,uColor.xyz);
+    
+    vec3 lcol1 = Sample_PointLight(v2f.wpos,0u);
+    vec3 lcol2 = Sample_PointLight(v2f.wpos,1u);
+    
+    vec3 col = (lcol1 + lcol2) * uColor.xyz;
+
+    fragColor = vec4(col,1.0);
+}
+#endif`;
 	public static readonly gizmos:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS
 #queue other
@@ -746,7 +773,7 @@ void vertex(){
 uniform vec4 uColor;
 out vec4 fragColor;
 void fragment(){
-    fragColor = vec4(1.0,1.0,0,1.0);
+    fragColor = uColor;
 }`;
 	public static readonly UnlitTexture:string = `#version 300 es\nprecision mediump float;
 #include SHADERFX_BASIS

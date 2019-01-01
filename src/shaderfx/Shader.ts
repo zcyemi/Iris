@@ -179,52 +179,7 @@ export class Shader{
     }
 
     public static CreateProgram(glctx:GLContext,vsource:string,psource:string):GLProgram{
-        let gl = glctx.getWebGLRenderingContext();
-        let vs = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vs, vsource);
-        gl.compileShader(vs);
-
-        if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
-            console.error(vsource);
-            let infolog =  gl.getShaderInfoLog(vs);
-            console.error('compile vertex shader failed: ' +infolog);
-            Shader.ParseShaderInfo(vsource,infolog);
-            gl.deleteShader(vs);
-            return null;
-        }
-
-        let ps = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(ps, psource);
-        gl.compileShader(ps);
-
-        if (!gl.getShaderParameter(ps, gl.COMPILE_STATUS)) {
-            console.error(psource);
-            let infolog =  gl.getShaderInfoLog(ps);
-            console.error('compile fragment shader failed: ' + infolog);
-            Shader.ParseShaderInfo(psource,infolog);
-            gl.deleteShader(ps);
-            return null;
-        }
-
-        let program = gl.createProgram();
-        gl.attachShader(program, vs);
-        gl.attachShader(program, ps);
-        gl.linkProgram(program);
-
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            console.error('link shader program failed!:' + gl.getProgramInfoLog(program));
-            gl.deleteProgram(program);
-            gl.deleteShader(vs);
-            gl.deleteShader(ps);
-            return null;
-        }
-
-        if (program == null){
-            throw new Error('compile shader error');
-        }
-
-        let p = new GLProgram(gl, program);
-        return p;
+        return glctx.createProgram(vsource,psource);
     }
 }
 
