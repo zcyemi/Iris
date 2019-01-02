@@ -124,6 +124,12 @@ export class SampleGame{
                     oncreate:(g)=>{
                         let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(0,1.0,0));
                     }
+                },
+                "pointlight_3":{
+                    trs:{ pos:[-3,4,5]},
+                    oncreate:(g)=>{
+                        let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(0,0,1.0));
+                    }
                 }
             }
         })

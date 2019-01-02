@@ -29,20 +29,13 @@ void vertex(){
     v2f.wpos = wpos.xyz;
 }
 #endif
-
 #pragma ps fragment
 #ifdef SHADER_PS
 out lowp vec4 fragColor;
 uniform vec4 uColor;
 void fragment(){
 
-    
-    //vec3 lcolor = LightModel_Lambert(LIGHT_DIR0,LIGHT_COLOR0,v2f.normal,uColor.xyz);
-    
-    vec3 lcol1 = Sample_PointLight(v2f.wpos,0u);
-    vec3 lcol2 = Sample_PointLight(v2f.wpos,1u);
-    
-    vec3 col = (lcol1 + lcol2) * uColor.xyz;
+    vec3 col = Sample_4PointLights(v2f.wpos,normalize(v2f.normal)) * uColor.xyz;
 
     fragColor = vec4(col,1.0);
 }

@@ -6,6 +6,7 @@ import { FrameBuffer } from "./FrameBuffer";
 import { GL, GLSizeOrData } from "./GL";
 import { MeshIndicesDesc } from "../Mesh";
 import { ShaderTags, Comparison, BlendOperator, BlendFactor } from "../shaderfx/Shader";
+import { Utility } from "../Utility";
 
 export class GLContext {
     private m_glFenceSynces:GLFenceSync[] = [];
@@ -56,7 +57,7 @@ export class GLContext {
         gl.compileShader(vs);
 
         if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
-            console.error(vsource);
+            console.error(Utility.StrAddLineNum(vsource));
             console.error('compile vertex shader failed: ' + gl.getShaderInfoLog(vs));
             gl.deleteShader(vs);
             return null;
@@ -67,7 +68,7 @@ export class GLContext {
         gl.compileShader(ps);
 
         if (!gl.getShaderParameter(ps, gl.COMPILE_STATUS)) {
-            console.error(psource);
+            console.error(Utility.StrAddLineNum(psource));
             console.error('compile fragment shader failed: ' + gl.getShaderInfoLog(ps));
             gl.deleteShader(ps);
             return null;
@@ -79,8 +80,8 @@ export class GLContext {
         gl.linkProgram(program);
 
         if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            console.error(vsource);
-            console.error(psource);
+            console.error(Utility.StrAddLineNum(vsource));
+            console.error(Utility.StrAddLineNum(psource));
             console.error('link shader program failed!:' + gl.getProgramInfoLog(program));
             gl.deleteProgram(program);
             gl.deleteShader(vs);

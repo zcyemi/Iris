@@ -5,6 +5,7 @@ import { ShaderData, ShaderSubData } from "./ShaderBuffer";
 import { Shader } from "./Shader";
 import { vec3, vec4, mat4, glmath } from "../math/GLMath";
 import { GLContext } from "../gl/GLContext";
+import { Light } from "../Light";
 
 export class ShaderFXLibs{
     private glctx:GLContext;
@@ -156,37 +157,59 @@ export class ShaderDataUniformObj extends ShaderData{
 }
 
 /**
- * max light count 4
- * 0-3 pos,light type
- * 4-7 col, intensity
- * *4
- * ambient color
- * normaly 1 directional light 3 point light
+ * four points light
+ * [0]
+ * vec4 lightColor0;
+ * vec4 lightColor1;
+ * vec4 lightColor2;
+ * vec4 lightColor3;
+ * vec4 lightIntensity;
+ * vec4 lightPosX;
+ * vec4 lightPosY;
+ * vec4 lightPosZ;
+ * [128]
+ * vec4 light_ambient;
  */
 export class ShaderDataUniformLight extends ShaderData{
     public static readonly UNIFORM_LIGHT:string = "UNIFORM_LIGHT";
     public constructor (){
-        let buffersize = (8 *4+ 4 + 1) *4;
+        let buffersize = (8 * 4 + 4) *4;
         super(buffersize);
     }
-    public setLightData(pos:vec3,type:number,index:number){
-        let offset = index * 32;
-        const buffer = this.buffer;
-        buffer.setVec3(offset,pos);
-        buffer.setFloat(offset+12,type);
+
+    public setPointLights(lights:Light[],count:number){
+        let buffer =this.buffer;
+
+        let lintensity = new vec4();
+        let lposx = new vec4();
+        let lposy = new vec4();
+        let lposz = new vec4();
+        for(let t=0;t<4;t++){
+            if(t < count){
+                let light = lights[t];
+                let lcol = light.lightColor;
+                buffer.setVec4(t*16,glmath.vec4(lcol.x,lcol.y,lcol.z,1.0));
+                let lpos = light.transform.position;
+                lintensity.raw[t] = light.intensity;
+                lposx.raw[t] = lpos.raw[0];
+                lposy.raw[t] = lpos.raw[1];
+                lposz.raw[t] = lpos.raw[2];
+            }
+            else{
+                buffer.setVec4(t*16,vec4.zero);
+            }
+        }
+        buffer.setVec4(64,lintensity);
+        buffer.setVec4(80,lposx);
+        buffer.setVec4(96,lposy);
+        buffer.setVec4(112,lposz);
     }
-    public setLightColorIntensity(col:vec3,intensity:number,index:number){
-        let offset = index * 32 + 16;
-        const buffer = this.buffer;
-        buffer.setVec3(offset,col);
-        buffer.setFloat(offset+12,intensity);
-    }
+
     public setAmbientColor(ambient:vec4){
         this.buffer.setVec4(128,ambient);
     }
     public setLightCount(count:number){
-        count = glmath.clamp(count,0,4);
-        this.buffer.setUint32(144,count);
+
     }
 }
 

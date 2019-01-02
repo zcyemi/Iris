@@ -130,6 +130,10 @@ export class Utility {
             };
             img.src = url;
         });
+	}
+	
+	public static StrAddLineNum(str:string):string{
+        return str.split('\n').map((line, index) => `${index + 1}. ${line}`).join('\n');
     }
 
 }

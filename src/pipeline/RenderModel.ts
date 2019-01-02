@@ -113,11 +113,8 @@ export class RenderModel implements IGraphicObj{
         const lightNum = scene.lightCount;
         const alllights = scene.lightDataList;
         data.setLightCount(lightNum);
-        for(var t= 0;t<lightNum;t++){
-            let light = alllights[t];
-            data.setLightData(light.lightPosData,light.lightType,t);
-            data.setLightColorIntensity(light.lightColor,light.intensity,t);
-        }
+        
+        data.setPointLights(alllights,lightNum);
 
         uniformLight.uploadBufferData(this.m_glctx);
         scene.lightDataDirty = false;
