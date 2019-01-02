@@ -4,95 +4,68 @@ import { Scene } from "../Scene";
 import { GLProgram } from "../gl/GLProgram";
 import { RenderPass } from "./RenderPass";
 import { MeshRender } from "../MeshRender";
+import { IRenderPipeline } from "../pipeline/IRenderPipeline";
+import { GL } from "../gl/GL";
 
 export class PassOpaque extends RenderPass{
 
     private m_tags:ShaderTags;
 
-    public constructor(pipeline:PipelineBase){
+    public constructor(pipeline:IRenderPipeline){
         super(pipeline);
-
-        console.log('init opaque')
 
         let deftags = new ShaderTags();
         deftags.blendOp = null;
         deftags.blend = false;
-        deftags.zwrite = false;
+        deftags.zwrite = true;
         deftags.ztest = Comparison.LEQUAL;
-        deftags.culling = CullingMode.Back;
-        deftags.fillDefaultVal();
+        deftags.culling = null;
         this.m_tags =deftags;
 
-        let gl = pipeline.GL;
+        pipeline.glctx.enable(GL.DEPTH_TEST);
 
-        gl.polygonOffset(-1,-1);
-
+        //pipeline.glctx.polygonOffset(-1,-1);
     }
 
     public render(scene:Scene){
         let queue = this.pipeline.nodeList.nodeOpaque;
 
         const pipe = this.pipeline;
-        const gl = pipe.GL;
-        const glctx = pipe.GLCtx;
-        const deftags = this.m_tags;
+        const glctx = pipe.glctx;
 
         let cam = scene.mainCamera;
         if(queue.length == 0) return;
-        gl.enable(gl.POLYGON_OFFSET_FILL);
+
+        const model = pipe.model;
+
+        // glctx.enable(GL.POLYGON_OFFSET_FILL);
+
+        const deftags = this.m_tags;
+        glctx.pipelineState(deftags);
+
+        glctx.depthMask(true);
+
+        glctx.bindFramebuffer(pipe.mainFrameBuffer);
 
         //light
         let light = scene.lights[0];
         if(light !=null && light.isDirty){
-            let datalight = pipe.shaderDataLight;
+            let bufferLight = model.uniformLight;
+            let datalight = bufferLight.data;
             datalight.setLightData(light.lightPosData,light.lightType,0);
             datalight.setLightColorIntensity(light.lightColor,light.intensity,0);
             datalight.setAmbientColor(cam.ambientColor);
-            pipe.updateUniformBufferLight(datalight);
+            bufferLight.uploadBufferData(glctx);
         }
 
-        //sm
-        let state =pipe.stateCache;
-        state.reset(deftags);
-
-        pipe.activeDefaultTexture();
-
-        //do draw
-
-        let len = queue.length;
-        let curprogram:GLProgram = null;
-        const dataobj = pipe.shaderDataObj;
-        for(let i=0;i<len;i++){
-            let node = queue[i];
+        const len = queue.length;
+        for(let t=0;t<len;t++){
+            const node = queue[t];
             if(node instanceof MeshRender){
-                let mat = node.material;
-                let mesh = node.mesh;
-    
-                let program = mat.program;
-                node.refreshData(glctx);
-    
-                if(program != curprogram){
-                    let glp = program.Program;
-                    gl.useProgram(glp);
-                    pipe.uniformBindDefault(program);
-    
-                    curprogram = program;
-                }
-                state.apply(mat.shaderTags);
-                mat.apply(gl);
-    
-                dataobj.setMtxModel(node.object.transform.objMatrix);
-                pipe.updateUniformBufferObject(dataobj);
-    
-                node.bindVertexArray(gl);
-                let indicedesc = mesh.indiceDesc;
-                gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
-                node.unbindVertexArray(gl);
-    
-                mat.clean(gl);
+                model.drawMeshRender(node,node.object.transform.objMatrix);
             }
         }
 
-        gl.disable(gl.POLYGON_OFFSET_FILL);
+        // gl.disable(gl.POLYGON_OFFSET_FILL);
     }
 }

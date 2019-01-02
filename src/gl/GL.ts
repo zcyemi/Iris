@@ -1,3 +1,4 @@
+import { type } from "os";
 
 
 
@@ -14,7 +15,53 @@ export enum GLConst {
 }
 
 
+export type GLData = Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array |
+Uint32Array | Uint8ClampedArray | Float32Array | Float64Array | DataView | ArrayBuffer | null;
+export type GLSizeOrData = number | GLData;
+
+
 export class GL{
+
+    public static readonly DEPTH_BUFFER_BIT = 0x00000100;
+    public static readonly STENCIL_BUFFER_BIT = 0x00000400;
+    public static readonly COLOR_BUFFER_BIT = 0x00004000;
+
+    public static readonly ARRAY_BUFFER: number = 0x8892;
+    public static readonly ELEMENT_ARRAY_BUFFER: number = 0x8893;
+    public static readonly UNIFORM_BUFFER:number = 0x8A11;
+
+    public static readonly PIXEL_PACK_BUFFER = 0x88EB;
+    public static readonly PIXEL_UNPACK_BUFFER = 0x88EC;
+    public static readonly PIXEL_PACK_BUFFER_BINDING = 0x88ED;
+    public static readonly PIXEL_UNPACK_BUFFER_BINDING = 0x88EF;
+    public static readonly COPY_READ_BUFFER = 0x8F36;
+    public static readonly COPY_WRITE_BUFFER = 0x8F37;
+    public static readonly COPY_READ_BUFFER_BINDING = 0x8F36;
+    public static readonly COPY_WRITE_BUFFER_BINDING = 0x8F37;
+
+    public static readonly STATIC_DRAW:number = 0x88E4;
+    public static readonly STREAM_DRAW:number = 0x88E0;
+    public static readonly DYNAMIC_DRAW:number = 0x88E8;
+
+    public static readonly RGB:number= 0x1907;
+    public static readonly RGBA:number = 0x1908;
+
+    public static readonly DEPTH_COMPONENT = 0x1902;
+
+    public static readonly DEPTH_COMPONENT16 = 0x81A5;
+    public static readonly DEPTH_COMPONENT24 = 0x81A6;
+    public static readonly DEPTH_COMPONENT32F = 0x8CAC;
+
+    public static readonly DEPTH_STENCIL = 0x84F9;
+    public static readonly DEPTH24_STENCIL8 = 0x88F0;
+
+    public static readonly STENCIL_INDEX = 0x1901;
+    public static readonly STENCIL_INDEX8 = 0x8D48;
+
+    private static readonly s_depth_fmt: number[] = [GL.DEPTH_COMPONENT16, GL.DEPTH_COMPONENT24, GL.DEPTH_COMPONENT32F, GL.DEPTH_COMPONENT];
+    private static readonly s_stencil_fmt: number[] = [GL.STENCIL_INDEX8, GL.STENCIL_INDEX];
+    private static readonly s_depth_stencil_fmt: number[] = [GL.DEPTH24_STENCIL8, GL.DEPTH_STENCIL]; 
+
     public static readonly BYTE:GLDataType = 5120;
     public static readonly UNSIGNED_BYTE:GLDataType = 5121;
     public static readonly SHORT:GLDataType = 5122;
@@ -47,6 +94,60 @@ export class GL{
     public static readonly REPEAT:number = 0x2901;
     public static readonly CLAMP_TO_EDGE:number = 0x812F;
     public static readonly MIRRORED_REPEAT:number = 0x8370;
+
+    public static readonly TEXTURE_COMPARE_MODE = 0x884C;
+    public static readonly TEXTURE_COMPARE_FUNC = 0x884D;
+    public static readonly COMPARE_REF_TO_TEXTURE = 0x884E;
+
+    public static readonly SAMPLER_2D = 0x8B5E;
+    public static readonly SAMPLER_3D = 0x8B5F;
+    public static readonly SAMPLER_2D_SHADOW = 0x8B62;
+    public static readonly SAMPLER_2D_ARRAY = 0x8DC1;
+    public static readonly SAMPLER_2D_ARRAY_SHADOW = 0x8DC4;
+    public static readonly SAMPLER_CUBE_SHADOW = 0x8DC5;
+
+    public static readonly OBJECT_TYPE = 0x9112;
+    public static readonly SYNC_CONDITION = 0x9113;
+    public static readonly SYNC_STATUS = 0x9114;
+    public static readonly SYNC_FLAGS = 0x9115;
+    public static readonly SYNC_FENCE = 0x9116;
+    public static readonly SYNC_GPU_COMMANDS_COMPLETE = 0x9117;
+    public static readonly UNSIGNALED = 0x9118;
+    public static readonly SIGNALED = 0x9119;
+    public static readonly ALREADY_SIGNALED  =0x911A;
+    public static readonly TIMEOUT_EXPIRED = 0x911B;
+    public static readonly CONDITION_SATISFIED = 0x911C;
+    public static readonly WAIT_FAILED = 0x911D;
+    public static readonly SYNC_FLUSH_COMMANDS_BIT = 0x00000001;
+
+    public static readonly NEVER = 0x0200;
+    public static readonly ALWAYS = 0x0207;
+    public static readonly LESS = 0x0201;
+    public static readonly EQUAL = 0x0202;
+    public static readonly LEQUAL = 0x0203;
+    public static readonly GREATER = 0x0204;
+    public static readonly GEQUAL = 0x0206;
+    public static readonly NOTEQUAL = 0x0205;
+
+    public static readonly BLEND = 0x0BE2;
+    public static readonly DEPTH_TEST = 0x0B71;
+    public static readonly DITHER = 0x0BD0;
+    public static readonly POLYGON_OFFSET_FILL = 0x8037;
+    public static readonly SAMPLE_ALPHA_TO_COVERAGE = 0x809E;
+    public static readonly SAMPLE_COVERAGE = 0x80A0;
+    public static readonly SCISSOR_TEST = 0x0C11;
+    public static readonly STENCIL_TEST = 0x0B90;
+
+    public static isDepthFmt(fmt:number){
+        return GL.s_depth_fmt.indexOf(fmt) >=0;
+    }
+    public static isDepthStencilFmt(fmt:number){
+        return GL.s_depth_stencil_fmt.indexOf(fmt) >=0;
+    }
+    public static isStencilFmt(fmt:number){
+        return GL.s_stencil_fmt.indexOf(fmt) >=0;
+    }
+
 }
 
 

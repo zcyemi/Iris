@@ -8,6 +8,7 @@ import { Mesh } from "../Mesh";
 import { ShaderFX } from "../shaderfx/ShaderFX";
 import { RenderPass } from "./RenderPass";
 import { SkyboxType } from "../Skybox";
+import { IRenderPipeline } from "../pipeline/IRenderPipeline";
 
 export class PassSkybox extends RenderPass{
     private m_tags:ShaderTags;
@@ -17,7 +18,7 @@ export class PassSkybox extends RenderPass{
     private m_lastSkyboxType: SkyboxType = SkyboxType.Tex360;
     private m_lastTex:WebGLTexture;
 
-    public constructor(pipeline:PipelineBase){
+    public constructor(pipeline:IRenderPipeline){
         super(pipeline);
         let deftags = new ShaderTags();
         deftags.blend = false;
@@ -35,7 +36,7 @@ export class PassSkybox extends RenderPass{
     }
 
     public release(){
-        this.m_skyrender.release(this.pipeline.GLCtx);
+        this.m_skyrender.release(this.pipeline.glctx);
         this.m_skyrender = null;
         this.m_lastTex = null;
 
@@ -47,8 +48,9 @@ export class PassSkybox extends RenderPass{
         if(camera.clearType != ClearType.Skybox || camera.skybox == null) return;
 
         let pipeline = this.pipeline;
-        pipeline.bindTargetFrameBuffer();
-        pipeline.stateCache.reset(this.m_tags);
+        const glctx = pipeline.glctx;
+        glctx.bindFramebuffer(pipeline.mainFrameBuffer);
+
 
         const skyboxrender = this.m_skyrender;
         const mat = skyboxrender.material;
@@ -69,7 +71,6 @@ export class PassSkybox extends RenderPass{
             mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
         }
 
-        pipeline.drawMeshRender(skyboxrender);
-
+        pipeline.model.drawMeshRender(skyboxrender);
     }
 }

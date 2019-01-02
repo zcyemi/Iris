@@ -1,25 +1,33 @@
-import { Texture } from "../Texture";
+import { Texture2D } from "../Texture2D";
 import { vec4 } from "../math/GLMath";
+import { ITexture } from "../Texture";
+import { type } from "os";
+import { RenderTexture } from "../RenderTexture";
 
+type DebugInfoTex = WebGLTexture | Texture2D | ITexture;
 
 export class BufferDebugInfo{
 
     public drawRect:vec4;
-    private m_texture: WebGLTexture | Texture;
+    private m_texture: DebugInfoTex;
 
-    public constructor(texture:WebGLTexture | Texture,rect:vec4){
+    public constructor(texture:DebugInfoTex,rect:vec4){
         this.m_texture =texture;
         this.drawRect = rect.clone();
     }
 
     public get rawTexture():WebGLTexture{
-        if(this.m_texture instanceof Texture){
-            return this.m_texture.rawtexture;
+        let tex = this.m_texture;
+        if(tex instanceof Texture2D){
+            return tex.getRawTexture();
+        }
+        else if(tex instanceof RenderTexture){
+            return tex.getRawTexture();
         }
         return this.m_texture;
     }
 
-    public setTexture(tex:WebGLTexture | Texture){
+    public setTexture(tex:DebugInfoTex){
         this.m_texture = tex;
     }
 }

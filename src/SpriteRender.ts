@@ -2,7 +2,7 @@ import { MeshRender } from "./MeshRender";
 import { Mesh } from "./Mesh";
 import { Material } from "./Material";
 import { GraphicsRender } from "./GraphicsRender";
-import { Texture } from "./Texture";
+import { Texture2D } from "./Texture2D";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 import { vec4 } from "./math/GLMath";
 import { GLContext } from "./gl/GLContext";
@@ -10,10 +10,10 @@ import { GLContext } from "./gl/GLContext";
 
 export class SpriteRender extends MeshRender{
 
-    private m_image:Texture;
+    private m_image:Texture2D;
     private m_imageDirty:boolean =false;
-    public get image():Texture{ return this.m_image;}
-    public set image(t:Texture){
+    public get image():Texture2D{ return this.m_image;}
+    public set image(t:Texture2D){
         if(t == this.m_image) return;
         this.m_image = t;
         this.m_imageDirty = true;

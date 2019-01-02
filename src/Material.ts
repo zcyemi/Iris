@@ -2,11 +2,14 @@ import { vec4, vec3 } from "./math/GLMath";
 import { Shader, ShaderTags } from "./shaderfx/Shader";
 import { ShaderOptionsConfig, ShaderOptions } from "./shaderfx/ShaderVariant";
 import { Utility } from "./Utility";
-import { Texture } from "./Texture";
+import { Texture2D } from "./Texture2D";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 import { GLProgram } from "./gl/GLProgram";
+import { TextureSampler } from "./TextureSampler";
+import { GL } from "./gl/GL";
+import { ITexture } from "./Texture";
 
-export type MaterialProperty = {type:number,value:any};
+export type MaterialProperty = {type:number,value:any,extra?:TextureSampler};
 
 export class MaterialPorpertyBlock{
     public uniforms:{[key:string]:MaterialProperty};
@@ -98,7 +101,10 @@ export class MaterialPorpertyBlock{
         let block =new MaterialPorpertyBlock(null);
         block.m_program = this.m_program;
         block.uniforms = Utility.cloneMap(this.uniforms,(p:MaterialProperty)=>{
-            return {type:p.type,value:p.value};
+            return {
+                type:p.type,
+                value:p.value,
+                extra:p.extra};
         });
         return block;
     }
@@ -119,6 +125,7 @@ export class Material{
     private m_propertyBlock:MaterialPorpertyBlock;
     private m_optConfig:ShaderOptionsConfig;
     private m_useVariants:boolean =false;
+    
 
     public name:string;
 
@@ -146,6 +153,8 @@ export class Material{
     public get propertyBlock():MaterialPorpertyBlock{
         return this.m_propertyBlock;
     }
+
+
 
     public setShader(shader:Shader){
         this.m_shader = shader;
@@ -179,10 +188,26 @@ export class Material{
         p.value = color;
     }
 
-    public setTexture(name:string,tex:WebGLTexture | Texture){
+    public setTexture(name:string,tex:WebGLTexture | ITexture){
         let p = this.m_propertyBlock.getUniform(name);
         if(p == null) return;
         p.value = tex;
+    }
+
+    public setSampler(name:string,texsampler?:TextureSampler){
+        let p = this.m_propertyBlock.getUniform(name);
+        if(p == null)return;
+        let ptype = p.type;
+
+        if( ptype != GL.SAMPLER_2D &&
+            ptype != GL.SAMPLER_2D_SHADOW && 
+            ptype != GL.SAMPLER_3D && 
+            ptype != GL.SAMPLER_2D_ARRAY &&
+            ptype != GL.SAMPLER_2D_ARRAY_SHADOW &&
+            ptype != GL.SAMPLER_CUBE_SHADOW){
+                return;
+        }
+        p.extra = texsampler;
     }
 
     public setFloat(name:string,val:number){
@@ -339,7 +364,7 @@ export class Material{
         for(var key in pu){
             let u = pu[key];
             if(key === "uShadowMap") continue;
-            this.setUniform(gl,program.Uniforms[key],u.type,u.value);
+            this.setUniform(gl,program.Uniforms[key],u);
         }
 
         let puniformblocks = propertyblock.uniformsBlock;
@@ -370,7 +395,11 @@ export class Material{
         // }
     }
 
-    private setUniform(gl:WebGL2RenderingContext,loc:WebGLUniformLocation,type:number,val:any){
+    private setUniform(gl:WebGL2RenderingContext,loc:WebGLUniformLocation,mp:MaterialProperty){
+
+        const val = mp.value;
+        const type = mp.type;
+
         if(val == null && type != gl.SAMPLER_2D) return;
         switch(type){
             case gl.FLOAT:
@@ -389,8 +418,8 @@ export class Material{
                 if(val != null){
                     let texCount = this.m_applyTexCount;
                     let tex:WebGLTexture = null;
-                    if(val instanceof Texture){
-                        tex = val.rawtexture;
+                    if(val.getRawTexture != undefined){
+                        tex = val.getRawTexture();
                     }
                     else if(val instanceof WebGLTexture){
                         tex= val;
@@ -403,7 +432,13 @@ export class Material{
                     }
                     gl.activeTexture(gl.TEXTURE4 + texCount);
                     gl.bindTexture(gl.TEXTURE_CUBE_MAP,tex);
-                    gl.uniform1i(loc,4 + texCount);
+                    const locid = 4 + texCount;
+                    gl.uniform1i(loc,locid);
+                    this.m_applyTexCount = texCount+1;
+                    const extra = mp.extra;
+                    if(extra != null){
+                        gl.bindSampler(locid,extra.rawobj);
+                    }
                 }
                 else{
                     //texture is null
@@ -416,8 +451,8 @@ export class Material{
                 if(val != null){
                     let texCount = this.m_applyTexCount;
                     let tex:WebGLTexture = null;
-                    if(val instanceof Texture){
-                        tex = val.rawtexture;
+                    if(val instanceof Texture2D){
+                        tex = val.getRawTexture();
                     }
                     else if(val instanceof WebGLTexture){
                         tex= val;
@@ -429,8 +464,13 @@ export class Material{
                     }
                     gl.activeTexture(gl.TEXTURE4 + texCount);
                     gl.bindTexture(gl.TEXTURE_2D,tex);
-                    gl.uniform1i(loc,4 + texCount);
+                    const locid = 4 + texCount;
+                    gl.uniform1i(loc,locid);
                     this.m_applyTexCount = texCount+1;
+                    const extra = mp.extra;
+                    if(extra != null){
+                        gl.bindSampler(locid,extra.rawobj);
+                    }
                 }
                 else{
                     //texture is null

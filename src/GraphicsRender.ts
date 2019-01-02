@@ -1,7 +1,7 @@
 import { ShaderFXLibs } from "./shaderfx/ShaderFXLibs";
 import { ShadowConfig } from "./render/Shadow";
 import { Delayter } from "./Utility";
-import { Texture } from "./Texture";
+import { Texture2D } from "./Texture2D";
 import { Material } from "./Material";
 import { IRenderPipeline } from "./pipeline/IRenderPipeline";
 import { Input } from "./Input";
@@ -17,7 +17,7 @@ export class GraphicsRender{
     private m_glctx:GLContext;
     private canvas:HTMLCanvasElement;
     private m_creationInfo:GraphicsRenderCreateInfo;
-    private m_defaultTexture:Texture;
+    private m_defaultTexture:Texture2D;
 
     public static globalRender:GraphicsRender;
 
@@ -56,7 +56,7 @@ export class GraphicsRender{
         return this.m_glctx;
     }
 
-    public get defaultTexture():Texture{
+    public get defaultTexture():Texture2D{
         return this.m_defaultTexture;
     }
 
@@ -78,14 +78,14 @@ export class GraphicsRender{
         this.m_shaderFXlib = new ShaderFXLibs(glctx);
 
         //default texture
-        let gl = glctx.gl;
+        let gl = glctx.getWebGLRenderingContext();
 
         Material.DEF_TEXID_NUM = GraphicsRender.TEXID_DEFAULT_TEX;
-        Texture.TEMP_TEXID = gl.TEXTURE2;
+        Texture2D.TEMP_TEXID = gl.TEXTURE2;
         
-        this.m_defaultTexture = Texture.crateEmptyTexture(2,2,glctx);
+        this.m_defaultTexture = Texture2D.crateEmptyTexture(2,2,glctx);
         gl.activeTexture(gl.TEXTURE3);
-        gl.bindTexture(gl.TEXTURE_2D,this.m_defaultTexture.rawtexture);
+        gl.bindTexture(gl.TEXTURE_2D,this.m_defaultTexture.getRawTexture());
         gl.frontFace(gl.CCW);
         this.setPipeline(pipeline);
     }
@@ -126,7 +126,7 @@ export class GraphicsRender{
     public resizeCanvas(w:number,h:number){
         let canvas = this.canvas;
         if(canvas.width == w && canvas.width == h) return;
-        
+
         if(w <=0 || h <=0){
             this.m_frameBufferInvalid = true
             return;
@@ -137,12 +137,14 @@ export class GraphicsRender{
 
         if(!this.m_valid) return;
 
+        const self =this;
+
         
         let delay = this.m_creationInfo.frameBufferResizeDelay;
         if(delay == 0){
             canvas.width = w;
             canvas.height = h;
-            this.m_renderPipeline.resizeFrameBuffer(w,h);
+            self.doResizeFrameBuffer(w,h);
             return;
         }
         else{
@@ -151,9 +153,13 @@ export class GraphicsRender{
             delayter.emit(()=>{
                 canvas.width = w;
                 canvas.height = h;
-                this.m_renderPipeline.resizeFrameBuffer(w,h);
+                self.doResizeFrameBuffer(w,h);
             })
         }
+    }
+
+    private doResizeFrameBuffer(w:number,h:number){
+        this.m_renderPipeline.resizeFrameBuffer(w,h);
     }
 
     /**
@@ -165,8 +171,6 @@ export class GraphicsRender{
         if(this.pause || this.m_frameBufferInvalid) return;
         this.m_time += dt;
         this.m_dt = dt;
-
-        let gl =this.m_glctx.gl;
 
         // gl.clearColor(0,0,0,1);
         // gl.clear(gl.COLOR_BUFFER_BIT);

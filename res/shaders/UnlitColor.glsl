@@ -6,7 +6,8 @@ precision mediump float;
 #pragma vs vertex
 in vec4 aPosition;
 void vertex(){
-    gl_Position = MATRIX_MVP * aPosition;
+    vec4 pos = aPosition;
+    gl_Position = MATRIX_MVP * pos;
 }
 
 #pragma ps fragment

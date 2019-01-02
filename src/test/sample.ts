@@ -13,159 +13,154 @@ import { SceneManager } from '../SceneManager';
 import { CameraFreeFly } from '../CameraUtility';
 import { FrameTimer } from '../FrameTimer';
 import { TextureCubeMap } from '../TextureCubeMap';
-import { GLTFSceneBuilder } from '../GLTFSceneBuilder';
 import { PipelineBase } from '../pipeline/PipelineBase';
 import { PipelineForwardZPrePass } from '../pipeline/PipelineForwardZPrePass';
 import { Transform } from '../Transform';
 import { SpriteRender } from '../SpriteRender';
-import { Texture } from '../Texture';
+import { Texture2D } from '../Texture2D';
 import { Skybox } from '../Skybox';
 import { GLContext } from '../gl/GLContext';
 import { GLUtility } from '../gl/GLUtility';
-import { vec3, glmath } from '../math/GLMath';
+import { vec3, glmath, quat, vec4 } from '../math/GLMath';
+import { GL } from '../gl/GL';
+import { StackedPipeline } from '../pipeline/StackedPipeline';
+import { SceneBuilder } from '../SceneBuilder';
+import { ShaderFX } from '../shaderfx/ShaderFX';
+import { PassOpaque } from '../render/PassOpaque';
+import { PassSkybox } from '../render/PassSkybox';
+import { PassTest } from '../render/PassTest';
+import { PassGizmos } from '../render/PassGizmos';
 
 export class SampleGame{
-    
     private m_canvas:HTMLCanvasElement;
-    private m_glctx:GLContext;
-
     private m_graphicsRender:GraphicsRender;
-    private m_sceneMgr:SceneManager;
-    private m_scene:Scene;
-    private m_sceneInited:boolean = false;
     private m_timer:FrameTimer = new FrameTimer(false);
 
     private static Instance:SampleGame;
-    private m_pipeline:PipelineBase;
+
+    private m_pipeline:StackedPipeline;
+    private m_scene:Scene;
+    private m_sceneMgr:SceneManager;
 
     public constructor(canvas:HTMLCanvasElement){
-
         SampleGame.Instance = this;
-
         this.m_canvas = canvas;
-
-        let pipe = new PipelineForwardZPrePass();
-        this.m_pipeline = pipe;
-
-        let grender = new GraphicsRender(canvas,pipe);
-        this.m_sceneMgr = new SceneManager();
+        let grender = new GraphicsRender(canvas);
         let sc = grender.shadowConfig;
         sc.shadowDistance = 20;
-
         this.m_graphicsRender = grender;
         Input.init(canvas);
-
-        this.createScene(grender.glctx);
 
         GLUtility.setTargetFPS(60);
         GLUtility.registerOnFrame(this.onFrame.bind(this));
 
-        this.resizeCanvas();
+        
         WindowUtility.setOnResizeFunc(this.resizeCanvas.bind(this));
+
+        let pipeline= new StackedPipeline({
+            passes: [
+                PassOpaque,
+                PassSkybox,
+                PassGizmos,
+            ],
+            clearinfo: {
+                clearMask: GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT,
+                color: glmath.vec4(0,0,0,1),
+                depth: 1000
+            }
+        });
+        grender.setPipeline(pipeline);
+        this.m_pipeline = pipeline;
+
+        this.m_scene = SceneBuilder.Build({
+            "children":{
+                "camera":{
+                    comp:[
+                        Camera.persepctive(null,60.0,1.0,0.1,50),
+                        new CameraFreeFly()
+                    ],
+                    oncreate:(g)=>{
+                        g.transform.applyTranslate(glmath.vec3(0,3.0,0));
+                        let camera = g.getComponent(Camera);
+                        camera.clearType = ClearType.Skybox;
+                        camera.skybox = Skybox.createFromProcedural();
+                    }
+                },
+                "cube":{
+                    trs: {pos:[2,1,-5]},
+                    oncreate:(g)=>{
+                        g.transform.applyRotate(quat.Random());
+                        let cmat =new Material(grender.shaderLib.shaderDiffuse);
+                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
+                        g.render = new MeshRender(Mesh.Cube,cmat)
+                    }
+                },
+                "cube_1":{
+                    trs: {pos:[-1,1,3]},
+                    oncreate:(g)=>{
+                        g.transform.applyRotate(quat.Random());
+                        let cmat =new Material(grender.shaderLib.shaderDiffuse);
+                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.7,0.7,0.7,1.0));
+                        g.render = new MeshRender(Mesh.Cube,cmat)
+                    }
+                },
+                "plane": {
+                    oncreate:(g)=>{
+                        g.transform.applyRotate(quat.fromEulerDeg(90,0,0));
+                        g.transform.applyScale(glmath.vec3(20,20,1));
+                        let cmat = new Material(grender.shaderLib.shaderDiffuse);
+                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,1,1.0));
+                        g.render = new MeshRender(Mesh.Quad,cmat);
+                    }
+                },
+                "pointlight_1":{
+                    trs:{ pos:[3,3,3]},
+                    oncreate:(g)=>{
+                        let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(1.0,0,0));
+                    }
+                },
+                "pointlight_2":{
+                    trs:{ pos:[-3,5,-5]},
+                    oncreate:(g)=>{
+                        let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(0,1.0,0));
+                    }
+                }
+            }
+        })
+
+        this.m_sceneMgr = new SceneManager();
+
+        this.resizeCanvas();
     }
 
     public resizeCanvas(){
         const canvas = this.m_canvas;
-        this.m_graphicsRender.resizeCanvas(canvas.clientWidth,canvas.clientHeight);
+        let grender =this.m_graphicsRender;
+        if(grender == null) return;
+        grender.resizeCanvas(canvas.clientWidth,canvas.clientHeight);
     }
 
-
     public onFrame(ts:number){
-        if(!this.m_sceneInited) return;
 
         let delta = this.m_timer.tick(ts);
         let dt = delta /1000;
         Input.onFrame(dt);
-        let scene = this.m_scene;
-        this.m_sceneMgr.onFrame(scene);
+        
+        this.m_sceneMgr.onFrame(this.m_scene);
 
         let gredner = this.m_graphicsRender;
-        gredner.render(scene,dt);
+        gredner.render(this.m_scene,dt);
         gredner.renderToCanvas();
+
     }
 
-    private m_obj1:GameObject;
-    private m_obj2:GameObject;
-    private m_obj3:GameObject;
-    private m_camera:Camera;
-    public async createScene(glctx:GLContext):Promise<void>{
-        let grender = this.m_graphicsRender;
-
-        let tr= new Transform(null);
-        tr.forward = vec3.down;
-
-        //texture
-        let tex = await glctx.createTextureImageAsync('res/images/tex0.png');
-
-        let skybox:Skybox = null;
-
-        let cubepaths:string[] = [
-            "res/envmap/peak/peaks_ft.jpg",
-            "res/envmap/peak/peaks_bk.jpg",
-            "res/envmap/peak/peaks_up.jpg",
-            "res/envmap/peak/peaks_dn.jpg",
-            "res/envmap/peak/peaks_rt.jpg",
-            "res/envmap/peak/peaks_lf.jpg",
-        ];
-        let texcube = await TextureCubeMap.loadCubeMap(cubepaths,glctx);
-        console.log(texcube);
-
-        let tex360 = await Texture.loadTexture2D('res/envmap/day360.jpg',glctx,false);
-        //skybox = Skybox.createFromTex360(tex360);
-        //skybox = Skybox.createFromCubeMap(texcube);
-
-        skybox = Skybox.createFromProcedural();
-
-        let scene:Scene = new Scene();
-        this.m_scene = scene;
-
-        //camera
-        let camera = Camera.persepctive(null, 60, 400.0 / 300.0, 0.5, 1000);
-        camera.transform.setPosition(glmath.vec3(0,0, 5));
-        //camera.transform.setLookAt(glmath.vec3(0,0,0));
-        camera.transform.setLocalDirty();
-        camera.ambientColor = Utility.colorRGBA(3, 110, 167, 15);
-        camera.clearType = ClearType.Skybox;
-        camera.skybox = skybox;
-        camera.background = glmath.vec4(0, 1, 0, 1);
-        camera.gameobject.addComponent(new CameraFreeFly());
-        camera.gameobject.name = "camera";
-        camera.transform.parent= scene.transform;
-        this.m_camera = camera;
-        
-
-        {
-
-            let spr = await Texture.loadTexture2D('res/images/img0.png',glctx,true);
-            let sprobj = new GameObject('sprite1');
-            let srender = sprobj.addRender(SpriteRender);
-            srender.image = spr;
-            srender.color.w = 0.5;
-
-            sprobj.transform.setPosition(glmath.vec3(0,1,-5));
-            sprobj.transform.parent = scene.transform;
-
-            console.log(sprobj.render.material.shaderTags);
-        }
-
-        //directional light
-        let lightobj = new GameObject();
-        let light0 = Light.creatDirctionLight(lightobj,1.0,glmath.vec3(0.5,-1,0.6));
-        light0.lightColor = new vec3([1,1,1]);
-        lightobj.transform.parent = scene.transform;
-
-        this.m_sceneInited = true;
-    }
 
     @DebugEntry('cmd.reload')
     public static cmdReload(target:SampleGame){
-        if(target != null) target.m_graphicsRender.reload();
     }
 
     @DebugEntry('cmd.passDebug')
     public static cmdPassDebug(){
-        let instance = SampleGame.Instance;
-        if(instance != null) instance.m_pipeline.renderPassDebug = !instance.m_pipeline.renderPassDebug;
     }
 }
 

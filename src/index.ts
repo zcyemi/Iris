@@ -7,6 +7,7 @@ export * from './gl/GLPipelineState';
 export * from './gl/GLProgram';
 export * from './gl/GLTFtool';
 export * from './gl/GLUtility';
+export * from './gl/FrameBuffer';
 
 export * from './gl/GLFenceSync';
 export * from './gl/GLPixelPack';
@@ -16,6 +17,9 @@ export * from './GraphicsRender';
 export * from './pipeline/IRenderPipeline';
 export * from './pipeline/PipelineBase';
 export * from './pipeline/PipelineForwardZPrePass';
+export * from './pipeline/StackedPipeline';
+export * from './pipeline/RenderModel';
+export * from './pipeline/RenderPipeline';
 
 export * from './render/PassDebug';
 export * from './render/PassGizmos';
@@ -41,15 +45,28 @@ export * from './GameObject';
 export * from './Input';
 export * from './Light';
 export * from './Material';
-export * from './Mesh';
-export * from './DynamicMesh';
+
 export * from './Transform';
 export * from './Component';
 export * from './Scene';
+export * from './SceneBuilder';
 export * from './SceneManager';
 export * from './GLTFSceneBuilder';
 
+export * from './Mesh';
+export * from './MeshRender';
+export * from './MeshBuilder';
+export * from './DynamicMesh';
+
+export * from './Texture';
+export * from './Texture2D';
+export * from './TextureCubeMap';
+export * from './TextureSampler';
+
 export * from './Utility';
+
+export * from './Skybox';
 
 //TODO move sample to another repo
 export * from './test/sample';
+

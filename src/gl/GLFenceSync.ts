@@ -1,4 +1,5 @@
 import { GLContext } from "./GLContext";
+import { GL } from "./GL";
 
 /**
  * Wrapper of WebGLSync object and gl.fenceSync.
@@ -36,9 +37,8 @@ export class GLFenceSync{
         }
         
         this.m_callback = onsignaled;
-        const gl = this.glctx.gl;
         this.m_signaled = false;
-        this.m_syncObj = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE,0);
+        this.m_syncObj = this.glctx.fenceSync(GL.SYNC_GPU_COMMANDS_COMPLETE,0);
 
         if(this.m_autoCheck){
             //register autocheck
@@ -51,7 +51,7 @@ export class GLFenceSync{
         let glctx = this.glctx;
         if(this.m_syncObj != null){
             glctx.unregistFenceSync(this);
-            glctx.gl.deleteSync(this.m_syncObj);
+            glctx.deleteSync(this.m_syncObj);
             this.m_syncObj= null;            
         }
         this.glctx= null;
@@ -63,11 +63,10 @@ export class GLFenceSync{
     public checkSignaled(autoEmitCallback:boolean = true):boolean{
         const sync = this.m_syncObj;
         if(sync == null) return this.m_signaled;
-
-        const gl = this.glctx.gl;
-        var status = gl.getSyncParameter(sync,gl.SYNC_STATUS);
-        if(status == gl.SIGNALED){
-            gl.deleteSync(sync);
+        const glctx =this.glctx;
+        var status = glctx.getSyncParameter(sync,GL.SYNC_STATUS);
+        if(status == GL.SIGNALED){
+            glctx.deleteSync(sync);
             this.m_syncObj = null;
             this.m_signaled= true;
 
@@ -77,7 +76,7 @@ export class GLFenceSync{
             }
             
             if(this.m_autoCheck){
-                this.glctx.unregistFenceSync(this);
+                glctx.unregistFenceSync(this);
             }
         }
         return this.m_signaled;

@@ -4,7 +4,7 @@ import { GraphicsRenderCreateInfo, GraphicsRender } from "../GraphicsRender";
 import { RenderNodeList } from "../RenderNodeList";
 import { BufferDebugInfo } from "../render/BufferDebugInfo";
 import { PassDebug } from "../render/PassDebug";
-import { Texture } from "../Texture";
+import { Texture2D } from "../Texture2D";
 import { ShadowMapData } from "../render/Shadow";
 import { PipelineStateCache } from "../PipelineStateCache";
 import { Transform } from "../Transform";
@@ -15,13 +15,18 @@ import { Mesh } from "../Mesh";
 import { MeshRender } from "../MeshRender";
 import { Material } from "../Material";
 import { Camera } from "../Camera";
-import { Input } from "../Input";
 import { GLContext } from "../gl/GLContext";
-import { GLFrameBuffer } from "../gl/GLFrameBuffer";
 import { GLProgram } from "../gl/GLProgram";
 import { mat4 } from "../math/GLMath";
+import { FrameBuffer } from "../gl/FrameBuffer";
+import { ReleaseGraphicObj } from "../IGraphicObj";
+import { RenderTexture } from "../RenderTexture";
+import { RenderModel } from "./RenderModel";
 
 export class PipelineBase implements IRenderPipeline {
+
+    public model:RenderModel;
+
 
     public static readonly UNIFORMINDEX_OBJ: number = 0;
     public static readonly UNIFORMINDEX_BASIS: number = 1;
@@ -33,9 +38,11 @@ export class PipelineBase implements IRenderPipeline {
     public get GLCtx(): GLContext { return this.glctx; }
     public get GL(): WebGL2RenderingContext { return this.gl; }
 
-    protected glctx: GLContext;
+    public glctx: GLContext;
     protected gl: WebGL2RenderingContext;
     private m_pipestateCache: PipelineStateCache;
+    public get stateCache(): PipelineStateCache { return this.m_pipestateCache; }
+
     protected m_inited:boolean = false;
 
     public graphicRender: GraphicsRender;
@@ -47,14 +54,9 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     //Copy of depth texture
-    protected m_mainDepthTexture: Texture;
-    protected m_mainDepthFB: WebGLFramebuffer;
-    public get mainDepthTexture(): Texture {
-        return this.m_mainDepthTexture;
-    }
-    public get mainDepthFrameBuffer(): WebGLFramebuffer {
-        return this.m_mainDepthFB;
-    }
+
+    protected m_depthRT:RenderTexture;
+    public get depthRT():RenderTexture{ return this.m_depthRT;}
 
     private m_uniformBufferBasis: WebGLBuffer;
 
@@ -92,23 +94,17 @@ export class PipelineBase implements IRenderPipeline {
         return this.m_nodelistCur;
     }
 
-    protected m_mainFrameBuffer: GLFrameBuffer;
-    protected m_mainFrameBufferInfo: GraphicsRenderCreateInfo;
-    protected m_mainFrameBufferBinded: boolean = false;
+    protected mainFBaspect: FrameBuffer;
+    protected m_mainfbInfo: GraphicsRenderCreateInfo;
 
-    public get mainFrameBufferWidth(): number { return this.m_mainFrameBufferWidth; }
-    public get mainFrameBufferHeight(): number { return this.m_mainFrameBufferHeight; }
-    public get mainFrameBufferAspect(): number { return this.m_mainFrameBufferAspect; }
-    public get mainFrameBuffer(): GLFrameBuffer { return this.m_mainFrameBuffer; }
+    public get mainFBwidth(): number { return this.mainFBaspect.width }
+    public get mainFBheight(): number { return this.mainFBaspect.height; }
+    public get mainFrameBufferAspect(): number {
+        let fb = this.mainFBaspect;
+        return fb.width/ fb.height;
+     }
+    public get mainFrameBuffer(): FrameBuffer { return this.mainFBaspect; }
 
-    public get stateCache(): PipelineStateCache { return this.m_pipestateCache; }
-
-    protected m_mainFrameBufferAspect: number = 1.0;
-    protected m_mainFrameBufferWidth: number = 0;
-    protected m_mainFrameBufferHeight: number = 0;
-
-    /** for viewport update in @function <bindTargetFrameBuffer> */
-    private m_mainFrameBufferResized:boolean = true;
 
     /** for shderDataBasis screnparam */
     private m_shaderDataScreenResized:boolean= false;
@@ -124,23 +120,23 @@ export class PipelineBase implements IRenderPipeline {
 
     public onSetupRender(glctx:GLContext,bufferinfo: GraphicsRenderCreateInfo) {
         this.glctx = glctx;
-        this.gl = glctx.gl;
-        this.m_mainFrameBufferInfo = bufferinfo;
+        this.gl = glctx.getWebGLRenderingContext();
+        this.m_mainfbInfo = bufferinfo;
 
-        this.init();
+        if(!this.m_inited){
+            this.onInitGL();
+            this.m_inited =true;
+        }
+        
     }
 
-    public init(){
-        if(this.m_inited) return;
-
-        let glctx = this.glctx;
-        let bufferinfo = this.m_mainFrameBufferInfo;
+    public onInitGL(){
+        const glctx = this.glctx;
+        const bufferinfo = this.m_mainfbInfo;
         this.m_pipestateCache = new PipelineStateCache(glctx);
-        let fb = this.glctx.createFrameBuffer(true, bufferinfo.colorFormat, bufferinfo.depthFormat);
-        this.m_mainFrameBuffer = fb;
-        this.m_mainFrameBufferWidth = fb.width;
-        this.m_mainFrameBufferHeight = fb.height;
-        this.m_mainFrameBufferAspect = fb.width / fb.height;
+        let fb = FrameBuffer.create(glctx,glctx.canvasWidth,glctx.canvasHeight,{colFmt:bufferinfo.colorFormat,
+        depthFmt:bufferinfo.depthFormat});
+        this.mainFBaspect = fb;
         this.createUniformBuffers();
 
         this.m_passDebug = new PassDebug(this);
@@ -152,10 +148,6 @@ export class PipelineBase implements IRenderPipeline {
         if(this.m_fullscreenRender == null){
             this.m_fullscreenRender = new MeshRender(Mesh.Quad,this.m_fullscreenMat);
         }
-
-
-        this.m_inited= true;
-
     }
 
     private createUniformBuffers() {
@@ -198,8 +190,6 @@ export class PipelineBase implements IRenderPipeline {
             gl.bindBufferBase(gl.UNIFORM_BUFFER, CLASS.UNIFORMINDEX_LIGHT, buffer);
             this.m_uniformBufferLight = buffer;
         }
-
-        console.log('create uniform buffers');
     }
 
     public renderBufferDebug() {
@@ -209,12 +199,9 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     public resizeFrameBuffer(width: number, height: number) {
-        let bufferInfo = this.m_mainFrameBufferInfo;
-        this.m_mainFrameBuffer = this.glctx.createFrameBuffer(false, bufferInfo.colorFormat, bufferInfo.depthFormat, width, height, this.m_mainFrameBuffer);
-        this.m_mainFrameBufferWidth = width;
-        this.m_mainFrameBufferHeight = height;
-        this.m_mainFrameBufferAspect = width / height;
-        this.m_mainFrameBufferResized = true;
+        this.mainFBaspect.resize(this.glctx,width,height);
+        const gl = this.gl;
+        gl.viewport(0,0,width,height);
 
         this.m_shaderDataScreenResized  = true;
     }
@@ -227,8 +214,8 @@ export class PipelineBase implements IRenderPipeline {
      */
     public onRenderToCanvas() {
         const gl = this.gl;
-        gl.viewport(0,0,this.m_mainFrameBufferWidth,this.m_mainFrameBufferHeight);
-        this.drawFullScreenTex(this.m_mainFrameBuffer.colorTex0);
+        gl.viewport(0,0,this.mainFBaspect.width,this.mainFBaspect.height);
+        this.drawFullScreenTex(this.mainFBaspect.coltex);
     }
 
     public updateShaderDataBasis(camera:Camera,submit:boolean =true){
@@ -238,7 +225,7 @@ export class PipelineBase implements IRenderPipeline {
         const databasic = databasis.render;
         databasic.setTime(grender.time,this.graphicRender.deltaTime);
         if(this.m_shaderDataScreenResized){
-            databasic.setScreenParam(this.mainFrameBufferWidth,this.mainFrameBufferHeight);
+            databasic.setScreenParam(this.mainFBwidth,this.mainFBheight);
             this.m_shaderDataScreenResized = false;
         }
 
@@ -291,7 +278,7 @@ export class PipelineBase implements IRenderPipeline {
     public activeDefaultTexture() {
         const gl = this.gl;
         gl.activeTexture(gl.TEXTURE3);
-        gl.bindTexture(gl.TEXTURE_2D, this.graphicRender.defaultTexture.rawtexture);
+        gl.bindTexture(gl.TEXTURE_2D, this.graphicRender.defaultTexture.getRawTexture());
     }
 
     public addBufferDebugInfo(info: BufferDebugInfo) {
@@ -307,25 +294,19 @@ export class PipelineBase implements IRenderPipeline {
         curinfo = curinfo.splice(index, 1);
     }
 
-    public bindTargetFrameBuffer(forece: boolean = false) {
-        let mainfb = this.m_mainFrameBuffer;
-        if (!this.m_mainFrameBufferBinded || forece ){
-            mainfb.bind(this.gl);
-            this.m_mainFrameBufferBinded = true;
-            forece = true;
-        }
-        if(this.m_mainFrameBufferResized || forece){
-            this.gl.viewport(0, 0, mainfb.width, mainfb.height);
-            this.m_mainFrameBufferResized = false;
-        }
+    public bindTargetFrameBuffer(forece:boolean,setvp:boolean) {
+        const glctx = this.glctx;
+        const fb = this.mainFBaspect;
+        if(glctx.bindFramebuffer(this.mainFBaspect)){
+            glctx.viewport(0,0,fb.width,fb.height);
+        } 
     }
 
     public UnBindTargetFrameBuffer() {
-        if (!this.m_mainFrameBufferBinded) return;
-
-        let gl = this.gl;
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        this.m_mainFrameBufferBinded = false;
+        const glctx = this.glctx;
+        if(glctx.bindFramebuffer(null)){
+            glctx.viewport(0,0,glctx.canvasWidth,glctx.canvasHeight);
+        }
     }
 
     public generateDrawList(scene: Scene): RenderNodeList {
@@ -389,7 +370,7 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     /** draw fullscreen tex */
-    public drawFullScreenTex(tex:Texture| WebGLTexture){
+    public drawFullScreenTex(tex:Texture2D| WebGLTexture){
         const mat =this.m_fullscreenMat;
         mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
         this.drawMeshRender(this.m_fullscreenRender);
@@ -431,12 +412,13 @@ export class PipelineBase implements IRenderPipeline {
      * @param defUniformBlock 
      */
     public drawMeshRender(meshrender:MeshRender,objmtx?:mat4,defUniformBlock:boolean = true){
-        const gl = this.gl;
+        const glctx= this.glctx;
+        const gl = glctx.getWebGLRenderingContext();
         let mat = meshrender.material;
         let mesh = meshrender.mesh;
         meshrender.refreshData(this.glctx);
         let program = mat.program;
-        gl.useProgram(program.Program);
+        glctx.useProgram(program.Program);
         if(defUniformBlock){
             this.uniformBindDefault(program);
         }
@@ -447,11 +429,10 @@ export class PipelineBase implements IRenderPipeline {
             this.updateUniformBufferObject(dataobj);
         }
 
-        meshrender.bindVertexArray(gl);
+        meshrender.bindVertexArray(glctx);
         let indicedesc = mesh.indiceDesc;
         gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type,indicedesc.offset);
-        meshrender.unbindVertexArray(gl);
-
+        meshrender.unbindVertexArray(glctx);
         mat.clean(gl);
     }
 
@@ -459,24 +440,16 @@ export class PipelineBase implements IRenderPipeline {
         if(!this.m_inited) return;
         
         let glctx = this.glctx;
-        let gl = glctx.gl;
 
         this.m_bufferDebugInfo = [];
-        
-        this.m_mainFrameBuffer.release(glctx);
-        this.m_mainFrameBufferWidth = 0;
-        this.m_mainFrameBufferHeight = 0;
-        this.m_mainFrameBufferAspect = 1.0;
-        this.m_mainFrameBuffer = null;
 
-        this.m_pipestateCache.release();
-        this.m_pipestateCache = null;
+        this.mainFBaspect = ReleaseGraphicObj(this.mainFBaspect,glctx);
+        this.m_pipestateCache = ReleaseGraphicObj(this.m_pipestateCache,glctx);
 
-
-        gl.deleteBuffer(this.m_uniformBufferBasis);
-        gl.deleteBuffer(this.m_uniformBufferLight);
-        gl.deleteBuffer(this.m_uniformBufferObj);
-        gl.deleteBuffer(this.m_uniformBufferShadowMap);
+        glctx.deleteBuffer(this.m_uniformBufferBasis);
+        glctx.deleteBuffer(this.m_uniformBufferLight);
+        glctx.deleteBuffer(this.m_uniformBufferObj);
+        glctx.deleteBuffer(this.m_uniformBufferShadowMap);
 
         this.m_uniformBufferBasis = null;
         this.m_uniformBufferLight = null;
@@ -495,8 +468,6 @@ export class PipelineBase implements IRenderPipeline {
     }
 
     public reload() {
-        this.release();
-        this.init();
     }
 
 }

@@ -3,7 +3,7 @@ import { ShaderFX, ShaderFile, ShaderInc } from "./ShaderFX";
 import { ShaderVariant } from "./ShaderVariant";
 import { ShaderData, ShaderSubData } from "./ShaderBuffer";
 import { Shader } from "./Shader";
-import { vec3, vec4, mat4 } from "../math/GLMath";
+import { vec3, vec4, mat4, glmath } from "../math/GLMath";
 import { GLContext } from "../gl/GLContext";
 
 export class ShaderFXLibs{
@@ -148,16 +148,25 @@ export class ShaderDataUniformObj extends ShaderData{
     public constructor(){
         let buffersize = 16*4;
         super(buffersize);
+        this.buffer.setMat4(0,mat4.Identity);
     }
     public setMtxModel(mtx:mat4){
         this.buffer.setMat4(0,mtx);
     }
 }
 
+/**
+ * max light count 4
+ * 0-3 pos,light type
+ * 4-7 col, intensity
+ * *4
+ * ambient color
+ * normaly 1 directional light 3 point light
+ */
 export class ShaderDataUniformLight extends ShaderData{
     public static readonly UNIFORM_LIGHT:string = "UNIFORM_LIGHT";
     public constructor (){
-        let buffersize = (8 *4+ 4) *4;
+        let buffersize = (8 *4+ 4 + 1) *4;
         super(buffersize);
     }
     public setLightData(pos:vec3,type:number,index:number){
@@ -174,6 +183,10 @@ export class ShaderDataUniformLight extends ShaderData{
     }
     public setAmbientColor(ambient:vec4){
         this.buffer.setVec4(128,ambient);
+    }
+    public setLightCount(count:number){
+        count = glmath.clamp(count,0,4);
+        this.buffer.setUint32(144,count);
     }
 }
 

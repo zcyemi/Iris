@@ -1,5 +1,6 @@
-import { Texture } from "./Texture";
+import { Texture2D } from "./Texture2D";
 import { TextureCubeMap } from "./TextureCubeMap";
+import { ITexture } from "./Texture";
 
 
 
@@ -13,11 +14,11 @@ export enum SkyboxType{
 
 export class Skybox {
 
-    private m_rawtex:Texture;
+    private m_rawtex:ITexture;
     private m_type:SkyboxType;
 
     public get type():SkyboxType{ return this.m_type;}
-    public get rawTex():Texture{return this.m_rawtex;}
+    public get rawTex():ITexture{return this.m_rawtex;}
 
     protected constructor(type:SkyboxType) {
         this.m_type =type;
@@ -30,7 +31,7 @@ export class Skybox {
         return sb;
     }
 
-    public static createFromTex360(tex:Texture):Skybox{
+    public static createFromTex360(tex:Texture2D):Skybox{
         if(tex == null) return null;
         let sb = new Skybox(SkyboxType.Tex360);
         sb.m_rawtex = tex;

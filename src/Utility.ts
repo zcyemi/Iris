@@ -1,4 +1,5 @@
 import { vec4, glmath } from "./math/GLMath";
+import { isNull } from "util";
 
 
 export type MapStr<T> = {[key:string]:T};
@@ -117,6 +118,20 @@ export class Utility {
 		img.src = src;
 	}
 
+	public static async loadImage(url:string):Promise<HTMLImageElement>{
+        if(url == null) return null;
+        return new Promise<HTMLImageElement>((res,rej)=>{
+            var img =new Image();
+            img.onload = ()=>{
+                res(img);
+            }
+            img.onerror = ()=>{
+                rej('image load failed');
+            };
+            img.src = url;
+        });
+    }
+
 }
 
 
@@ -144,3 +159,6 @@ export class WindowUtility{
 }
 
 
+export function undefinedOr(x:any,y:any){
+	return x == undefined ? y: x;
+}

@@ -1,20 +1,40 @@
 import { GLProgram } from "./GLProgram";
 import { GLFrameBuffer } from "./GLFrameBuffer";
 import { GLPipelineState } from "./GLPipelineState";
-import { vec4 } from "../math/GLMath";
 import { GLFenceSync } from "./GLFenceSync";
+import { FrameBuffer } from "./FrameBuffer";
+import { GL, GLSizeOrData } from "./GL";
+import { MeshIndicesDesc } from "../Mesh";
+import { ShaderTags, Comparison, BlendOperator, BlendFactor } from "../shaderfx/Shader";
 
 export class GLContext {
-
     private m_glFenceSynces:GLFenceSync[] = [];
 
-    public gl: WebGL2RenderingContext;
+    private m_curfb:FrameBuffer;
+    private m_readfb:FrameBuffer;
+    private m_drawfb:FrameBuffer;
+    private m_viewport:number[] = [0,0,0,0];
+    private m_clearDepth:number;
+
+    private m_pipelineState:ShaderTags;
+
+    private gl: WebGL2RenderingContext;
     private constructor(wgl: WebGL2RenderingContext) {
         this.gl = wgl;
+        this.viewport(0,0,wgl.canvas.clientWidth,wgl.canvas.clientHeight);
+        this.m_pipelineState = new ShaderTags();
     }
+
+    public get canvasWidth():number{return this.gl.canvas.clientWidth;}
+    public get canvasHeight():number{return this.gl.canvas.clientHeight;}
+    public get bindingFBO():FrameBuffer{ return this.m_curfb;}
+    public get bindingReadFBO():FrameBuffer {return this.m_readfb;}
+    public get bindingDrawFBO():FrameBuffer{ return this.m_drawfb;}
+
     public static createFromGL(wgl: WebGL2RenderingContext): GLContext {
         return new GLContext(wgl);
     }
+    
     public static createFromCanvas(canvas: HTMLCanvasElement, attrib?: WebGLContextAttributes): GLContext | null {
         let g: any = canvas.getContext('webgl2', attrib);
         if (g == null) {
@@ -22,6 +42,10 @@ export class GLContext {
         }
         if (g == null) return null;
         return new GLContext(g);
+    }
+
+    public getWebGLRenderingContext():WebGL2RenderingContext{
+         return this.gl;
     }
 
     public createProgram(vsource: string, psource: string): GLProgram | null {
@@ -55,6 +79,8 @@ export class GLContext {
         gl.linkProgram(program);
 
         if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.error(vsource);
+            console.error(psource);
             console.error('link shader program failed!:' + gl.getProgramInfoLog(program));
             gl.deleteProgram(program);
             gl.deleteShader(vs);
@@ -68,131 +94,55 @@ export class GLContext {
         return p;
     }
 
-    public createTextureImage(src: string, callback?: () => void): WebGLTexture | null {
-        var img = new Image();
-        var gl = this.gl;
-        var tex = gl.createTexture();
-
-        img.onload = () => {
-            gl.bindTexture(gl.TEXTURE_2D, tex);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
-            gl.generateMipmap(gl.TEXTURE_2D);
-
-            gl.bindTexture(gl.TEXTURE_2D, null);
-
-            console.log('init webgl texture');
-            if (callback != null) callback();
-        };
-        img.src = src;
-        return tex;
-    }
-
-    public async createTextureImageAsync(src: string, min_filter?: number, mag_filter?: number): Promise<WebGLTexture> {
-        var gl = this.gl;
-        return new Promise<WebGLTexture>((res, rej) => {
-            var img = new Image();
-            img.onload = () => {
-                let tex = gl.createTexture();
-                try {
-                    gl.bindTexture(gl.TEXTURE_2D, tex);
-                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
-
-                    if (min_filter == null) {
-                        min_filter = gl.LINEAR_MIPMAP_LINEAR;
-                    }
-                    if (mag_filter == null) {
-                        mag_filter = gl.LINEAR;
-                    }
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, mag_filter);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, min_filter);
-
-                    gl.generateMipmap(gl.TEXTURE_2D);
-                    gl.bindTexture(gl.TEXTURE_2D, null);
-                    res(tex);
-                }
-                catch (e) {
-                    gl.deleteTexture(tex);
-                    rej(e);
-                }
-
-            };
-            img.onerror = (ev: Event| string) => {
-                rej(ev);
-            }
-            img.src = src;
-        })
-    }
-
-    public createTexture(internalFormat: number, width: number, height: number, linear: boolean = false, mipmap: boolean = false): WebGLTexture | null {
-        let gl = this.gl;
-
-        let tex = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.texStorage2D(gl.TEXTURE_2D, 1, internalFormat, width, height);
-
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, linear ? gl.LINEAR : gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, linear ? (mipmap ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR) : gl.NEAREST);
-
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-        if (mipmap)
-            gl.generateMipmap(gl.TEXTURE_2D);
-
-        return tex;
-    }
-
     public createFrameBuffer(retain: boolean, colorInternalFormat: number, depthInternalFormat?: number, width?: number, height?: number,glfb?:GLFrameBuffer): GLFrameBuffer | null {
         return GLFrameBuffer.create(retain, this, colorInternalFormat, depthInternalFormat, width, height,glfb);
     }
 
-
-    private m_tempFrameBuffer: WebGLFramebuffer;
-    public saveTextureToImage(texture: WebGLTexture): HTMLImageElement | null {
-        if (texture == null) return null;
-        let gl = this.gl;
-        if (this.m_tempFrameBuffer == null) {
-            this.m_tempFrameBuffer = <WebGLFramebuffer>gl.createFramebuffer();
-        }
-
-        let curfb = gl.getParameter(gl.FRAMEBUFFER_BINDING);
-        let curtex = gl.getParameter(gl.TEXTURE_BINDING_2D);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.m_tempFrameBuffer);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-
-        let image = this.saveCurrentFrameBufferToImage();
-
-        gl.bindTexture(gl.TEXTURE_2D, curtex);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, curfb);
-
-        return image;
+    public bindFramebuffer(fb:FrameBuffer):boolean{
+        if(this.m_curfb == fb) return false;
+        const gl = this.gl;
+        gl.bindFramebuffer(gl.FRAMEBUFFER,fb != null? fb.rawobj:null);
+        this.m_curfb = fb;
+        return true;
     }
-    public saveCurrentFrameBufferToImage(x: number = 0, y: number = 0, w: number | null = null, h: number | null = null): HTMLImageElement {
-        let gl = this.gl;
 
-        if (w == null || h == null) {
-            let canvas = gl.canvas;
-            w = canvas.width;
-            h = canvas.height;
+    public bindReadFrameBuffer(fb:FrameBuffer):boolean{
+        if(this.m_readfb == fb) return false;
+        const gl = this.gl;
+        gl.bindFramebuffer(gl.READ_FRAMEBUFFER,fb != null? fb.rawobj:null);
+        this.m_readfb = fb;
+        return true;
+    }
+
+    public bindDrawFrameBuffer(fb:FrameBuffer):boolean{
+        if(this.m_drawfb == fb) return false;
+        const gl = this.gl;
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,fb != null? fb.rawobj:null);
+        this.m_drawfb = fb;
+        return true;
+    }
+
+    public blitFramebuffer(srcX0: number, srcY0: number, srcX1: number, srcY1: number, dstX0: number, dstY0: number,
+        dstX1: number, dstY1: number, mask: number, filter: number) {
+        let readfb = this.m_readfb;
+        let drawfb =this.m_drawfb;
+        if(readfb == drawfb){
+            throw new Error('blitFrameBuffer error: read/draw framebuffer are equal!');
         }
+        const gl = this.gl;
+        gl.blitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+    }
 
-        let data = new Uint8Array(w * h * 4);
-        gl.readPixels(x, y, w, h, gl.RGBA, gl.UNSIGNED_BYTE, data);
+    public viewport(x:number,y:number,w:number,h:number){
+        let vp = this.m_viewport;
+        if(vp[2] == w && vp[3] == h && vp[0] == x && vp[1] == y) return;
 
-        let tempcanvas = document.createElement('canvas');
-        tempcanvas.width = w;
-        tempcanvas.height = h;
-
-        var ctx2d = <CanvasRenderingContext2D>tempcanvas.getContext('2d');
-        var imgdata = ctx2d.createImageData(w, h);
-        imgdata.data.set(data);
-        ctx2d.putImageData(imgdata, 0, 0);
-
-        var img = new Image();
-        img.src = tempcanvas.toDataURL();
-        return img;
+        const gl = this.gl;
+        gl.viewport(x,y,w,h);
+        vp[0] = x;
+        vp[1] = y;
+        vp[2] = w;
+        vp[3] = h;
     }
 
     public savePipeline(...type: number[]): GLPipelineState {
@@ -204,18 +154,181 @@ export class GLContext {
         state.restore(this.gl);
     }
 
-    /**
-     * Do not call this function explicitly
-     * @param fs 
-     */
+    public colorMask(red: GLboolean, green: GLboolean, blue: GLboolean, alpha: GLboolean){
+        this.gl.colorMask(red,green,blue,alpha);
+    }
+    public colorEnable(enable:boolean){
+        this.gl.colorMask(enable,enable,enable,enable);
+    }
+
+    public useProgram(program:WebGLProgram | null){
+        this.gl.useProgram(program);
+    }
+
+    public useGLProgram(program:GLProgram){
+        this.gl.useProgram(program.Program);
+    }
+
+    public uniformBlockBinding(program: WebGLProgram, uniformBlockIndex: number, uniformBlockBinding: number):void{
+        this.gl.uniformBlockBinding(program,uniformBlockIndex,uniformBlockBinding);
+    }
+
+    public createBuffer():WebGLBuffer{
+        return this.gl.createBuffer();
+    }
+
+    public deleteBuffer(buffer: WebGLBuffer | null){
+        this.gl.deleteBuffer(buffer);
+    }
+
+    public createBufferAndBind(target:number){
+        const gl = this.gl;
+        let buffer= gl.createBuffer();
+        gl.bindBuffer(target,buffer);
+        return buffer;
+    }
+
+    public bindBuffer(target:number,buffer:WebGLBuffer| null){
+        this.gl.bindBuffer(target,buffer);
+    }
+
+    public bufferData(target:number,sizeOrData:GLSizeOrData,usage:number){
+        this.gl.bufferData(target,sizeOrData,usage);
+    }
+
+    public fenceSync(condition: number, flags: number):WebGLSync{
+        return this.gl.fenceSync(condition,flags);
+    }
+    public isSync(sync: WebGLSync | null): boolean{
+        return this.gl.isSync(sync);
+    }
+    public deleteSync(sync: WebGLSync | null){
+        this.gl.deleteSync(sync);
+    }
+    public clientWaitSync(sync: WebGLSync, flags: number, timeout: number): number{
+        return this.gl.clientWaitSync(sync,flags,timeout);
+    }
+    public waitSync(sync: WebGLSync, flags: number, timeout: number){
+        this.gl.waitSync(sync,flags,timeout);
+    }
+    public getSyncParameter(sync: WebGLSync, pname: number): any{
+        return this.gl.getSyncParameter(sync,pname);
+    }
+
+    public deleteTexture(texture: WebGLTexture | null){
+        this.gl.deleteTexture(texture);
+    }
+    public createTexture(): WebGLTexture{
+        return this.gl.createTexture();
+    }
+
+    public createVertexArray(): WebGLVertexArrayObject | null{
+        return this.gl.createVertexArray();
+    }
+    public deleteVertexArray(vertexArray: WebGLVertexArrayObject | null){
+        this.gl.deleteVertexArray(vertexArray);
+    }
+    public isVertexArray(vertexArray: WebGLVertexArrayObject | null): boolean{
+        return this.gl.isVertexArray(vertexArray);
+    }
+    public bindVertexArray(array: WebGLVertexArrayObject | null){
+        this.gl.bindVertexArray(array);
+    }
+    public depthFunc(func: number){
+        let state =this.m_pipelineState;
+        if(state.ztest == func) return;
+        state.ztest = func;
+        this.gl.depthFunc(func);
+    }
+    public depthMask(flag: boolean){
+        let state =this.m_pipelineState;
+        if(state.zwrite == flag) return;
+        state.zwrite = flag;
+        this.gl.depthMask(flag);
+    }
+    public depthRange(zNear: number, zFar: number){
+        this.gl.depthRange(zNear,zFar);
+    }
+    public enable(cap: number){
+        this.gl.enable(cap);
+    }
+
+    public disable(cap:number){
+        this.gl.disable(cap);
+    }
+
+
+    public pipelineBlend(enable:boolean){
+        let state = this.m_pipelineState;
+        if(state.blend == enable) return;
+        state.blend = enable;
+        if(enable){
+            this.gl.enable(GL.BLEND);
+        }
+        else{
+            this.gl.disable(GL.BLEND);
+        }
+    }
+
+    public pipelineBlendParam(op:BlendOperator|number,srcfactor:BlendFactor |number,dstfactor:BlendFactor| number){
+        const gl =this.gl;
+        const state = this.m_pipelineState;
+        if(state.blendOp != op){
+            gl.blendEquation(op);
+            state.blendOp = op;
+        }
+        if(state.blendFactorSrc != srcfactor || state.blendFactorDst != dstfactor){
+            gl.blendFunc(srcfactor,dstfactor);
+            state.blendFactorDst = dstfactor;
+            state.blendFactorSrc = srcfactor;
+        }
+    }
+
+    public cullFace(mode:number){
+        let state = this.m_pipelineState;
+        if(state.culling == mode) return;
+        state.culling = mode;
+        this.gl.cullFace(mode);
+    }
+
+    public pipelineState(tag:ShaderTags){
+        if(tag == null) return;
+
+        if(tag.ztest != null) this.depthFunc(tag.ztest);
+        if(tag.zwrite !=null) this.depthMask(tag.zwrite);
+
+        const blend = tag.blend;
+        if(blend !=null){
+            this.pipelineBlend(blend);
+            if(blend){
+                this.pipelineBlendParam(tag.blendOp,tag.blendFactorSrc,tag.blendFactorDst);
+            }
+        }
+        if(tag.culling != null){
+            this.cullFace(tag.culling);
+        }
+    }
+
+    public clear(mask:number){
+        this.gl.clear(mask);
+    }
+    public clearColor(r:number,g:number,b:number,a:number){
+        this.gl.clearColor(r,g,b,a);
+    }
+
+    public clearColorAry(raw:number[]){
+        this.gl.clearColor(raw[0],raw[1],raw[2],raw[3]);
+    }
+
+    public clearDepth(depth:number){
+        if(this.m_clearDepth == depth) return;
+        this.gl.clearDepth(depth);
+        this.m_clearDepth = depth;
+    }
+
     public registFenceSync(fs:GLFenceSync){
         this.m_glFenceSynces.push(fs);
     }
-
-    /**
-     * Do not call this function explicitly
-     * @param fs 
-     */
     public unregistFenceSync(fs:GLFenceSync):boolean{
         let syncs = this.m_glFenceSynces;
 
@@ -226,10 +339,6 @@ export class GLContext {
         }
         return false;
     }
-
-    /**
-     * check statu of all registed GLFenceScene
-     */
     public checkAllFenceSync(){
         let syncs = this.m_glFenceSynces;
         let len = syncs.length;
@@ -247,6 +356,20 @@ export class GLContext {
         if(changed){
             this.m_glFenceSynces = remains;
         }
+    }
+    public bindBufferBase(target: number, index: number, buffer: WebGLBuffer | null){
+        this.gl.bindBufferBase(target,index,buffer);
+    }
+    public bindBufferRange(target: number, index: number, buffer: WebGLBuffer | null, offset: number, size: number){
+        this.gl.bindBufferRange(target,index,buffer,offset,size);
+    }
+    
+    public drawElementIndices(desc:MeshIndicesDesc){
+        this.gl.drawElements(desc.topology,desc.indiceCount,desc.type,desc.offset);
+    }
+
+    public polygonOffset(factor:number,units:number){
+        this.gl.polygonOffset(factor,units);
     }
 
 }

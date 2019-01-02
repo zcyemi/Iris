@@ -10,7 +10,7 @@ export class GLPixelPack{
     private m_sync: GLFenceSync;
     private glctx:GLContext;
     public constructor(glctx:GLContext,buffersize:number,dynamic:boolean = true){
-        const gl = glctx.gl;
+        const gl = glctx.getWebGLRenderingContext();
         let pb = gl.createBuffer();
         gl.bindBuffer(gl.PIXEL_PACK_BUFFER,pb);
         gl.bufferData(gl.PIXEL_PACK_BUFFER,buffersize,dynamic? gl.DYNAMIC_READ: gl.STATIC_READ);
@@ -21,11 +21,11 @@ export class GLPixelPack{
     }
 
     public release(){
-        if(this.glctx == null) return;
+        const glctx = this.glctx;
+        if(glctx == null) return;
 
-        const gl =this.glctx.gl;
         if(this.m_pb != null){
-            gl.deleteBuffer(this.m_pb);
+            glctx.deleteBuffer(this.m_pb);
             this.m_pb = null;
         }
 
@@ -34,7 +34,7 @@ export class GLPixelPack{
 
     public readPixelsSync(rect:vec4,format:number,type:GLDataType,dstbuffer:ArrayBufferView,dstoffset:number =0,length?:number){
         const pb = this.m_pb;
-        const gl = this.glctx.gl;
+        const gl = this.glctx.getWebGLRenderingContext();
         gl.bindBuffer(gl.PIXEL_PACK_BUFFER,pb);
         gl.readPixels(rect.x,rect.y,rect.z,rect.w,format,type,0);
 
@@ -55,7 +55,7 @@ export class GLPixelPack{
             }
         }
         var pb = this.m_pb;
-        var gl = this.glctx.gl;
+        var gl = this.glctx.getWebGLRenderingContext();
         gl.bindBuffer(gl.PIXEL_PACK_BUFFER,pb);
         gl.readPixels(rect.x,rect.y,rect.z,rect.w,format,type,0);
         

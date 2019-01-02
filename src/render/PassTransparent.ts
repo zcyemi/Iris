@@ -22,58 +22,58 @@ export class PassTransparent extends RenderPass{
     }
 
     public render(scene?:Scene){
-        const pipe = this.pipeline;
-        const gl = pipe.GL;
-        const glctx = pipe.GLCtx;
-        const deftags = this.m_tags;
+        // const pipe = this.pipeline;
+        // const gl = pipe.GL;
+        // const glctx = pipe.GLCtx;
+        // const deftags = this.m_tags;
 
-        let queue = pipe.nodeList.nodeTransparent;
-        if(queue.length == 0) return;
+        // let queue = pipe.nodeList.nodeTransparent;
+        // if(queue.length == 0) return;
 
-        //sm
-        let state =pipe.stateCache;
-        state.reset(deftags);
+        // //sm
+        // let state =pipe.stateCache;
+        // state.reset(deftags);
 
-        pipe.activeDefaultTexture();
+        // pipe.activeDefaultTexture();
 
-        //do draw
-        let len = queue.length;
-        let curprogram:GLProgram = null;
+        // //do draw
+        // let len = queue.length;
+        // let curprogram:GLProgram = null;
 
-        const dataobj = pipe.shaderDataObj;
+        // const dataobj = pipe.shaderDataObj;
 
-        // gl.enable(gl.BLEND);
-        // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        // // gl.enable(gl.BLEND);
+        // // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-        for(let i=0;i<len;i++){
-            let node = queue[i];
+        // for(let i=0;i<len;i++){
+        //     let node = queue[i];
 
-            if(node instanceof MeshRender){
-                let mat = node.material;
-                let mesh = node.mesh;
-                let program = mat.program;
-                node.refreshData(glctx);
+        //     if(node instanceof MeshRender){
+        //         let mat = node.material;
+        //         let mesh = node.mesh;
+        //         let program = mat.program;
+        //         node.refreshData(glctx);
     
-                if(program != curprogram){
-                    let glp = program.Program;
-                    gl.useProgram(glp);
-                    pipe.uniformBindDefault(program);
-                    curprogram = program;
-                }
-                state.apply(mat.shaderTags);
-                mat.apply(gl);
-                dataobj.setMtxModel(node.object.transform.objMatrix);
-                pipe.updateUniformBufferObject(dataobj);
+        //         if(program != curprogram){
+        //             let glp = program.Program;
+        //             gl.useProgram(glp);
+        //             pipe.uniformBindDefault(program);
+        //             curprogram = program;
+        //         }
+        //         state.apply(mat.shaderTags);
+        //         mat.apply(gl);
+        //         dataobj.setMtxModel(node.object.transform.objMatrix);
+        //         pipe.updateUniformBufferObject(dataobj);
 
-                node.bindVertexArray(gl);
-                let indicedesc = mesh.indiceDesc;
-                gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
-                node.unbindVertexArray(gl);
+        //         node.bindVertexArray(glctx);
+        //         let indicedesc = mesh.indiceDesc;
+        //         gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type, indicedesc.offset);
+        //         node.unbindVertexArray(glctx);
 
-                mat.clean(gl);
-            }
+        //         mat.clean(gl);
+        //     }
         
-        }
+        // }
     }
 
 }
