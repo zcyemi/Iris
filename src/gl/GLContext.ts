@@ -450,4 +450,108 @@ export class GLContext {
         this.gl.bindFramebuffer(target,fb);
     }
 
+    public frontFace(mode:i32){
+        this.gl.frontFace(mode);
+    }
+
+    public vertexAttribPointer(index: GLuint, size: GLint, type: GLenum, normalized: GLboolean, stride: GLsizei, offset: GLintptr){
+        this.gl.vertexAttribPointer(index,size,type,normalized,stride,offset);
+    }
+
+    public enableVertexAttribArray(index:i32){
+        this.gl.enableVertexAttribArray(index);
+    }
+
+    public uniform1f(loc:WebGLUniformLocation,x:f32){
+        this.gl.uniform1f(loc,x);
+    }
+    public uniform1i(loc:WebGLUniformLocation,x:i32){
+        this.gl.uniform1i(loc,x);
+    }
+    public uniform1ui(loc:WebGLUniformLocation,x:i32){
+        this.gl.uniform1ui(loc,x);
+    }
+    public uniform1iv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform1iv(loc,data,srcOffset,srcLength);
+    }
+    public uniform1fv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform1fv(loc,data,srcOffset,srcLength);
+    }
+    public uniform1uiv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform1uiv(loc,data,srcOffset,srcLength);
+    }
+
+    public uniform2f(loc:WebGLUniformLocation,x:f32,y:f32){
+        this.gl.uniform2f(loc,x,y);
+    }
+    public uniform2i(loc:WebGLUniformLocation,x:i32,y:i32){
+        this.gl.uniform2i(loc,x,y);
+    }
+    public uniform2ui(loc:WebGLUniformLocation,x:i32,y:i32){
+        this.gl.uniform2ui(loc,x,y);
+    }
+    public uniform2iv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform2iv(loc,data,srcOffset,srcLength);
+    }
+    public uniform2fv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform1fv(loc,data,srcOffset,srcLength);
+    }
+    public uniform2uiv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform2uiv(loc,data,srcOffset,srcLength);
+    }
+
+    public uniform3f(loc:WebGLUniformLocation,x:f32,y:f32,z:f32){
+        this.gl.uniform3f(loc,x,y,z);
+    }
+    public uniform3i(loc:WebGLUniformLocation,x:i32,y:i32,z:i32){
+        this.gl.uniform3i(loc,x,y,z);
+    }
+    public uniform3ui(loc:WebGLUniformLocation,x:i32,y:i32,z:i32){
+        this.gl.uniform3ui(loc,x,y,z);
+    }
+    public uniform3iv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform3iv(loc,data,srcOffset,srcLength);
+    }
+    public uniform3fv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform3fv(loc,data,srcOffset,srcLength);
+    }
+    public uniform3uiv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform3uiv(loc,data,srcOffset,srcLength);
+    }
+
+    public uniform4f(loc:WebGLUniformLocation,x:f32,y:f32,z:f32,w:f32){
+        this.gl.uniform4f(loc,x,y,z,w);
+    }
+    public uniform4i(loc:WebGLUniformLocation,x:i32,y:i32,z:i32,w:i32){
+        this.gl.uniform4i(loc,x,y,z,w);
+    }
+    public uniform4ui(loc:WebGLUniformLocation,x:i32,y:i32,z:i32,w:i32){
+        this.gl.uniform4ui(loc,x,y,z,w);
+    }
+    public uniform4iv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform4iv(loc,data,srcOffset,srcLength);
+    }
+    public uniform4fv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform4fv(loc,data,srcOffset,srcLength);
+    }
+    public uniform4uiv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform4uiv(loc,data,srcOffset,srcLength);
+    }
+
+    public bindSampler(unit: number, sampler: WebGLSampler){
+        this.gl.bindSampler(unit,sampler);
+    }
+
 }

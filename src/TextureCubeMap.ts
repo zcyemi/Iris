@@ -2,6 +2,7 @@ import { Texture2D } from './Texture2D';
 import { GLUtility } from './gl/GLUtility';
 import { GLContext } from './gl/GLContext';
 import { ITexture, TextureCreationDesc, TextureDescUtility } from './Texture';
+import { GL } from './gl/GL';
 
 /**
  * TEXTURE_CUBE_MAP wrapped by Texture
@@ -42,30 +43,29 @@ export class TextureCubeMap implements ITexture{
     public static loadCubeMapImage(imgs:HTMLImageElement[],glctx:GLContext):TextureCubeMap| null{
         let texcube:TextureCubeMap = null;
             try{
-                let gl = glctx.getWebGLRenderingContext();
-                let gltexcube = gl.createTexture();
-                gl.activeTexture(Texture2D.TEMP_TEXID);
-                gl.bindTexture(gl.TEXTURE_CUBE_MAP,gltexcube);
+                let gltexcube = glctx.createTexture();
+                glctx.activeTexture(Texture2D.TEMP_TEXID);
+                glctx.bindTexture(GL.TEXTURE_CUBE_MAP,gltexcube);
 
                 let imgw:number = imgs[0].width;
                 let imgh:number = imgs[0].height;
                 for(let i=0;i<6;i++){
                     let img = imgs[i];
-                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X +i,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
+                    glctx.texImage2D(GL.TEXTURE_CUBE_MAP_POSITIVE_X +i,0,GL.RGB,imgw,imgh,0,GL.RGB,GL.UNSIGNED_BYTE,img);
                 }
-                gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
-                gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-                gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
-                gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-                gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_R,gl.CLAMP_TO_EDGE);
-                gl.bindTexture(gl.TEXTURE_CUBE_MAP,null);
+                glctx.texParameteri(GL.TEXTURE_CUBE_MAP,GL.TEXTURE_MIN_FILTER,GL.LINEAR);
+                glctx.texParameteri(GL.TEXTURE_CUBE_MAP,GL.TEXTURE_MAG_FILTER,GL.LINEAR);
+                glctx.texParameteri(GL.TEXTURE_CUBE_MAP,GL.TEXTURE_WRAP_S,GL.CLAMP_TO_EDGE);
+                glctx.texParameteri(GL.TEXTURE_CUBE_MAP,GL.TEXTURE_WRAP_T,GL.CLAMP_TO_EDGE);
+                glctx.texParameteri(GL.TEXTURE_CUBE_MAP,GL.TEXTURE_WRAP_R,GL.CLAMP_TO_EDGE);
+                glctx.bindTexture(GL.TEXTURE_CUBE_MAP,null);
 
                 let desc:TextureCreationDesc = {
-                    format: gl.RGB,
-                    internalformat:gl.RGB,
+                    format: GL.RGB,
+                    internalformat:GL.RGB,
                     mipmap:false,
-                    min_filter : gl.LINEAR,
-                    mag_filter: gl.LINEAR
+                    min_filter : GL.LINEAR,
+                    mag_filter: GL.LINEAR
                 };
                 texcube = new TextureCubeMap(gltexcube,imgw,imgh,desc);
                 texcube.m_raw = gltexcube;

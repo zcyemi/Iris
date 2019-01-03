@@ -8,6 +8,7 @@ import { GLProgram } from "./gl/GLProgram";
 import { TextureSampler } from "./TextureSampler";
 import { GL } from "./gl/GL";
 import { ITexture } from "./Texture";
+import { GLContext } from "./gl/GLContext";
 
 export type MaterialProperty = {type:number,value:any,extra?:TextureSampler};
 
@@ -355,7 +356,7 @@ export class Material{
     
     private m_applyTexCount = 0;
 
-    public apply(gl:WebGL2RenderingContext){
+    public apply(glctx:GLContext){
         this.m_applyTexCount = 0;
         let program = this.program;
 
@@ -364,7 +365,7 @@ export class Material{
         for(var key in pu){
             let u = pu[key];
             if(key === "uShadowMap") continue;
-            this.setUniform(gl,program.Uniforms[key],u);
+            this.setUniform(glctx,program.Uniforms[key],u);
         }
 
         let puniformblocks = propertyblock.uniformsBlock;
@@ -372,7 +373,7 @@ export class Material{
             const glp = program.Program;
             for(var key in puniformblocks){
                 let ind = Number(key);
-                gl.uniformBlockBinding(glp,ind,puniformblocks[ind]);
+                glctx.uniformBlockBinding(glp,ind,puniformblocks[ind]);
             }
         }
     }
@@ -395,26 +396,26 @@ export class Material{
         // }
     }
 
-    private setUniform(gl:WebGL2RenderingContext,loc:WebGLUniformLocation,mp:MaterialProperty){
+    private setUniform(glctx:GLContext,loc:WebGLUniformLocation,mp:MaterialProperty){
 
         const val = mp.value;
         const type = mp.type;
 
-        if(val == null && type != gl.SAMPLER_2D) return;
+        if(val == null && type != GL.SAMPLER_2D) return;
         switch(type){
-            case gl.FLOAT:
-                gl.uniform1f(loc,val);
+            case GL.FLOAT:
+                glctx.uniform1f(loc,val);
                 break;
-            case gl.FLOAT_VEC2:
-                gl.uniform2fv(loc,val);
+            case GL.FLOAT_VEC2:
+                glctx.uniform2fv(loc,val);
                 break;
-            case gl.FLOAT_VEC3:
-                gl.uniform3fv(loc,val.raw);
+            case GL.FLOAT_VEC3:
+                glctx.uniform3fv(loc,val.raw);
                 break;
-            case gl.FLOAT_VEC4:
-                gl.uniform4fv(loc,val.raw);
+            case GL.FLOAT_VEC4:
+                glctx.uniform4fv(loc,val.raw);
                 break;
-            case gl.SAMPLER_CUBE:
+            case GL.SAMPLER_CUBE:
                 if(val != null){
                     let texCount = this.m_applyTexCount;
                     let tex:WebGLTexture = null;
@@ -430,14 +431,14 @@ export class Material{
                         //gl.uniform1i(loc,Material.DEF_TEXID_NUM);
                         return;
                     }
-                    gl.activeTexture(gl.TEXTURE4 + texCount);
-                    gl.bindTexture(gl.TEXTURE_CUBE_MAP,tex);
+                    glctx.activeTexture(GL.TEXTURE4 + texCount);
+                    glctx.bindTexture(GL.TEXTURE_CUBE_MAP,tex);
                     const locid = 4 + texCount;
-                    gl.uniform1i(loc,locid);
+                    glctx.uniform1i(loc,locid);
                     this.m_applyTexCount = texCount+1;
                     const extra = mp.extra;
                     if(extra != null){
-                        gl.bindSampler(locid,extra.rawobj);
+                        glctx.bindSampler(locid,extra.rawobj);
                     }
                 }
                 else{
@@ -447,7 +448,7 @@ export class Material{
                     //gl.uniform1i(loc,Material.DEF_TEXID_NUM);
                 }
                 break;
-            case gl.SAMPLER_2D:
+            case GL.SAMPLER_2D:
                 if(val != null){
                     let texCount = this.m_applyTexCount;
                     let tex:WebGLTexture = null;
@@ -459,23 +460,23 @@ export class Material{
                     }
                     if(tex == null){
                         //raw texture is null or onloading...
-                        gl.uniform1i(loc,Material.DEF_TEXID_NUM);
+                        glctx.uniform1i(loc,Material.DEF_TEXID_NUM);
                         return;
                     }
-                    gl.activeTexture(gl.TEXTURE4 + texCount);
-                    gl.bindTexture(gl.TEXTURE_2D,tex);
+                    glctx.activeTexture(GL.TEXTURE4 + texCount);
+                    glctx.bindTexture(GL.TEXTURE_2D,tex);
                     const locid = 4 + texCount;
-                    gl.uniform1i(loc,locid);
+                    glctx.uniform1i(loc,locid);
                     this.m_applyTexCount = texCount+1;
                     const extra = mp.extra;
                     if(extra != null){
-                        gl.bindSampler(locid,extra.rawobj);
+                        glctx.bindSampler(locid,extra.rawobj);
                     }
                 }
                 else{
                     //texture is null
                     //use default white texture
-                    gl.uniform1i(loc,Material.DEF_TEXID_NUM);
+                    glctx.uniform1i(loc,Material.DEF_TEXID_NUM);
                 }
                 break;
         }

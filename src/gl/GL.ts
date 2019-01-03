@@ -102,6 +102,7 @@ export class GL {
     public static readonly TEXTURE_MIN_FILTER: number = 0x2801;
     public static readonly TEXTURE_WRAP_S: number = 0x2802;
     public static readonly TEXTURE_WRAP_T: number = 0x2803;
+    public static readonly TEXTURE_WRAP_R:number = 0x8072;
     public static readonly TEXTURE_2D: number = 0x0DE1;
     public static readonly TEXTURE: number = 0x1702;
     public static readonly TEXTURE_CUBE_MAP: number = 0x8513;
@@ -160,6 +161,57 @@ export class GL {
     public static readonly SAMPLE_COVERAGE = 0x80A0;
     public static readonly SCISSOR_TEST = 0x0C11;
     public static readonly STENCIL_TEST = 0x0B90;
+
+    public static readonly CW = 0x0900;
+    public static readonly CCW = 0x0901;
+
+    public static readonly TEXTURE0 = 33984;
+    public static readonly TEXTURE1 = 33985;
+    public static readonly TEXTURE2 = 33986;
+    public static readonly TEXTURE3 = 33987;
+    public static readonly TEXTURE4 = 33988;
+    public static readonly TEXTURE5 = 33989;
+    public static readonly TEXTURE6 = 33990;
+    public static readonly TEXTURE7 = 33991;
+    public static readonly TEXTURE8 = 33992;
+    public static readonly TEXTURE9 = 33993;
+    public static readonly TEXTURE10 = 33994;
+    public static readonly TEXTURE11 = 33995;
+    public static readonly TEXTURE12 = 33996;
+    public static readonly TEXTURE13 = 33997;
+    public static readonly TEXTURE14 = 33998;
+    public static readonly TEXTURE15 = 33999;
+    public static readonly TEXTURE16 = 34000;
+    public static readonly TEXTURE17 = 34001;
+    public static readonly TEXTURE18 = 34002;
+    public static readonly TEXTURE19 = 34003;
+    public static readonly TEXTURE20 = 34004;
+    public static readonly TEXTURE21 = 34005;
+    public static readonly TEXTURE22 = 34006;
+    public static readonly TEXTURE23 = 34007;
+    public static readonly TEXTURE24 = 34008;
+    public static readonly TEXTURE25 = 34009;
+    public static readonly TEXTURE26 = 34010;
+    public static readonly TEXTURE27 = 34011;
+    public static readonly TEXTURE28 = 34012;
+    public static readonly TEXTURE29 = 34013;
+    public static readonly TEXTURE30 = 34014;
+    public static readonly TEXTURE31 = 34015;
+
+    public static readonly FLOAT_VEC2 = 0x8B50;
+    public static readonly FLOAT_VEC3 = 0x8B51;
+    public static readonly FLOAT_VEC4 = 0x8B52;
+    public static readonly INT_VEC2 = 0x8B53;
+    public static readonly INT_VEC3 = 0x8B54;
+    public static readonly INT_VEC4 = 0x8B55;
+    public static readonly BOOL = 0x8B56;
+    public static readonly BOOL_VEC2 = 0x8B57;
+    public static readonly BOOL_VEC3 = 0x8B58;
+    public static readonly BOOL_VEC4 = 0x8B59;
+    public static readonly FLOAT_MAT2 = 0x8B5A;
+    public static readonly FLOAT_MAT3 = 0x8B5B;
+    public static readonly FLOAT_MAT4 = 0x8B5C;
+    public static readonly SAMPLER_CUBE = 0x8B60;
 
     public static isDepthFmt(fmt: number) {
         return GL.s_depth_fmt.indexOf(fmt) >= 0;

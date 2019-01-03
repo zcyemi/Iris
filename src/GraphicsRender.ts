@@ -6,6 +6,7 @@ import { Material } from "./Material";
 import { IRenderPipeline } from "./pipeline/IRenderPipeline";
 import { Input } from "./Input";
 import { GLContext } from "./gl/GLContext";
+import { GL } from "./gl/GL";
 
 export class GraphicsRenderCreateInfo{
     public colorFormat:number = 0x8058;
@@ -78,15 +79,13 @@ export class GraphicsRender{
         this.m_shaderFXlib = new ShaderFXLibs(glctx);
 
         //default texture
-        let gl = glctx.getWebGLRenderingContext();
-
         Material.DEF_TEXID_NUM = GraphicsRender.TEXID_DEFAULT_TEX;
-        Texture2D.TEMP_TEXID = gl.TEXTURE2;
+        Texture2D.TEMP_TEXID = GL.TEXTURE2;
         
         this.m_defaultTexture = Texture2D.crateEmptyTexture(2,2,glctx);
-        gl.activeTexture(gl.TEXTURE3);
-        gl.bindTexture(gl.TEXTURE_2D,this.m_defaultTexture.getRawTexture());
-        gl.frontFace(gl.CCW);
+        glctx.activeTexture(GL.TEXTURE3);
+        glctx.bindTexture(GL.TEXTURE_2D,this.m_defaultTexture.getRawTexture());
+        glctx.frontFace(GL.CCW);
         this.setPipeline(pipeline);
     }
 
