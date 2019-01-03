@@ -22,6 +22,7 @@ import { FrameBuffer } from "../gl/FrameBuffer";
 import { ReleaseGraphicObj } from "../IGraphicObj";
 import { RenderTexture } from "../RenderTexture";
 import { RenderModel } from "./RenderModel";
+import { GL } from "../gl/GL";
 
 export class PipelineBase implements IRenderPipeline {
 
@@ -385,24 +386,24 @@ export class PipelineBase implements IRenderPipeline {
      * @param defUniformBlock 
      */
     public drawMeshWithMat(mesh:Mesh,mat:Material,vao:WebGLVertexArrayObject,objmtx?:mat4,defUniformBlock:boolean = true){
-        const gl = this.gl;
+        const glctx = this.glctx;
         let program = mat.program;
-        gl.useProgram(program.Program);
+        glctx.useProgram(program.Program);
         if(defUniformBlock){
             this.uniformBindDefault(program);
         }
-        mat.apply(gl);
+        mat.apply(glctx);
         const dataobj = this.m_shaderDataObj;
         if(objmtx !=null){
             dataobj.setMtxModel(objmtx);
             this.updateUniformBufferObject(dataobj);
         }
         if(vao == null) throw new Error('vertex array obj is null!');
-        gl.bindVertexArray(vao);
+        glctx.bindVertexArray(vao);
         let indicedesc = mesh.indiceDesc;
-        gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type,indicedesc.offset);
-        gl.bindVertexArray(null);
-        mat.clean(gl);
+        glctx.drawElements(GL.TRIANGLES, indicedesc.indiceCount,indicedesc.type,indicedesc.offset);
+        glctx.bindVertexArray(null);
+        mat.clean(glctx);
     }
 
     /**
@@ -422,7 +423,7 @@ export class PipelineBase implements IRenderPipeline {
         if(defUniformBlock){
             this.uniformBindDefault(program);
         }
-        mat.apply(gl);
+        mat.apply(glctx);
         const dataobj = this.m_shaderDataObj;
         if(objmtx !=null){
             dataobj.setMtxModel(objmtx);
@@ -433,7 +434,7 @@ export class PipelineBase implements IRenderPipeline {
         let indicedesc = mesh.indiceDesc;
         gl.drawElements(gl.TRIANGLES, indicedesc.indiceCount,indicedesc.type,indicedesc.offset);
         meshrender.unbindVertexArray(glctx);
-        mat.clean(gl);
+        mat.clean(glctx);
     }
 
     public release() {

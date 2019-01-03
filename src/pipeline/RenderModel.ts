@@ -142,12 +142,11 @@ export class RenderModel implements IGraphicObj{
         let mesh = meshrender.mesh;
 
         const glctx = this.m_glctx;
-        const gl = glctx.getWebGLRenderingContext();
         meshrender.refreshData(glctx);
         let glp = mat.program;
         glctx.useGLProgram(glp);
         this.bindDefaultUniform(glp);
-        mat.apply(gl);
+        mat.apply(glctx);
         if(objmtx != null){
             this.updateUniformObjMtx(objmtx);
         }
@@ -155,22 +154,21 @@ export class RenderModel implements IGraphicObj{
         meshrender.bindVertexArray(glctx);
         glctx.drawElementIndices(mesh.indiceDesc);
         meshrender.unbindVertexArray(glctx);
-        mat.clean(gl);
+        mat.clean(glctx);
     }
 
     public drawMeshWithMat(mesh:Mesh,mat:Material,vao:WebGLVertexArrayObject,objmtx:mat4){
         const glctx = this.m_glctx;
-        const gl = glctx.getWebGLRenderingContext();
         mesh.refreshMeshBuffer(glctx);
         let glp = mat.program;
         glctx.useGLProgram(glp);
         this.bindDefaultUniform(glp);
-        mat.apply(gl);
+        mat.apply(glctx);
         if(objmtx != null)this.updateUniformObjMtx(objmtx);
         glctx.bindVertexArray(vao);
         glctx.drawElementIndices(mesh.indiceDesc);
         glctx.bindVertexArray(null);
-        mat.clean(gl);
+        mat.clean(glctx);
     }
 
     public clearFrameBufferTarget(clearinfo:PipelineClearInfo,fb:FrameBuffer){

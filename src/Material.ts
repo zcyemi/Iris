@@ -383,7 +383,7 @@ export class Material{
      * especially for binded texture
      * @param gl 
      */
-    public clean(gl:WebGL2RenderingContext){
+    public clean(glctx:GLContext){
         // let pu = this.m_propertyBlock.uniforms;
         // for(let i=0,len = pu.length;i<len;i++){
         //     let u = pu[i];

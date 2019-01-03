@@ -22,6 +22,14 @@ export type GLSizeOrData = number | GLData;
 
 export class GL {
 
+    public static readonly POINTS = 0x0000;
+    public static readonly LINES = 0x0001;
+    public static readonly LINE_LOOP = 0x0002;
+    public static readonly LINE_STRIP = 0x0003;
+    public static readonly TRIANGLES = 0x0004;
+    public static readonly TRIANGLE_STRIP = 0x0005;
+    public static readonly TRIANGLE_FAN = 0x0006;
+
     public static readonly FRAMEBUFFER = 0x8D40;
     public static readonly RENDERBUFFER = 0x8D41;
     public static readonly COLOR_ATTACHMENT0 = 0x8CE0;
@@ -212,6 +220,13 @@ export class GL {
     public static readonly FLOAT_MAT3 = 0x8B5B;
     public static readonly FLOAT_MAT4 = 0x8B5C;
     public static readonly SAMPLER_CUBE = 0x8B60;
+
+    public static readonly STREAM_READ = 0x88E1;
+    public static readonly STREAM_COPY = 0x88E2;
+    public static readonly STATIC_READ = 0x88E5;
+    public static readonly STATIC_COPY = 0x88E6;
+    public static readonly DYNAMIC_READ = 0x88E9;
+    public static readonly DYNAMIC_COPY = 0x88EA;
 
     public static isDepthFmt(fmt: number) {
         return GL.s_depth_fmt.indexOf(fmt) >= 0;

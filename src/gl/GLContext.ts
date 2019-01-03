@@ -367,6 +367,10 @@ export class GLContext {
         this.gl.drawElements(desc.topology,desc.indiceCount,desc.type,desc.offset);
     }
 
+    public drawElements(mode: GLenum, count: GLsizei, type: GLenum, offset: GLintptr){
+        this.gl.drawElements(mode,count,type,offset);
+    }
+
     public polygonOffset(factor:number,units:number){
         this.gl.polygonOffset(factor,units);
     }
@@ -552,6 +556,16 @@ export class GLContext {
 
     public bindSampler(unit: number, sampler: WebGLSampler){
         this.gl.bindSampler(unit,sampler);
+    }
+
+    public readPixels(x: number, y: number, width: number, height: number, format: number, type: number,
+        dstData: any){
+        this.gl.readPixels(x,y,width,height,format,type,dstData);
+    }
+
+    public getBufferSubData(target: number, srcByteOffset: number, dstBuffer: ArrayBufferView,
+        dstOffset?: number, length?: number){
+        this.gl.getBufferSubData(target,srcByteOffset,dstBuffer,dstOffset,length);
     }
 
 }

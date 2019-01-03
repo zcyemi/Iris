@@ -1,6 +1,6 @@
 import { GLContext } from "./GLContext";
 import { vec4 } from "../math/GLMath";
-import { GLDataType } from "./GL";
+import { GLDataType, GL } from "./GL";
 import { read } from "fs";
 import { GLFenceSync } from "./GLFenceSync";
 
@@ -10,11 +10,10 @@ export class GLPixelPack{
     private m_sync: GLFenceSync;
     private glctx:GLContext;
     public constructor(glctx:GLContext,buffersize:number,dynamic:boolean = true){
-        const gl = glctx.getWebGLRenderingContext();
-        let pb = gl.createBuffer();
-        gl.bindBuffer(gl.PIXEL_PACK_BUFFER,pb);
-        gl.bufferData(gl.PIXEL_PACK_BUFFER,buffersize,dynamic? gl.DYNAMIC_READ: gl.STATIC_READ);
-        gl.bindBuffer(gl.PIXEL_PACK_BUFFER,null);
+        let pb = glctx.createBuffer();
+        glctx.bindBuffer(GL.PIXEL_PACK_BUFFER,pb);
+        glctx.bufferData(GL.PIXEL_PACK_BUFFER,buffersize,dynamic? GL.DYNAMIC_READ: GL.STATIC_READ);
+        glctx.bindBuffer(GL.PIXEL_PACK_BUFFER,null);
         this.m_pb= pb;
 
         this.glctx= glctx;
@@ -34,12 +33,13 @@ export class GLPixelPack{
 
     public readPixelsSync(rect:vec4,format:number,type:GLDataType,dstbuffer:ArrayBufferView,dstoffset:number =0,length?:number){
         const pb = this.m_pb;
-        const gl = this.glctx.getWebGLRenderingContext();
-        gl.bindBuffer(gl.PIXEL_PACK_BUFFER,pb);
-        gl.readPixels(rect.x,rect.y,rect.z,rect.w,format,type,0);
 
-        gl.getBufferSubData(gl.PIXEL_PACK_BUFFER,0,dstbuffer,dstoffset,length);
-        gl.bindBuffer(gl.PIXEL_PACK_BUFFER,null);
+        const glctx = this.glctx;
+        glctx.bindBuffer(GL.PIXEL_PACK_BUFFER,pb);
+        glctx.readPixels(rect.x,rect.y,rect.z,rect.w,format,type,0);
+
+        glctx.getBufferSubData(GL.PIXEL_PACK_BUFFER,0,dstbuffer,dstoffset,length);
+        glctx.bindBuffer(GL.PIXEL_PACK_BUFFER,null);
     }
 
     public readPixelsAsync(rect:vec4,format:number,type:GLDataType,dstbuffer:ArrayBufferView,cb:(ArrayBufferView)=>void,dstoffset:number =0,length?:number){
@@ -55,14 +55,14 @@ export class GLPixelPack{
             }
         }
         var pb = this.m_pb;
-        var gl = this.glctx.getWebGLRenderingContext();
-        gl.bindBuffer(gl.PIXEL_PACK_BUFFER,pb);
-        gl.readPixels(rect.x,rect.y,rect.z,rect.w,format,type,0);
+        const glctx = this.glctx;
+        glctx.bindBuffer(GL.PIXEL_PACK_BUFFER,pb);
+        glctx.readPixels(rect.x,rect.y,rect.z,rect.w,format,type,0);
         
         sync.emit(()=>{
-            gl.bindBuffer(gl.PIXEL_PACK_BUFFER,pb);
-            gl.getBufferSubData(gl.PIXEL_PACK_BUFFER,0,dstbuffer,dstoffset,length);
-            gl.bindBuffer(gl.PIXEL_PACK_BUFFER,null);
+            glctx.bindBuffer(GL.PIXEL_PACK_BUFFER,pb);
+            glctx.getBufferSubData(GL.PIXEL_PACK_BUFFER,0,dstbuffer,dstoffset,length);
+            glctx.bindBuffer(GL.PIXEL_PACK_BUFFER,null);
             cb(dstbuffer);
         });
     }
