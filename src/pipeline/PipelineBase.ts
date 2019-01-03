@@ -6,7 +6,6 @@ import { BufferDebugInfo } from "../render/BufferDebugInfo";
 import { PassDebug } from "../render/PassDebug";
 import { Texture2D } from "../Texture2D";
 import { ShadowMapData } from "../render/Shadow";
-import { PipelineStateCache } from "../PipelineStateCache";
 import { Transform } from "../Transform";
 import { IRenderPipeline } from "./IRenderPipeline";
 import { RenderPass } from "../render/RenderPass";
@@ -41,8 +40,6 @@ export class PipelineBase implements IRenderPipeline {
 
     public glctx: GLContext;
     protected gl: WebGL2RenderingContext;
-    private m_pipestateCache: PipelineStateCache;
-    public get stateCache(): PipelineStateCache { return this.m_pipestateCache; }
 
     protected m_inited:boolean = false;
 
@@ -134,7 +131,6 @@ export class PipelineBase implements IRenderPipeline {
     public onInitGL(){
         const glctx = this.glctx;
         const bufferinfo = this.m_mainfbInfo;
-        this.m_pipestateCache = new PipelineStateCache(glctx);
         let fb = FrameBuffer.create(glctx,glctx.canvasWidth,glctx.canvasHeight,{colFmt:bufferinfo.colorFormat,
         depthFmt:bufferinfo.depthFormat});
         this.mainFBaspect = fb;
@@ -445,7 +441,6 @@ export class PipelineBase implements IRenderPipeline {
         this.m_bufferDebugInfo = [];
 
         this.mainFBaspect = ReleaseGraphicObj(this.mainFBaspect,glctx);
-        this.m_pipestateCache = ReleaseGraphicObj(this.m_pipestateCache,glctx);
 
         glctx.deleteBuffer(this.m_uniformBufferBasis);
         glctx.deleteBuffer(this.m_uniformBufferLight);

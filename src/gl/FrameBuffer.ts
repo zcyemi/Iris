@@ -4,8 +4,6 @@ import { GLContext } from "./GLContext";
 import { ShaderFX } from "../shaderfx/ShaderFX";
 import { IGraphicObj } from "../IGraphicObj";
 import { GL } from "./GL";
-
-
 interface FrameBufferCreateDesc{
     depthTex?:Texture2D,
     depthStencil?:Texture2D,

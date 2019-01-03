@@ -6,12 +6,10 @@ import { PassDepth } from "../render/PassDepth";
 import { PassShadowMap } from "../render/PassShadowMap";
 import { PipelineBase } from "./PipelineBase";
 import { Scene } from "../Scene";
-import { Comparison } from "../shaderfx/Shader";
 import { RenderPass } from "../render/RenderPass";
 import { RenderTexture } from "../RenderTexture";
 import { ReleaseGraphicObj } from "../IGraphicObj";
 import { GLContext } from "../gl/GLContext";
-import { GraphicsRenderCreateInfo } from "../GraphicsRender";
 import { GL } from "../gl/GL";
 
 
@@ -94,10 +92,9 @@ export class PipelineForwardZPrePass extends PipelineBase {
         this.renderBufferDebug();
         this.UnBindTargetFrameBuffer();
 
-        const state = this.stateCache;
-        state.setBlend(false);
-        state.setZTest(Comparison.ALWAYS);
-        state.setZWrite(true);
+        // state.setBlend(false);
+        // state.setZTest(Comparison.ALWAYS);
+        // state.setZWrite(true);
     }
 
     public release(){

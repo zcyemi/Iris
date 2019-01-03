@@ -1,5 +1,4 @@
 import { GLProgram } from "./GLProgram";
-import { GLPipelineState } from "./GLPipelineState";
 import { GLFenceSync } from "./GLFenceSync";
 import { FrameBuffer } from "./FrameBuffer";
 import { GL, GLSizeOrData } from "./GL";
@@ -142,15 +141,6 @@ export class GLContext {
         vp[1] = y;
         vp[2] = w;
         vp[3] = h;
-    }
-
-    public savePipeline(...type: number[]): GLPipelineState {
-        return new GLPipelineState(this.gl, ...type);
-    }
-
-    public restorePipeline(state: GLPipelineState) {
-        if (state == null) return;
-        state.restore(this.gl);
     }
 
     public colorMask(red: GLboolean, green: GLboolean, blue: GLboolean, alpha: GLboolean){
