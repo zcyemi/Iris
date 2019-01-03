@@ -45,18 +45,7 @@ export class PassOpaque extends RenderPass{
 
         glctx.depthMask(true);
 
-        glctx.bindFramebuffer(pipe.mainFrameBuffer);
-
-        //light
-        let light = scene.lights[0];
-        if(light !=null && light.isDirty){
-            let bufferLight = model.uniformLight;
-            let datalight = bufferLight.data;
-            datalight.setLightData(light.lightPosData,light.lightType,0);
-            datalight.setLightColorIntensity(light.lightColor,light.intensity,0);
-            datalight.setAmbientColor(cam.ambientColor);
-            bufferLight.uploadBufferData(glctx);
-        }
+        glctx.bindGLFramebuffer(pipe.mainFrameBuffer);
 
         const len = queue.length;
         for(let t=0;t<len;t++){

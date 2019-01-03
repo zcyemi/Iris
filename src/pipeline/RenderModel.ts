@@ -176,7 +176,7 @@ export class RenderModel implements IGraphicObj{
     public clearFrameBufferTarget(clearinfo:PipelineClearInfo,fb:FrameBuffer){
         if(clearinfo == null )return;
         const glctx = this.m_glctx;
-        glctx.bindFramebuffer(fb);
+        glctx.bindGLFramebuffer(fb);
         let ccol = clearinfo.color;
         if(ccol) glctx.clearColorAry(ccol.raw);
         let depth = clearinfo.depth;

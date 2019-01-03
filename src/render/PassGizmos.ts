@@ -73,7 +73,7 @@ export class PassGizmos extends RenderPass{
         const model = pipeline.model;
         const glctx = pipeline.glctx;
 
-        glctx.bindFramebuffer(pipeline.mainFrameBuffer);
+        glctx.bindGLFramebuffer(pipeline.mainFrameBuffer);
 
         if(scene != null){
             this.drawLightMark(scene);

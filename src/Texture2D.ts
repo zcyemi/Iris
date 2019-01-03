@@ -1,6 +1,7 @@
 import { GLContext } from "./gl/GLContext";
 import { ShaderFX } from "./shaderfx/ShaderFX";
 import { ITexture, TextureCreationDesc, TextureDescUtility } from "./Texture";
+import { GL } from "./gl/GL";
 
 export class Texture2D implements ITexture {
     public static TEMP_TEXID: number;
@@ -37,49 +38,45 @@ export class Texture2D implements ITexture {
     }
 
     public static createTexture2D(width: number, height: number, desc: TextureCreationDesc, glctx: GLContext): Texture2D {
-        let gl = glctx.getWebGLRenderingContext();
-
         TextureDescUtility.fillDefault(desc);
-
-        let tex = gl.createTexture();
-        gl.activeTexture(ShaderFX.GL_TEXTURE_TEMP);
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.texStorage2D(gl.TEXTURE_2D, 1, desc.internalformat, width, height);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, desc.mag_filter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, desc.min_filter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, desc.wrap_s);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, desc.wrap_t);
+        let tex = glctx.createTexture();
+        glctx.activeTexture(ShaderFX.GL_TEXTURE_TEMP);
+        glctx.bindTexture(GL.TEXTURE_2D, tex);
+        glctx.texStorage2D(GL.TEXTURE_2D, 1, desc.internalformat, width, height);
+        glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, desc.mag_filter);
+        glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, desc.min_filter);
+        glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, desc.wrap_s);
+        glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, desc.wrap_t);
         if (desc.mipmap) {
-            gl.generateMipmap(gl.TEXTURE_2D);
+            glctx.generateMipmap(GL.TEXTURE_2D);
         }
-        gl.bindTexture(gl.TEXTURE_2D, null);
+        glctx.bindTexture(GL.TEXTURE_2D, null);
 
         let texture = new Texture2D(tex, width, height, desc);
         return texture;
     }
 
     public static createTexture2DImage(img:HTMLImageElement,desc:TextureCreationDesc,glctx:GLContext):Texture2D{
-        const gl = glctx.getWebGLRenderingContext();
-        let tex = gl.createTexture();
+        let tex = glctx.createTexture();
 
         TextureDescUtility.fillDefault(desc);
 
         try {
-            gl.bindTexture(gl.TEXTURE_2D, tex);
-            gl.texImage2D(gl.TEXTURE_2D, 0, desc.format, desc.internalformat, gl.UNSIGNED_BYTE, img);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, desc.mag_filter);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, desc.min_filter);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, desc.wrap_s);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, desc.wrap_t);
+            glctx.bindTexture(GL.TEXTURE_2D, tex);
+            glctx.texImage2D(GL.TEXTURE_2D, 0,desc.internalformat,img.width,img.height,0,desc.format, GL.UNSIGNED_BYTE, img);
+            glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, desc.mag_filter);
+            glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, desc.min_filter);
+            glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, desc.wrap_s);
+            glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, desc.wrap_t);
             if(desc.mipmap){
-                gl.generateMipmap(gl.TEXTURE_2D);
+                glctx.generateMipmap(GL.TEXTURE_2D);
             }
-            gl.generateMipmap(gl.TEXTURE_2D);
-            gl.bindTexture(gl.TEXTURE_2D, null);
+            glctx.generateMipmap(GL.TEXTURE_2D);
+            glctx.bindTexture(GL.TEXTURE_2D, null);
             return new Texture2D(tex, img.width, img.height, desc);
         }
         catch (e) {
-            gl.deleteTexture(tex);
+            glctx.deleteTexture(tex);
             return null;
         }
     }
@@ -87,7 +84,6 @@ export class Texture2D implements ITexture {
     public static loadTexture2D(url: string, glctx: GLContext, alpha: boolean = true): Promise<Texture2D> {
         return new Promise<Texture2D>((res, rej) => {
             var img = new Image();
-            const gl = glctx.getWebGLRenderingContext();
             img.onload = () => {
                 try {
                     let desc = alpha? TextureDescUtility.DefaultRGBA: TextureDescUtility.DefaultRGB;
@@ -95,7 +91,7 @@ export class Texture2D implements ITexture {
                     res(new Texture2D(tex, img.width, img.height, desc));
                 }
                 catch (e) {
-                    gl.deleteTexture(tex);
+                    glctx.deleteTexture(tex);
                     rej(e);
                 }
 
@@ -110,24 +106,22 @@ export class Texture2D implements ITexture {
     public resize(width: number, height: number, glctx: GLContext) {
         if (width == this.m_width && height == this.m_height) return;
 
-        let gl = glctx.getWebGLRenderingContext();
-
-        gl.deleteTexture(this.m_raw);
+        glctx.deleteTexture(this.m_raw);
 
         let desc = this.m_desc;
 
-        let tex = gl.createTexture();
-        gl.activeTexture(ShaderFX.GL_TEXTURE_TEMP);
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.texStorage2D(gl.TEXTURE_2D, 1, desc.internalformat, width, height);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, desc.mag_filter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, desc.min_filter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, desc.wrap_s);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, desc.wrap_t);
+        let tex = glctx.createTexture();
+        glctx.activeTexture(ShaderFX.GL_TEXTURE_TEMP);
+        glctx.bindTexture(GL.TEXTURE_2D, tex);
+        glctx.texStorage2D(GL.TEXTURE_2D, 1, desc.internalformat, width, height);
+        glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, desc.mag_filter);
+        glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, desc.min_filter);
+        glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, desc.wrap_s);
+        glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, desc.wrap_t);
         if (desc.mipmap) {
-            gl.generateMipmap(gl.TEXTURE_2D);
+            glctx.generateMipmap(GL.TEXTURE_2D);
         }
-        gl.bindTexture(gl.TEXTURE_2D, null);
+        glctx.bindTexture(GL.TEXTURE_2D, null);
 
         this.m_raw = tex;
         this.m_width = width;
@@ -138,16 +132,15 @@ export class Texture2D implements ITexture {
         if (width < 2 || height < 2) {
             throw new Error('invalid texture size');
         }
-        let gl = glctx.getWebGLRenderingContext();
-        let tex = gl.createTexture();
-        gl.activeTexture(Texture2D.TEMP_TEXID);
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, width, height);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.bindTexture(gl.TEXTURE_2D, null);
+        let tex = glctx.createTexture();
+        glctx.activeTexture(Texture2D.TEMP_TEXID);
+        glctx.bindTexture(GL.TEXTURE_2D, tex);
+        glctx.texStorage2D(GL.TEXTURE_2D, 1, GL.RGBA8, width, height);
+        glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+        glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+        glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+        glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
+        glctx.bindTexture(GL.TEXTURE_2D, null);
 
         return new Texture2D(tex, width, height);
     }
@@ -158,17 +151,16 @@ export class Texture2D implements ITexture {
         var image = new Image();
         var tex = new Texture2D(null);
         image.onload = () => {
-            let gl = glctx.getWebGLRenderingContext();
-            let rawtex = gl.createTexture();
-            gl.activeTexture(Texture2D.TEMP_TEXID);
-            gl.bindTexture(gl.TEXTURE_2D, rawtex);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-            gl.generateMipmap(gl.TEXTURE_2D);
-            gl.bindTexture(gl.TEXTURE_2D, null);
+            let rawtex = glctx.createTexture();
+            glctx.activeTexture(Texture2D.TEMP_TEXID);
+            glctx.bindTexture(GL.TEXTURE_2D, rawtex);
+            glctx.texImage2D(GL.TEXTURE_2D, 0, GL.RGB, image.width, image.height, 0, GL.RGB, GL.UNSIGNED_BYTE, image);
+            glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+            glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+            glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+            glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
+            glctx.generateMipmap(GL.TEXTURE_2D);
+            glctx.bindTexture(GL.TEXTURE_2D, null);
             tex.m_width = image.width;
             tex.m_height = image.height;
             tex.m_raw = rawtex;

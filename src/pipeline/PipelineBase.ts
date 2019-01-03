@@ -297,14 +297,14 @@ export class PipelineBase implements IRenderPipeline {
     public bindTargetFrameBuffer(forece:boolean,setvp:boolean) {
         const glctx = this.glctx;
         const fb = this.mainFBaspect;
-        if(glctx.bindFramebuffer(this.mainFBaspect)){
+        if(glctx.bindGLFramebuffer(this.mainFBaspect)){
             glctx.viewport(0,0,fb.width,fb.height);
         } 
     }
 
     public UnBindTargetFrameBuffer() {
         const glctx = this.glctx;
-        if(glctx.bindFramebuffer(null)){
+        if(glctx.bindGLFramebuffer(null)){
             glctx.viewport(0,0,glctx.canvasWidth,glctx.canvasHeight);
         }
     }

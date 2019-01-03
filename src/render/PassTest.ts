@@ -27,7 +27,7 @@ export class PassTest extends RenderPass{
         glctx.enable(GL.DEPTH_TEST);
         glctx.depthFunc(GL.LEQUAL);
 
-        glctx.bindFramebuffer(pipe.mainFrameBuffer);
+        glctx.bindGLFramebuffer(pipe.mainFrameBuffer);
 
         const model = pipe.model;
         model.drawMeshRender(this.m_render,mat4.Identity);

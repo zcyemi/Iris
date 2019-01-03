@@ -95,7 +95,7 @@ export class RenderPipeline implements IRenderPipeline{
 
 
         const mainfb = this.m_mainfb;
-        glctx.bindFramebuffer(mainfb);
+        glctx.bindGLFramebuffer(mainfb);
 
         model.clearFrameBufferTarget(this.m_clearInfo,mainfb);
         //exec passes
@@ -105,7 +105,7 @@ export class RenderPipeline implements IRenderPipeline{
 
     public onRenderToCanvas(){
         const glctx =this.m_glctx;
-        glctx.bindFramebuffer(null);
+        glctx.bindGLFramebuffer(null);
         const mainfb = this.m_mainfb;
         glctx.viewport(0,0,mainfb.width,mainfb.height);
         this.m_model.drawFullScreen(this.m_mainfb.coltex);

@@ -49,7 +49,7 @@ export class PassSkybox extends RenderPass{
 
         let pipeline = this.pipeline;
         const glctx = pipeline.glctx;
-        glctx.bindFramebuffer(pipeline.mainFrameBuffer);
+        glctx.bindGLFramebuffer(pipeline.mainFrameBuffer);
 
 
         const skyboxrender = this.m_skyrender;

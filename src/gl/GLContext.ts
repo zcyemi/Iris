@@ -1,11 +1,10 @@
 import { GLProgram } from "./GLProgram";
-import { GLFrameBuffer } from "./GLFrameBuffer";
 import { GLPipelineState } from "./GLPipelineState";
 import { GLFenceSync } from "./GLFenceSync";
 import { FrameBuffer } from "./FrameBuffer";
 import { GL, GLSizeOrData } from "./GL";
 import { MeshIndicesDesc } from "../Mesh";
-import { ShaderTags, Comparison, BlendOperator, BlendFactor } from "../shaderfx/Shader";
+import { ShaderTags, BlendOperator, BlendFactor } from "../shaderfx/Shader";
 import { Utility } from "../Utility";
 import { i32, f32 } from "../math/GLMath";
 
@@ -96,11 +95,9 @@ export class GLContext {
         return p;
     }
 
-    public createFrameBuffer(retain: boolean, colorInternalFormat: number, depthInternalFormat?: number, width?: number, height?: number,glfb?:GLFrameBuffer): GLFrameBuffer | null {
-        return GLFrameBuffer.create(retain, this, colorInternalFormat, depthInternalFormat, width, height,glfb);
-    }
 
-    public bindFramebuffer(fb:FrameBuffer):boolean{
+
+    public bindGLFramebuffer(fb:FrameBuffer):boolean{
         if(this.m_curfb == fb) return false;
         const gl = this.gl;
         gl.bindFramebuffer(gl.FRAMEBUFFER,fb != null? fb.rawobj:null);
@@ -436,4 +433,21 @@ export class GLContext {
     public deleteProgram(program:WebGLProgram){
         this.gl.deleteProgram(program);
     }
+
+    public createFramebuffer():WebGLFramebuffer{
+        return this.gl.createFramebuffer();
+    }
+
+    public deleteFramebuffer(fb:WebGLFramebuffer){
+        this.gl.deleteFramebuffer(fb);
+    }
+
+    public framebufferTexture2D(target: i32, attachment: i32, textarget: i32, texture: WebGLTexture | null, level: i32){
+        this.gl.framebufferTexture2D(target,attachment,textarget,texture,level);
+    }
+
+    public bindFramebuffer(target:i32,fb:WebGLFramebuffer){
+        this.gl.bindFramebuffer(target,fb);
+    }
+
 }
