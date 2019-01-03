@@ -179,7 +179,7 @@ export class Shader{
     }
 
     public static CreateProgram(glctx:GLContext,vsource:string,psource:string):GLProgram{
-        return glctx.createProgram(vsource,psource);
+        return glctx.createGLProgram(vsource,psource);
     }
 }
 

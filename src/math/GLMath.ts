@@ -2,6 +2,12 @@ const DEG2RAD_HALF = Math.PI / 360.0;
 const DEG2RAD = Math.PI / 180.0;
 const RAD2DEG = 180.0 / Math.PI;
 
+export type i32 = number;
+export type i64 = number;
+export type f32 = number;
+export type f64 = number;
+
+
 export class glmath {
     public static vec3(x: number, y: number, z: number): vec3 {
         return new vec3([x, y, z]);

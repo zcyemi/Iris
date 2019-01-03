@@ -7,6 +7,7 @@ import { GL, GLSizeOrData } from "./GL";
 import { MeshIndicesDesc } from "../Mesh";
 import { ShaderTags, Comparison, BlendOperator, BlendFactor } from "../shaderfx/Shader";
 import { Utility } from "../Utility";
+import { i32, f32 } from "../math/GLMath";
 
 export class GLContext {
     private m_glFenceSynces:GLFenceSync[] = [];
@@ -49,7 +50,7 @@ export class GLContext {
          return this.gl;
     }
 
-    public createProgram(vsource: string, psource: string): GLProgram | null {
+    public createGLProgram(vsource: string, psource: string): GLProgram | null {
 
         let gl = this.gl;
         let vs = gl.createShader(gl.VERTEX_SHADER);
@@ -373,4 +374,66 @@ export class GLContext {
         this.gl.polygonOffset(factor,units);
     }
 
+    //texture
+
+    public activeTexture(texture:number){
+        this.gl.activeTexture(texture);
+    }
+
+    public bindTexture(target:number,tex:WebGLTexture){
+        this.gl.bindTexture(target,tex);
+    }
+    public texStorage2D(target:number,level:number,format:number,width:number,height:number){
+        this.gl.texStorage2D(target,level,format,width,height);
+    }
+    public texImage2D(target:i32,level:i32,internalfmt:i32,width:i32,height:i32,border:i32,format:i32,type:i32,pixels:any){
+        this.gl.texImage2D(target,level,internalfmt,width,height,border,format,type,pixels);
+    }
+    public texParameteri(target: i32, pname: i32, param: i32){
+        this.gl.texParameteri(target,pname,param);
+    }
+    public texParameterf(target: i32, pname: i32, param: f32){
+        this.gl.texParameterf(target,pname,param);
+    }
+
+    public generateMipmap(target:i32){
+        this.gl.generateMipmap(target);
+    }
+
+    public createShader(type:i32):WebGLShader{
+        return this.gl.createShader(type);
+    }
+    public shaderSource(shader:WebGLShader,source:string){
+        this.gl.shaderSource(shader,source);
+    }
+    public compileShader(shader:WebGLShader){
+        this.gl.compileShader(shader);
+    }
+    public getShaderParameter(shader:WebGLShader,type:i32){
+        this.gl.getShaderParameter(shader,type);
+    }
+    public getShaderInfoLog(shader:WebGLShader){
+        this.gl.getShaderInfoLog(shader);
+    }
+    public deleteShader(shader:WebGLShader){
+        this.gl.deleteShader(shader);
+    }
+    public createProgram():WebGLProgram{
+        return this.gl.createProgram();
+    }
+    public attachShader(program:WebGLProgram,shader:WebGLShader){
+        this.gl.attachShader(program,shader);
+    }
+    public linkProgram(program:WebGLProgram){
+        this.gl.linkProgram(program);
+    }
+    public getProgramParameter(program:WebGLProgram,target:i32){
+        return this.gl.getProgramParameter(program,target);
+    }
+    public getProgramInfoLog(program:WebGLProgram):string{
+        return this.gl.getProgramInfoLog(program);
+    }
+    public deleteProgram(program:WebGLProgram){
+        this.gl.deleteProgram(program);
+    }
 }
