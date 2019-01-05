@@ -1,5 +1,5 @@
 import { GameObject } from "./GameObject";
-import { vec3 } from "./math/GLMath";
+import { vec3, vec4, glmath } from "./math/GLMath";
 import { Component } from "./Component";
 import { Scene } from "./Scene";
 
@@ -70,8 +70,17 @@ export class Light extends Component{
         light.castShadow = true;
         return light;
     }
-
     public onUpdate(scene:Scene){
         scene.addLight(this);
+    }
+
+    public getShaderLightPosData():vec4{
+        if(this.lightType == LightType.direction){
+            let fwd = this.transform.forward.raw;
+            return glmath.vec4(-fwd[0],-fwd[1],-fwd[2],1.0);
+        }
+        else{
+            return this.transform.position.vec4(0.0);
+        }
     }
 }

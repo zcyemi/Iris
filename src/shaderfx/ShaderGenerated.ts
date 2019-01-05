@@ -59,42 +59,73 @@ vec4 ClipToWorld(in vec4 clippoint){
 
 #define saturate(x) clamp(x,0.0,1.0)
 `;
-	public static readonly SHADERFX_LIGHT:string = `struct LIGHT_DATA{
-    vec4 pos_type;
-    vec4 col_intensity;
+	public static readonly SHADERFX_LIGHT:string = `layout (std140) uniform UNIFORM_LIGHT{
+    vec4 lightColor0;
+    vec4 lightColor1;
+    vec4 lightColor2;
+    vec4 lightColor3;
+    vec4 lightIntensity;
+    vec4 lightPosX;
+    vec4 lightPosY;
+    vec4 lightPosZ;
+    vec4 light_ambient;
+    vec4 lightPrimePos;
+    vec4 lightPrimeColor;
 };
-layout (std140) uniform UNIFORM_LIGHT{
-    LIGHT_DATA light_source[4];
-    vec4 ambient_color;
-    mediump uint light_num;
-};
 
-#define LIGHT_NUM light_num
-#define LIGHT_COLOR0 light_source[0].col_intensity.xyz
-#define LIGHT_COLOR1 light_source[1].col_intensity.xyz
-#define LIGHT_COLOR2 light_source[2].col_intensity.xyz
-#define LIGHT_COLOR3 light_source[3].col_intensity.xyz
+#define LIGHT_COLOR0 lightColor0
+#define LIGHT_COLOR1 lightColor1
+#define LIGHT_COLOR2 lightColor2
+#define LIGHT_COLOR3 lightColor3
 
-#define LIGHT_INTENSITY0 light_source[0].col_intensity.w
-#define LIGHT_INTENSITY1 light_source[1].col_intensity.w
-#define LIGHT_INTENSITY2 light_source[2].col_intensity.w
-#define LIGHT_INTENSITY3 light_source[3].col_intensity.w
+#define MAIN_LIGHT_POS lightPrimePos
+#define MAIN_LIGHT_COLOR lightPrimeColor
 
-#define LIGHT_DIR0 light_source[0].pos_type.xyz
-#define LIGHT_DIR1 light_source[1].pos_type.xyz`;
-	public static readonly SHADERFX_LIGHTING:string = `vec3 LightModel_Lambert(vec3 lightdir,vec3 lightColor,vec3 normal,vec3 albedo){
-    float diff = max(.0,dot(-lightdir,normal));
-    return albedo * lightColor * diff;
+#define LIGHT_INTENSITY lightIntensity
+#define LIGHT_INTENSITY0 lightIntensity.x
+#define LIGHT_INTENSITY1 lightIntensity.y
+#define LIGHT_INTENSITY2 lightIntensity.z
+#define LIGHT_INTENSITY3 lightIntensity.w
+`;
+	public static readonly SHADERFX_LIGHTING:string = `vec3 LightModel_Lambert(vec3 lightdir,vec3 lightColor,float atten,vec3 normal,vec3 albedo){
+    float diff = max(.0,dot(lightdir,normal));
+    return albedo * lightColor * diff * atten;
 }
 
 
-vec3 Sample_PointLight(vec3 wpos,uint index){
-    LIGHT_DATA ldata = light_source[index];
+vec3 Sample_4PointLights(vec3 wpos,vec3 normal){
+    vec4 toLightX = lightPosX - vec4(wpos.x);
+    vec4 toLightY = lightPosY - vec4(wpos.y);
+    vec4 toLightZ = lightPosZ - vec4(wpos.z);
 
-    float dist = length(wpos - ldata.pos_type.xyz);
+    //dot
+    vec4 ndotl = vec4(0.0);
+    ndotl += toLightX * normal.x;
+    ndotl += toLightY * normal.y;
+    ndotl += toLightZ * normal.z;
+    ndotl = max(vec4(0.0),ndotl);
 
-    return step(dist,9.0) * ldata.col_intensity.xyz;
-}`;
+    //lensq
+    vec4 toLightSq = vec4(0.0);
+    toLightSq += toLightX * toLightX;
+    toLightSq += toLightY * toLightY;
+    toLightSq += toLightZ * toLightZ;
+    toLightSq = max(toLightSq,vec4(0.000001));
+
+    ndotl *= sqrt(toLightSq);
+
+    vec4 atten = 1.0/ (1.0 + toLightSq * LIGHT_INTENSITY);
+    vec4 diff = ndotl * atten;
+    
+    vec3 col = vec3(0.0);
+    col += diff.x * LIGHT_COLOR0.xyz;
+    col += diff.y * LIGHT_COLOR1.xyz;
+    col += diff.z * LIGHT_COLOR2.xyz;
+    col += diff.w * LIGHT_COLOR3.xyz;
+
+    return col;
+}
+`;
 	public static readonly SHADERFX_SHADOWMAP:string = `#options SMCASCADE NONE TWO FOUR
 #options SHADOW ON OFF
 
@@ -232,22 +263,18 @@ void vertex(){
     v2f.wpos = wpos.xyz;
 }
 #endif
-
 #pragma ps fragment
 #ifdef SHADER_PS
 out lowp vec4 fragColor;
 uniform vec4 uColor;
 void fragment(){
 
+    vec3 col = Sample_4PointLights(v2f.wpos,normalize(v2f.normal)) * uColor.xyz;
     
-    //vec3 lcolor = LightModel_Lambert(LIGHT_DIR0,LIGHT_COLOR0,v2f.normal,uColor.xyz);
-    
-    vec3 lcol1 = Sample_PointLight(v2f.wpos,0u);
-    vec3 lcol2 = Sample_PointLight(v2f.wpos,1u);
-    
-    vec3 col = (lcol1 + lcol2) * uColor.xyz;
+    vec3 mainCol = LightModel_Lambert(MAIN_LIGHT_POS.xyz,MAIN_LIGHT_COLOR.xyz,MAIN_LIGHT_COLOR.w,v2f.normal,uColor.xyz);
 
-    fragColor = vec4(col,1.0);
+
+    fragColor = vec4(mainCol + col,1.0);
 }
 #endif`;
 	public static readonly gizmos:string = `#version 300 es\nprecision mediump float;

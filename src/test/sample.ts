@@ -130,6 +130,11 @@ export class SampleGame{
                     oncreate:(g)=>{
                         let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(0,0,1.0));
                     }
+                },
+                "directionalLight":{
+                    oncreate:(g)=>{
+                        Light.creatDirctionLight(g,0.1,vec3.down,vec3.one);
+                    }
                 }
             }
         })

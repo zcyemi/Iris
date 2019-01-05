@@ -169,12 +169,27 @@ export class ShaderDataUniformObj extends ShaderData{
  * vec4 lightPosZ;
  * [128]
  * vec4 light_ambient;
+ * [144]
+ * vec4 lightPrimePos;
+ * vec4 lightPrimeColor;
  */
 export class ShaderDataUniformLight extends ShaderData{
     public static readonly UNIFORM_LIGHT:string = "UNIFORM_LIGHT";
     public constructor (){
-        let buffersize = (8 * 4 + 4) *4;
+        let buffersize = (8 * 4 + 4 + 8) *4;
         super(buffersize);
+    }
+
+    public setMainLight(light:Light){
+        let buffer =this.buffer;
+        if(light == null){
+            buffer.setVec4(144,vec4.zero);
+            buffer.setVec4(160,vec4.zero);
+        }
+        else{
+            buffer.setVec4(144,light.getShaderLightPosData());
+            buffer.setVec4(160,light.lightColor.vec4(light.intensity));
+        }
     }
 
     public setPointLights(lights:Light[],count:number){

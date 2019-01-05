@@ -115,6 +115,7 @@ export class RenderModel implements IGraphicObj{
         data.setLightCount(lightNum);
         
         data.setPointLights(alllights,lightNum);
+        data.setMainLight(scene.lightPrime);
 
         uniformLight.uploadBufferData(this.m_glctx);
         scene.lightDataDirty = false;

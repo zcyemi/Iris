@@ -36,7 +36,10 @@ uniform vec4 uColor;
 void fragment(){
 
     vec3 col = Sample_4PointLights(v2f.wpos,normalize(v2f.normal)) * uColor.xyz;
+    
+    vec3 mainCol = LightModel_Lambert(MAIN_LIGHT_POS.xyz,MAIN_LIGHT_COLOR.xyz,MAIN_LIGHT_COLOR.w,v2f.normal,uColor.xyz);
 
-    fragColor = vec4(col,1.0);
+
+    fragColor = vec4(mainCol + col,1.0);
 }
 #endif
