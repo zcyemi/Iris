@@ -32,6 +32,7 @@ export class RenderModel implements IGraphicObj{
 
     private m_matFullscreen:Material;
     private m_matScreenRect:Material;
+
     private m_renderFullscreen:MeshRender;
 
     private m_screenAspect:number;
@@ -146,8 +147,8 @@ export class RenderModel implements IGraphicObj{
         this.drawMeshRender(this.m_renderFullscreen);
     }
 
-    public drawMeshRender(meshrender:MeshRender,objmtx?:mat4){
-        let mat = meshrender.material;
+    public drawMeshRender(meshrender:MeshRender,objmtx?:mat4,matReplace?:Material){
+        let mat = matReplace != null? matReplace: meshrender.material;
         let mesh = meshrender.mesh;
 
         const glctx = this.m_glctx;
@@ -182,8 +183,9 @@ export class RenderModel implements IGraphicObj{
 
     public drawsScreenTex(tex:WebGLTexture,rect:vec4){
         const mat = this.m_matScreenRect;
+        mat.setVec4("uRect",rect);
         mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
-        this.drawMeshRender(this.m_renderFullscreen);
+        this.drawMeshRender(this.m_renderFullscreen,null,mat);
     }
 
     public clearFrameBufferTarget(clearinfo:PipelineClearInfo,fb:FrameBuffer){
