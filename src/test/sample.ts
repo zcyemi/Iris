@@ -38,6 +38,7 @@ import { PassDebug } from '../render/PassDebug';
 import { PassShadow } from '../render/PassShadow';
 import { Component } from '../Component';
 import { ControlHandlerComponent } from '../ControlHandlerComponent';
+import { GraphicsContext } from '../GraphicsContext';
 
 export class SampleGame{
     private m_canvas:HTMLCanvasElement;
@@ -54,6 +55,8 @@ export class SampleGame{
         SampleGame.Instance = this;
         this.m_canvas = canvas;
         var grender = new GraphicsRender(canvas);
+
+        GraphicsContext.activeRender(grender);
         let sc = grender.shadowConfig;
         sc.shadowDistance = 20;
         this.m_graphicsRender = grender;

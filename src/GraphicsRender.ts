@@ -7,6 +7,7 @@ import { IRenderPipeline } from "./pipeline/IRenderPipeline";
 import { Input } from "./Input";
 import { GLContext } from "./gl/GLContext";
 import { GL } from "./gl/GL";
+import { vec2 } from "./math/GLMath";
 
 export class GraphicsRenderCreateInfo{
     public colorFormat:number = 0x8058;
@@ -42,6 +43,12 @@ export class GraphicsRender{
     private m_time:number = 0;
     private m_dt:number = 0;
 
+    private m_screenWidth:number;
+    private m_screenHeight:number;
+
+    public get screenWidth():number{ return this.m_screenWidth;}
+    public get screenHeight():number{ return this.m_screenHeight;}
+
     public get time():number {return this.m_time;}
     public get deltaTime():number{ return this.m_dt;}
 
@@ -61,9 +68,13 @@ export class GraphicsRender{
         return this.m_defaultTexture;
     }
 
+
     public constructor(canvas:HTMLCanvasElement,pipeline?:IRenderPipeline,creationInfo?:GraphicsRenderCreateInfo){
         GraphicsRender.globalRender = this;
         this.canvas = canvas;
+
+        this.m_screenWidth = canvas.clientWidth;
+        this.m_screenHeight = canvas.clientHeight;
 
         if(creationInfo == null){
             creationInfo = new GraphicsRenderCreateInfo();
@@ -158,6 +169,8 @@ export class GraphicsRender{
     }
 
     private doResizeFrameBuffer(w:number,h:number){
+        this.m_screenWidth = w;
+        this.m_screenHeight = h;
         this.m_renderPipeline.resizeFrameBuffer(w,h);
     }
 
@@ -177,6 +190,15 @@ export class GraphicsRender{
         let p = this.pipeline;
         if(p == null) return;
         p.exec(scene);
+    }
+
+    /**
+     * return GLES view coord [-1,1]
+     */
+    public canvasCoordToViewCoord(pointerx:number,pointery:number):vec2{
+        let x = pointerx / this.screenWidth *2.0 -1.0;
+        let y = 1.0 - 2.0 *pointery / this.screenHeight;
+        return new vec2([x,y]);
     }
 
     public renderToCanvas(){

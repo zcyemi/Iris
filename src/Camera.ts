@@ -2,8 +2,8 @@ import { GameObject } from "./GameObject";
 import { Component } from "./Component";
 import { Scene } from "./Scene";
 import { Skybox } from "./Skybox";
-import { mat4, vec4, glmath, f32 } from "./math/GLMath";
-import { Ray } from "./Ray";
+import { mat4, vec4, glmath, f32, vec3 } from "./math/GLMath";
+import { Ray } from "./math/Ray";
 
 
 export enum AmbientType{
@@ -36,9 +36,12 @@ export class Camera extends Component{
     public m_projectionType:ProjectionType;
 
     private m_projMtx:mat4;
-    private m_projMtxInv:mat4
-    private m_worldMtx:mat4;
-    private m_worldMtxCalculated:boolean = false;
+    private m_projMtxInv:mat4;
+    private m_worldToCamMtx:mat4;
+    private m_camToWorldMtx:mat4;
+    private m_screenToWorldMtx:mat4;
+
+    private m_worldToCamMtxCalculated:boolean = false;
 
     private m_background:vec4 = vec4.zero;
     private m_ambientColor:vec4 = glmath.vec4(0.1,0.1,0.1,1.0);
@@ -148,38 +151,77 @@ export class Camera extends Component{
     /** View matrix of camera */
     public get WorldMatrix():mat4{
         let trs = this.transform;
-        if(!this.m_worldMtxCalculated && trs.isDirty){
-            this.m_worldMtx = mat4.coordCvt(trs.position,trs.worldForward,trs.worldUp);
+        if(!this.m_worldToCamMtxCalculated && trs.isDirty){
+            this.m_worldToCamMtx = mat4.coordCvt(trs.position,trs.worldForward,trs.worldUp);
+            this.m_camToWorldMtx = null;
+            this.m_screenToWorldMtx = null;
             this.m_dataTrsDirty = true;
-            this.m_worldMtxCalculated = true;
+            this.m_worldToCamMtxCalculated = true;
         }
-        return this.m_worldMtx;
+        return this.m_worldToCamMtx;
+    }
+    public get WorldToCameraMatrix():mat4{ return this.WorldMatrix;}
+    public get CameraToWorldMatrix():mat4{
+        let camToWorld = this.m_camToWorldMtx;
+        if(camToWorld == null){
+            camToWorld = mat4.inverse(this.WorldToCameraMatrix);
+            this.m_camToWorldMtx = camToWorld;
+        }
+        return camToWorld;
+    }
+
+    public get ScreenToWorldMatrix():mat4{
+        let mtx = this.m_screenToWorldMtx;
+        if(mtx == null){
+            mtx = this.CameraToWorldMatrix.mul(this.ProjMatrixInv);
+            this.m_screenToWorldMtx = mtx;
+        }
+        return mtx;
     }
 
     /** Projection matrix of camera */
     public get ProjMatrix():mat4{
         if(this.m_projDirty){
             this.m_projMtx = mat4.perspectiveFoV(this.m_fov,this.m_aspectratio,this.m_near,this.m_far);
+            this.m_projMtxInv = null;
+            this.m_screenToWorldMtx;
             this.m_projDirty= false;
             this.m_dataProjDirty = true;
         }
         return this.m_projMtx;
     }
 
-    public screenPointToRay(x:f32,y:f32):Ray{
-        return new Ray();
+    public get ProjMatrixInv():mat4{
+        let inv = this.m_projMtxInv;
+        if(inv != null) return inv;
+        inv = mat4.inverse(this.m_projMtx);
+        if(!inv.isValid){
+            throw new Error("invalid proj matrix");
+        }
+        this.m_projMtxInv = inv;
+        return inv;
+    }
 
+    public viewPointToRay(spos:vec3):Ray{
+        let tarpos = this.ScreenToWorldMatrix.mulvec(spos.vec4(1.0));
+        tarpos.div(tarpos.w);
+        let pos = this.transform.position;
+
+        let dir = new vec3(tarpos.raw).sub(pos).normalize;
+
+        return new Ray(pos,dir);
     }
 
     public constructor(){
         super();
         this.m_projMtx = mat4.perspectiveFoV(60,1,0.01,100);
+        this.m_projMtxInv = null;
         this.m_projectionType = ProjectionType.perspective;
     }
 
     public onUpdate(scene:Scene){
         scene.mainCamera = this;
-        this.m_worldMtxCalculated = false;
+        this.m_worldToCamMtxCalculated = false;
     }
 
     public static persepctive(gobj:GameObject,fov:number,aspectratio:number,near:number,far:number):Camera{
@@ -197,7 +239,7 @@ export class Camera extends Component{
         camera.m_projMtx = mat4.perspectiveFoV(fov,aspectratio,near,far);
         camera.m_projectionType = ProjectionType.perspective;
         let trs = gobj.transform;
-        camera.m_worldMtx = mat4.coordCvt(trs.localPosition,trs.worldForward,trs.worldUp);
+        camera.m_worldToCamMtx = mat4.coordCvt(trs.localPosition,trs.worldForward,trs.worldUp);
 
         return camera;
     }
@@ -218,7 +260,7 @@ export class Camera extends Component{
         camera.m_projMtx = mat4.orthographic(w,size,near,far);
         camera.m_projectionType = ProjectionType.orthographic;
         let trs = gobj.transform;
-        camera.m_worldMtx = mat4.coordCvt(trs.localPosition,trs.worldForward,trs.worldUp);
+        camera.m_worldToCamMtx = mat4.coordCvt(trs.localPosition,trs.worldForward,trs.worldUp);
 
         return camera;
     }

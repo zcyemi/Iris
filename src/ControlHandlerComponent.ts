@@ -1,6 +1,8 @@
 import { Component } from "./Component";
 import { Scene } from "./Scene";
 import { Input } from "./Input";
+import { GraphicsContext } from "./GraphicsContext";
+import { glmath, vec3 } from "./math/GLMath";
 
 
 export class ControlHandlerComponent extends Component{
@@ -16,6 +18,8 @@ export class ControlHandlerComponent extends Component{
         let camera = scene.mainCamera;
         if(camera == null) return;
 
+        let grender = GraphicsContext.currentRender;
+
  
         let trs = this.gameobject.transform;
         
@@ -24,8 +28,15 @@ export class ControlHandlerComponent extends Component{
 
         let snapshot = Input.snapshot;
         if(snapshot.getMouseDown(0)){
-            console.log(pos.raw);
-            
+
+            let mpos = snapshot.mousepos;
+
+            let viewcoord = grender.canvasCoordToViewCoord(mpos.x,mpos.y);
+            let ray = camera.viewPointToRay(glmath.vec3(viewcoord.x,viewcoord.y,0));
+
+            if(ray.sphereIntersect(pos,0.3)){
+                console.log("click");
+            }
 
         }
         
