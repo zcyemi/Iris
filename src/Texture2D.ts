@@ -51,7 +51,6 @@ export class Texture2D implements ITexture {
             glctx.generateMipmap(GL.TEXTURE_2D);
         }
         glctx.bindTexture(GL.TEXTURE_2D, null);
-
         let texture = new Texture2D(tex, width, height, desc);
         return texture;
     }

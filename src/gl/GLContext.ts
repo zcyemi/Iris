@@ -544,6 +544,11 @@ export class GLContext {
         this.gl.uniform4uiv(loc,data,srcOffset,srcLength);
     }
 
+    public uniformMatrix4fv(location: WebGLUniformLocation | null, transpose: boolean, data: Float32Array | ArrayLike<number>,
+        srcOffset?: number, srcLength?: number){
+        this.gl.uniformMatrix4fv(location,transpose,data,srcOffset,srcLength);
+    }
+
     public bindSampler(unit: number, sampler: WebGLSampler){
         this.gl.bindSampler(unit,sampler);
     }

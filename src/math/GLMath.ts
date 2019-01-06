@@ -588,6 +588,10 @@ export class vec3 {
         return vec3.Cross(lhs, this);
     }
 
+    public crossRevSafe(lhs: vec3) {
+        return vec3.SafeCross(lhs, this);
+    }
+
     public static Cross(lhs: vec3, rhs: vec3): vec3 {
         return new vec3([
             lhs.y * rhs.z - lhs.z * rhs.y,
@@ -595,6 +599,7 @@ export class vec3 {
             lhs.x * rhs.y - lhs.y * rhs.x
         ]);
     }
+    
 
     public static SafeCross(lhs: vec3, rhs: vec3): vec3 {
         let c = new vec3([
@@ -1136,6 +1141,15 @@ export class mat4 {
         ]));
     }
 
+    public get isValid(): boolean {
+        const raw = this.raw;
+        let len = raw.length;
+        for (let t = 0; t < len; t++) {
+            if (isNaN(raw[t])) return false;
+        }
+        return true;
+    }
+
     /**
      * Build coordinate change matrix RH->RH LH->LH
      * @param pos pos
@@ -1164,8 +1178,8 @@ export class mat4 {
     public static coordCvt(pos: vec3, forward: vec3, up: vec3) {
         let f = forward.normalized();
         let u = up.normalized();
-        let r = u.crossRev(f).normalize;
-        u = f.crossRev(r).normalize;
+        let r = u.crossRevSafe(f).normalize;
+        u = f.crossRevSafe(r).normalize;
         return new mat4([
             r.x, u.x, f.x, 0,
             r.y, u.y, f.y, 0,

@@ -1,4 +1,4 @@
-import { vec4, vec3 } from "./math/GLMath";
+import { vec4, vec3, mat4 } from "./math/GLMath";
 import { Shader, ShaderTags } from "./shaderfx/Shader";
 import { ShaderOptionsConfig, ShaderOptions } from "./shaderfx/ShaderVariant";
 import { Utility } from "./Utility";
@@ -235,6 +235,12 @@ export class Material{
         p.value = val;
     }
 
+    public setMat4(name:string,val:mat4){
+        let p = this.m_propertyBlock.getUniform(name);
+        if(p == null) return;
+        p.value = val;
+    }
+
     /**
      * Set uniform block binding
      * @param name 
@@ -403,6 +409,9 @@ export class Material{
 
         if(val == null && type != GL.SAMPLER_2D) return;
         switch(type){
+            case GL.FLOAT_MAT4:
+                glctx.uniformMatrix4fv(loc,true,val.raw);
+                break;
             case GL.FLOAT:
                 glctx.uniform1f(loc,val);
                 break;

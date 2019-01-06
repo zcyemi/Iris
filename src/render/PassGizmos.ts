@@ -112,18 +112,30 @@ export class PassGizmos extends RenderPass{
     {
         let lights = scene.lights;
         const lightcount = scene.lightCount;
-        if(lights == null || lightcount == 0) return;
 
         const model = this.pipeline.model;
         const mesh =this.m_meshcross;
         const meshvao = this.m_meshvao;
+        let mat = this.m_matColor;       
 
-        let mat = this.m_matColor;        
+        let lightPrime = scene.lightPrime;
+        if(lightPrime != null){
+            mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,lightPrime.lightColor.vec4(1.0));
+            model.drawMeshWithMat(mesh,mat,meshvao,lightPrime.transform.objMatrix);
+        }
+
+        if(lights == null || lightcount == 0) return;
+
+
+
         for(var t=0;t<lightcount;t++){
             let light = lights[t];
+            
             mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,light.lightColor.vec4(1.0));
             model.drawMeshWithMat(mesh,mat,meshvao,light.transform.objMatrix);
         }
+
+
 
     }
 

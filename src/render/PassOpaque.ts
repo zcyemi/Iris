@@ -6,6 +6,7 @@ import { RenderPass } from "./RenderPass";
 import { MeshRender } from "../MeshRender";
 import { IRenderPipeline } from "../pipeline/IRenderPipeline";
 import { GL } from "../gl/GL";
+import { pipeline } from "stream";
 
 export class PassOpaque extends RenderPass{
 
@@ -45,7 +46,10 @@ export class PassOpaque extends RenderPass{
 
         glctx.depthMask(true);
 
-        glctx.bindGLFramebuffer(pipe.mainFrameBuffer);
+        const mainfb = pipe.mainFrameBuffer;
+        glctx.viewport(0,0,mainfb.width,mainfb.height);
+
+        glctx.bindGLFramebuffer(mainfb);
 
         const len = queue.length;
         for(let t=0;t<len;t++){

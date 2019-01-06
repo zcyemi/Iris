@@ -2,7 +2,8 @@ import { GameObject } from "./GameObject";
 import { Component } from "./Component";
 import { Scene } from "./Scene";
 import { Skybox } from "./Skybox";
-import { mat4, vec4, glmath } from "./math/GLMath";
+import { mat4, vec4, glmath, f32 } from "./math/GLMath";
+import { Ray } from "./Ray";
 
 
 export enum AmbientType{
@@ -35,6 +36,7 @@ export class Camera extends Component{
     public m_projectionType:ProjectionType;
 
     private m_projMtx:mat4;
+    private m_projMtxInv:mat4
     private m_worldMtx:mat4;
     private m_worldMtxCalculated:boolean = false;
 
@@ -162,6 +164,11 @@ export class Camera extends Component{
             this.m_dataProjDirty = true;
         }
         return this.m_projMtx;
+    }
+
+    public screenPointToRay(x:f32,y:f32):Ray{
+        return new Ray();
+
     }
 
     public constructor(){

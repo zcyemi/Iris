@@ -35,6 +35,9 @@ import { GLTFtool } from '../gl/GLTFtool';
 
 import ""
 import { PassDebug } from '../render/PassDebug';
+import { PassShadow } from '../render/PassShadow';
+import { Component } from '../Component';
+import { ControlHandlerComponent } from '../ControlHandlerComponent';
 
 export class SampleGame{
     private m_canvas:HTMLCanvasElement;
@@ -64,6 +67,7 @@ export class SampleGame{
 
         let pipeline= new StackedPipeline({
             passes: [
+                PassShadow,
                 PassOpaque,
                 PassSkybox,
                 PassGizmos,
@@ -122,27 +126,31 @@ export class SampleGame{
                         g.render = new MeshRender(Mesh.Quad,cmat);
                     }
                 },
-                // "pointlight_1":{
-                //     trs:{ pos:[3,3,3]},
-                //     oncreate:(g)=>{
-                //         let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(1.0,0,0));
-                //     }
-                // },
-                // "pointlight_2":{
-                //     trs:{ pos:[-3,5,-5]},
-                //     oncreate:(g)=>{
-                //         let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(0,1.0,0));
-                //     }
-                // },
-                // "pointlight_3":{
-                //     trs:{ pos:[-3,4,5]},
-                //     oncreate:(g)=>{
-                //         let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(0,0,1.0));
-                //     }
-                // },
-                "directionalLight":{
+                "pointlight_1":{
+                    trs:{ pos:[3,3,3]},
                     oncreate:(g)=>{
-                        Light.creatDirctionLight(g,1.0,vec3.down,vec3.one);
+                        let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(1.0,0,0));
+                    }
+                },
+                "pointlight_2":{
+                    trs:{ pos:[-3,5,-5]},
+                    oncreate:(g)=>{
+                        let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(0,1.0,0));
+                    }
+                },
+                "pointlight_3":{
+                    trs:{ pos:[-3,4,5]},
+                    oncreate:(g)=>{
+                        let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(0,0,1.0));
+                    }
+                },
+                "directionalLight":{
+                    comp:[
+                        new ControlHandlerComponent()
+                    ],
+                    oncreate:(g)=>{
+                        Light.creatDirctionLight(g,1.0,vec3.down,glmath.vec3(1,0,0));
+                        g.transform.setPosition(glmath.vec3(0,5,0));
                     }
                 }
             }
