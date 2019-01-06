@@ -1,5 +1,5 @@
 import { GLProgram } from "../gl/GLProgram";
-import { mat4 } from "../math/GLMath";
+import { mat4, vec4 } from "../math/GLMath";
 import { BaseRender } from "../BaseRender";
 import { PipelineBase } from "./PipelineBase";
 import { ShaderDataBasis, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
@@ -16,6 +16,7 @@ import { ITexture } from "../Texture";
 import { Camera } from "../Camera";
 import { PipelineClearInfo } from "./RenderPipeline";
 import { Scene } from "../Scene";
+import { BufferDebugInfo } from "../render/BufferDebugInfo";
 
 
 /**
@@ -30,11 +31,13 @@ export class RenderModel implements IGraphicObj{
     private m_uniformShadowMap:ShaderUniformBuffer<ShaderDataUniformShadowMap>;
 
     private m_matFullscreen:Material;
+    private m_matScreenRect:Material;
     private m_renderFullscreen:MeshRender;
 
     private m_screenAspect:number;
 
-
+    private m_bufferDebugInfo:BufferDebugInfo[];
+    public get bufferDebugInfo():BufferDebugInfo[]{ return this.m_bufferDebugInfo;}
     
     public get uniformBasis():ShaderUniformBuffer<ShaderDataBasis>{return this.m_uniformBasis;}
     public get uniformObj():ShaderUniformBuffer<ShaderDataUniformObj>{return this.m_uniformObj;}
@@ -47,6 +50,8 @@ export class RenderModel implements IGraphicObj{
         const glctx = pipeline.graphicRender.glctx;
         this.m_glctx = glctx;
 
+        this.m_bufferDebugInfo = [];
+
         this.m_uniformObj = new ShaderUniformBuffer(glctx,ShaderDataUniformObj,0,ShaderFX.UNIFORM_OBJ);
         this.m_uniformBasis = new ShaderUniformBuffer(glctx,ShaderDataBasis,1,ShaderFX.UNIFORM_BASIS);
         this.m_uniformShadowMap = new ShaderUniformBuffer(glctx,ShaderDataUniformShadowMap,2,ShaderFX.UNIFORM_SHADOWMAP);
@@ -54,6 +59,9 @@ export class RenderModel implements IGraphicObj{
     
         this.m_matFullscreen = new Material(pipeline.graphicRender.shaderLib.shaderBlit);
         this.m_renderFullscreen = new MeshRender(Mesh.Quad,this.m_matFullscreen);
+
+        this.m_matScreenRect = new Material(pipeline.graphicRender.shaderLib.shaderScreenRect);
+
     }
 
 
@@ -172,6 +180,12 @@ export class RenderModel implements IGraphicObj{
         mat.clean(glctx);
     }
 
+    public drawsScreenTex(tex:WebGLTexture,rect:vec4){
+        const mat = this.m_matScreenRect;
+        mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
+        this.drawMeshRender(this.m_renderFullscreen);
+    }
+
     public clearFrameBufferTarget(clearinfo:PipelineClearInfo,fb:FrameBuffer){
         if(clearinfo == null )return;
         const glctx = this.m_glctx;
@@ -181,6 +195,19 @@ export class RenderModel implements IGraphicObj{
         let depth = clearinfo.depth;
         if(depth !=null) glctx.clearDepth(depth);
         glctx.clear(clearinfo.clearMask);
+    }
+
+    public addBufferDebugInfo(info: BufferDebugInfo) {
+        let curinfo = this.m_bufferDebugInfo;
+        if (curinfo.indexOf(info) >= 0) return;
+        curinfo.push(info);
+    }
+
+    public removeBufferDebugInfo(info: BufferDebugInfo) {
+        let curinfo = this.m_bufferDebugInfo;
+        let index = curinfo.indexOf(info);
+        if (index < 0) return;
+        curinfo = curinfo.splice(index, 1);
     }
 
     public release(glctx:GLContext){

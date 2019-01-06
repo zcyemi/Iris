@@ -22,6 +22,7 @@ export class ShaderFXLibs{
     private m_shadermap:Shader;
     private m_blit:Shader;
     private m_sprite:Shader;
+    private m_screenRect:Shader;
 
     private m_pbrMetallicRoughness:Shader;
 
@@ -45,6 +46,8 @@ export class ShaderFXLibs{
     public static SH_blit:ShaderSource;
     @ShaderFile("sprite")
     public static SH_sprite:ShaderSource;
+    @ShaderFile("screenRect")
+    public static SH_screenRect:ShaderSource;
 
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_BASIS)
     public static SHADERFX_BASIS:ShaderVariant;
@@ -124,6 +127,13 @@ export class ShaderFXLibs{
             this.m_sprite = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_sprite);
         }
         return this.m_sprite;
+    }
+
+    public get shaderScreenRect():Shader{
+        if(this.m_screenRect == null){
+            this.m_screenRect = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_screenRect);
+        }
+        return this.m_screenRect;
     }
 
     public release(){

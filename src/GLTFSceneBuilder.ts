@@ -33,8 +33,8 @@ export class GLTFSceneBuilder{
         this.m_glctx = glctx;
         this.m_shaderfxlib = shaderlib;
 
-        this.m_pbrShader = shaderlib.shaderPbrMetallicRoughness;
-        this.m_pbrBlendShader = shaderlib.shaderUnlitTexture;
+        this.m_pbrShader = shaderlib.shaderDiffuse;
+        this.m_pbrBlendShader = shaderlib.shaderDiffuse;
 
         this.gltf= gltfdata.gltf;
     }
@@ -64,14 +64,14 @@ export class GLTFSceneBuilder{
         }
 
         let gstrs = gsceneobj.transform;
-        gstrs.setScale(glmath.vec3(0.001,0.001,0.001));
+        //gstrs.setScale(glmath.vec3(0.001,0.001,0.001));
 
         return gsceneobj;
     }
 
     private buildNode(nodes:GLTFnode[],index:number): GameObject{
         let _node= nodes[index];
-
+        
         if(_node == null){
             console.error(nodes);
             console.error(index);
@@ -89,9 +89,9 @@ export class GLTFSceneBuilder{
             gobj.transform.localMatrix = new mat4( _node.matrix);
         }
 
-        //gobj.transform.localScale = glmath.vec3(0.001,0.001,0.001);
 
-        if(_node.mesh){
+        //gobj.transform.localScale = glmath.vec3(0.001,0.001,0.001);
+        if(_node.mesh != undefined){
             let meshrender = this.getMesh(_node.mesh);
             if(meshrender != null){
                 gobj.render = meshrender;

@@ -30,6 +30,11 @@ import { PassOpaque } from '../render/PassOpaque';
 import { PassSkybox } from '../render/PassSkybox';
 import { PassTest } from '../render/PassTest';
 import { PassGizmos } from '../render/PassGizmos';
+import { GLTFSceneBuilder } from '../GLTFSceneBuilder';
+import { GLTFtool } from '../gl/GLTFtool';
+
+import ""
+import { PassDebug } from '../render/PassDebug';
 
 export class SampleGame{
     private m_canvas:HTMLCanvasElement;
@@ -45,7 +50,7 @@ export class SampleGame{
     public constructor(canvas:HTMLCanvasElement){
         SampleGame.Instance = this;
         this.m_canvas = canvas;
-        let grender = new GraphicsRender(canvas);
+        var grender = new GraphicsRender(canvas);
         let sc = grender.shadowConfig;
         sc.shadowDistance = 20;
         this.m_graphicsRender = grender;
@@ -62,6 +67,7 @@ export class SampleGame{
                 PassOpaque,
                 PassSkybox,
                 PassGizmos,
+                PassDebug,
             ],
             clearinfo: {
                 clearMask: GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT,
@@ -72,6 +78,9 @@ export class SampleGame{
         grender.setPipeline(pipeline);
         this.m_pipeline = pipeline;
 
+
+
+
         this.m_scene = SceneBuilder.Build({
             "children":{
                 "camera":{
@@ -80,64 +89,77 @@ export class SampleGame{
                         new CameraFreeFly()
                     ],
                     oncreate:(g)=>{
-                        g.transform.applyTranslate(glmath.vec3(0,3.0,0));
+                        g.transform.applyTranslate(glmath.vec3(0,1.0,5));
                         let camera = g.getComponent(Camera);
                         camera.clearType = ClearType.Skybox;
                         camera.skybox = Skybox.createFromProcedural();
                     }
                 },
-                "cube":{
-                    trs: {pos:[2,1,-5]},
-                    oncreate:(g)=>{
-                        g.transform.applyRotate(quat.Random());
-                        let cmat =new Material(grender.shaderLib.shaderDiffuse);
-                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
-                        g.render = new MeshRender(Mesh.Cube,cmat)
-                    }
-                },
-                "cube_1":{
-                    trs: {pos:[-1,1,3]},
-                    oncreate:(g)=>{
-                        g.transform.applyRotate(quat.Random());
-                        let cmat =new Material(grender.shaderLib.shaderDiffuse);
-                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.7,0.7,0.7,1.0));
-                        g.render = new MeshRender(Mesh.Cube,cmat)
-                    }
-                },
+                // "cube":{
+                //     trs: {pos:[2,1,-5]},
+                //     oncreate:(g)=>{
+                //         g.transform.applyRotate(quat.Random());
+                //         let cmat =new Material(grender.shaderLib.shaderDiffuse);
+                //         cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
+                //         g.render = new MeshRender(Mesh.Cube,cmat)
+                //     }
+                // },
+                // "cube_1":{
+                //     trs: {pos:[-1,1,3]},
+                //     oncreate:(g)=>{
+                //         g.transform.applyRotate(quat.Random());
+                //         let cmat =new Material(grender.shaderLib.shaderDiffuse);
+                //         cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.7,0.7,0.7,1.0));
+                //         g.render = new MeshRender(Mesh.Cube,cmat)
+                //     }
+                // },
                 "plane": {
                     oncreate:(g)=>{
                         g.transform.applyRotate(quat.fromEulerDeg(90,0,0));
-                        g.transform.applyScale(glmath.vec3(20,20,1));
+                        g.transform.applyScale(glmath.vec3(10,10,1));
                         let cmat = new Material(grender.shaderLib.shaderDiffuse);
                         cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,1,1.0));
                         g.render = new MeshRender(Mesh.Quad,cmat);
                     }
                 },
-                "pointlight_1":{
-                    trs:{ pos:[3,3,3]},
-                    oncreate:(g)=>{
-                        let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(1.0,0,0));
-                    }
-                },
-                "pointlight_2":{
-                    trs:{ pos:[-3,5,-5]},
-                    oncreate:(g)=>{
-                        let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(0,1.0,0));
-                    }
-                },
-                "pointlight_3":{
-                    trs:{ pos:[-3,4,5]},
-                    oncreate:(g)=>{
-                        let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(0,0,1.0));
-                    }
-                },
+                // "pointlight_1":{
+                //     trs:{ pos:[3,3,3]},
+                //     oncreate:(g)=>{
+                //         let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(1.0,0,0));
+                //     }
+                // },
+                // "pointlight_2":{
+                //     trs:{ pos:[-3,5,-5]},
+                //     oncreate:(g)=>{
+                //         let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(0,1.0,0));
+                //     }
+                // },
+                // "pointlight_3":{
+                //     trs:{ pos:[-3,4,5]},
+                //     oncreate:(g)=>{
+                //         let light = Light.createPointLight(g,10.0,null,1.0,glmath.vec3(0,0,1.0));
+                //     }
+                // },
                 "directionalLight":{
                     oncreate:(g)=>{
-                        Light.creatDirctionLight(g,0.1,vec3.down,vec3.one);
+                        Light.creatDirctionLight(g,1.0,vec3.down,vec3.one);
                     }
                 }
             }
-        })
+        });
+
+                
+        var scene = this.m_scene;
+
+        (async function(){
+            let model = await GLTFtool.LoadGLTFBinary("res/gltf/blender.glb");
+
+            let builder = new GLTFSceneBuilder(model,grender.glctx,grender.shaderLib);
+            let g = builder.createScene();
+            g.transform.setPosition(glmath.vec3(0,1,0));
+            g.transform.parent = scene.transform;
+        })();
+        
 
         this.m_sceneMgr = new SceneManager();
 
