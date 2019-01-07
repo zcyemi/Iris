@@ -1,5 +1,4 @@
 import { Scene } from "../Scene";
-import { PipelineBase } from "../pipeline/PipelineBase";
 import { IRenderPipeline } from "../pipeline/IRenderPipeline";
 
 export abstract class RenderPass {

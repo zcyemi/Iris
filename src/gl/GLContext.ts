@@ -6,6 +6,7 @@ import { MeshIndicesDesc } from "../Mesh";
 import { ShaderTags, BlendOperator, BlendFactor } from "../shaderfx/Shader";
 import { Utility } from "../Utility";
 import { i32, f32 } from "../math/GLMath";
+import { GLVertexArray } from "./GLVertexArray";
 
 export class GLContext {
     private m_glFenceSynces:GLFenceSync[] = [];
@@ -214,15 +215,33 @@ export class GLContext {
     public createVertexArray(): WebGLVertexArrayObject | null{
         return this.gl.createVertexArray();
     }
+
+    public createGLVertexArray():GLVertexArray{
+        return new GLVertexArray(this.createVertexArray());
+    }
+
     public deleteVertexArray(vertexArray: WebGLVertexArrayObject | null){
         this.gl.deleteVertexArray(vertexArray);
     }
+
+    public deleteGLVertexArray(va:GLVertexArray){
+        if(va != null && va.raw !=null){
+            this.deleteVertexArray(va.raw);
+        }
+    }
+
     public isVertexArray(vertexArray: WebGLVertexArrayObject | null): boolean{
         return this.gl.isVertexArray(vertexArray);
     }
+
     public bindVertexArray(array: WebGLVertexArrayObject | null){
         this.gl.bindVertexArray(array);
     }
+
+    public bindGLVertexArray(va:GLVertexArray | null){
+        this.gl.bindVertexArray(va == null? null: va.raw);
+    }
+
     public depthFunc(func: number){
         let state =this.m_pipelineState;
         if(state.ztest == func) return;

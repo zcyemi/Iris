@@ -1,7 +1,6 @@
 import { Texture2D } from "../Texture2D";
 import { vec4 } from "../math/GLMath";
 import { ITexture } from "../Texture";
-import { type } from "os";
 import { RenderTexture } from "../RenderTexture";
 
 type DebugInfoTex = WebGLTexture | Texture2D | ITexture;

@@ -1,4 +1,3 @@
-import { PipelineBase } from "../pipeline/PipelineBase";
 import { Scene } from "../Scene";
 import { Shader, ShaderTags, Comparison } from "../shaderfx/Shader";
 import { Material } from "../Material";
@@ -10,16 +9,17 @@ import { ShaderFile, ShaderFX } from "../shaderfx/ShaderFX";
 import { MeshBuilder } from "../MeshBuilder";
 import { RenderPass } from "./RenderPass";
 import { IRenderPipeline } from "../pipeline/IRenderPipeline";
+import { GLVertexArray } from "../gl/GLVertexArray";
 
 export class PassGizmos extends RenderPass{
     protected m_material:Material;
     private m_mesh:Mesh;
 
     private m_meshcross:Mesh;
-    private m_meshvao:WebGLVertexArrayObject;
+    private m_meshvao:GLVertexArray;
     private m_matColor:Material;
 
-    private m_vao:WebGLVertexArrayObject;
+    private m_vao:GLVertexArray;
 
     @ShaderFile("gizmos")
     public static SH_gizmos:ShaderSource;

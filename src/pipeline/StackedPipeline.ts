@@ -5,7 +5,6 @@ import { RenderPass } from "../render/RenderPass";
 import { PassDebug } from "../render/PassDebug";
 import { PassDepth } from "../render/PassDepth";
 import { type } from "os";
-import { PassShadowMap } from "../render/PassShadowMap";
 import { PassSkybox } from "../render/PassSkybox";
 import { FrameBuffer } from "../gl/FrameBuffer";
 import { RenderModel } from "./RenderModel";

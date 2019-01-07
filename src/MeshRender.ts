@@ -7,6 +7,7 @@ import { GLContext } from "./gl/GLContext";
 import { GLProgram } from "./gl/GLProgram";
 import { Program } from "estree";
 import { GL } from "./gl/GL";
+import { GLVertexArray } from "./gl/GLVertexArray";
 
 export class MeshRender extends BaseRender{
     public mesh:Mesh;
@@ -15,7 +16,7 @@ export class MeshRender extends BaseRender{
     public _depthVal:number;
 
     private m_dynamic:boolean =false;
-    private m_vao:WebGLVertexArrayObject;
+    private m_vao:GLVertexArray;
     private m_vaoProgamId:number = -1;
 
     public get dynamic():boolean{
@@ -178,17 +179,17 @@ export class MeshRender extends BaseRender{
         glctx.bindBuffer(GL.ELEMENT_ARRAY_BUFFER,mesh.bufferIndices);
     }
 
-    public static CreateVertexArrayObj(glctx:GLContext,mesh:Mesh,program:GLProgram):WebGLVertexArrayObject{
+    public static CreateVertexArrayObj(glctx:GLContext,mesh:Mesh,program:GLProgram):GLVertexArray{
         if(!mesh.bufferInited){
             mesh.refreshMeshBuffer(glctx);
         }
         if(program == null) throw new Error("program is null"); 
 
-        let vao = glctx.createVertexArray();
+        let vao = glctx.createGLVertexArray();
 
-        glctx.bindVertexArray(vao);
+        glctx.bindGLVertexArray(vao);
         MeshRender.bindBuffers(glctx,mesh,program);
-        glctx.bindVertexArray(null);
+        glctx.bindGLVertexArray(null);
 
         return vao;
     }

@@ -1,7 +1,5 @@
 import { GLProgram } from "../gl/GLProgram";
 import { mat4, vec4 } from "../math/GLMath";
-import { BaseRender } from "../BaseRender";
-import { PipelineBase } from "./PipelineBase";
 import { ShaderDataBasis, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { FrameBuffer } from "../gl/FrameBuffer";
 import { GLContext } from "../gl/GLContext";
@@ -17,6 +15,7 @@ import { Camera } from "../Camera";
 import { PipelineClearInfo } from "./RenderPipeline";
 import { Scene } from "../Scene";
 import { BufferDebugInfo } from "../render/BufferDebugInfo";
+import { GLVertexArray } from "../gl/GLVertexArray";
 
 
 /**
@@ -167,7 +166,7 @@ export class RenderModel implements IGraphicObj{
         mat.clean(glctx);
     }
 
-    public drawMeshWithMat(mesh:Mesh,mat:Material,vao:WebGLVertexArrayObject,objmtx:mat4){
+    public drawMeshWithMat(mesh:Mesh,mat:Material,vao:GLVertexArray,objmtx:mat4){
         const glctx = this.m_glctx;
         mesh.refreshMeshBuffer(glctx);
         let glp = mat.program;
@@ -175,9 +174,9 @@ export class RenderModel implements IGraphicObj{
         this.bindDefaultUniform(glp);
         mat.apply(glctx);
         if(objmtx != null)this.updateUniformObjMtx(objmtx);
-        glctx.bindVertexArray(vao);
+        glctx.bindGLVertexArray(vao);
         glctx.drawElementIndices(mesh.indiceDesc);
-        glctx.bindVertexArray(null);
+        glctx.bindGLVertexArray(null);
         mat.clean(glctx);
     }
 
