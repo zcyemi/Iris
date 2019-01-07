@@ -374,6 +374,20 @@ export class vec4 {
         this.w = v.w;
     }
 
+    public setValue(x:f32,y:f32,z:f32,w:f32){
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.w = w;
+    }
+
+    public setRaw(a:number[]){
+        this.x = a[0];
+        this.y = a[1];
+        this.z = a[2];
+        this.w = a[3];
+    }
+
     public static get zero(): vec4 { return new vec4(); }
     public static get one(): vec4 { return new vec4([1, 1, 1, 1]); }
 }

@@ -8,6 +8,7 @@ import { Input } from "./Input";
 import { GLContext } from "./gl/GLContext";
 import { GL } from "./gl/GL";
 import { vec2 } from "./math/GLMath";
+import { Gizmos } from "./Gizmos";
 
 export class GraphicsRenderCreateInfo{
     public colorFormat:number = 0x8058;
@@ -20,6 +21,8 @@ export class GraphicsRender{
     private canvas:HTMLCanvasElement;
     private m_creationInfo:GraphicsRenderCreateInfo;
     private m_defaultTexture:Texture2D;
+
+    public readonly gizmos:Gizmos;
 
     public static globalRender:GraphicsRender;
 
@@ -72,6 +75,7 @@ export class GraphicsRender{
     public constructor(canvas:HTMLCanvasElement,pipeline?:IRenderPipeline,creationInfo?:GraphicsRenderCreateInfo){
         GraphicsRender.globalRender = this;
         this.canvas = canvas;
+        this.gizmos = new Gizmos();
 
         this.m_screenWidth = canvas.clientWidth;
         this.m_screenHeight = canvas.clientHeight;
@@ -190,6 +194,12 @@ export class GraphicsRender{
         let p = this.pipeline;
         if(p == null) return;
         p.exec(scene);
+
+        this.lateRender();
+    }
+
+    private lateRender(){
+        this.gizmos.onframe();
     }
 
     /**

@@ -14,31 +14,31 @@ export class ControlHandlerComponent extends Component{
     }
 
     public onUpdate(scene:Scene){
-
         let camera = scene.mainCamera;
         if(camera == null) return;
 
         let grender = GraphicsContext.currentRender;
-
- 
         let trs = this.gameobject.transform;
-        
         let pos = trs.position;
 
-
         let snapshot = Input.snapshot;
-        if(snapshot.getMouseDown(0)){
+        let mpos = snapshot.mousepos;
 
-            let mpos = snapshot.mousepos;
-
+        let mouseDown = snapshot.getMouseDown(0);
+        if(mouseDown){
             let viewcoord = grender.canvasCoordToViewCoord(mpos.x,mpos.y);
             let ray = camera.viewPointToRay(glmath.vec3(viewcoord.x,viewcoord.y,0));
-
             if(ray.sphereIntersect(pos,0.3)){
-                console.log("click");
+                this.m_selected = true;
             }
-
+            else{
+                this.m_selected = false;
+            }
         }
-        
+
+        if(this.m_selected){
+            //draw
+            
+        }
     }
 }
