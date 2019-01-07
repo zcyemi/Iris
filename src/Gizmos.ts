@@ -20,6 +20,13 @@ export class Gizmos{
 
     private m_cmdlist:GizmosCmd[] = [];
     private m_cmdCount:number = 0;
+
+    public get cmdlist():GizmosCmd[]{
+        return this.m_cmdlist;
+    }
+    public get cmdCount():number{
+        return this.m_cmdCount;
+    }
     
     public onframe(){
         this.m_cmdCount =0;

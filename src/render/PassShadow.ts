@@ -71,7 +71,7 @@ export class PassShadow extends RenderPass{
 
             //config light mtx;
 
-            let lightProj:mat4 = mat4.perspective(10,10,0.01,100) ;//mat4.orthographic(10,10,0.01,100);
+            let lightProj:mat4 = mat4.orthographic(10,10,0.1,20) ;//mat4.orthographic(10,10,0.01,100);
             let lightView:mat4 = mat4.coordCvt(lightPrim.transform.position,lightPrim.lightPosData,lightPrim.transform.worldUp);
             if(!lightView.isValid){
                 throw new Error("invalid lightMtx");

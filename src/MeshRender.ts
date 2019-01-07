@@ -89,7 +89,7 @@ export class MeshRender extends BaseRender{
             MeshRender.bindBuffers(glctx,this.mesh,this.material.program);
         }
         else{
-            glctx.bindVertexArray(this.m_vao);
+            glctx.bindGLVertexArray(this.m_vao);
         }
     }
 

@@ -30,6 +30,17 @@ export class MeshBuilder{
         this.m_indicesCount +=2;
     }
 
+    public addLines(...arg:vec3[]){
+        let len = arg.length;
+        for(var t=1;t<len;t++){
+            this.addLine(arg[t-1],arg[t]);
+        }
+        if(len> 2){
+            this.addLine(arg[len-1],arg[0]);
+        }
+    }
+
+
     public addPoint(p:vec3){
 
     }

@@ -410,7 +410,7 @@ export class Material{
         if(val == null && type != GL.SAMPLER_2D) return;
         switch(type){
             case GL.FLOAT_MAT4:
-                glctx.uniformMatrix4fv(loc,true,val.raw);
+                glctx.uniformMatrix4fv(loc,false,val.raw);
                 break;
             case GL.FLOAT:
                 glctx.uniform1f(loc,val);

@@ -2,12 +2,14 @@ import { Component } from "./Component";
 import { Scene } from "./Scene";
 import { Input } from "./Input";
 import { GraphicsContext } from "./GraphicsContext";
-import { glmath, vec3 } from "./math/GLMath";
+import { glmath, vec3, quat } from "./math/GLMath";
 
 
 export class ControlHandlerComponent extends Component{
 
     private m_selected:boolean = false;
+    
+    private static s_globalSel
 
     public onStart(){
 
@@ -38,7 +40,25 @@ export class ControlHandlerComponent extends Component{
 
         if(this.m_selected){
             //draw
+
+            if(snapshot.getKey('q')){
+                trs.applyTranslate(glmath.vec3(0.05,0,0));
+                trs.setLocalDirty(true);
+            }else if(snapshot.getKey('e')){
+                trs.applyTranslate(glmath.vec3(-0.05,0,0));
+                trs.setLocalDirty(true);
+            }
+            else if(snapshot.getKey('z')){
+                trs.applyTranslate(glmath.vec3(0,0,0.05));
+                trs.setLocalDirty(true);
+            }
+            else if(snapshot.getKey('c')){
+                trs.applyTranslate(glmath.vec3(0,0,-0.05));
+                trs.setLocalDirty(true);
+            }
             
+            
+            grender.gizmos.drawBox(pos,vec3.one,quat.Identity);
         }
     }
 }
