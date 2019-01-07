@@ -1,7 +1,5 @@
 import { GLProgram } from "../gl/GLProgram";
 import { mat4, vec4 } from "../math/GLMath";
-import { BaseRender } from "../BaseRender";
-import { PipelineBase } from "./PipelineBase";
 import { ShaderDataBasis, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { FrameBuffer } from "../gl/FrameBuffer";
 import { GLContext } from "../gl/GLContext";

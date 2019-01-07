@@ -355,6 +355,7 @@ export class vec4 {
     }
 
     public static Random(): vec4 {
+
         return new vec4([Math.random(), Math.random(), Math.random(), Math.random()]);
     }
 
@@ -945,8 +946,12 @@ export class quat {
         return new quat([cross.x * sinh, cross.y * sinh, cross.z * sinh, cosh]);
     }
 
+
+
     public static Coordinate(forward: vec3, up: vec3): quat {
-        if (forward.dot(up) > Number.EPSILON) {
+
+        
+        if (forward.dot(up) > 0.00000001) { //Number.EPSILON
             throw new Error("<forward> must be perpendicular ot <up>");
         }
         let f = forward.normalized();

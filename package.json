@@ -7,7 +7,8 @@
   "scripts": {
     "build": "gulp build",
     "watch": "gulp watch",
-    "test": "mocha -r ts-node/register tests/**/*.test.ts"
+    "test": "mocha -r ts-node/register tests/**/*.test.ts",
+    "asbuild": "asc src/index.ts -b build/iris.dev.wasm -t build/iris.dev.wat --sourceMap --validate --debug --use Math=NativeMath"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +18,7 @@
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.11.4",
     "@types/webgl2": "0.0.4",
+    "assemblyscript": "AssemblyScript/assemblyscript",
     "browser-sync": "^2.24.7",
     "chai": "^4.2.0",
     "gulp": "^3.9.1",

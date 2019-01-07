@@ -1,4 +1,3 @@
-import { PipelineBase } from "../pipeline/PipelineBase";
 import { Scene } from "../Scene";
 import { Shader, ShaderTags, Comparison } from "../shaderfx/Shader";
 import { Material } from "../Material";

@@ -1,10 +1,9 @@
 import { Scene } from "../Scene";
-import { PipelineBase } from "../pipeline/PipelineBase";
 import { IRenderPipeline } from "../pipeline/IRenderPipeline";
 
 export abstract class RenderPass {
 
-    protected pipeline:IRenderPipeline;
+    protected pipeline:IRenderPipeline | null;
 
     constructor(pipeline:IRenderPipeline) {
         this.pipeline = pipeline;
@@ -17,7 +16,7 @@ export abstract class RenderPass {
         this.pipeline = null;
     }
 
-    public static Release<T extends IRenderPipeline>(pass:RenderPass):null{
+    public static Release<T extends IRenderPipeline>(pass:RenderPass){
         if(pass == null) return;
         pass.release();
         return null;

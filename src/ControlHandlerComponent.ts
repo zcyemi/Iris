@@ -18,7 +18,10 @@ export class ControlHandlerComponent extends Component{
         if(camera == null) return;
 
         let grender = GraphicsContext.currentRender;
-        let trs = this.gameobject.transform;
+
+        let gobj = this.gameobject;
+        if(gobj == null) return;
+        let trs = gobj.transform;
         let pos = trs.position;
 
         let snapshot = Input.snapshot;
