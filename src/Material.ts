@@ -370,8 +370,12 @@ export class Material{
         let pu = propertyblock.uniforms;
         for(var key in pu){
             let u = pu[key];
-            if(key === "uShadowMap") continue;
-            this.setUniform(glctx,program.Uniforms[key],u);
+            if(key === "uShadowMap"){
+                glctx.uniform1i(program.Uniforms[key],ShaderFX.GL_SHADOWMAP_TEX0_ID);
+            }
+            else{
+                this.setUniform(glctx,program.Uniforms[key],u);
+            }
         }
 
         let puniformblocks = propertyblock.uniformsBlock;

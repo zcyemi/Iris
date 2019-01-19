@@ -37,10 +37,8 @@ export class ControlHandlerComponent extends Component{
                 this.m_selected = false;
             }
         }
-
         if(this.m_selected){
             //draw
-
             if(snapshot.getKey('q')){
                 trs.applyTranslate(glmath.vec3(0.05,0,0));
                 trs.setLocalDirty(true);

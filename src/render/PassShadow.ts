@@ -40,6 +40,9 @@ export class PassShadow extends RenderPass{
 
         const model =this.pipeline.model;
         model.addBufferDebugInfo(new BufferDebugInfo(this.m_fbShadow.depthtex,glmath.vec4(0,0,128,128)));
+
+
+        model.setShadowMapTex(tex,0);
     }
 
     public render(scene:Scene){
@@ -81,6 +84,9 @@ export class PassShadow extends RenderPass{
 
             uniformLightVP.value = lightmtx;
 
+            const uniformSM = model.uniformShadowMap;
+            uniformSM.data.setLightMtx(lightmtx,0);
+            model.updateUniformShadowMap();
 
             const queuelen = queue.length;
             for(let t=0;t< queuelen;t++){

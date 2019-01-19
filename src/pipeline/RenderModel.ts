@@ -16,6 +16,7 @@ import { PipelineClearInfo } from "./RenderPipeline";
 import { Scene } from "../Scene";
 import { BufferDebugInfo } from "../render/BufferDebugInfo";
 import { GLVertexArray } from "../gl/GLVertexArray";
+import { GL } from "../gl/GL";
 
 
 /**
@@ -83,6 +84,9 @@ export class RenderModel implements IGraphicObj{
         if(indexLight != null) glctx.uniformBlockBinding(glp,indexLight,uniformLight.uniformIndex);
 
         //ShadowMap todo
+        let uniformSM  =this.m_uniformShadowMap;
+        let indexSM = ublock[uniformSM.name];
+        if(indexSM != null) glctx.uniformBlockBinding(glp,indexSM,uniformSM.uniformIndex);
     }
 
     public updateUnifromScreenParam(w:number,h:number){
@@ -129,10 +133,23 @@ export class RenderModel implements IGraphicObj{
         scene.lightDataDirty = false;
 
         console.log("upload light data");
-
         return true;
-
     }
+
+    public updateUniformShadowMap(){
+        let uniformSM = this.m_uniformShadowMap;
+        uniformSM.uploadBufferData(this.m_glctx);
+    }
+
+    public setShadowMapTex(tex:ITexture,index:number){
+        let rawtex = tex.getRawTexture();
+        const glctx = this.m_glctx;
+        
+        glctx.activeTexture(ShaderFX.GL_SHADOWMAP_TEX0);
+        glctx.bindTexture(GL.TEXTURE_2D,rawtex);
+        glctx.activeTexture(ShaderFX.GL_TEXTURE_TEMP);
+    }
+        
 
     public updateUniformObjMtx(objmtx:mat4){
         let uniformObj = this.m_uniformObj;

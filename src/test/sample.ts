@@ -122,7 +122,7 @@ export class SampleGame{
                     oncreate:(g)=>{
                         g.transform.applyRotate(quat.fromEulerDeg(90,0,0));
                         g.transform.applyScale(glmath.vec3(10,10,1));
-                        let cmat = new Material(grender.shaderLib.shaderDiffuse);
+                        let cmat = new Material(grender.shaderLib.shaderShadowSample);
                         cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1,1,1,1.0));
                         g.render = new MeshRender(Mesh.Quad,cmat);
                     }
