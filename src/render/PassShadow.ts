@@ -80,6 +80,7 @@ export class PassShadow extends RenderPass{
             if(!lightView.isValid){
                 throw new Error("invalid lightMtx");
             }
+            
 
             let lightmtx:mat4 = lightProj.mul(lightView);
 

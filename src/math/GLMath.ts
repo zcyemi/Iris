@@ -9,6 +9,8 @@ export type f64 = number;
 
 
 export class glmath {
+
+    public static readonly eplison:f32 = 0.000000001;
     public static vec3(x: number, y: number, z: number): vec3 {
         return new vec3([x, y, z]);
     }
@@ -48,8 +50,10 @@ export class vec2 {
 
     public constructor(v?: number[]) {
         if (v != null) {
-            this.raw[0] = v[0];
-            this.raw[1] = v[1];
+            this.raw = [v[0],v[1]];
+        }
+        else{
+            this.raw = [0,0];
         }
     }
 
@@ -170,7 +174,7 @@ export class vec4 {
 
     public constructor(v?: number[]) {
         if (v != null) {
-            this.raw = v;
+            this.raw = [v[0],v[1],v[2],v[3]];
         }
         else {
             this.raw = [0, 0, 0, 0];
@@ -417,7 +421,7 @@ export class vec3 {
 
     public constructor(v?: number[]) {
         if (v != null) {
-            this.raw = v;
+            this.raw = [v[0],v[1],v[2]];
         }
         else {
             this.raw = [0, 0, 0];
