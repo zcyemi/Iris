@@ -1,13 +1,18 @@
 #options SMCASCADE NONE TWO FOUR
 #options SHADOW ON OFF
+precision mediump sampler2DShadow;
 
 #ifdef SHADOW_ON
+
+#define SHADOW_COORD vec4 shadow_coord
+#define CAL_SHADOW_COORD(x,pos) x.shadow_coord = uLightMtx[0] * vec4(pos.xyz,1.0)
 
 uniform UNIFORM_SHADOWMAP{
     mat4 uLightMtx[4];
     float uShadowDist;
 };
-uniform sampler2D uShadowMap;
+
+uniform sampler2DShadow uShadowMap;
 
 float computeShadow(vec4 vLightPos,sampler2D shadowsampler){
     vec3 clipspace = vLightPos.xyz / vLightPos.w;
@@ -63,6 +68,7 @@ float computeShadowPCF3(vec4 vLightPos,sampler2DShadow shadowsampler){
     vec2 uvw1 = 1. + 2. * st;
     vec2 u = vec2((2. - st.x) / uvw0.x - 1., st.x / uvw1.x + 1.) * shadowMapSizeInv.y;
     vec2 v = vec2((2. - st.y) / uvw0.y - 1., st.y / uvw1.y + 1.) * shadowMapSizeInv.y;
+    curdepth -=0.001;
 
     float shadow = 0.;
     shadow += uvw0.x * uvw0.y * texture(shadowsampler, vec3(base_uv.xy + vec2(u[0], v[0]), curdepth));

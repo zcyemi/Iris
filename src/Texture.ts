@@ -25,6 +25,7 @@ export interface TextureCreationDesc {
     mag_filter?: number;
     wrap_s?: number;
     wrap_t?: number;
+    compare_mode?:number;
 }
 
 

@@ -28,6 +28,7 @@ export class PassShadow extends RenderPass{
           mag_filter: GL.NEAREST,
           wrap_s: GL.REPEAT,
           wrap_t: GL.REPEAT,
+          compare_mode: GL.COMPARE_REF_TO_TEXTURE
         },glctx);
 
         this.m_fbShadow = FrameBuffer.createFromTexture(glctx,{

@@ -47,6 +47,9 @@ export class Texture2D implements ITexture {
         glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, desc.min_filter);
         glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, desc.wrap_s);
         glctx.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, desc.wrap_t);
+        if(desc.compare_mode != null){
+            glctx.texParameteri(GL.TEXTURE_2D,GL.TEXTURE_COMPARE_MODE,desc.compare_mode);
+        }
         if (desc.mipmap) {
             glctx.generateMipmap(GL.TEXTURE_2D);
         }

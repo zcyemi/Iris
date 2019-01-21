@@ -8,7 +8,7 @@ struct V2F{
     vec3 pos;
     vec3 normal;
     vec3 wpos;
-    vec4 FragPosLightSpace;
+    SHADOW_COORD;
 };
 inout V2F v2f;
 
@@ -28,7 +28,7 @@ void vertex(){
     v2f.normal = ObjToWorldDir(aNormal.xyz);
     v2f.wpos = wpos.xyz;
 
-    v2f.FragPosLightSpace = uLightMtx[0] * vec4(v2f.pos,1.0);
+    CAL_SHADOW_COORD(v2f,wpos);
 }
 #endif
 
@@ -37,7 +37,7 @@ void vertex(){
 
 out lowp vec4 fragColor;
 void fragment(){
-    float depth = computeShadow(v2f.FragPosLightSpace,uShadowMap);
+    float depth = computeShadowPCF3(v2f.shadow_coord,uShadowMap);
     fragColor = vec4(depth,depth,depth,1.0);
 }
 #endif
