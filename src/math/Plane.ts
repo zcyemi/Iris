@@ -35,7 +35,7 @@ export class Plane extends vec4{
         let cross = crossdir.normalized;
         let point = this.point;
         let dir = sdir.cross(cross).normalized;
-        let ipoint = this.getIntersectionWithLine(Ray.fromPointDir(point,dir));
+        let ipoint = p.getIntersectionWithLine(Ray.fromPointDir(point,dir));
         return Ray.fromPointDir(ipoint,cross);
     }
 
@@ -54,6 +54,7 @@ export class Plane extends vec4{
 
     public getIntersectionWithPlanes(p1:Plane,p2:Plane):vec3{
         let line = p1.getIntersectionWithPlane(p2);
+        if(line == null) return null;
         return this.getIntersectionWithLine(line);
     }
 
