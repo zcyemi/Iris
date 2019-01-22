@@ -657,7 +657,7 @@ export class vec3 {
         return new vec3([v1.x + v2.x, v1.y + v2.y, v1.z + v2.z]);
     }
 
-    public get normalize(): vec3 {
+    public get normalized(): vec3 {
         const len = this.length;
         if(len == 0){
            return this;
@@ -665,7 +665,7 @@ export class vec3 {
         return this.div(this.length);
     }
 
-    public normalized(): vec3 {
+    public Normalize(): vec3 {
         const len = this.length;
         if(len == 0) return vec3.zero;
         return this.divToRef(this.length);
@@ -944,9 +944,9 @@ export class quat {
      * @param normal
      */
     public static FromToNormal(from: vec3, to: vec3, normal: vec3) {
-        let f = from.normalized();
-        let t = to.normalized();
-        let n = normal.normalized();
+        let f = from.Normalize();
+        let t = to.Normalize();
+        let n = normal.Normalize();
         let cross = vec3.Cross(f, t);
 
         let croosLen2 = cross.length2;
@@ -957,7 +957,7 @@ export class quat {
             }
             let cr = vec3.Cross(n, f);
             let cu = vec3.Cross(f, cr);
-            let nor = cu.normalize;
+            let nor = cu.normalized;
             return new quat([nor.x, nor.y, nor.z, 0]);
         }
         cross.div(Math.sqrt(croosLen2));
@@ -977,8 +977,8 @@ export class quat {
         if (forward.dot(up) > Number.EPSILON) {
             throw new Error("<forward> must be perpendicular ot <up>");
         }
-        let f = forward.normalized();
-        let u = up.normalized();
+        let f = forward.Normalize();
+        let u = up.Normalize();
 
         let qf = quat.FromToNormal(vec3.forward, f, u);
         let u1 = qf.rota(vec3.up);
@@ -1168,9 +1168,9 @@ export class mat4 {
     }
 
     public static lookAt(eye: vec3, target: vec3, up: vec3) {
-        let vz = eye.subToRef(target).normalize;
-        let vx = up.cross(vz).normalize;
-        var vy = vz.cross(vx).normalize;
+        let vz = eye.subToRef(target).normalized;
+        let vx = up.cross(vz).normalized;
+        var vy = vz.cross(vx).normalized;
 
         return mat4.inverse(new mat4([
             vx.x, vx.y, vx.z, 0,
@@ -1199,10 +1199,10 @@ export class mat4 {
      * @param up dir
      */
     public static coord(pos: vec3, forward: vec3, up: vec3): mat4 {
-        let f = forward.normalized();
-        let u = up.normalized();
-        let r = u.cross(f).normalize;
-        u = f.cross(r).normalize;
+        let f = forward.Normalize();
+        let u = up.Normalize();
+        let r = u.cross(f).normalized;
+        u = f.cross(r).normalized;
         return new mat4([
             r.x, u.x, f.x, 0,
             r.y, u.y, f.y, 0,
@@ -1218,10 +1218,10 @@ export class mat4 {
      * @param up dir
      */
     public static coordCvt(pos: vec3, forward: vec3, up: vec3) {
-        let f = forward.normalized();
-        let u = up.normalized();
-        let r = u.crossRevSafe(f).normalize;
-        u = f.crossRevSafe(r).normalize;
+        let f = forward.Normalize();
+        let u = up.Normalize();
+        let r = u.crossRevSafe(f).normalized;
+        u = f.crossRevSafe(r).normalized;
         return new mat4([
             r.x, u.x, f.x, 0,
             r.y, u.y, f.y, 0,

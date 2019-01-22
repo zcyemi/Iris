@@ -100,7 +100,7 @@ describe('quaternion',()=>{
 
     it("quat-2-mtx", () => {
         var qeuler = quat.fromEulerDeg(51, -20, 165);
-        var v = new vec3([1, -2, 3]).normalize;
+        var v = new vec3([1, -2, 3]).normalized;
         let qmtx = quat.QuatToMtx(qeuler);
         var v1 = qeuler.rota(v);
         var v2 = qmtx.mulvec(v);
@@ -175,7 +175,7 @@ describe('quaternion',()=>{
         let v2 = vec3.Random();
 
         let q = quat.FromToNormal(v1, v2, vec3.Random());
-        expectVec3(q.rota(v1).normalize, v2.normalize);
+        expectVec3(q.rota(v1).normalized, v2.normalized);
     })
 
     it("quat-from-to-parall", () => {
@@ -185,7 +185,7 @@ describe('quaternion',()=>{
         let v3 = v1.cross(v2);
         let up = v3.cross(v1);
         let q = quat.FromToNormal(v1, v2, up);
-        expectVec3(q.rota(v1).normalize, v2.normalize);
+        expectVec3(q.rota(v1).normalized, v2.normalized);
     })
 
     it("quat-from-to-normal", () => {
@@ -214,9 +214,9 @@ describe('quaternion',()=>{
 
     it("quat-from-to-coord", () => {
         let coordverify = (f: vec3, u: vec3) => {
-            let rn = u.cross(f).normalize;
-            let fn = f.normalized();
-            let un = u.normalized();
+            let rn = u.cross(f).normalized;
+            let fn = f.Normalize();
+            let un = u.Normalize();
             let q = quat.Coordinate(fn, un);
             expectVec3(fn, q.rota(vec3.forward));
             expectVec3(un, q.rota(vec3.up));
@@ -224,10 +224,10 @@ describe('quaternion',()=>{
         }
 
         for (let i = 0; i < 10; i++) {
-            let vf = vec3.Random().normalize;
+            let vf = vec3.Random().normalized;
             let vu = vec3.Random();
-            let vr = vec3.Cross(vu, vf).normalize;
-            vu = vec3.Cross(vf, vr).normalize;
+            let vr = vec3.Cross(vu, vf).normalized;
+            vu = vec3.Cross(vf, vr).normalized;
             coordverify(vf, vu);
         }
 

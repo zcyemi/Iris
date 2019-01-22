@@ -5,12 +5,12 @@ import { Ray } from "./Ray";
 export class Plane extends vec4{
     
     public static fromNormalD(nor:vec3,D:f32){
-        let nd = nor.normalized();
+        let nd = nor.Normalize();
         return new Plane([nd.x,nd.y,nd.z,D]);
     }
     
     public static fromPointDir(dir:vec3,point:vec3){
-        let nd = dir.normalized();
+        let nd = dir.Normalize();
         let d = point.dot(nd);
         return new Plane([nd.x,nd.y,nd.z,-d]);
     }
@@ -32,9 +32,9 @@ export class Plane extends vec4{
         let crossdir = sdir.cross(pdir);
         if(Math.abs(crossdir.length2) < glmath.eplison) return null;
 
-        let cross = crossdir.normalize;
+        let cross = crossdir.normalized;
         let point = this.point;
-        let dir = sdir.cross(cross).normalize;
+        let dir = sdir.cross(cross).normalized;
         let ipoint = this.getIntersectionWithLine(new Ray(point,dir));
         return new Ray(ipoint,cross);
     }

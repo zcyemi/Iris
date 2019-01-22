@@ -207,7 +207,7 @@ export class Camera extends Component{
         tarpos.div(tarpos.w);
         let pos = this.transform.position;
 
-        let dir = new vec3(tarpos.raw).sub(pos).normalize;
+        let dir = new vec3(tarpos.raw).sub(pos).normalized;
 
         return new Ray(pos,dir);
     }

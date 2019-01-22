@@ -218,8 +218,8 @@ export class Transform{
         }
         let forward = dir.divToRef(len);
         let up = this.up;
-        let right = vec3.SafeCross(forward,up).normalize;
-        up = forward.cross(right).normalize;
+        let right = vec3.SafeCross(forward,up).normalized;
+        up = forward.cross(right).normalized;
 
         this.m_localRotation = quat.Coordinate(forward,up);
         this.m_forward = forward;
@@ -246,8 +246,8 @@ export class Transform{
             return;
         }
         let up = dir.divToRef(len);
-        let right =vec3.SafeCross(up,this.forward).normalize;
-        let forward = right.cross(up).normalize;
+        let right =vec3.SafeCross(up,this.forward).normalized;
+        let forward = right.cross(up).normalized;
         this.m_localRotation = quat.Coordinate(forward,up);
         this.m_up = up;
         this.m_forward.set(forward);
@@ -274,7 +274,7 @@ export class Transform{
             return;
         }
         let right = dir.divToRef(len);
-        let forward = vec3.SafeCross(right,this.up).normalize;
+        let forward = vec3.SafeCross(right,this.up).normalized;
         let up = forward.cross(right);
         this.m_localRotation = quat.Coordinate(forward,up);
         this.m_up.set(up);
@@ -343,10 +343,10 @@ export class Transform{
     public setLookDir(forward:vec3,worldup:vec3){
         this.m_localTRSdirty= true;
 
-        let f = forward.normalized();
+        let f = forward.Normalize();
         if(worldup == null) worldup = this.up;
-        let right = vec3.SafeCross(worldup,f).normalize;
-        let up = f.cross(right).normalize;
+        let right = vec3.SafeCross(worldup,f).normalized;
+        let up = f.cross(right).normalized;
         this.m_up.set(up);
         this.m_right= right;
         this.m_forward = f;
