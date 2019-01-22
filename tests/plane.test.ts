@@ -27,18 +27,29 @@ describe("plane", () => {
 
     it("plane-line", () => {
         let plane = Plane.fromNormalD(vec3.up, -1);
-        let ray = new Ray(vec3.zero, glmath.vec3(1, 1, 0));
+        let ray = Ray.fromPointDir(vec3.zero, glmath.vec3(1, 1, 0));
         let point = plane.getIntersectionWithLine(ray);
         expect(plane.isPointAtPlane(point)).eq(true);
     })
     it("plane-line2", () => {
         for (let t = 0; t < 20; t++) {
             let plane = Plane.fromNormalD(vec3.Random(), Math.random() * 10);
-            let ray = new Ray(vec3.Random(), vec3.Random());
+            let ray = Ray.fromPointDir(vec3.Random(), vec3.Random());
             let p = plane.getIntersectionWithLine(ray);
             expect(plane.isPointAtPlane(p)).eq(true);
         }
     })
+
+    it("plane-line-parallel",()=>{
+        let p = Plane.fromPointDir(vec3.one,vec3.zero);
+        let line = Ray.fromPointDir(glmath.vec3(1,0,0),glmath.vec3(-1,1,0));
+        let point = p.getIntersectionWithLine(line);
+        expect(point).to.eq(null);
+        let line1 = Ray.fromPointDir(vec3.zero,vec3.Random());
+        let point1 = p.getIntersectionWithLine(line1);
+        expectVec3(point1,vec3.zero);
+    });
+
     it("plane-plane", () => {
         for (let t = 0; t < 20; t++) {
             let p1 = Plane.fromNormalD(vec3.Random(), Math.random() * 10);
@@ -52,7 +63,7 @@ describe("plane", () => {
         }
     });
 
-    it("plane-plane-parall",()=>{
+    it("plane-plane-parallel",()=>{
         let dir = glmath.vec3(5,10,20);
         let p1 = Plane.fromNormalD(dir,10);
         let p2 = Plane.fromNormalD(dir,-5);

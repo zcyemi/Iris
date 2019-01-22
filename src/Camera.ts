@@ -209,7 +209,7 @@ export class Camera extends Component{
 
         let dir = new vec3(tarpos.raw).sub(pos).normalized;
 
-        return new Ray(pos,dir);
+        return Ray.fromPointDir(pos,dir);
     }
 
     public constructor(){

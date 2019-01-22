@@ -8,6 +8,9 @@ export function pairwise(src:Array<any>,f:(s:any,t:any)=>void,dest:Array<any>){
     }
 }
 
+export function expectTrue(x:any){
+    expect(x).to.eq(true);
+}
 
 export function expectPair(src:Array<any>,dest:Array<any>,torenlance:number = 0.001){
     pairwise(src,(s,t)=>{

@@ -35,14 +35,20 @@ export class Plane extends vec4{
         let cross = crossdir.normalized;
         let point = this.point;
         let dir = sdir.cross(cross).normalized;
-        let ipoint = this.getIntersectionWithLine(new Ray(point,dir));
-        return new Ray(ipoint,cross);
+        let ipoint = this.getIntersectionWithLine(Ray.fromPointDir(point,dir));
+        return Ray.fromPointDir(ipoint,cross);
     }
 
-    public getIntersectionWithLine(r:Ray):vec3{
-        let off = r.origin.subToRef(this.point);
+    /**
+     * return null when line is parallel to the plaen.
+     * @param r 
+     */
+    public getIntersectionWithLine(r:Ray):vec3| null{
         let dir = this.dir;
-        let d = off.dot(dir) / dir.dot(r.direction);
+        let rdotdir = dir.dot(r.direction);
+        if(glmath.closeToZero(rdotdir)) return null;
+        let off = r.origin.subToRef(this.point);
+        let d = off.dot(dir) / rdotdir;
         return r.getPoint(-d);
     }
 
