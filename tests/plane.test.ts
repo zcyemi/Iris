@@ -45,9 +45,22 @@ describe("plane", () => {
             let p2 = Plane.fromNormalD(vec3.Random(), Math.random() * 10);
 
             let line = p1.getIntersectionWithPlane(p2);
-
-            expect(line.direction.dot(p1.dir)).closeTo(0,glmath.eplison);
-            expect(line.direction.dot(p2.dir)).closeTo(0,glmath.eplison);
+            if(line != null){
+                expect(line.direction.dot(p1.dir)).closeTo(0, glmath.eplison);
+                expect(line.direction.dot(p2.dir)).closeTo(0, glmath.eplison);
+            }
         }
     });
+
+    it("plane-plane-parall",()=>{
+        let dir = glmath.vec3(5,10,20);
+        let p1 = Plane.fromNormalD(dir,10);
+        let p2 = Plane.fromNormalD(dir,-5);
+
+        let line1 = p1.getIntersectionWithPlane(p2);
+        let line2 = p2.getIntersectionWithPlane(p1);
+
+        expect(line1).eq(null);
+        expect(line2).eq(null);
+    })
 })

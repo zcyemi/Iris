@@ -40,6 +40,33 @@ describe('vec3',()=>{
         expect(cs.y).not.eq(NaN);
         expect(cs.z).not.eq(NaN);
     })
+
+    it('cross-self',()=>{
+        let v = vec3.one;
+        let cross = v.cross(v);
+        expectVec3(cross,vec3.zero);
+    })
+
+    it('cross-zero',()=>{
+        let v = vec3.one;
+        let zero = vec3.zero;
+        let cross = v.cross(zero);
+        expectVec3(cross,vec3.zero);
+    })
+
+    it("dot-zero",()=>{
+        let v = vec3.Random();
+        let z = vec3.zero;
+        expect(v.dot(z)).closeTo(0,glmath.eplison);
+    })
+
+    it("dot-perpendicular",()=>{
+        let v1 = vec3.Random();
+        let v2 = vec3.Random();
+        let v3 = v1.cross(v2);
+        expect(v1.dot(v3)).closeTo(0,glmath.eplison);
+    })
+
     it('normalize', () => {
         let v = vec3.Random();
         let vn1 = v.normalized();
@@ -47,6 +74,19 @@ describe('vec3',()=>{
         let vn = v.normalize;
         expect(vn).eq(v);
         expectVec3(vn1, v);
+    })
+
+    it("isValid",()=>{
+        let v1 = vec3.Random();
+        expect(v1.isValid).eq(true);
+        let v2 = glmath.vec3(NaN,NaN,1.0);
+        expect(v2.isValid).eq(false);
+        let v3 = glmath.vec3(NaN,NaN,NaN);
+        expect(v3.isValid).eq(false);
+        let v4 = glmath.vec3(NaN,1.0,NaN);
+        expect(v4.isValid).eq(false);
+        let v5 = glmath.vec3(1.0,NaN,NaN);
+        expect(v5.isValid).eq(false);
     })
 });
 

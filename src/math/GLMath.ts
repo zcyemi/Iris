@@ -15,6 +15,14 @@ export class glmath {
         return new vec3([x, y, z]);
     }
 
+    public static closeTo(v:f32,tar:f32){
+        return Math.abs(v- tar) < glmath.eplison;
+    }
+
+    public static closeToZero(v:f32):boolean{
+        return Math.abs(v) < glmath.eplison;
+    }
+
     public static vec4(x: number, y: number, z: number, w: number): vec4 {
         return new vec4([x, y, z, w]);
     }
@@ -179,6 +187,11 @@ export class vec4 {
         else {
             this.raw = [0, 0, 0, 0];
         }
+    }
+
+    public isValid():boolean{
+        let raw = this.raw;
+        return !isNaN(raw[0]) && !isNaN(raw[1]) && !isNaN(raw[2]) && isNaN(raw[3]);
     }
 
     public add(v: number | vec3 | vec4 | number[]): vec4 {
@@ -427,6 +440,11 @@ export class vec3 {
             this.raw = [0, 0, 0];
         }
     }
+    
+    public get isValid(): boolean {
+        const raw = this.raw;
+        return !isNaN(raw[0]) && !isNaN(raw[1]) && !isNaN(raw[2]);
+    }
 
     public add(v: number | vec3 | vec4 | number[]): vec3 {
         if (v instanceof vec3 || v instanceof vec4) {
@@ -640,10 +658,16 @@ export class vec3 {
     }
 
     public get normalize(): vec3 {
+        const len = this.length;
+        if(len == 0){
+           return this;
+        }
         return this.div(this.length);
     }
 
     public normalized(): vec3 {
+        const len = this.length;
+        if(len == 0) return vec3.zero;
         return this.divToRef(this.length);
     }
 

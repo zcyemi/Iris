@@ -21,10 +21,18 @@ export class Plane extends vec4{
     public get dir():vec3{
         return new vec3(this.raw);
     }
-
-    public getIntersectionWithPlane(p:Plane):Ray{
+    /**
+     * return null when two plane are parallel
+     * @param p 
+     */
+    public getIntersectionWithPlane(p:Plane):Ray|null{
         let sdir = this.dir;
-        let cross = sdir.cross(p.dir).normalize;
+        let pdir = p.dir;
+
+        let crossdir = sdir.cross(pdir);
+        if(Math.abs(crossdir.length2) < glmath.eplison) return null;
+
+        let cross = crossdir.normalize;
         let point = this.point;
         let dir = sdir.cross(cross).normalize;
         let ipoint = this.getIntersectionWithLine(new Ray(point,dir));

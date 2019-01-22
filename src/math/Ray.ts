@@ -27,4 +27,8 @@ export class Ray{
     public sphereIntersect(pos:vec3,radius:f32):boolean{
         return this.distantToPointSq(pos) < radius * radius;
     }
+
+    public isValid():boolean{
+        return this.direction.isValid && this.origin.isValid;
+    }
 }
