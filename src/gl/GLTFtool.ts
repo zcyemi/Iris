@@ -306,7 +306,7 @@ export class GLTFbinary{
         let start = pos;
 
         if(chunkType == 0x4E4F534A){
-            let jsonstr = String.fromCharCode.apply(null,new Uint8Array(dataview.buffer,start,chunkLen));
+            let jsonstr = String.fromCharCode.apply(null,Array.from(new Uint8Array(dataview.buffer,start,chunkLen)));
             data.gltf = JSON.parse(jsonstr);
         }
         else if(chunkType == 0x004E4942){

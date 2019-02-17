@@ -64,6 +64,7 @@ export * from './Utility';
 
 export * from './Skybox';
 
+export * from './ProgramBase';
+
 //TODO move sample to another repo
 export * from './test/sample';
-

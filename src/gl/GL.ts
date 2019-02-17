@@ -1,7 +1,3 @@
-import { type } from "os";
-
-
-
 
 export enum GLConst {
     BYTE = 5120,
@@ -10,10 +6,7 @@ export enum GLConst {
     UNSIGNED_SHORT = 5123,
     UNSIGNED_INT = 5125,
     FLOAT = 5126,
-
-
 }
-
 
 export type GLData = Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array |
     Uint32Array | Uint8ClampedArray | Float32Array | Float64Array | DataView | ArrayBuffer | null;

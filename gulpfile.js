@@ -8,10 +8,10 @@ gulp.task('build',()=>{
     mergeShader();
     build();
 
-    child_process.exec('tsc',(error,stdout,stderr)=>{
-        if(stdout != null && stdout != '') console.log(stdout);
-        if(stderr != null && stderr != '') console.log(stderr);
-    });
+    // child_process.exec('tsc',(error,stdout,stderr)=>{
+    //     if(stdout != null && stdout != '') console.log(stdout);
+    //     if(stderr != null && stderr != '') console.log(stderr);
+    // });
 });
 
 gulp.task('watch',()=>{

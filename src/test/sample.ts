@@ -37,35 +37,22 @@ import { PassShadow } from '../render/PassShadow';
 import { Component } from '../Component';
 import { ControlHandlerComponent } from '../ControlHandlerComponent';
 import { GraphicsContext } from '../GraphicsContext';
+import { ProgramBase } from '../ProgramBase';
 
-export class SampleGame{
-    private m_canvas:HTMLCanvasElement;
-    private m_graphicsRender:GraphicsRender;
-    private m_timer:FrameTimer = new FrameTimer(false);
-
+export class SampleGame extends ProgramBase{
     private static Instance:SampleGame;
-
     private m_pipeline:StackedPipeline;
     private m_scene:Scene;
     private m_sceneMgr:SceneManager;
 
     public constructor(canvas:HTMLCanvasElement){
+        super(canvas);
         SampleGame.Instance = this;
-        this.m_canvas = canvas;
-        var grender = new GraphicsRender(canvas);
-
+        let grender = this.m_graphicsRender;
         GraphicsContext.activeRender(grender);
         let sc = grender.shadowConfig;
         sc.shadowDistance = 20;
-        this.m_graphicsRender = grender;
-        Input.init(canvas);
-
-        GLUtility.setTargetFPS(60);
-        GLUtility.registerOnFrame(this.onFrame.bind(this));
-
         
-        WindowUtility.setOnResizeFunc(this.resizeCanvas.bind(this));
-
         let pipeline= new StackedPipeline({
             passes: [
                 PassShadow,
@@ -82,9 +69,6 @@ export class SampleGame{
         });
         grender.setPipeline(pipeline);
         this.m_pipeline = pipeline;
-
-
-
 
         this.m_scene = SceneBuilder.Build({
             "children":{
@@ -168,30 +152,20 @@ export class SampleGame{
             g.transform.setPosition(glmath.vec3(0,1,0));
             g.transform.parent = scene.transform;
         })();
-        
-
         this.m_sceneMgr = new SceneManager();
 
-        this.resizeCanvas();
+        this.onResize();
     }
 
-    public resizeCanvas(){
-        const canvas = this.m_canvas;
-        let grender =this.m_graphicsRender;
-        if(grender == null) return;
-        grender.resizeCanvas(canvas.clientWidth,canvas.clientHeight);
-    }
 
     public onFrame(ts:number){
 
-        let delta = this.m_timer.tick(ts);
-        let dt = delta /1000;
-        Input.onFrame(dt);
-        
+        super.onFrame(ts);
+
         this.m_sceneMgr.onFrame(this.m_scene);
 
         let gredner = this.m_graphicsRender;
-        gredner.render(this.m_scene,dt);
+        gredner.render(this.m_scene,ts);
         gredner.renderToCanvas();
 
     }
