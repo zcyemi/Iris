@@ -5,7 +5,7 @@
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc && gulp build",
+    "build": "tsc --module esnext && gulp build",
     "watch": "gulp watch",
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },

@@ -1,9 +1,7 @@
+import { expectPair } from './testhelper';
+import { mat3, quat, vec3, mat4, vec4 } from '../src/math/index';
 import * as chai from 'chai';
-import { expectVec3, expectQuat, expectPair, expectMat4 } from './testhelper';
-import { mat3, quat, vec3, mat4, vec4 } from '../src/math/GLMath';
-
 const expect = chai.expect;
-
 
 
 describe("glmath", () => {

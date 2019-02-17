@@ -1,7 +1,7 @@
 import { ShaderVariant, ShaderOptionsConfig, ShaderOptions } from "./ShaderVariant";
 import { ShaderTags, Comparison, RenderQueue, BlendOperator, BlendFactor, CullingMode } from "./Shader";
 import { ShaderPreprocessor } from "./ShaderPreprocessor";
-import { Utility } from "../Utility";
+import { Utility } from "../core/Utility";
 import { GLUtility } from "../gl/GLUtility";
 
 export type VariantsGroup = { [key: string]: ShaderVariant };

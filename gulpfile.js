@@ -22,7 +22,7 @@ gulp.task('watch',()=>{
         build();
     });
 
-    child_process.exec('tsc -w',(error,stdout,stderr)=>{
+    child_process.exec('tsc --module esnext -w',(error,stdout,stderr)=>{
         if(stdout != null && stdout != '') console.log(stdout);
         if(stderr != null && stderr != '') console.log(stderr);
     });

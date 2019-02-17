@@ -1,8 +1,8 @@
-import { Texture2D } from "../Texture2D";
-import { RenderTexture } from "../RenderTexture";
+import { Texture2D } from "../core/Texture2D";
+import { RenderTexture } from "../core/RenderTexture";
 import { GLContext } from "./GLContext";
 import { ShaderFX } from "../shaderfx/ShaderFX";
-import { IGraphicObj } from "../IGraphicObj";
+import { IGraphicObj } from "../core/IGraphicObj";
 import { GL } from "./GL";
 interface FrameBufferCreateDesc{
     depthTex?:Texture2D,

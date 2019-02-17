@@ -1,70 +1,13 @@
-export * from './math/GLMath';
+export * from './math/index';
+export * from './gl/index';
+export * from './rendering/index';
+export * from './shaderfx/index';
+export * from './core/index';
+export * from './pipeline/index';
+export * from './misc/index';
+export * from './collection/index';
 
-export * from './gl/GL';
-export * from './gl/GLContext';
-export * from './gl/GLProgram';
-export * from './gl/GLTFtool';
-export * from './gl/GLUtility';
-export * from './gl/FrameBuffer';
-
-export * from './gl/GLFenceSync';
-export * from './gl/GLPixelPack';
-
-export * from './DebugEntry';
-export * from './GraphicsRender';
-export * from './pipeline/IRenderPipeline';
-// export * from './pipeline/PipelineForwardZPrePass';
-export * from './pipeline/StackedPipeline';
-export * from './pipeline/RenderModel';
-export * from './pipeline/RenderPipeline';
-
-export * from './render/PassDebug';
-export * from './render/PassGizmos';
-export * from './render/PassDepth';
-export * from './render/PassOpaque';
-// export * from './render/PassShadowMap';
-export * from './render/PassSkybox';
-// export * from './render/PassTransparent';
-export * from './render/RenderPass';
-export * from './render/Shadow';
-
-export * from './shaderfx/ShaderFX';
-export * from './shaderfx/Shader';
-export * from './shaderfx/ShaderBuffer';
-export * from './shaderfx/ShaderFXLibs';
-export * from './shaderfx/ShaderSource';
-export * from './shaderfx/ShaderVariant';
-
-export * from './Camera';
-export * from './CameraUtility';
-export * from './FrameTimer';
-export * from './GameObject';
-export * from './Input';
-export * from './Light';
-export * from './Material';
-
-export * from './Transform';
-export * from './Component';
-export * from './Scene';
-export * from './SceneBuilder';
-export * from './SceneManager';
-export * from './GLTFSceneBuilder';
-
-export * from './Mesh';
-export * from './MeshRender';
-export * from './MeshBuilder';
-export * from './DynamicMesh';
-
-export * from './Texture';
-export * from './Texture2D';
-export * from './TextureCubeMap';
-export * from './TextureSampler';
-
-export * from './Utility';
-
-export * from './Skybox';
-
-export * from './ProgramBase';
-
-//TODO move sample to another repo
+//classes for sample
 export * from './test/sample';
+export * from './DebugEntry';
+

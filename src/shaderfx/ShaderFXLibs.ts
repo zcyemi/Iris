@@ -5,7 +5,7 @@ import { ShaderData, ShaderSubData } from "./ShaderBuffer";
 import { Shader } from "./Shader";
 import { vec3, vec4, mat4, glmath } from "../math/GLMath";
 import { GLContext } from "../gl/GLContext";
-import { Light } from "../Light";
+import { Light } from "../core/Light";
 
 export class ShaderFXLibs{
     private glctx:GLContext;

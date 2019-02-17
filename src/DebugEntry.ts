@@ -1,4 +1,4 @@
-import { MapStr } from "./Utility";
+import { MapStr } from "./core/Utility";
 
 var debugRegister:MapStr<(any)=>void> = {};
 

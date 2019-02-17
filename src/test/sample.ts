@@ -1,43 +1,24 @@
-import { Scene } from '../Scene';
-import { GameObject } from '../GameObject';
-import { MeshRender } from '../MeshRender';
-import { Material } from '../Material';
-import { Mesh } from '../Mesh';
-import { Camera, AmbientType, ClearType } from '../Camera';
-import { GraphicsRender } from '../GraphicsRender';
-import { Light } from '../Light';
+import { Scene } from '../core/Scene';
+import { MeshRender } from '../core/MeshRender';
+import { Material } from '../core/Material';
+import { Mesh } from '../core/index';
+import { Camera, ClearType } from '../core/Camera';
+import { Light } from '../core/Light';
 import { DebugEntry } from '../DebugEntry';
-import { Utility, WindowUtility } from '../Utility';
-import { Input } from '../Input';
-import { SceneManager } from '../SceneManager';
-import { CameraFreeFly } from '../CameraUtility';
-import { FrameTimer } from '../FrameTimer';
-import { TextureCubeMap } from '../TextureCubeMap';
-import { Transform } from '../Transform';
-import { SpriteRender } from '../SpriteRender';
-import { Texture2D } from '../Texture2D';
-import { Skybox } from '../Skybox';
-import { GLContext } from '../gl/GLContext';
-import { GLUtility } from '../gl/GLUtility';
+import { SceneManager } from '../core/SceneManager';
+import { CameraFreeFly } from '../misc/CameraUtility';
+import { Skybox } from '../core/Skybox';
 import { vec3, glmath, quat, vec4 } from '../math/GLMath';
 import { GL } from '../gl/GL';
 import { StackedPipeline } from '../pipeline/StackedPipeline';
-import { SceneBuilder } from '../SceneBuilder';
+import { SceneBuilder } from '../core/SceneBuilder';
 import { ShaderFX } from '../shaderfx/ShaderFX';
-import { PassOpaque } from '../render/PassOpaque';
-import { PassSkybox } from '../render/PassSkybox';
-import { PassTest } from '../render/PassTest';
-import { PassGizmos } from '../render/PassGizmos';
-import { GLTFSceneBuilder } from '../GLTFSceneBuilder';
+import { PassOpaque,PassSkybox,PassGizmos,PassDebug,PassShadow } from '../rendering/index';
+import { GLTFSceneBuilder } from '../misc/GLTFSceneBuilder';
 import { GLTFtool } from '../gl/GLTFtool';
-
-import ""
-import { PassDebug } from '../render/PassDebug';
-import { PassShadow } from '../render/PassShadow';
-import { Component } from '../Component';
-import { ControlHandlerComponent } from '../ControlHandlerComponent';
-import { GraphicsContext } from '../GraphicsContext';
-import { ProgramBase } from '../ProgramBase';
+import { ControlHandlerComponent } from '../misc/index';
+import { GraphicsContext } from '../core/GraphicsContext';
+import { ProgramBase } from '../misc/ProgramBase';
 
 export class SampleGame extends ProgramBase{
     private static Instance:SampleGame;

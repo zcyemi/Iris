@@ -1,6 +1,6 @@
-import { GraphicsRender, GraphicsRenderCreateInfo } from "../GraphicsRender";
+import { GraphicsRender, GraphicsRenderCreateInfo } from "../core/GraphicsRender";
 import { GLContext } from "../gl/GLContext";
-import { RenderNodeList } from "../RenderNodeList";
+import { RenderNodeList } from "../core/RenderNodeList";
 import { RenderModel } from "./RenderModel";
 import { FrameBuffer } from "../gl/FrameBuffer";
 

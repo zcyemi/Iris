@@ -1,4 +1,4 @@
-import { Utility } from "../Utility";
+import { Utility } from "../core/Utility";
 import { ShaderPreprocessor } from "./ShaderPreprocessor";
 import { GLUtility } from "../gl/GLUtility";
 
