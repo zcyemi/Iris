@@ -224,7 +224,7 @@ export class Camera extends Component{
         this.m_worldToCamMtxCalculated = false;
     }
 
-    public static persepctive(gobj:GameObject,fov:number,aspectratio:number,near:number,far:number):Camera{
+    public static persepctive(gobj:GameObject | null,fov:number,aspectratio:number,near:number,far:number):Camera{
         let camera = new Camera();
         camera.m_fov = fov;
         camera.m_aspectratio = aspectratio;

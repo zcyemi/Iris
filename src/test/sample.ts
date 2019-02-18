@@ -19,6 +19,8 @@ import { GLTFtool } from '../gl/GLTFtool';
 import { ControlHandlerComponent } from '../misc/index';
 import { GraphicsContext } from '../core/GraphicsContext';
 import { ProgramBase } from '../misc/ProgramBase';
+import { PassOverlay } from '../rendering/PassOverlay';
+import { UIRender } from '../core/UIRender';
 
 export class SampleGame extends ProgramBase{
     private static Instance:SampleGame;
@@ -41,6 +43,7 @@ export class SampleGame extends ProgramBase{
                 PassSkybox,
                 PassGizmos,
                 PassDebug,
+                PassOverlay
             ],
             clearinfo: {
                 clearMask: GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT,
@@ -63,6 +66,11 @@ export class SampleGame extends ProgramBase{
                         let camera = g.getComponent(Camera);
                         camera.clearType = ClearType.Skybox;
                         camera.skybox = Skybox.createFromProcedural();
+                    }
+                },
+                "ui":{
+                    oncreate:(g)=>{
+                        g.render = new UIRender(grender);
                     }
                 },
                 // "cube":{

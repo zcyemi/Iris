@@ -1,5 +1,5 @@
 import { MeshTopology, Mesh } from "./Mesh";
-import { vec3 } from "../math/GLMath";
+import { vec3, vec4 } from "../math/GLMath";
 import { GLConst } from "../gl/GL";
 
 
@@ -55,6 +55,28 @@ export class MeshBuilder{
         let index = this.m_indicesCount;
         this.m_indiecs.push(index,index+1,index+2);
         this.m_indicesCount = index+3;
+    }
+
+    public addTriRaw(ary:number[]){
+        if(ary.length!=6) throw new Error('invalid array');
+        const pos =this.m_positions;
+        pos.push(...ary);
+
+        let index = this.m_indicesCount;
+        this.m_indiecs.push(index,index+1,index+2);
+        this.m_indicesCount = index+3;
+    }
+
+    public addRect(rect:vec4,z:number){
+        const pos = this.m_positions;
+        let x= rect.x;
+        let y = rect.y;
+        let w = rect.z;
+        let h = rect.w;
+        let i = this.m_positions.length/4;
+        pos.push(...[x,y,z,1,x+w,y,z,1,x,y+h,z,1,x+w,y+h,z,1]);
+        this.m_indiecs.push(...[i,i+1,i+2,i+1,i+2,i+3]);
+        this.m_indicesCount = i+6;
     }
 
 
