@@ -1,6 +1,7 @@
 import { GameObject } from "./GameObject";
 import { Material } from "./Material";
 import { GLContext } from "../gl/GLContext";
+import { RenderModel } from "../pipeline";
 
 export abstract class BaseRender{
 
@@ -14,6 +15,6 @@ export abstract class BaseRender{
     
     public abstract refreshData(glctx:GLContext)
     public abstract release(glctx:GLContext);
-    public abstract draw(gl:WebGL2RenderingContext);
+    public abstract draw(gl:GLContext,model:RenderModel);
 
 }

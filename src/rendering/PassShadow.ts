@@ -58,7 +58,7 @@ export class PassShadow extends RenderPass{
         const uniformLightVP = this.m_uniformLightVP;
 
         const queue = pipeline.nodeList.nodeOpaque;
-        if(queue == null || queue.length ==0) return;
+        if(queue == null || queue.size ==0) return;
 
         const model = pipeline.model;
 
@@ -90,9 +90,10 @@ export class PassShadow extends RenderPass{
             uniformSM.data.setLightMtx(lightmtx,0);
             model.updateUniformShadowMap();
 
-            const queuelen = queue.length;
+            const queuelen = queue.size;
+            const queueary = queue.array;
             for(let t=0;t< queuelen;t++){
-                const node = queue[t];
+                const node = queueary[t];
                 if(node instanceof MeshRender && node.castShadow){
                     model.drawMeshRender(node,node.object.transform.objMatrix,matShadowGather);
                 }

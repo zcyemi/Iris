@@ -34,7 +34,7 @@ export class PassOpaque extends RenderPass{
         const glctx = pipe.glctx;
 
         let cam = scene.mainCamera;
-        if(queue.length == 0) return;
+        if(queue.size == 0) return;
 
         const model = pipe.model;
 
@@ -50,11 +50,15 @@ export class PassOpaque extends RenderPass{
 
         glctx.bindGLFramebuffer(mainfb);
 
-        const len = queue.length;
+        const len = queue.size;
+        const queueary = queue.array;
         for(let t=0;t<len;t++){
-            const node = queue[t];
+            const node = queueary[t];
             if(node instanceof MeshRender){
                 model.drawMeshRender(node,node.object.transform.objMatrix);
+            }
+            else{
+                node.draw(glctx,model);
             }
         }
 

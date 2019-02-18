@@ -42,7 +42,7 @@ export class MeshRender extends BaseRender{
         this.mesh = null;
     }
 
-    public draw(gl:WebGL2RenderingContext){
+    public draw(gl:GLContext){
         let mesh = this.mesh;
         const desc = mesh.indiceDesc;
         gl.drawElements(desc.topology,desc.indiceCount,desc.type,desc.offset);

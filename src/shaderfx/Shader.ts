@@ -8,6 +8,7 @@ export enum RenderQueue{
     Transparent,
     Skybox,
     Image,
+    Overlay,
     Other
 }
 

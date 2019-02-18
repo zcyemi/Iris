@@ -1,16 +1,20 @@
 import { RenderQueue } from "../shaderfx/Shader";
 import { BaseRender } from "./BaseRender";
+import { DoubleBuffered } from "../collection";
+import { IndexedBuffer } from "../collection/IndexedBuffer";
 
 export class RenderNodeList{
 
-    public nodeOpaque:BaseRender[] = [];
-    public nodeTransparent:BaseRender[] = [];
-    public nodeImage:BaseRender[] = [];
+    public nodeOpaque:IndexedBuffer<BaseRender> = new IndexedBuffer();
+    public nodeTransparent:IndexedBuffer<BaseRender> = new IndexedBuffer();
+    public nodeImage:IndexedBuffer<BaseRender> = new IndexedBuffer();
+    public nodeOverlay:IndexedBuffer<BaseRender> = new IndexedBuffer();
     
     public reset(){
-        if(this.nodeOpaque.length != 0) this.nodeOpaque = [];
-        if(this.nodeTransparent.length != 0) this.nodeTransparent = [];
-        if(this.nodeImage.length != 0) this.nodeImage = [];
+        this.nodeOpaque.empty();
+        this.nodeTransparent.empty();
+        this.nodeImage.empty();
+        this.nodeOverlay.empty();
     }
     public pushRenderNode(rnode:BaseRender){
         let material = rnode.material;
@@ -25,6 +29,9 @@ export class RenderNodeList{
                 break;
             case RenderQueue.Image:
                 this.nodeImage.push(rnode);
+                break;
+            case RenderQueue.Overlay:
+                this.nodeOverlay.push(rnode);
                 break;
         }
     }
