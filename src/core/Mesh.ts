@@ -121,14 +121,21 @@ export class Mesh{
         return this.m_bufferInited;
     }
 
-    public setNormal(data:MeshDataBuffer,type:GLDataType,size:number){
+    public setNormal(data:MeshDataBuffer,type:GLDataType,size:number,bufferByteLen:number = undefined){
         this.m_dataNormal = data;
-        this.vertexDesc.normal = new MeshVertexAttrDesc(type,size,data.byteLength);
+        this.vertexDesc.normal = new MeshVertexAttrDesc(type,size,bufferByteLen == undefined? data.byteLength: bufferByteLen);
     }
 
-    public setUV(data:MeshDataBuffer,type:GLDataType,size:number){
+    /**
+     * 
+     * @param data 
+     * @param type 
+     * @param size component size [1,2,3,4]
+     * @param bufferByteLen 
+     */
+    public setUV(data:MeshDataBuffer,type:GLDataType,size:number,bufferByteLen:number = undefined){
         this.m_dataUV = data;
-        this.vertexDesc.uv = new MeshVertexAttrDesc(type,size,data.byteLength);
+        this.vertexDesc.uv = new MeshVertexAttrDesc(type,size,bufferByteLen == undefined ? data.byteLength : bufferByteLen);
     }
 
     /**
