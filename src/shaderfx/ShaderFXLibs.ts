@@ -25,6 +25,7 @@ export class ShaderFXLibs{
     private m_screenRect:Shader;
     private m_shadowsample:Shader;
     private m_shaderrect:Shader;
+    private m_shadertext:Shader;
 
     private m_pbrMetallicRoughness:Shader;
 
@@ -54,6 +55,8 @@ export class ShaderFXLibs{
     public static SH_shadowsample:ShaderSource;
     @ShaderFile("rect")
     public static SH_rect:ShaderSource;
+    @ShaderFile('text')
+    public static SH_text:ShaderSource;
 
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_BASIS)
     public static SHADERFX_BASIS:ShaderVariant;
@@ -154,6 +157,13 @@ export class ShaderFXLibs{
             this.m_shaderrect = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_rect);
         }
         return this.m_shaderrect;
+    }
+
+    public get shaderText():Shader{
+        if(this.m_shadertext == null){
+            this.m_shadertext = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_text);
+        }
+        return this.m_shadertext;
     }
 
     public release(){

@@ -4,7 +4,8 @@ precision mediump float;
 
 #queue overlay
 #zwrite off
-#ztest always
+#ztest lequal
+#blend src_alpha one_minus_src_alpha
 
 inout vec2 vUV;
 
@@ -24,7 +25,13 @@ void vertex(){
 #pragma ps fragment
 #ifdef SHADER_PS
 out vec4 fragColor;
+uniform sampler2D uSampler;
 void fragment(){
-    fragColor = vec4(0.0,0.0,0.0,1.0);
+    vec2 uv =vUV;
+    vec4 col = texture(uSampler,uv);
+    col.a = col.r;
+    col.rgb = vec3(1.0);
+
+    fragColor = col;
 }
 #endif
