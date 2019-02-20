@@ -137,9 +137,9 @@ export class Mesh{
      * @param type data type
      * @param size component size
      */
-    public setPosition(data:MeshDataBuffer,type:GLDataType,size:number){
+    public setPosition(data:MeshDataBuffer,type:GLDataType,size:number,bufferByteLen:number = undefined){
         this.m_dataPosition = data;
-        this.vertexDesc.position = new MeshVertexAttrDesc(type,size,data.byteLength);
+        this.vertexDesc.position = new MeshVertexAttrDesc(type,size,bufferByteLen == undefined ? data.byteLength: bufferByteLen);
     }
 
     public setIndices(data:MeshDataBufferIndices,type:GLDataType,mode:MeshTopology){
@@ -505,7 +505,15 @@ export class MeshBufferUtility{
         return 0;
     }
 
-    public static IndicesBufferFillQuad(databuffer:MeshDataBufferIndices,quadsize:number,){
+    /**
+     * Quad Order
+     * v0 -- v1
+     *  |    |
+     * v3 -- v2
+     * @param databuffer 
+     * @param quadsize 
+     */
+    public static IndicesBufferFillQuad(databuffer:MeshDataBufferIndices,quadsize:number){
         let itemlen = quadsize *6;
         if(databuffer.length < itemlen) throw new Error('buffer size exceeded.');
         
