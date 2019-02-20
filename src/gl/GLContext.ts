@@ -317,6 +317,10 @@ export class GLContext {
         }
     }
 
+    public get currentPipelineState():ShaderTags{
+        return this.m_pipelineState.clone();
+    }
+
     public clear(mask:number){
         this.gl.clear(mask);
     }
