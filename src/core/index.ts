@@ -30,3 +30,7 @@ export * from './Utility';
 
 export * from './GraphicsRender';
 export * from './GraphicsContext';
+
+
+export * from './Types';
+export * from './Color';

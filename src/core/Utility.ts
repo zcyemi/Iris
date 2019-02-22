@@ -1,5 +1,6 @@
 import { vec4, glmath } from "../math/GLMath";
 import { isNull } from "util";
+import { float } from "./Types";
 
 
 export type MapStr<T> = {[key:string]:T};
@@ -91,8 +92,12 @@ export class Utility {
 		return glmath.vec4(Math.random(),Math.random(),Math.random(),1);
 	}
 
-	public static colorRGBA(r:number,g:number,b:number,a:number):vec4{
+	public static colorRGBAVec4(r:number,g:number,b:number,a:number):vec4{
 		return glmath.vec4(r,g,b,a).div(255.0);
+	}
+
+	public static colorRGBA(r:number,g:number,b:number,a:number):float[]{
+		return [r/255.0,g/255.0,b/255.0,a/255.0];
 	}
 
 	public static byteDataToImageData(width:number,height:number,data:Uint8Array):string{
