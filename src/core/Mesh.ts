@@ -43,6 +43,7 @@ export class MeshVertexDesc{
     public position : MeshVertexAttrDesc;
     public uv: MeshVertexAttrDesc;
     public normal: MeshVertexAttrDesc;
+    public color:MeshVertexAttrDesc;
     public get totalByteSize(){
         let bytes = this.position.totalbytes;
         if(this.uv != null){
@@ -50,6 +51,9 @@ export class MeshVertexDesc{
         }
         if(this.normal != null){
             bytes += this.normal.totalbytes;
+        }
+        if(this.color != null){
+            bytes += this.color.totalbytes;
         }
         return bytes;
     }
@@ -87,6 +91,7 @@ export class Mesh{
     public bufferIndices:WebGLBuffer;
     public bufferUV:WebGLBuffer;
     public bufferNormal:WebGLBuffer;
+    public bufferColor:WebGLBuffer;
 
     public name:string;
     public readonly vertexDesc:MeshVertexDesc = new MeshVertexDesc();
@@ -100,11 +105,13 @@ export class Mesh{
     protected m_dataUV:MeshDataBuffer;
     protected m_dataNormal:MeshDataBuffer;
     protected m_dataIndices:MeshDataBufferIndices;
+    protected m_dataColor:MeshDataBuffer;
 
     public get dataPosition():MeshDataBuffer{ return this.m_dataPosition;}
     public get dataUV():MeshDataBuffer{ return this.m_dataUV;}
     public get dataNormal():MeshDataBuffer{ return this.m_dataNormal;}
     public get dataIndices():MeshDataBufferIndices{ return this.m_dataIndices;}
+    public get dataColor():MeshDataBuffer{return this.m_dataColor;}
 
     protected m_bufferInited:boolean =false;
     protected m_seperatedBuffer:boolean = false;
@@ -141,6 +148,18 @@ export class Mesh{
     /**
      * 
      * @param data 
+     * @param type 
+     * @param size component size [1,2,3,4]
+     * @param bufferByteLen 
+     */
+    public setColor(data:MeshDataBuffer,type:GLDataType,size:number,bufferByteLen:number = undefined){
+        this.m_dataColor = data;
+        this.vertexDesc.color= new MeshVertexAttrDesc(type,size,bufferByteLen == undefined ? data.byteLength : bufferByteLen);
+    }
+
+    /**
+     * 
+     * @param data 
      * @param type data type
      * @param size component size
      */
@@ -149,11 +168,11 @@ export class Mesh{
         this.vertexDesc.position = new MeshVertexAttrDesc(type,size,bufferByteLen == undefined ? data.byteLength: bufferByteLen);
     }
 
-    public setIndices(data:MeshDataBufferIndices,type:GLDataType,mode:MeshTopology){
+    public setIndices(data:MeshDataBufferIndices,type:GLDataType,mode:MeshTopology,indicesCount:number = undefined){
         this.m_dataIndices = data;
         
         let inddesc = this.indiceDesc;
-        inddesc.indiceCount =data.length;
+        inddesc.indiceCount =indicesCount == undefined? data.length: indicesCount;
         inddesc.topology = mode;
         inddesc.offset = 0;
         inddesc.type = type;
