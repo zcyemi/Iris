@@ -33,9 +33,13 @@ export class UIRender extends BaseRender {
 
     private m_sprBatch:SpriteBatch;
 
+    private m_grender:GraphicsRender;
+
 
     public constructor(grender:GraphicsRender){
         super();
+
+        this.m_grender = grender;
 
         this.material = new Material(grender.shaderLib.shaderRect);
         let meshbuilder = new MeshBuilder(MeshTopology.Triangles);
@@ -43,9 +47,10 @@ export class UIRender extends BaseRender {
         meshbuilder.addRect(new vec4([50,100,200,50]),-0.9);
         meshbuilder.addRect(new vec4([43,144,43,75]),0);
 
-        let batch = new SpriteBatch();
+        var batch = new SpriteBatch(512,grender);
         batch.drawRect([100,100,100,10],Color.YELLOW,0);
         batch.drawRect([200,10,30,100],Color.BLUE,0);
+        this.m_sprBatch = batch;
 
         this.m_mesh = meshbuilder.genMesh();
 
@@ -95,6 +100,8 @@ export class UIRender extends BaseRender {
         if(textvao == null){
             this.m_texvao = MeshRender.CreateVertexArrayObj(glctx,this.m_textmesh,this.m_matText.program);
         }
+
+        this.m_sprBatch._refreshMeshData(glctx,this.m_grender);
     } 
     public release(glctx: GLContext){
         this.material = null;
@@ -104,20 +111,13 @@ export class UIRender extends BaseRender {
         if(mesh == null)  return;
         this.refreshData(gl);
 
-        let glp = this.material.program;
-        gl.useGLProgram(glp);
-        this.material.apply(gl);
-        model.bindDefaultUniform(glp);
-        let vao = this.m_vao;
-        gl.bindGLVertexArray(vao);
-        gl.drawElementIndices(mesh.indiceDesc);
+        let sb = this.m_sprBatch;
+        model.drawMeshWithMat(sb.mesh,sb.material,sb.vao);
 
         let mattext = this.m_matText;
-
         let cursatet  =gl.currentPipelineState;
-
         gl.pipelineState(mattext.shaderTags);
-        glp = mattext.program;
+        let glp = mattext.program;
         gl.useGLProgram(glp);
         mattext.apply(gl);
         model.bindDefaultUniform(glp);

@@ -1,7 +1,7 @@
 import { vec4 } from "../math";
 import { IndexedTypedBuffer } from "../collection";
 import { float } from "../core/Types";
-import { DynamicMesh, MeshDataBufferIndices, MeshBufferUtility, MeshTopology, Mesh, MeshRender, Material, GraphicsRender } from "../core";
+import { DynamicMesh, MeshDataBufferIndices, MeshBufferUtility, MeshTopology, Mesh, MeshRender, Material, GraphicsRender, Color } from "../core";
 import { GLConst, GLContext, GLVertexArray } from "../gl";
 
 export class SpriteBatch{
@@ -16,21 +16,35 @@ export class SpriteBatch{
 
     private m_matRect:Material;
 
+    public get material():Material{
+        return this.m_matRect;
+    }
 
-
-    public constructor(defaultSize:number = 512){
+    public constructor(defaultSize:number = 512,grender:GraphicsRender){
         this.rectPosBuffer = new IndexedTypedBuffer(Float32Array,defaultSize);
         this.rectColorBuffer = new IndexedTypedBuffer(Float32Array,defaultSize);
-
 
         let indicesArray = new Uint16Array(128*6);
         MeshBufferUtility.IndicesBufferFillQuad(indicesArray,128);
         SpriteBatch.s_indicesBuffer = indicesArray;
 
         let mesh = new DynamicMesh("spritebatch");
-        mesh.setIndices(indicesArray,GLConst.UNSIGNED_SHORT,MeshTopology.Triangles,0);
+
+        mesh.setIndices(indicesArray,GLConst.UNSIGNED_SHORT,MeshTopology.Triangles);
         mesh.setPosition(this.rectPosBuffer.array,GLConst.FLOAT,3);
         mesh.setColor(this.rectColorBuffer.array,GLConst.FLOAT,4);
+        mesh.refreshMeshBuffer(grender.glctx);
+
+        let mat = this.m_matRect;
+        if(mat == null){
+            mat = new Material(grender.shaderLib.shaderRect);
+            this.m_matRect = mat;
+        }
+
+        if(this.vao == null){
+            this.vao = MeshRender.CreateVertexArrayObj(grender.glctx,mesh,mat.program);
+        }
+
         this.mesh = mesh;
     }
     
@@ -39,30 +53,15 @@ export class SpriteBatch{
         if(!this.m_isdirty) return;
 
         let mesh = this.mesh;
-
-        let colorbuffer =this.rectColorBuffer;
-        mesh.uploadDataBufferColor(glctx,colorbuffer.array,colorbuffer.size*4);
-
-        let posbuffer = this.rectPosBuffer;
-        mesh.uploadDataBufferPosition(glctx,posbuffer.array,posbuffer.size*4);
         
+        let posbuffer = this.rectPosBuffer;
+        mesh.uploadDataBufferPosition(glctx,posbuffer.array,posbuffer.size *4);
+        let colbuffer = this.rectColorBuffer;
+        mesh.uploadDataBufferColor(glctx,colbuffer.array,colbuffer.size*4);
+        mesh.setIndicesCount(posbuffer.size /8 *6);
 
-        mesh.refreshMeshBuffer(glctx);
-
-        let mat = this.m_matRect;
-        if(mat == null){
-            mat = new Material(grender.shaderLib.shaderRect);
-            this.m_matRect = mat;
-        }
-
-        let vao = this.vao;
-        if(vao == null){
-            this.vao = MeshRender.CreateVertexArrayObj(glctx,mesh,mat.program);
-        }
-
-        this.m_isdirty= false;
+        this.m_isdirty = false;
     }
-
 
     public drawRect(rect:float[],color:float[],depth:number =0){
         const vertexbuffer = this.rectPosBuffer;
@@ -78,10 +77,12 @@ export class SpriteBatch{
 
         varray.set([x,y,depth,x1,y,depth,x1,y1,depth,x,y1,depth],vertexbuffer.size);
 
+        vertexbuffer.size+= 12;
+
         const col = color;
 
         let csize = colorbuffer.size;
-        for(let t=0;t<3;t++){
+        for(let t=0;t<4;t++){
             carray.set(col,csize);
             csize +=4;
         }
