@@ -1,6 +1,9 @@
 #version 300 es
 precision mediump float;
 #queue opaque
+#zwrite off
+#ztest always
+
 inout vec2 vUV;
 #pragma vs vertex
 in vec4 aPosition;

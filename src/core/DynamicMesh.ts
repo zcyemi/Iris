@@ -125,7 +125,7 @@ export class DynamicMesh extends Mesh{
         let buffer = this.bufferUV;
         if(buffer == null){
             buffer = gl.createBuffer();
-            this.bufferVertices = buffer;
+            this.bufferUV = buffer;
         }
         gl.bindBuffer(GL.ARRAY_BUFFER,buffer);
         gl.bufferData(GL.ARRAY_BUFFER,data,GL.DYNAMIC_DRAW);
@@ -152,6 +152,10 @@ export class DynamicMesh extends Mesh{
             nordesc.totalbytes = data.byteLength;
         }
         let buffer = this.bufferNormal;
+        if(buffer == null){
+            buffer = gl.createBuffer();
+            this.bufferNormal = buffer;
+        }
         gl.bindBuffer(GL.ARRAY_BUFFER,buffer);
         gl.bufferData(GL.ARRAY_BUFFER,data,GL.DYNAMIC_DRAW);
         gl.bindBuffer(GL.ARRAY_BUFFER,null);

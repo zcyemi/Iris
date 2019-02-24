@@ -157,13 +157,13 @@ export class RenderModel implements IGraphicObj{
         uniformObj.uploadBufferData(this.m_glctx);
     }
 
-    public drawFullScreen(tex:ITexture){
+    public drawFullScreen(tex:ITexture,setState:boolean = true){
         const mat = this.m_matFullscreen;
         mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
-        this.drawMeshRender(this.m_renderFullscreen);
+        this.drawMeshRender(this.m_renderFullscreen,null,null,setState);
     }
 
-    public drawMeshRender(meshrender:MeshRender,objmtx?:mat4,matReplace?:Material){
+    public drawMeshRender(meshrender:MeshRender,objmtx?:mat4,matReplace?:Material,setState:boolean = false){
         let mat = matReplace != null? matReplace: meshrender.material;
         let mesh = meshrender.mesh;
 
@@ -175,6 +175,10 @@ export class RenderModel implements IGraphicObj{
         mat.apply(glctx);
         if(objmtx != null){
             this.updateUniformObjMtx(objmtx);
+        }
+
+        if(setState){
+            glctx.pipelineState(mat.shaderTags);
         }
 
         meshrender.bindVertexArray(glctx);
