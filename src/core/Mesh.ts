@@ -179,6 +179,11 @@ export class Mesh{
         inddesc.totalbytes = data.byteLength;
     }
 
+    public setIndicesCount(indices:number){
+        let indicesdesc = this.indiceDesc;
+        indicesdesc.indiceCount = indices;
+    }
+
     public static get Quad():Mesh{
         if(Mesh.s_quad != null) return Mesh.s_quad;
         let quad = new Mesh();

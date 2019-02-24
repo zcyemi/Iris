@@ -76,6 +76,7 @@ export class ShaderFX{
     public static ATTR_aPosition = "aPosition";
     public static ATTR_aUV = "aUV";
     public static ATTR_aNormal = "aNormal";
+    public static ATTR_aColor = "aColor";
 
     public static UNIFORM_BASIS = "UNIFORM_BASIS";
     public static UNIFORM_OBJ = "UNIFORM_OBJ";

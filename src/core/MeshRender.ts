@@ -107,38 +107,51 @@ export class MeshRender extends BaseRender{
         }
     }
 
-
+    /**
+     * @todo buffer binding
+     * @param glctx 
+     * @param mesh 
+     * @param program 
+     */
     private static bindBuffers(glctx:GLContext,mesh:Mesh,program:GLProgram){
         const vertdesc = mesh.vertexDesc;
         const attrs = program.Attributes;
 
-
         if(mesh.seperatedBuffer){
             if(vertdesc.position != null){
-                glctx.bindBuffer(GL.ARRAY_BUFFER,mesh.bufferVertices);
                 let aPos = attrs[ShaderFX.ATTR_aPosition];
                 if(aPos != null){
+                    glctx.bindBuffer(GL.ARRAY_BUFFER,mesh.bufferVertices);
                     let posdesc = vertdesc.position;
                     glctx.vertexAttribPointer(aPos,posdesc.size,GL.FLOAT,false,posdesc.size *4,posdesc.offset);
                     glctx.enableVertexAttribArray(aPos);
                 }
             }
             if(vertdesc.uv !=null){
-                glctx.bindBuffer(GL.ARRAY_BUFFER,mesh.bufferUV);
                 let aUV = attrs[ShaderFX.ATTR_aUV];
                 if(aUV != null){
+                    glctx.bindBuffer(GL.ARRAY_BUFFER,mesh.bufferUV);
                     let uvdesc = vertdesc.uv;
                     glctx.vertexAttribPointer(aUV,uvdesc.size,GL.FLOAT,false,uvdesc.size *4,uvdesc.offset);
                     glctx.enableVertexAttribArray(aUV);
                 }
             }
             if(vertdesc.normal){
-                glctx.bindBuffer(GL.ARRAY_BUFFER,mesh.bufferNormal)
                 let aNorm = attrs[ShaderFX.ATTR_aNormal];
                 if(aNorm !=null){
+                    glctx.bindBuffer(GL.ARRAY_BUFFER,mesh.bufferNormal)
                     let normdesc = vertdesc.normal;
                     glctx.vertexAttribPointer(aNorm,normdesc.size,GL.FLOAT,false,normdesc.size *4,normdesc.offset);
                     glctx.enableVertexAttribArray(aNorm);
+                }
+            }
+            if(vertdesc.color){
+                let aColor = attrs[ShaderFX.ATTR_aColor]
+                if(aColor != null){
+                    glctx.bindBuffer(GL.ARRAY_BUFFER,mesh.bufferColor);
+                    let colordesc = vertdesc.color;
+                    glctx.vertexAttribPointer(aColor,colordesc.size,GL.FLOAT,false,colordesc.size*4, colordesc.offset);
+                    glctx.enableVertexAttribArray(aColor);
                 }
             }
             glctx.bindBuffer(GL.ARRAY_BUFFER,null);
@@ -161,7 +174,6 @@ export class MeshRender extends BaseRender{
                     glctx.enableVertexAttribArray(aUV);
                 }
             }
-    
             if(vertdesc.normal){
                 let aNorm = attrs[ShaderFX.ATTR_aNormal];
                 if(aNorm !=null){

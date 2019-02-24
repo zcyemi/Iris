@@ -9,8 +9,8 @@ export class DynamicMesh extends Mesh{
         super(name,true);
     }
 
-    public refreshMeshBuffer(glctx:GLContext){
-        if(this.m_bufferInited) return;
+    public refreshMeshBuffer(glctx:GLContext):boolean{
+        if(this.m_bufferInited) return false;
 
 
         if(this.m_seperatedBuffer){
@@ -69,6 +69,7 @@ export class DynamicMesh extends Mesh{
         }
         this.m_bufferInited = true;
 
+        return true;
     }
 
     public uploadDataBufferPosition(gl:GLContext,databuffer:MeshDataBuffer = null,databytes:number = undefined){
@@ -77,7 +78,7 @@ export class DynamicMesh extends Mesh{
             data = databuffer;
         }
         else{
-            data = this.m_dataColor;
+            data = this.m_dataPosition;
         }
 
         let posdesc =this.vertexDesc.position;

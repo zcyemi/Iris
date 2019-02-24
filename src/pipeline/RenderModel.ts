@@ -183,7 +183,7 @@ export class RenderModel implements IGraphicObj{
         mat.clean(glctx);
     }
 
-    public drawMeshWithMat(mesh:Mesh,mat:Material,vao:GLVertexArray,objmtx:mat4){
+    public drawMeshWithMat(mesh:Mesh,mat:Material,vao:GLVertexArray,objmtx:mat4 = null){
         const glctx = this.m_glctx;
         mesh.refreshMeshBuffer(glctx);
         let glp = mat.program;
