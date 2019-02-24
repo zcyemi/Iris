@@ -102,36 +102,59 @@ export class DynamicMesh extends Mesh{
         gl.bindBuffer(GL.ARRAY_BUFFER,null);
     }
 
-    public uploadDataBufferUV(gl:WebGL2RenderingContext,databuffer:MeshDataBuffer = null){
-        let buffer = this.bufferUV;
-        if(buffer == null) throw new Error('uvbuffer is null');
+    public uploadDataBufferUV(gl:GLContext,databuffer:MeshDataBuffer = null,databytes:number = undefined){
         let data:MeshDataBuffer = null;
         if(databuffer!=null && databuffer != this.m_dataUV){
-            if(databuffer.byteLength > this.m_dataUV.byteLength) throw new Error('uvbuffer overflow');
             data = databuffer;
         }
         else{
             data = this.m_dataUV;
         }
-        gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
-        gl.bufferData(gl.ARRAY_BUFFER,data,gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER,null);
+
+        let uvdesc = this.vertexDesc.uv;
+        if(databytes != undefined){
+            if(databytes > data.byteLength){
+                throw new Error("specific uv buffer databytes overflow!");
+            }else{
+                uvdesc.totalbytes = databytes;
+            }
+        }else{
+            uvdesc.totalbytes = data.byteLength;
+        }
+
+        let buffer = this.bufferUV;
+        if(buffer == null){
+            buffer = gl.createBuffer();
+            this.bufferVertices = buffer;
+        }
+        gl.bindBuffer(GL.ARRAY_BUFFER,buffer);
+        gl.bufferData(GL.ARRAY_BUFFER,data,GL.DYNAMIC_DRAW);
+        gl.bindBuffer(GL.ARRAY_BUFFER,null);
     }
 
-    public uploadDataBufferNormal(gl:WebGL2RenderingContext,databuffer:MeshDataBuffer = null){
-        let buffer = this.bufferNormal;
-        if(buffer == null) throw new Error('normal buffer is null');
+    public uploadDataBufferNormal(gl:GLContext,databuffer:MeshDataBuffer = null,databytes:number = undefined){
         let data:MeshDataBuffer = null;
         if(databuffer!=null && databuffer != this.m_dataNormal){
-            if(databuffer.byteLength > this.m_dataNormal.byteLength) throw new Error('normal buffer overflow');
             data = databuffer;
         }
         else{
             data = this.m_dataNormal;
         }
-        gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
-        gl.bufferData(gl.ARRAY_BUFFER,data,gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER,null);
+
+        let nordesc =this.vertexDesc.normal;
+        if(databytes != undefined){
+            if(databytes > data.byteLength){
+                throw new Error('specific normal buffer databytes overflow!');
+            }else{
+                nordesc.totalbytes = databytes;
+            }
+        }else{
+            nordesc.totalbytes = data.byteLength;
+        }
+        let buffer = this.bufferNormal;
+        gl.bindBuffer(GL.ARRAY_BUFFER,buffer);
+        gl.bufferData(GL.ARRAY_BUFFER,data,GL.DYNAMIC_DRAW);
+        gl.bindBuffer(GL.ARRAY_BUFFER,null);
     }
 
     public uploadDataBufferColor(gl:GLContext,databuffer:MeshDataBuffer = null,databytes:number = undefined){

@@ -18,6 +18,7 @@ export class RenderNodeList{
     }
     public pushRenderNode(rnode:BaseRender){
         let material = rnode.material;
+        if(material == null) return;
         let tag = material.shaderTags;
         if(tag == null) return;
         switch(tag.queue){
