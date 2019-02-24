@@ -210,6 +210,9 @@ float computeShadowPCF3(vec4 vLightPos,sampler2DShadow shadowsampler){
 #endif`;
 	public static readonly blit:string = `#version 300 es\nprecision mediump float;
 #queue opaque
+#zwrite off
+#ztest always
+
 inout vec2 vUV;
 #pragma vs vertex
 in vec4 aPosition;
@@ -897,7 +900,7 @@ void fragment(){
 
 #queue overlay
 #zwrite off
-#ztest lequal
+#ztest always
 #blend src_alpha one_minus_src_alpha
 
 inout vec2 vUV;
@@ -921,10 +924,8 @@ out vec4 fragColor;
 uniform sampler2D uSampler;
 void fragment(){
     vec2 uv =vUV;
-    vec4 col = texture(uSampler,uv);
-    col.a = col.r;
-    col.rgb = vec3(1.0);
-
+    vec4 col = vec4(1.0);
+    col.a = texture(uSampler,uv).a;
     fragColor = col;
 }
 #endif

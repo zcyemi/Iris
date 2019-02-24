@@ -1,7 +1,7 @@
 import { Scene } from '../core/Scene';
 import { MeshRender } from '../core/MeshRender';
 import { Material } from '../core/Material';
-import { Mesh } from '../core/index';
+import { Mesh, Color } from '../core/index';
 import { Camera, ClearType } from '../core/Camera';
 import { Light } from '../core/Light';
 import { DebugEntry } from '../DebugEntry';
@@ -64,6 +64,8 @@ export class SampleGame extends ProgramBase{
                     oncreate:(g)=>{
                         g.transform.applyTranslate(glmath.vec3(0,1.0,5));
                         let camera = g.getComponent(Camera);
+                        // camera.clearType = ClearType.Background;
+                        // camera.background = new vec4( Color.WHITE);
                         camera.clearType = ClearType.Skybox;
                         camera.skybox = Skybox.createFromProcedural();
                     }
