@@ -17,11 +17,13 @@ export class RenderNodeList{
         this.nodeOverlay.empty();
     }
     public pushRenderNode(rnode:BaseRender){
-        let material = rnode.material;
-        if(material == null) return;
-        let tag = material.shaderTags;
-        if(tag == null) return;
-        switch(tag.queue){
+
+        let queue = rnode.renderQueue;
+        if(queue == null){
+            if(rnode.material == null || rnode.material.shaderTags == null) return;
+            queue= rnode.material.shaderTags.queue;
+        }
+        switch(queue){
             case RenderQueue.Opaque:
                 this.nodeOpaque.push(rnode);
                 break;

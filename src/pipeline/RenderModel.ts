@@ -183,13 +183,15 @@ export class RenderModel implements IGraphicObj{
         mat.clean(glctx);
     }
 
-    public drawMeshWithMat(mesh:Mesh,mat:Material,vao:GLVertexArray,objmtx:mat4 = null){
+    public drawMeshWithMat(mesh:Mesh,mat:Material,vao:GLVertexArray,objmtx:mat4 = null,applyStatus:boolean = false){
         const glctx = this.m_glctx;
+
         mesh.refreshMeshBuffer(glctx);
         let glp = mat.program;
         glctx.useGLProgram(glp);
         this.bindDefaultUniform(glp);
         mat.apply(glctx);
+        if(applyStatus) glctx.pipelineState(mat.shaderTags);
         if(objmtx != null)this.updateUniformObjMtx(objmtx);
         glctx.bindGLVertexArray(vao);
         glctx.drawElementIndices(mesh.indiceDesc);
