@@ -49,9 +49,8 @@ export class SpriteBatch{
     }
     
 
-    public _refreshMeshData(glctx:GLContext,grender:GraphicsRender){
+    public refreshData(glctx:GLContext){
         if(!this.m_isdirty) return;
-
         let mesh = this.mesh;
         
         let posbuffer = this.rectPosBuffer;

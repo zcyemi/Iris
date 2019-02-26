@@ -126,7 +126,6 @@ export class TextBuilder {
             let v1 = g.y1 / 128.0;
             let v2 = g.y2 / 128.0;
 
-
             uvary[uvsize] = u1;
             uvary[uvsize + 1] = v1;
 
