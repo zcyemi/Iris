@@ -22,12 +22,12 @@ export class GLContext {
     private gl: WebGL2RenderingContext;
     private constructor(wgl: WebGL2RenderingContext) {
         this.gl = wgl;
-        this.viewport(0,0,wgl.canvas.clientWidth,wgl.canvas.clientHeight);
+        this.viewport(0,0,wgl.canvas.width,wgl.canvas.height);
         this.m_pipelineState = new ShaderTags();
     }
 
-    public get canvasWidth():number{return this.gl.canvas.clientWidth;}
-    public get canvasHeight():number{return this.gl.canvas.clientHeight;}
+    public get canvasWidth():number{return this.gl.canvas.width;}
+    public get canvasHeight():number{return this.gl.canvas.height;}
     public get bindingFBO():FrameBuffer{ return this.m_curfb;}
     public get bindingReadFBO():FrameBuffer {return this.m_readfb;}
     public get bindingDrawFBO():FrameBuffer{ return this.m_drawfb;}
