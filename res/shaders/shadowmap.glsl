@@ -9,7 +9,8 @@ uniform mat4 uLightVP;
 
 in vec4 aPosition;
 void vertex(){
-    gl_Position = (uLightVP * MATRIX_M) * aPosition;
+    mat4 lightmtx = uLightVP;
+    gl_Position = lightmtx * MATRIX_M * aPosition; //(uLightVP * MATRIX_M) *
 }
 
 void fragment(){

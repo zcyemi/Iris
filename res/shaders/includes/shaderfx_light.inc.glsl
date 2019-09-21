@@ -1,23 +1,27 @@
-struct LIGHT_DATA{
-    vec4 pos_type;
-    vec4 col_intensity;
-};
 layout (std140) uniform UNIFORM_LIGHT{
-    LIGHT_DATA light_source[4];
-    vec4 ambient_color;
-    mediump uint light_num;
+    vec4 lightColor0;
+    vec4 lightColor1;
+    vec4 lightColor2;
+    vec4 lightColor3;
+    vec4 lightIntensity;
+    vec4 lightPosX;
+    vec4 lightPosY;
+    vec4 lightPosZ;
+    vec4 light_ambient;
+    vec4 lightPrimePos;
+    vec4 lightPrimeColor;
 };
 
-#define LIGHT_NUM light_num
-#define LIGHT_COLOR0 light_source[0].col_intensity.xyz
-#define LIGHT_COLOR1 light_source[1].col_intensity.xyz
-#define LIGHT_COLOR2 light_source[2].col_intensity.xyz
-#define LIGHT_COLOR3 light_source[3].col_intensity.xyz
+#define LIGHT_COLOR0 lightColor0
+#define LIGHT_COLOR1 lightColor1
+#define LIGHT_COLOR2 lightColor2
+#define LIGHT_COLOR3 lightColor3
 
-#define LIGHT_INTENSITY0 light_source[0].col_intensity.w
-#define LIGHT_INTENSITY1 light_source[1].col_intensity.w
-#define LIGHT_INTENSITY2 light_source[2].col_intensity.w
-#define LIGHT_INTENSITY3 light_source[3].col_intensity.w
+#define MAIN_LIGHT_POS lightPrimePos
+#define MAIN_LIGHT_COLOR lightPrimeColor
 
-#define LIGHT_DIR0 light_source[0].pos_type.xyz
-#define LIGHT_DIR1 light_source[1].pos_type.xyz
+#define LIGHT_INTENSITY lightIntensity
+#define LIGHT_INTENSITY0 lightIntensity.x
+#define LIGHT_INTENSITY1 lightIntensity.y
+#define LIGHT_INTENSITY2 lightIntensity.z
+#define LIGHT_INTENSITY3 lightIntensity.w

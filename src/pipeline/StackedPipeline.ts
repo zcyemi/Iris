@@ -1,17 +1,12 @@
 import { IRenderPipeline } from "./IRenderPipeline";
-import { GraphicsRender, GraphicsRenderCreateInfo } from "../GraphicsRender";
+import { GraphicsRender, GraphicsRenderCreateInfo } from "../core/GraphicsRender";
 import { GLContext } from "../gl/GLContext";
-import { RenderPass } from "../render/RenderPass";
-import { PassDebug } from "../render/PassDebug";
-import { PassDepth } from "../render/PassDepth";
-import { type } from "os";
-import { PassShadowMap } from "../render/PassShadowMap";
-import { PassSkybox } from "../render/PassSkybox";
+import { RenderPass } from "../rendering/index";
 import { FrameBuffer } from "../gl/FrameBuffer";
 import { RenderModel } from "./RenderModel";
-import { ReleaseGraphicObj } from "../IGraphicObj";
-import { RenderNodeList } from "../RenderNodeList";
-import { Scene } from "../Scene";
+import { ReleaseGraphicObj } from "../core/IGraphicObj";
+import { RenderNodeList } from "../core/RenderNodeList";
+import { Scene } from "../core/Scene";
 import { PipelineUtility } from "./PipelineUtility";
 import { PipelineClearInfo } from "./RenderPipeline";
 
@@ -110,7 +105,7 @@ export class StackedPipeline implements IRenderPipeline{
     }
     onRenderToCanvas(){
         const glctx =this.m_glctx;
-        glctx.bindFramebuffer(null);
+        glctx.bindGLFramebuffer(null);
         const mainfb = this.m_mainfb;
         glctx.viewport(0,0,mainfb.width,mainfb.height);
         this.m_model.drawFullScreen(this.m_mainfb.coltex);

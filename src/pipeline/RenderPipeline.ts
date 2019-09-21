@@ -1,15 +1,11 @@
-import { Scene } from "../Scene";
+import { Scene } from "../core/Scene";
 import { DoubleBuffered } from "../collection/DoubleBuffered";
-import { RenderNodeList } from "../RenderNodeList";
+import { RenderNodeList } from "../core/RenderNodeList";
 import { PipelineUtility } from "./PipelineUtility";
-import { type } from "os";
-import { Mesh } from "../Mesh";
-import { Material } from "../Material";
 import { mat4, vec4 } from "../math/GLMath";
 import { RenderModel } from "./RenderModel";
-import { MeshRender } from "../MeshRender";
 import { IRenderPipeline } from "./IRenderPipeline";
-import { GraphicsRender, GraphicsRenderCreateInfo } from "../GraphicsRender";
+import { GraphicsRender, GraphicsRenderCreateInfo } from "../core/GraphicsRender";
 import { GLContext } from "../gl/GLContext";
 import { FrameBuffer } from "../gl/FrameBuffer";
 
@@ -95,7 +91,7 @@ export class RenderPipeline implements IRenderPipeline{
 
 
         const mainfb = this.m_mainfb;
-        glctx.bindFramebuffer(mainfb);
+        glctx.bindGLFramebuffer(mainfb);
 
         model.clearFrameBufferTarget(this.m_clearInfo,mainfb);
         //exec passes
@@ -105,7 +101,7 @@ export class RenderPipeline implements IRenderPipeline{
 
     public onRenderToCanvas(){
         const glctx =this.m_glctx;
-        glctx.bindFramebuffer(null);
+        glctx.bindGLFramebuffer(null);
         const mainfb = this.m_mainfb;
         glctx.viewport(0,0,mainfb.width,mainfb.height);
         this.m_model.drawFullScreen(this.m_mainfb.coltex);

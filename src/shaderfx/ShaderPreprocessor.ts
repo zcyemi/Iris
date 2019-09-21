@@ -166,6 +166,8 @@ export class ShaderPreprocessor {
     }
 
 
+
+
     public static processOptions(line: string): [string, ShaderOptions] {
         const match = ShaderPreprocessor.REGEX_OPTIONS;
         if (!line.match(match)) {

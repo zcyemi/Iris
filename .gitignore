@@ -8,3 +8,4 @@ res/iris.es.js
 res/iris.iife.js
 .vscode
 /yarn.lock
+*.lock

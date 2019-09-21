@@ -1,5 +1,5 @@
 import { vec3, mat4, quat } from "./math/GLMath";
-import { GameObject } from "./GameObject";
+import { GameObject } from "./core/GameObject";
 
 /**
  * WIP efactoring

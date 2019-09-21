@@ -1,6 +1,6 @@
 import { ShaderData } from "./ShaderBuffer";
 import { GLContext } from "../gl/GLContext";
-import { IGraphicObj } from "../IGraphicObj";
+import { IGraphicObj } from "../core/IGraphicObj";
 import { GL } from "../gl/GL";
 
 

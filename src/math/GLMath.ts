@@ -2,9 +2,25 @@ const DEG2RAD_HALF = Math.PI / 360.0;
 const DEG2RAD = Math.PI / 180.0;
 const RAD2DEG = 180.0 / Math.PI;
 
+export type i32 = number;
+export type i64 = number;
+export type f32 = number;
+export type f64 = number;
+
+
 export class glmath {
+
+    public static readonly eplison:f32 = 0.000000001;
     public static vec3(x: number, y: number, z: number): vec3 {
         return new vec3([x, y, z]);
+    }
+
+    public static closeTo(v:f32,tar:f32){
+        return Math.abs(v- tar) < glmath.eplison;
+    }
+
+    public static closeToZero(v:f32):boolean{
+        return Math.abs(v) < glmath.eplison;
     }
 
     public static vec4(x: number, y: number, z: number, w: number): vec4 {
@@ -42,8 +58,10 @@ export class vec2 {
 
     public constructor(v?: number[]) {
         if (v != null) {
-            this.raw[0] = v[0];
-            this.raw[1] = v[1];
+            this.raw = [v[0],v[1]];
+        }
+        else{
+            this.raw = [0,0];
         }
     }
 
@@ -164,11 +182,16 @@ export class vec4 {
 
     public constructor(v?: number[]) {
         if (v != null) {
-            this.raw = v;
+            this.raw = [v[0],v[1],v[2],v[3]];
         }
         else {
             this.raw = [0, 0, 0, 0];
         }
+    }
+
+    public isValid():boolean{
+        let raw = this.raw;
+        return !isNaN(raw[0]) && !isNaN(raw[1]) && !isNaN(raw[2]) && isNaN(raw[3]);
     }
 
     public add(v: number | vec3 | vec4 | number[]): vec4 {
@@ -368,6 +391,20 @@ export class vec4 {
         this.w = v.w;
     }
 
+    public setValue(x:f32,y:f32,z:f32,w:f32){
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.w = w;
+    }
+
+    public setRaw(a:number[]){
+        this.x = a[0];
+        this.y = a[1];
+        this.z = a[2];
+        this.w = a[3];
+    }
+
     public static get zero(): vec4 { return new vec4(); }
     public static get one(): vec4 { return new vec4([1, 1, 1, 1]); }
 }
@@ -397,11 +434,16 @@ export class vec3 {
 
     public constructor(v?: number[]) {
         if (v != null) {
-            this.raw = v;
+            this.raw = [v[0],v[1],v[2]];
         }
         else {
             this.raw = [0, 0, 0];
         }
+    }
+    
+    public get isValid(): boolean {
+        const raw = this.raw;
+        return !isNaN(raw[0]) && !isNaN(raw[1]) && !isNaN(raw[2]);
     }
 
     public add(v: number | vec3 | vec4 | number[]): vec3 {
@@ -582,6 +624,10 @@ export class vec3 {
         return vec3.Cross(lhs, this);
     }
 
+    public crossRevSafe(lhs: vec3) {
+        return vec3.SafeCross(lhs, this);
+    }
+
     public static Cross(lhs: vec3, rhs: vec3): vec3 {
         return new vec3([
             lhs.y * rhs.z - lhs.z * rhs.y,
@@ -589,6 +635,7 @@ export class vec3 {
             lhs.x * rhs.y - lhs.y * rhs.x
         ]);
     }
+    
 
     public static SafeCross(lhs: vec3, rhs: vec3): vec3 {
         let c = new vec3([
@@ -610,11 +657,17 @@ export class vec3 {
         return new vec3([v1.x + v2.x, v1.y + v2.y, v1.z + v2.z]);
     }
 
-    public get normalize(): vec3 {
+    public get normalized(): vec3 {
+        const len = this.length;
+        if(len == 0){
+           return this;
+        }
         return this.div(this.length);
     }
 
-    public normalized(): vec3 {
+    public Normalize(): vec3 {
+        const len = this.length;
+        if(len == 0) return vec3.zero;
         return this.divToRef(this.length);
     }
 
@@ -891,9 +944,9 @@ export class quat {
      * @param normal
      */
     public static FromToNormal(from: vec3, to: vec3, normal: vec3) {
-        let f = from.normalized();
-        let t = to.normalized();
-        let n = normal.normalized();
+        let f = from.Normalize();
+        let t = to.Normalize();
+        let n = normal.Normalize();
         let cross = vec3.Cross(f, t);
 
         let croosLen2 = cross.length2;
@@ -904,7 +957,7 @@ export class quat {
             }
             let cr = vec3.Cross(n, f);
             let cu = vec3.Cross(f, cr);
-            let nor = cu.normalize;
+            let nor = cu.normalized;
             return new quat([nor.x, nor.y, nor.z, 0]);
         }
         cross.div(Math.sqrt(croosLen2));
@@ -924,8 +977,8 @@ export class quat {
         if (forward.dot(up) > Number.EPSILON) {
             throw new Error("<forward> must be perpendicular ot <up>");
         }
-        let f = forward.normalized();
-        let u = up.normalized();
+        let f = forward.Normalize();
+        let u = up.Normalize();
 
         let qf = quat.FromToNormal(vec3.forward, f, u);
         let u1 = qf.rota(vec3.up);
@@ -1115,9 +1168,9 @@ export class mat4 {
     }
 
     public static lookAt(eye: vec3, target: vec3, up: vec3) {
-        let vz = eye.subToRef(target).normalize;
-        let vx = up.cross(vz).normalize;
-        var vy = vz.cross(vx).normalize;
+        let vz = eye.subToRef(target).normalized;
+        let vx = up.cross(vz).normalized;
+        var vy = vz.cross(vx).normalized;
 
         return mat4.inverse(new mat4([
             vx.x, vx.y, vx.z, 0,
@@ -1130,6 +1183,15 @@ export class mat4 {
         ]));
     }
 
+    public get isValid(): boolean {
+        const raw = this.raw;
+        let len = raw.length;
+        for (let t = 0; t < len; t++) {
+            if (isNaN(raw[t])) return false;
+        }
+        return true;
+    }
+
     /**
      * Build coordinate change matrix RH->RH LH->LH
      * @param pos pos
@@ -1137,10 +1199,10 @@ export class mat4 {
      * @param up dir
      */
     public static coord(pos: vec3, forward: vec3, up: vec3): mat4 {
-        let f = forward.normalized();
-        let u = up.normalized();
-        let r = u.cross(f).normalize;
-        u = f.cross(r).normalize;
+        let f = forward.Normalize();
+        let u = up.Normalize();
+        let r = u.cross(f).normalized;
+        u = f.cross(r).normalized;
         return new mat4([
             r.x, u.x, f.x, 0,
             r.y, u.y, f.y, 0,
@@ -1156,10 +1218,10 @@ export class mat4 {
      * @param up dir
      */
     public static coordCvt(pos: vec3, forward: vec3, up: vec3) {
-        let f = forward.normalized();
-        let u = up.normalized();
-        let r = u.crossRev(f).normalize;
-        u = f.crossRev(r).normalize;
+        let f = forward.Normalize();
+        let u = up.Normalize();
+        let r = u.crossRevSafe(f).normalized;
+        u = f.crossRevSafe(r).normalized;
         return new mat4([
             r.x, u.x, f.x, 0,
             r.y, u.y, f.y, 0,

@@ -1,9 +1,4 @@
-import { RenderNodeList } from "../RenderNodeList";
-import { Transform } from "../Transform";
-import { Scene } from "../Scene";
-import { Mesh } from "../Mesh";
-import { Material } from "../Material";
-import { mat4 } from "../math/GLMath";
+import { RenderNodeList, Transform,BaseRender,Scene } from "../core/index";
 
 export class PipelineUtility{
 

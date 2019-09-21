@@ -1,11 +1,12 @@
 import { GLProgram } from "./GLProgram";
-import { GLFrameBuffer } from "./GLFrameBuffer";
-import { GLPipelineState } from "./GLPipelineState";
 import { GLFenceSync } from "./GLFenceSync";
 import { FrameBuffer } from "./FrameBuffer";
 import { GL, GLSizeOrData } from "./GL";
-import { MeshIndicesDesc } from "../Mesh";
-import { ShaderTags, Comparison, BlendOperator, BlendFactor } from "../shaderfx/Shader";
+import { MeshIndicesDesc } from "../core/index";
+import { ShaderTags, BlendOperator, BlendFactor } from "../shaderfx/Shader";
+import { Utility } from "../core/Utility";
+import { i32, f32 } from "../math/GLMath";
+import { GLVertexArray } from "./GLVertexArray";
 
 export class GLContext {
     private m_glFenceSynces:GLFenceSync[] = [];
@@ -21,12 +22,12 @@ export class GLContext {
     private gl: WebGL2RenderingContext;
     private constructor(wgl: WebGL2RenderingContext) {
         this.gl = wgl;
-        this.viewport(0,0,wgl.canvas.clientWidth,wgl.canvas.clientHeight);
+        this.viewport(0,0,wgl.canvas.width,wgl.canvas.height);
         this.m_pipelineState = new ShaderTags();
     }
 
-    public get canvasWidth():number{return this.gl.canvas.clientWidth;}
-    public get canvasHeight():number{return this.gl.canvas.clientHeight;}
+    public get canvasWidth():number{return this.gl.canvas.width;}
+    public get canvasHeight():number{return this.gl.canvas.height;}
     public get bindingFBO():FrameBuffer{ return this.m_curfb;}
     public get bindingReadFBO():FrameBuffer {return this.m_readfb;}
     public get bindingDrawFBO():FrameBuffer{ return this.m_drawfb;}
@@ -48,7 +49,7 @@ export class GLContext {
          return this.gl;
     }
 
-    public createProgram(vsource: string, psource: string): GLProgram | null {
+    public createGLProgram(vsource: string, psource: string): GLProgram | null {
 
         let gl = this.gl;
         let vs = gl.createShader(gl.VERTEX_SHADER);
@@ -56,7 +57,7 @@ export class GLContext {
         gl.compileShader(vs);
 
         if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
-            console.error(vsource);
+            console.error(Utility.StrAddLineNum(vsource));
             console.error('compile vertex shader failed: ' + gl.getShaderInfoLog(vs));
             gl.deleteShader(vs);
             return null;
@@ -67,7 +68,7 @@ export class GLContext {
         gl.compileShader(ps);
 
         if (!gl.getShaderParameter(ps, gl.COMPILE_STATUS)) {
-            console.error(psource);
+            console.error(Utility.StrAddLineNum(psource));
             console.error('compile fragment shader failed: ' + gl.getShaderInfoLog(ps));
             gl.deleteShader(ps);
             return null;
@@ -79,8 +80,8 @@ export class GLContext {
         gl.linkProgram(program);
 
         if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            console.error(vsource);
-            console.error(psource);
+            console.error(Utility.StrAddLineNum(vsource));
+            console.error(Utility.StrAddLineNum(psource));
             console.error('link shader program failed!:' + gl.getProgramInfoLog(program));
             gl.deleteProgram(program);
             gl.deleteShader(vs);
@@ -94,11 +95,9 @@ export class GLContext {
         return p;
     }
 
-    public createFrameBuffer(retain: boolean, colorInternalFormat: number, depthInternalFormat?: number, width?: number, height?: number,glfb?:GLFrameBuffer): GLFrameBuffer | null {
-        return GLFrameBuffer.create(retain, this, colorInternalFormat, depthInternalFormat, width, height,glfb);
-    }
 
-    public bindFramebuffer(fb:FrameBuffer):boolean{
+
+    public bindGLFramebuffer(fb:FrameBuffer):boolean{
         if(this.m_curfb == fb) return false;
         const gl = this.gl;
         gl.bindFramebuffer(gl.FRAMEBUFFER,fb != null? fb.rawobj:null);
@@ -143,15 +142,6 @@ export class GLContext {
         vp[1] = y;
         vp[2] = w;
         vp[3] = h;
-    }
-
-    public savePipeline(...type: number[]): GLPipelineState {
-        return new GLPipelineState(this.gl, ...type);
-    }
-
-    public restorePipeline(state: GLPipelineState) {
-        if (state == null) return;
-        state.restore(this.gl);
     }
 
     public colorMask(red: GLboolean, green: GLboolean, blue: GLboolean, alpha: GLboolean){
@@ -225,15 +215,33 @@ export class GLContext {
     public createVertexArray(): WebGLVertexArrayObject | null{
         return this.gl.createVertexArray();
     }
+
+    public createGLVertexArray():GLVertexArray{
+        return new GLVertexArray(this.createVertexArray());
+    }
+
     public deleteVertexArray(vertexArray: WebGLVertexArrayObject | null){
         this.gl.deleteVertexArray(vertexArray);
     }
+
+    public deleteGLVertexArray(va:GLVertexArray){
+        if(va != null && va.raw !=null){
+            this.deleteVertexArray(va.raw);
+        }
+    }
+
     public isVertexArray(vertexArray: WebGLVertexArrayObject | null): boolean{
         return this.gl.isVertexArray(vertexArray);
     }
+
     public bindVertexArray(array: WebGLVertexArrayObject | null){
         this.gl.bindVertexArray(array);
     }
+
+    public bindGLVertexArray(va:GLVertexArray | null){
+        this.gl.bindVertexArray(va == null? null: va.raw);
+    }
+
     public depthFunc(func: number){
         let state =this.m_pipelineState;
         if(state.ztest == func) return;
@@ -309,6 +317,10 @@ export class GLContext {
         }
     }
 
+    public get currentPipelineState():ShaderTags{
+        return this.m_pipelineState.clone();
+    }
+
     public clear(mask:number){
         this.gl.clear(mask);
     }
@@ -368,8 +380,210 @@ export class GLContext {
         this.gl.drawElements(desc.topology,desc.indiceCount,desc.type,desc.offset);
     }
 
+    public drawElements(mode: GLenum, count: GLsizei, type: GLenum, offset: GLintptr){
+        this.gl.drawElements(mode,count,type,offset);
+    }
+
     public polygonOffset(factor:number,units:number){
         this.gl.polygonOffset(factor,units);
+    }
+
+    //texture
+
+    public activeTexture(texture:number){
+        this.gl.activeTexture(texture);
+    }
+
+    public bindTexture(target:number,tex:WebGLTexture){
+        this.gl.bindTexture(target,tex);
+    }
+    public texStorage2D(target:number,level:number,format:number,width:number,height:number){
+        this.gl.texStorage2D(target,level,format,width,height);
+    }
+    public texImage2D(target:i32,level:i32,internalfmt:i32,width:i32,height:i32,border:i32,format:i32,type:i32,pixels:any){
+        this.gl.texImage2D(target,level,internalfmt,width,height,border,format,type,pixels);
+    }
+    public texParameteri(target: i32, pname: i32, param: i32){
+        this.gl.texParameteri(target,pname,param);
+    }
+    public texParameterf(target: i32, pname: i32, param: f32){
+        this.gl.texParameterf(target,pname,param);
+    }
+
+    public generateMipmap(target:i32){
+        this.gl.generateMipmap(target);
+    }
+
+    public createShader(type:i32):WebGLShader{
+        return this.gl.createShader(type);
+    }
+    public shaderSource(shader:WebGLShader,source:string){
+        this.gl.shaderSource(shader,source);
+    }
+    public compileShader(shader:WebGLShader){
+        this.gl.compileShader(shader);
+    }
+    public getShaderParameter(shader:WebGLShader,type:i32){
+        this.gl.getShaderParameter(shader,type);
+    }
+    public getShaderInfoLog(shader:WebGLShader){
+        this.gl.getShaderInfoLog(shader);
+    }
+    public deleteShader(shader:WebGLShader){
+        this.gl.deleteShader(shader);
+    }
+    public createProgram():WebGLProgram{
+        return this.gl.createProgram();
+    }
+    public attachShader(program:WebGLProgram,shader:WebGLShader){
+        this.gl.attachShader(program,shader);
+    }
+    public linkProgram(program:WebGLProgram){
+        this.gl.linkProgram(program);
+    }
+    public getProgramParameter(program:WebGLProgram,target:i32){
+        return this.gl.getProgramParameter(program,target);
+    }
+    public getProgramInfoLog(program:WebGLProgram):string{
+        return this.gl.getProgramInfoLog(program);
+    }
+    public deleteProgram(program:WebGLProgram){
+        this.gl.deleteProgram(program);
+    }
+
+    public createFramebuffer():WebGLFramebuffer{
+        return this.gl.createFramebuffer();
+    }
+
+    public deleteFramebuffer(fb:WebGLFramebuffer){
+        this.gl.deleteFramebuffer(fb);
+    }
+
+    public framebufferTexture2D(target: i32, attachment: i32, textarget: i32, texture: WebGLTexture | null, level: i32){
+        this.gl.framebufferTexture2D(target,attachment,textarget,texture,level);
+    }
+
+    public bindFramebuffer(target:i32,fb:WebGLFramebuffer){
+        this.gl.bindFramebuffer(target,fb);
+    }
+
+    public frontFace(mode:i32){
+        this.gl.frontFace(mode);
+    }
+
+    public vertexAttribPointer(index: GLuint, size: GLint, type: GLenum, normalized: GLboolean, stride: GLsizei, offset: GLintptr){
+        this.gl.vertexAttribPointer(index,size,type,normalized,stride,offset);
+    }
+
+    public enableVertexAttribArray(index:i32){
+        this.gl.enableVertexAttribArray(index);
+    }
+
+    public uniform1f(loc:WebGLUniformLocation,x:f32){
+        this.gl.uniform1f(loc,x);
+    }
+    public uniform1i(loc:WebGLUniformLocation,x:i32){
+        this.gl.uniform1i(loc,x);
+    }
+    public uniform1ui(loc:WebGLUniformLocation,x:i32){
+        this.gl.uniform1ui(loc,x);
+    }
+    public uniform1iv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform1iv(loc,data,srcOffset,srcLength);
+    }
+    public uniform1fv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform1fv(loc,data,srcOffset,srcLength);
+    }
+    public uniform1uiv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform1uiv(loc,data,srcOffset,srcLength);
+    }
+
+    public uniform2f(loc:WebGLUniformLocation,x:f32,y:f32){
+        this.gl.uniform2f(loc,x,y);
+    }
+    public uniform2i(loc:WebGLUniformLocation,x:i32,y:i32){
+        this.gl.uniform2i(loc,x,y);
+    }
+    public uniform2ui(loc:WebGLUniformLocation,x:i32,y:i32){
+        this.gl.uniform2ui(loc,x,y);
+    }
+    public uniform2iv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform2iv(loc,data,srcOffset,srcLength);
+    }
+    public uniform2fv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform1fv(loc,data,srcOffset,srcLength);
+    }
+    public uniform2uiv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform2uiv(loc,data,srcOffset,srcLength);
+    }
+
+    public uniform3f(loc:WebGLUniformLocation,x:f32,y:f32,z:f32){
+        this.gl.uniform3f(loc,x,y,z);
+    }
+    public uniform3i(loc:WebGLUniformLocation,x:i32,y:i32,z:i32){
+        this.gl.uniform3i(loc,x,y,z);
+    }
+    public uniform3ui(loc:WebGLUniformLocation,x:i32,y:i32,z:i32){
+        this.gl.uniform3ui(loc,x,y,z);
+    }
+    public uniform3iv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform3iv(loc,data,srcOffset,srcLength);
+    }
+    public uniform3fv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform3fv(loc,data,srcOffset,srcLength);
+    }
+    public uniform3uiv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform3uiv(loc,data,srcOffset,srcLength);
+    }
+
+    public uniform4f(loc:WebGLUniformLocation,x:f32,y:f32,z:f32,w:f32){
+        this.gl.uniform4f(loc,x,y,z,w);
+    }
+    public uniform4i(loc:WebGLUniformLocation,x:i32,y:i32,z:i32,w:i32){
+        this.gl.uniform4i(loc,x,y,z,w);
+    }
+    public uniform4ui(loc:WebGLUniformLocation,x:i32,y:i32,z:i32,w:i32){
+        this.gl.uniform4ui(loc,x,y,z,w);
+    }
+    public uniform4iv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform4iv(loc,data,srcOffset,srcLength);
+    }
+    public uniform4fv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform4fv(loc,data,srcOffset,srcLength);
+    }
+    public uniform4uiv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
+        srcLength?: number){
+        this.gl.uniform4uiv(loc,data,srcOffset,srcLength);
+    }
+
+    public uniformMatrix4fv(location: WebGLUniformLocation | null, transpose: boolean, data: Float32Array | ArrayLike<number>,
+        srcOffset?: number, srcLength?: number){
+        this.gl.uniformMatrix4fv(location,transpose,data,srcOffset,srcLength);
+    }
+
+    public bindSampler(unit: number, sampler: WebGLSampler){
+        this.gl.bindSampler(unit,sampler);
+    }
+
+    public readPixels(x: number, y: number, width: number, height: number, format: number, type: number,
+        dstData: any){
+        this.gl.readPixels(x,y,width,height,format,type,dstData);
+    }
+
+    public getBufferSubData(target: number, srcByteOffset: number, dstBuffer: ArrayBufferView,
+        dstOffset?: number, length?: number){
+        this.gl.getBufferSubData(target,srcByteOffset,dstBuffer,dstOffset,length);
     }
 
 }

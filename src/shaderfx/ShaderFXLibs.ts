@@ -5,6 +5,7 @@ import { ShaderData, ShaderSubData } from "./ShaderBuffer";
 import { Shader } from "./Shader";
 import { vec3, vec4, mat4, glmath } from "../math/GLMath";
 import { GLContext } from "../gl/GLContext";
+import { Light } from "../core/Light";
 
 export class ShaderFXLibs{
     private glctx:GLContext;
@@ -21,6 +22,10 @@ export class ShaderFXLibs{
     private m_shadermap:Shader;
     private m_blit:Shader;
     private m_sprite:Shader;
+    private m_screenRect:Shader;
+    private m_shadowsample:Shader;
+    private m_shaderrect:Shader;
+    private m_shadertext:Shader;
 
     private m_pbrMetallicRoughness:Shader;
 
@@ -44,6 +49,14 @@ export class ShaderFXLibs{
     public static SH_blit:ShaderSource;
     @ShaderFile("sprite")
     public static SH_sprite:ShaderSource;
+    @ShaderFile("screenRect")
+    public static SH_screenRect:ShaderSource;
+    @ShaderFile("shadowSample")
+    public static SH_shadowsample:ShaderSource;
+    @ShaderFile("rect")
+    public static SH_rect:ShaderSource;
+    @ShaderFile('text')
+    public static SH_text:ShaderSource;
 
     @ShaderInc(ShaderFX.VARIANT_SHADERFX_BASIS)
     public static SHADERFX_BASIS:ShaderVariant;
@@ -125,6 +138,34 @@ export class ShaderFXLibs{
         return this.m_sprite;
     }
 
+    public get shaderScreenRect():Shader{
+        if(this.m_screenRect == null){
+            this.m_screenRect = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_screenRect);
+        }
+        return this.m_screenRect;
+    }
+
+    public get shaderShadowSample():Shader{
+        if(this.m_shadowsample == null){
+            this.m_shadowsample = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_shadowsample);
+        }
+        return this.m_shadowsample;
+    }
+
+    public get shaderRect():Shader{
+        if(this.m_shaderrect == null){
+            this.m_shaderrect = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_rect);
+        }
+        return this.m_shaderrect;
+    }
+
+    public get shaderText():Shader{
+        if(this.m_shadertext == null){
+            this.m_shadertext = ShaderFX.compileShaders(this.glctx,ShaderFXLibs.SH_text);
+        }
+        return this.m_shadertext;
+    }
+
     public release(){
     }
 
@@ -156,37 +197,74 @@ export class ShaderDataUniformObj extends ShaderData{
 }
 
 /**
- * max light count 4
- * 0-3 pos,light type
- * 4-7 col, intensity
- * *4
- * ambient color
- * normaly 1 directional light 3 point light
+ * four points light
+ * [0]
+ * vec4 lightColor0;
+ * vec4 lightColor1;
+ * vec4 lightColor2;
+ * vec4 lightColor3;
+ * vec4 lightIntensity;
+ * vec4 lightPosX;
+ * vec4 lightPosY;
+ * vec4 lightPosZ;
+ * [128]
+ * vec4 light_ambient;
+ * [144]
+ * vec4 lightPrimePos;
+ * vec4 lightPrimeColor;
  */
 export class ShaderDataUniformLight extends ShaderData{
     public static readonly UNIFORM_LIGHT:string = "UNIFORM_LIGHT";
     public constructor (){
-        let buffersize = (8 *4+ 4 + 1) *4;
+        let buffersize = (8 * 4 + 4 + 8) *4;
         super(buffersize);
     }
-    public setLightData(pos:vec3,type:number,index:number){
-        let offset = index * 32;
-        const buffer = this.buffer;
-        buffer.setVec3(offset,pos);
-        buffer.setFloat(offset+12,type);
+
+    public setMainLight(light:Light){
+        let buffer =this.buffer;
+        if(light == null){
+            buffer.setVec4(144,vec4.zero);
+            buffer.setVec4(160,vec4.zero);
+        }
+        else{
+            buffer.setVec4(144,light.getShaderLightPosData());
+            buffer.setVec4(160,light.lightColor.vec4(light.intensity));
+        }
     }
-    public setLightColorIntensity(col:vec3,intensity:number,index:number){
-        let offset = index * 32 + 16;
-        const buffer = this.buffer;
-        buffer.setVec3(offset,col);
-        buffer.setFloat(offset+12,intensity);
+
+    public setPointLights(lights:Light[],count:number){
+        let buffer =this.buffer;
+
+        let lintensity = new vec4();
+        let lposx = new vec4();
+        let lposy = new vec4();
+        let lposz = new vec4();
+        for(let t=0;t<4;t++){
+            if(t < count){
+                let light = lights[t];
+                let lcol = light.lightColor;
+                buffer.setVec4(t*16,glmath.vec4(lcol.x,lcol.y,lcol.z,1.0));
+                let lpos = light.transform.position;
+                lintensity.raw[t] = light.intensity;
+                lposx.raw[t] = lpos.raw[0];
+                lposy.raw[t] = lpos.raw[1];
+                lposz.raw[t] = lpos.raw[2];
+            }
+            else{
+                buffer.setVec4(t*16,vec4.zero);
+            }
+        }
+        buffer.setVec4(64,lintensity);
+        buffer.setVec4(80,lposx);
+        buffer.setVec4(96,lposy);
+        buffer.setVec4(112,lposz);
     }
+
     public setAmbientColor(ambient:vec4){
         this.buffer.setVec4(128,ambient);
     }
     public setLightCount(count:number){
-        count = glmath.clamp(count,0,4);
-        this.buffer.setUint32(144,count);
+
     }
 }
 
