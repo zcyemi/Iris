@@ -11,3 +11,4 @@ export * from './collection/index';
 export * from './test/sample';
 export * from './DebugEntry';
 
+export default {};

@@ -35,7 +35,7 @@ export class MeshRender extends BaseRender{
 
     public release(glctx:GLContext){
         if(this.m_vao != null){
-            glctx.deleteVertexArray(this.m_vao);
+            glctx.deleteGLVertexArray(this.m_vao);
             this.m_vao = null;
         }
 
