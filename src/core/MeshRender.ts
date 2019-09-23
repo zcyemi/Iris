@@ -1,7 +1,7 @@
 import { Mesh } from "./Mesh";
 import { Material } from "./Material";
 import { GameObject } from "./GameObject";
-import { ShaderFX } from "../shaderfx/index";
+import { ShaderFX } from "../shaderfx";
 import { BaseRender } from "./BaseRender";
 import { GLContext,GLProgram,GL,GLVertexArray} from "../gl/index";
 

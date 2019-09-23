@@ -149,7 +149,6 @@ export class RenderModel implements IGraphicObj{
         glctx.bindTexture(GL.TEXTURE_2D,rawtex);
         glctx.activeTexture(ShaderFX.GL_TEXTURE_TEMP);
     }
-        
 
     public updateUniformObjMtx(objmtx:mat4){
         let uniformObj = this.m_uniformObj;
@@ -217,7 +216,9 @@ export class RenderModel implements IGraphicObj{
         let ccol = clearinfo.color;
         if(ccol) glctx.clearColorAry(ccol.raw);
         let depth = clearinfo.depth;
-        if(depth !=null) glctx.clearDepth(depth);
+        if(depth !=null){
+            glctx.clearDepth(depth);
+        }
         glctx.clear(clearinfo.clearMask);
     }
 

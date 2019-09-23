@@ -2,10 +2,10 @@ import { GLProgram } from "./GLProgram";
 import { GLFenceSync } from "./GLFenceSync";
 import { FrameBuffer } from "./FrameBuffer";
 import { GL, GLSizeOrData } from "./GL";
-import { MeshIndicesDesc } from "../core/index";
+import { MeshIndicesDesc, Mesh, Material, Camera } from "../core/index";
 import { ShaderTags, BlendOperator, BlendFactor } from "../shaderfx/Shader";
 import { Utility } from "../core/Utility";
-import { i32, f32 } from "../math/GLMath";
+import { i32, f32, mat4 } from "../math/GLMath";
 import { GLVertexArray } from "./GLVertexArray";
 
 export class GLContext {
@@ -584,6 +584,13 @@ export class GLContext {
     public getBufferSubData(target: number, srcByteOffset: number, dstBuffer: ArrayBufferView,
         dstOffset?: number, length?: number){
         this.gl.getBufferSubData(target,srcByteOffset,dstBuffer,dstOffset,length);
+    }
+
+    public darwMesh(mesh:Mesh,mat:Material,mtx:mat4 = null,camera:Camera){
+        
+        if(!mesh.bufferInited){
+            mesh.refreshMeshBuffer(this);
+        }
     }
 
 }

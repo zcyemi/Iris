@@ -197,7 +197,6 @@ export class ShaderSource {
 
         match = line.match(regexblend);
         if (match != null) {
-            console.log('process blend');
             if (tags == null) {
                 tags = new ShaderTags();
                 this.m_shaderTag = tags;

@@ -1,8 +1,38 @@
 import { GraphicsRender, GraphicsRenderCreateInfo } from "../core/GraphicsRender";
 import { GLContext } from "../gl/GLContext";
-import { RenderNodeList } from "../core/RenderNodeList";
 import { RenderModel } from "./RenderModel";
 import { FrameBuffer } from "../gl/FrameBuffer";
+import { RenderNodeList } from "../core/RenderNodeList";
+
+
+
+export enum PipelineFeatureType{
+    ZPrePass = 0,
+}
+
+
+export class PipelineFeatures{
+
+    private m_featureEnable:{[key:number]:boolean} = {};
+    private m_featureValue:{[key:string]:any} = {};
+
+    public isEnable(t:PipelineFeatureType):boolean{
+        var val = this.m_featureEnable[t];
+        return val == true;
+    }
+
+    public setFeatureStatus(t:PipelineFeatureType,enable:boolean){
+        this.m_featureEnable[t] = enable;
+    }
+
+    public getFeatureValue(property:string):any{
+        return this.m_featureValue[property];
+    }
+    public setFeatureValue(property:string,value:any){
+        this.m_featureEnable[property] = value;
+    }
+}
+
 
 export interface IRenderPipeline{
     graphicRender:GraphicsRender;
@@ -15,6 +45,7 @@ export interface IRenderPipeline{
     
     exec(data:any);
     onRenderToCanvas();
+
     
     onSetupRender(glctx:GLContext,info:GraphicsRenderCreateInfo);
     onInitGL();

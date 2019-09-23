@@ -1,11 +1,10 @@
 import { ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
-import { Scene } from "../core/Scene";
-import { GLProgram } from "../gl/GLProgram";
 import { RenderPass } from "./RenderPass";
-import { MeshRender } from "../core/MeshRender";
 import { IRenderPipeline } from "../pipeline/IRenderPipeline";
 import { GL } from "../gl/GL";
 import { pipeline } from "stream";
+import { MeshRender } from "../core/MeshRender";
+import { Scene } from "../core/Scene";
 
 export class PassOpaque extends RenderPass{
 
@@ -41,27 +40,31 @@ export class PassOpaque extends RenderPass{
         // glctx.enable(GL.POLYGON_OFFSET_FILL);
 
         const deftags = this.m_tags;
-        glctx.pipelineState(deftags);
 
         glctx.depthMask(true);
 
+        glctx.pipelineState(deftags);
+
+
         const mainfb = pipe.mainFrameBuffer;
+
         glctx.viewport(0,0,mainfb.width,mainfb.height);
 
         glctx.bindGLFramebuffer(mainfb);
 
         const len = queue.size;
         const queueary = queue.array;
+        
         for(let t=0;t<len;t++){
             const node = queueary[t];
             if(node instanceof MeshRender){
-                model.drawMeshRender(node,node.object.transform.objMatrix);
+                model.drawMeshRender(node,node.object.transform.objMatrix,node.material,true);
             }
             else{
                 node.draw(glctx,model);
             }
         }
 
-        // gl.disable(gl.POLYGON_OFFSET_FILL);
+        // glctx.disable(GL.POLYGON_OFFSET_FILL);
     }
 }

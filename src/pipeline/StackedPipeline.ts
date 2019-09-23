@@ -107,7 +107,7 @@ export class StackedPipeline implements IRenderPipeline{
         const glctx =this.m_glctx;
         glctx.bindGLFramebuffer(null);
         const mainfb = this.m_mainfb;
-        glctx.viewport(0,0,mainfb.width,mainfb.height);
+        glctx.viewport(0,0,mainfb.width*0.5,mainfb.height*0.5);
         this.m_model.drawFullScreen(this.m_mainfb.coltex);
     }
 

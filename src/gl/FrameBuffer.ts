@@ -60,18 +60,21 @@ export class FrameBuffer implements IGraphicObj{
         if(texdesc.colFmt != undefined){
             let coltex = Texture2D.createTexture2D(width,height,{
                 internalformat: texdesc.colFmt,
+                mipmap:false
             },glctx);
             fb.bindTexutre(glctx,coltex,GL.COLOR_ATTACHMENT0);
         }
         if(texdesc.depthFmt != undefined){
             let deptex = Texture2D.createTexture2D(width,height,{
-                internalformat: texdesc.depthFmt
+                internalformat: texdesc.depthFmt,
+                mipmap:false
             },glctx);
             fb.bindTexutre(glctx,deptex,GL.DEPTH_ATTACHMENT)
         }
         else if(texdesc.depthstencilFmt != undefined){
             let dstex = Texture2D.createTexture2D(width,height,{
-                internalformat:texdesc.depthstencilFmt
+                internalformat:texdesc.depthstencilFmt,
+                mipmap:false
             },glctx);
             fb.bindTexutre(glctx,dstex,GL.DEPTH_STENCIL_ATTACHMENT)
         }

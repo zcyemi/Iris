@@ -8,28 +8,31 @@ gulp.task('build',()=>{
     mergeShader();
     build();
 
-    // child_process.exec('tsc',(error,stdout,stderr)=>{
-    //     if(stdout != null && stdout != '') console.log(stdout);
-    //     if(stderr != null && stderr != '') console.log(stderr);
-    // });
+    child_process.exec('tsc',(error,stdout,stderr)=>{
+        if(error !=null) console.error(error);
+        if(stdout != null && stdout != '') console.log(stdout);
+        if(stderr != null && stderr != '') console.log(stderr);
+    });
+
+    return gulp.src('./src/index.ts');
 });
+
+
+
 
 gulp.task('watch',()=>{
     mergeShader();
     build();
 
-    gulp.watch('./src/**/*.ts',null,()=>{
-        build();
-    });
+    gulp.watch('./src/**/*.ts',null,build);
 
     child_process.exec('tsc --module esnext -w',(error,stdout,stderr)=>{
+        if(error) console.error(error); 
         if(stdout != null && stdout != '') console.log(stdout);
         if(stderr != null && stderr != '') console.log(stderr);
     });
 
-    gulp.watch('./res/shaders/**/*.glsl',null,()=>{
-        mergeShader();
-    });
+    gulp.watch('./res/shaders/**/*.glsl',null,mergeShader);
     browsersync.init({
         server: {
             baseDir: './',
@@ -42,6 +45,8 @@ gulp.task('watch',()=>{
         files: ['./res/*.js', './*.html']
     })
 })
+
+
 
 var onBuild =false;
 
@@ -59,6 +64,8 @@ function build(){
 
         console.log('[build done]');
     });
+
+    return gulp.src('src/index.ts');
 }
 
 gulp.task('shader',mergeShader)
@@ -103,4 +110,6 @@ function mergeShader(){
     }
     shadergen += '}'
     fs.writeFileSync('src/shaderfx/ShaderGenerated.ts',shadergen);
+
+    return gulp.src('./src/index.ts');
 }

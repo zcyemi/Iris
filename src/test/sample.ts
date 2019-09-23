@@ -21,10 +21,12 @@ import { GraphicsContext } from '../core/GraphicsContext';
 import { ProgramBase } from '../misc/ProgramBase';
 import { PassOverlay } from '../rendering/PassOverlay';
 import { UIRender } from '../core/UIRender';
+import { MultiViewPipeline } from '../pipeline/MultiViewPipeline';
+import { IRenderPipeline } from '../pipeline';
 
 export class SampleGame extends ProgramBase{
     private static Instance:SampleGame;
-    private m_pipeline:StackedPipeline;
+    private m_pipeline:IRenderPipeline;
     private m_scene:Scene;
     private m_sceneMgr:SceneManager;
 
@@ -36,21 +38,24 @@ export class SampleGame extends ProgramBase{
         let sc = grender.shadowConfig;
         sc.shadowDistance = 20;
         
-        let pipeline= new StackedPipeline({
-            passes: [
-                PassShadow,
-                PassOpaque,
-                PassSkybox,
-                PassGizmos,
-                PassDebug,
-                PassOverlay
-            ],
-            clearinfo: {
-                clearMask: GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT,
-                color: glmath.vec4(0,0,0,1),
-                depth: 1000
-            }
-        });
+        // let pipeline= new StackedPipeline({
+        //     passes: [
+        //         // PassShadow,
+        //         PassOpaque,
+        //         // PassSkybox,
+        //         // PassGizmos,
+        //         // PassDebug,
+        //         // PassOverlay
+        //     ],
+        //     clearinfo: {
+        //         clearMask: GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT,
+        //         color: glmath.vec4(1,0,0,1),
+        //         depth: 1000
+        //     }
+        // });
+
+        let pipeline = new MultiViewPipeline();
+
         grender.setPipeline(pipeline);
         this.m_pipeline = pipeline;
 
@@ -75,15 +80,15 @@ export class SampleGame extends ProgramBase{
                         g.render = new UIRender(grender);
                     }
                 },
-                // "cube":{
-                //     trs: {pos:[2,1,-5]},
-                //     oncreate:(g)=>{
-                //         g.transform.applyRotate(quat.Random());
-                //         let cmat =new Material(grender.shaderLib.shaderDiffuse);
-                //         cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
-                //         g.render = new MeshRender(Mesh.Cube,cmat)
-                //     }
-                // },
+                "cube":{
+                    trs: {pos:[2,1,-5]},
+                    oncreate:(g)=>{
+                        g.transform.applyRotate(quat.Random());
+                        let cmat =new Material(grender.shaderLib.shaderUnlitColor);
+                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
+                        g.render = new MeshRender(Mesh.Cube,cmat)
+                    }
+                },
                 // "cube_1":{
                 //     trs: {pos:[-1,1,3]},
                 //     oncreate:(g)=>{
