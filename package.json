@@ -8,11 +8,14 @@
     "build": "tsc --module esnext && gulp build",
     "watch": "gulp watch",
     "watchdev": "rollup -c ./rollup.config.ts --watch",
-    "test": "mocha -r ts-node/register tests/**/*.test.ts"
+    "test": "mocha -r ts-node/register tests/**/*.test.ts",
+    "pack-res": "iris-res pack ./iris.respacker.js"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "ts-binary-serializer": "^2.1.1"
+  },
   "devDependencies": {
     "@types/chai": "^4.1.6",
     "@types/mocha": "^5.2.5",

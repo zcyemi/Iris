@@ -1,5 +1,4 @@
 import { vec4, glmath } from "../math/GLMath";
-import { isNull } from "util";
 import { float } from "./Types";
 
 
@@ -67,6 +66,10 @@ export class Utility {
 		return hval >>> 0;
 	}
 
+	public static StringIsNullOrEmptry(str:string){
+		return str == null || str == '';
+	}
+
 	/**
 	 * Deep clone map object
 	 * @param map 
@@ -109,6 +112,19 @@ export class Utility {
 		imgdata.data.set(data);
 		ctx2d.putImageData(imgdata, 0, 0);
 		return tempcanvas.toDataURL();
+	}
+
+	public static async loadFile(url:string):Promise<ArrayBuffer|null>{
+		let resp = await fetch(url,{
+			method:'get'
+		});
+		if(resp.status != 200){
+			return null;
+		}
+		let blob:any = await resp.blob();
+		if(blob == null) return null;
+		let ary = await blob.arrayBuffer();
+		return ary;
 	}
 
 	public static byteDataToImage(width:number,height:number,data:Uint8Array,cb:(img:HTMLImageElement)=>void){

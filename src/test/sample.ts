@@ -1,7 +1,7 @@
 import { Scene } from '../core/Scene';
 import { MeshRender } from '../core/MeshRender';
 import { Material } from '../core/Material';
-import { Mesh, Color } from '../core/index';
+import { Mesh, Color, Utility } from '../core/index';
 import { Camera, ClearType } from '../core/Camera';
 import { Light } from '../core/Light';
 import { DebugEntry } from '../DebugEntry';
@@ -23,6 +23,7 @@ import { PassOverlay } from '../rendering/PassOverlay';
 import { UIRender } from '../core/UIRender';
 import { MultiViewPipeline } from '../pipeline/MultiViewPipeline';
 import { IRenderPipeline } from '../pipeline';
+import { AssetsDataBase } from '../core/AssetsDatabase';
 
 export class SampleGame extends ProgramBase{
     private static Instance:SampleGame;
@@ -150,7 +151,16 @@ export class SampleGame extends ProgramBase{
         // })();
         this.m_sceneMgr = new SceneManager();
 
+        this.loadResBundle();
+
+
         this.onResize();
+    }
+
+    public async loadResBundle(){
+
+        let bundle = await AssetsDataBase.loadBundle('res/iris.resbundle');
+        console.log(bundle);
     }
 
 

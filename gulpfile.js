@@ -42,7 +42,7 @@ gulp.task('watch',()=>{
             }
         },
         port: 6644,
-        files: ['./res/*.js', './*.html']
+        files: ['./res/*.js', './*.html','./res/*.resbundle']
     })
 })
 

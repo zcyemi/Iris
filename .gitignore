@@ -9,3 +9,4 @@ res/iris.iife.js
 .vscode
 /yarn.lock
 *.lock
+/yarn-error.log
