@@ -1,0 +1,51 @@
+#file shadowGather.sfx
+#include include/basis.sfx
+#include include/shadowmap.sfx
+
+#GLSL
+
+precision mediump float;
+
+inout vec2 vUV :TEXCOORD_0;
+inout vec3 vvdir :TEXCOORD_1;
+
+
+in vec4 aPosition :POSITION_0;
+void vertex(){
+    vec4 pos = aPosition;
+    vUV = pos.xy +0.5;
+    pos.xy *=2.0;
+
+    vec4 clippos = vec4(pos.xy *2.0,1.0,1.0);
+    vec4 cwpos = ClipToWorld(clippos);
+
+    vvdir = (cwpos.xyz / cwpos.w) - CAMERA_POS.xyz;
+    
+    gl_Position = pos;
+}
+
+
+out vec4 fragColor :TARGET_0;
+uniform sampler2D uDepthTexure;
+
+void fragment(){
+    float eyedepth = DECODE_VIEWDEPTH(SAMPLE_DEPTH_TEXTURE(uDepthTexure,vUV));
+    vec3 dir = normalize(vvdir);
+    vec3 wpos = dir * eyedepth + CAMERA_POS.xyz;
+    vec4 lpos = uLightMtx0 * vec4(wpos,1.0);
+    vec3 lcpos = lpos.xyz / lpos.w;
+    lcpos = lpos.xyz *0.5 +0.5;
+    float shadowDep = texture(uShadowMap,vec3(lcpos.xy,0.0));
+    float d = shadowDep;// lcpos.z;
+    fragColor = vec4(lcpos.z -1.0,0,0,1.0);
+}
+
+#END
+
+
+technique shadowGather{
+    #version 300 es
+
+    #param vs vertex
+    #param ps fragment
+}

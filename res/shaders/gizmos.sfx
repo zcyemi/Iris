@@ -1,0 +1,27 @@
+#file gizmos.sfx
+#include include/basis.sfx
+
+#GLSL
+precision mediump float;
+
+in vec4 aPosition: POSITION_0;
+
+void vertex(){
+    vec4 vpos = aPosition;
+    gl_Position = MATRIX_MVP * vpos;
+}
+
+out vec4 fragColor : TARGET_0;
+void fragment(){
+    fragColor = vec4(1.0);
+}
+#END
+
+technique gizmos{
+    #version 300 es
+
+    #pipeline quque other
+
+    #param vs vertex
+    #param ps fragment
+}

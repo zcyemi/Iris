@@ -1,0 +1,40 @@
+#file screenRect.sfx
+#include include/basis.sfx
+
+#GLSL
+precision mediump float;
+
+uniform vec4 uRect;
+
+in vec4 aPosition : POSITION_0;
+in vec2 aUV : TEXCOORD_0;
+
+inout vec2 vUV : TEXCOORD_0;
+
+void vertex(){
+    vec4 pos = aPosition;
+
+    vec4 rect = uRect * SCREEN.zwzw * 2.0;
+    pos.xy = ((pos.xy + 0.5) * rect.zw + rect.xy) - 1.0;
+
+    vUV = vec2(aUV.x,1.0 -aUV.y);
+    gl_Position = pos;
+}
+
+
+uniform sampler2D uSampler;
+out vec4 fragColor : TARGET_0;
+void fragment(){
+    fragColor = texture(uSampler,vUV);
+}
+
+#END
+
+technique screenRect{
+    #version 300 es
+    #pipeline queue opaque
+
+    #param vs vertex
+    #param ps fragment
+
+}

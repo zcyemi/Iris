@@ -1,0 +1,46 @@
+#file shadowSample.sfx
+#include include/basis.sfx
+#include include/shadowmap.sfx
+
+#GLSL
+precision mediump float;
+
+struct V2F{
+    vec3 pos;
+    vec3 normal;
+    vec3 wpos;
+    SHADOW_COORD;
+};
+inout V2F v2f;
+
+in vec4 aPosition : POSITION_0;
+in vec2 aUV : TEXCOORD_0;
+in vec4 aNormal : NORMAL_0;
+
+void vertex(){
+    vec4 wpos = MATRIX_M * aPosition;
+    v2f.pos = wpos.xyz;
+    vec4 pos = MATRIX_VP * wpos;
+    gl_Position = pos;
+    v2f.normal = ObjToWorldDir(aNormal.xyz);
+    v2f.wpos = wpos.xyz;
+
+    CAL_SHADOW_COORD(v2f,wpos);
+}
+
+out lowp vec4 fragColor : TARGET_0;
+void fragment(){
+    float depth = computeShadowPCF3(v2f.shadow_coord,uShadowMap);
+    fragColor = vec4(depth,depth,depth,1.0);
+}
+
+#END
+
+technique shadowsample{
+    #version 300 es
+
+    #pipeline queue opaque
+
+    #param vs vertex
+    #param ps fragment
+}

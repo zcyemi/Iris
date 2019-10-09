@@ -9,7 +9,7 @@
     "watch": "gulp watch",
     "watchdev": "rollup -c ./rollup.config.ts --watch",
     "test": "mocha -r ts-node/register tests/**/*.test.ts",
-    "pack-res": "iris-res pack ./iris.respacker.js"
+    "pack-res": "iris-res pack ./iris.respacker.js -l"
   },
   "author": "",
   "license": "ISC",

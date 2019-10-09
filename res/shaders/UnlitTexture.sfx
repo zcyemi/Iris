@@ -1,0 +1,32 @@
+#file unlitTexture.sfx
+#include include/basis.sfx
+
+#GLSL
+precision mediump float;
+
+inout vec2 vUV :TEXCOORD_0;
+
+
+in vec4 aPosition : POSITION_0;
+in vec2 aUV : TEXCOORD_0;
+void vertex(){
+    gl_Position = MATRIX_MVP * aPosition;
+    vUV = aUV;
+}
+
+
+uniform sampler2D uSampler;
+out vec4 fragColor :TARGET_0;
+void fragment(){
+    fragColor = texture(uSampler,vUV);
+}
+
+#END
+
+technique unlit_texture{
+
+    #pipeline queue opaque
+
+    #param vs vertex
+    #param ps fragment
+}
