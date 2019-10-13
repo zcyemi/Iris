@@ -8,8 +8,8 @@ import browsersync from 'rollup-plugin-browsersync';
 export default{
     input: `src/index.ts`,
     output: [
-        {file: 'res/iris.iife.js', name: 'iris', format: 'iife',sourcemap: false},
-        {file: 'res/iris.es.js',format: 'es'}
+        {file: 'dist/iris.iife.js', name: 'iris', format: 'iife',sourcemap: false},
+        // {file: 'dist/iris.es.js',format: 'es'}
     ],
     external: [],
     plugins: [

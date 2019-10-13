@@ -7,7 +7,7 @@ export * from './misc/index';
 export * from './collection/index';
 
 //classes for sample
-export * from './test/sample';
+export * from './sample/sample';
 export * from './DebugEntry';
 
 export default {};

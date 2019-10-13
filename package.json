@@ -3,13 +3,14 @@
   "version": "0.0.4",
   "description": "A webgl rendering framework.",
   "main": "./dist/index.js",
+  "module": "./dist/iris.es.js",
   "typings": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc --module esnext && gulp build",
     "watch": "gulp watch",
     "watchdev": "rollup -c ./rollup.config.ts --watch",
     "test": "mocha -r ts-node/register tests/**/*.test.ts",
-    "pack-res": "iris-res pack ./iris.respacker.js -l"
+    "pack-res": "iris-res pack ./resource/iris.respacker.js -l"
   },
   "author": "",
   "license": "ISC",

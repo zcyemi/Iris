@@ -151,6 +151,8 @@ export class ShaderFX{
     public static readonly GL_SHADOWMAP_TEX2: number = 0x84CE;
     public static readonly GL_SHADOWMAP_TEX3: number = 0x84CF;
 
+    private static s_shaderCache:Map<string,Shader> = new Map();
+
     public static findShaderSource(bundleName:string,shaderName:string): ShaderFXSource|null{
 
         let bundle = AssetsDataBase.getLoadedBundle(bundleName);
@@ -165,10 +167,17 @@ export class ShaderFX{
     }
 
     public static findShader(bundle:string,shaderName:string): Shader|null{
+
+        let shadername = `${bundle}/${shaderName}`;
+        let sh = this.s_shaderCache.get(shadername);
+        if(sh !=null) return sh;
+
         let source = ShaderFX.findShaderSource(bundle,shaderName);
         if(source==null) return null;
 
         let shader = new Shader(source);
+        this.s_shaderCache.set(shadername,shader);
+
         return shader;
     }
 

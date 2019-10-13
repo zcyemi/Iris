@@ -38,21 +38,16 @@
             height: 100%;
         }
     </style>
-
-    <script src="./res/iris.iife.js"></script>
+    <script src="./dist/iris.iife.js"></script>
 </header>
 
 <body>
     <div class="container">
         <div class="side">
             <h3>Rendering Engine</h3>
-            <button onclick="DebugCmd('cmd.reload',sampler)">reload</button>
-            <button onclick="DebugCmd('cmd.passDebug')">pass Debug</button>
-            
         </div>
         <div class="render">
             <canvas width="400" height="300" id="rendercanvas"></canvas>
-
             <script>
                 var canvas = document.getElementById('rendercanvas');
                 var sampler = new SampleGame(canvas);

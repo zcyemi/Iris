@@ -46,6 +46,10 @@ export class AssetsDataBase{
         if(Utility.StringIsNullOrEmptry(url)) return null;
         let arryabuffer = await Utility.loadFile(url);
 
+        if(arryabuffer == null){
+            throw new Error('bundle data is null');
+        }
+
         let bundle = BinarySerializer.Deserialize(arryabuffer,AssetsBundle);
 
         if(bundle !=null){
@@ -57,6 +61,9 @@ export class AssetsDataBase{
                 return;
             }
             loadedBundles.set(bundleName,bundle);
+        }
+        else{
+            throw new Error("deserial bundle failed");
         }
 
         return bundle;
