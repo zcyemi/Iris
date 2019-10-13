@@ -3,6 +3,7 @@ import { IndexedTypedBuffer } from "../collection";
 import { float } from "../core/Types";
 import { DynamicMesh, MeshDataBufferIndices, MeshBufferUtility, MeshTopology, Mesh, MeshRender, Material, GraphicsRender, Color } from "../core";
 import { GLConst, GLContext, GLVertexArray } from "../gl";
+import { ShaderFX } from "../core/ShaderFX";
 
 export class SpriteBatch{
     public rectPosBuffer:IndexedTypedBuffer<Float32Array>;
@@ -37,7 +38,9 @@ export class SpriteBatch{
 
         let mat = this.m_matRect;
         if(mat == null){
-            mat = new Material(grender.shaderLib.shaderRect);
+
+            let shader = ShaderFX.findShader("iris","@shaderfx/rect");
+            mat = new Material(shader);
             this.m_matRect = mat;
         }
 

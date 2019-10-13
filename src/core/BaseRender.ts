@@ -2,7 +2,7 @@ import { GameObject } from "./GameObject";
 import { Material } from "./Material";
 import { GLContext } from "../gl/GLContext";
 import { RenderModel } from "../pipeline";
-import { RenderQueue } from "../shaderfx";
+import { RenderQueue } from "../pipeline/RenderQueue";
 
 export abstract class BaseRender{
 

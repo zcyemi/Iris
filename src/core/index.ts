@@ -34,3 +34,5 @@ export * from './GraphicsContext';
 
 export * from './Types';
 export * from './Color';
+
+export * from './Shader';

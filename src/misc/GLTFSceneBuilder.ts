@@ -1,14 +1,14 @@
 import { GameObject } from "../core/GameObject";
-import { Mesh, MeshDataBuffer, MeshVertexAttrDesc, MeshDataBufferIndices, MeshBufferUtility } from "../core/index";
+import { Mesh, MeshDataBuffer, MeshVertexAttrDesc, MeshDataBufferIndices, MeshBufferUtility, Shader } from "../core/index";
 import { MeshRender } from "../core/MeshRender";
 import { GL } from "../gl/GL";
 import { Material } from "../core/Material";
-import { ShaderFXLibs } from "../shaderfx/ShaderFXLibs";
-import { Shader, ShaderTags, CullingMode, BlendOperator, RenderQueue } from "../shaderfx/Shader";
 import { Texture2D } from "../core/Texture2D";
 import { GLTFdata, GLTFfile, GLTFnode } from "../gl/GLTFtool";
 import { GLContext } from "../gl/GLContext";
 import { glmath, quat, mat4, vec4 } from "../math/GLMath";
+import { ShaderTags, CullingMode, BlendOperator } from "../core/ShaderFX";
+import { RenderQueue } from "../pipeline/RenderQueue";
 
 
 export class GLTFSceneBuilder{
@@ -16,7 +16,6 @@ export class GLTFSceneBuilder{
 
     private m_gltfData:GLTFdata;
     private m_glctx:GLContext;
-    private m_shaderfxlib:ShaderFXLibs;
     private m_pbrShader:Shader;
     private m_pbrBlendShader:Shader;
 
@@ -28,13 +27,12 @@ export class GLTFSceneBuilder{
     private materials:{[index:number]:Material} = {};
     private images:{[index:number]:Texture2D} = {};
 
-    public constructor(gltfdata:GLTFdata,glctx:GLContext,shaderlib:ShaderFXLibs){
+    public constructor(gltfdata:GLTFdata,glctx:GLContext){
         this.m_gltfData = gltfdata;
         this.m_glctx = glctx;
-        this.m_shaderfxlib = shaderlib;
 
-        this.m_pbrShader = shaderlib.shaderDiffuse;
-        this.m_pbrBlendShader = shaderlib.shaderDiffuse;
+        // this.m_pbrShader = shaderlib.shaderDiffuse;
+        // this.m_pbrBlendShader = shaderlib.shaderDiffuse;
 
         this.gltf= gltfdata.gltf;
     }
@@ -291,44 +289,45 @@ export class GLTFSceneBuilder{
         let _pbrMetallicRoughness = _material.pbrMetallicRoughness;
         if(_pbrMetallicRoughness != null){
 
-            let _baseCOlorFactor = _pbrMetallicRoughness.baseColorFactor
-            if(_baseCOlorFactor != null){
-                mat.setColor(ShaderFXLibs.SH_PBR_BaseColorFactor,new vec4(_baseCOlorFactor));
-            }
+            //TODO
+            // let _baseCOlorFactor = _pbrMetallicRoughness.baseColorFactor
+            // if(_baseCOlorFactor != null){
+            //     mat.setColor(ShaderFXLibs.SH_PBR_BaseColorFactor,new vec4(_baseCOlorFactor));
+            // }
 
-            let _baseColorTexture = _pbrMetallicRoughness.baseColorTexture;
-            if(_baseColorTexture != null){
-                let tex = this.getImage(_baseColorTexture.index);
-                if(tex !=null) mat.setTexture(ShaderFXLibs.SH_PBR_BaseColorTexture,tex);
-            }
+            // let _baseColorTexture = _pbrMetallicRoughness.baseColorTexture;
+            // if(_baseColorTexture != null){
+            //     let tex = this.getImage(_baseColorTexture.index);
+            //     if(tex !=null) mat.setTexture(ShaderFXLibs.SH_PBR_BaseColorTexture,tex);
+            // }
 
-            let _metallicFactor = _pbrMetallicRoughness.metallicFactor;
-            if(_metallicFactor != null){
-                mat.setFloat(ShaderFXLibs.SH_PBR_MetallicFactor,_metallicFactor);
-            }
+            // let _metallicFactor = _pbrMetallicRoughness.metallicFactor;
+            // if(_metallicFactor != null){
+            //     mat.setFloat(ShaderFXLibs.SH_PBR_MetallicFactor,_metallicFactor);
+            // }
 
-            let _roughnessFactor = _pbrMetallicRoughness.roughnessFactor;
-            if(_roughnessFactor != null){
-                mat.setFloat(ShaderFXLibs.SH_PBR_RoughnessFactor,_roughnessFactor);
-            }
+            // let _roughnessFactor = _pbrMetallicRoughness.roughnessFactor;
+            // if(_roughnessFactor != null){
+            //     mat.setFloat(ShaderFXLibs.SH_PBR_RoughnessFactor,_roughnessFactor);
+            // }
 
-            let _metallicRoughnessTexture = _pbrMetallicRoughness.metallicRoughnessTexture;
-            if(_metallicRoughnessTexture != null){
-                let tex = this.getImage(_metallicRoughnessTexture.index);
-                mat.setTexture(ShaderFXLibs.SH_PBR_MetallicRoughnessTexture,tex);
-            }
+            // let _metallicRoughnessTexture = _pbrMetallicRoughness.metallicRoughnessTexture;
+            // if(_metallicRoughnessTexture != null){
+            //     let tex = this.getImage(_metallicRoughnessTexture.index);
+            //     mat.setTexture(ShaderFXLibs.SH_PBR_MetallicRoughnessTexture,tex);
+            // }
         }
 
         //emissive property
-        let _emissiveFactor = _material.emissiveFactor;
-        if(_emissiveFactor != null){
-            mat.setColor(ShaderFXLibs.SH_PBR_EmissiveFactor,glmath.vec4(_emissiveFactor[0],_emissiveFactor[1],_emissiveFactor[2],0));
-        }
-        let _emissiveTexture = _material.emissiveTexture;
-        if(_emissiveTexture != null){
-            let tex = this.getImage(_emissiveTexture.index);
-            mat.setTexture(ShaderFXLibs.SH_PBR_EmissiveTexture,tex);
-        }
+        // let _emissiveFactor = _material.emissiveFactor;
+        // if(_emissiveFactor != null){
+        //     mat.setColor(ShaderFXLibs.SH_PBR_EmissiveFactor,glmath.vec4(_emissiveFactor[0],_emissiveFactor[1],_emissiveFactor[2],0));
+        // }
+        // let _emissiveTexture = _material.emissiveTexture;
+        // if(_emissiveTexture != null){
+        //     let tex = this.getImage(_emissiveTexture.index);
+        //     mat.setTexture(ShaderFXLibs.SH_PBR_EmissiveTexture,tex);
+        // }
 
         this.materials[index] = mat;
         return mat;

@@ -1,7 +1,7 @@
 import { GLContext } from "../gl/GLContext";
-import { ShaderFX } from "../shaderfx/ShaderFX";
 import { ITexture, TextureCreationDesc, TextureDescUtility } from "./Texture";
 import { GL } from "../gl/GL";
+import { ShaderFX } from "./ShaderFX";
 
 export class Texture2D implements ITexture {
     public static TEMP_TEXID: number;

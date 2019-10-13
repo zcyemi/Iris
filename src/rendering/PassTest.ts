@@ -7,6 +7,7 @@ import { MeshRender } from "../core/MeshRender";
 import { Mesh } from "../core/index";
 import { Material } from "../core/Material";
 import { mat4 } from "../math/GLMath";
+import { ShaderFX } from "../core/ShaderFX";
 
 
 export class PassTest extends RenderPass{
@@ -16,7 +17,9 @@ export class PassTest extends RenderPass{
     public constructor(pipeline:IRenderPipeline){
         super(pipeline);
 
-        this.m_render = new MeshRender(Mesh.Cube,new Material(pipeline.graphicRender.shaderLib.shaderUnlitColor),false);
+
+        let shader= ShaderFX.findShader("iris","@shaderfx/unlit_color");
+        this.m_render = new MeshRender(Mesh.Cube,new Material(shader),false);
     }
 
     public render(scene:Scene){

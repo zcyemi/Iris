@@ -33,6 +33,7 @@ export class AssetsBundle{
         if(entry == null) return null;
         return new DataView(this.data,entry.data_offset,entry.data_size);
     }
+
 }
 
 

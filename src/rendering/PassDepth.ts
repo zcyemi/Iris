@@ -1,11 +1,10 @@
-import { ShaderTags, Comparison, CullingMode, Shader } from "../shaderfx/Shader";
 import { Scene } from "../core/Scene";
 import { BufferDebugInfo } from "./BufferDebugInfo";
 import { RenderPass } from "./RenderPass";
-import { ShaderFX } from "../shaderfx/ShaderFX";
 import { GLProgram } from "../gl/GLProgram";
 import { glmath } from "../math/GLMath";
 import { IRenderPipeline } from "../pipeline/IRenderPipeline";
+import { ShaderTags } from "../core/ShaderFX";
 
 /**
  * Pre-rendering Depth Pass

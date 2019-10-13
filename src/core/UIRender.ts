@@ -2,10 +2,10 @@ import { BaseRender } from "./BaseRender";
 import { GLContext } from "../gl";
 import { GraphicsRender } from "./GraphicsRender";
 import { RenderModel } from "../pipeline";
-import { RenderQueue } from "../shaderfx";
 import { TextBuilder } from "../misc/TextBuilder";
 import { SpriteBatch } from "../misc/SpriteBatch";
 import { Color } from "./Color";
+import { RenderQueue } from "../pipeline/RenderQueue";
 
 export class UIRender extends BaseRender {
     private m_sprBatch: SpriteBatch;

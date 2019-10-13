@@ -1,13 +1,12 @@
 import { GLProgram } from "../gl/GLProgram";
 import { mat4, vec4 } from "../math/GLMath";
-import { ShaderDataBasis, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
+// import { ShaderDataBasis, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
 import { FrameBuffer } from "../gl/FrameBuffer";
 import { GLContext } from "../gl/GLContext";
 import { IGraphicObj, ReleaseGraphicObj } from "../core/IGraphicObj";
 import { IRenderPipeline } from "./IRenderPipeline";
-import { ShaderUniformBuffer } from "../shaderfx/ShaderUniformBuffer";
+import { ShaderUniformBuffer } from "../core/ShaderUniformBuffer";
 import { MeshRender } from "../core/MeshRender";
-import { ShaderFX } from "../shaderfx/ShaderFX";
 import { Material } from "../core/Material";
 import { Mesh } from "../core/index";
 import { ITexture } from "../core/Texture";
@@ -17,6 +16,7 @@ import { Scene } from "../core/Scene";
 import { BufferDebugInfo } from "../rendering/index";
 import { GLVertexArray } from "../gl/GLVertexArray";
 import { GL } from "../gl/GL";
+import { ShaderFX } from "../core/ShaderFX";
 
 
 /**
@@ -25,10 +25,10 @@ import { GL } from "../gl/GL";
 export class RenderModel implements IGraphicObj{
     private m_glctx:GLContext;
 
-    private m_uniformBasis:ShaderUniformBuffer<ShaderDataBasis>;
-    private m_uniformObj:ShaderUniformBuffer<ShaderDataUniformObj>;
-    private m_uniformLight:ShaderUniformBuffer<ShaderDataUniformLight>;
-    private m_uniformShadowMap:ShaderUniformBuffer<ShaderDataUniformShadowMap>;
+    // private m_uniformBasis:ShaderUniformBuffer<ShaderDataBasis>;
+    // private m_uniformObj:ShaderUniformBuffer<ShaderDataUniformObj>;
+    // private m_uniformLight:ShaderUniformBuffer<ShaderDataUniformLight>;
+    // private m_uniformShadowMap:ShaderUniformBuffer<ShaderDataUniformShadowMap>;
 
     private m_matFullscreen:Material;
     private m_matScreenRect:Material;
@@ -40,10 +40,10 @@ export class RenderModel implements IGraphicObj{
     private m_bufferDebugInfo:BufferDebugInfo[];
     public get bufferDebugInfo():BufferDebugInfo[]{ return this.m_bufferDebugInfo;}
     
-    public get uniformBasis():ShaderUniformBuffer<ShaderDataBasis>{return this.m_uniformBasis;}
-    public get uniformObj():ShaderUniformBuffer<ShaderDataUniformObj>{return this.m_uniformObj;}
-    public get uniformLight():ShaderUniformBuffer<ShaderDataUniformLight>{return this.m_uniformLight;}
-    public get uniformShadowMap():ShaderUniformBuffer<ShaderDataUniformShadowMap>{return this.m_uniformShadowMap;}
+    // public get uniformBasis():ShaderUniformBuffer<ShaderDataBasis>{return this.m_uniformBasis;}
+    // public get uniformObj():ShaderUniformBuffer<ShaderDataUniformObj>{return this.m_uniformObj;}
+    // public get uniformLight():ShaderUniformBuffer<ShaderDataUniformLight>{return this.m_uniformLight;}
+    // public get uniformShadowMap():ShaderUniformBuffer<ShaderDataUniformShadowMap>{return this.m_uniformShadowMap;}
 
 
 
@@ -53,15 +53,18 @@ export class RenderModel implements IGraphicObj{
 
         this.m_bufferDebugInfo = [];
 
-        this.m_uniformObj = new ShaderUniformBuffer(glctx,ShaderDataUniformObj,0,ShaderFX.UNIFORM_OBJ);
-        this.m_uniformBasis = new ShaderUniformBuffer(glctx,ShaderDataBasis,1,ShaderFX.UNIFORM_BASIS);
-        this.m_uniformShadowMap = new ShaderUniformBuffer(glctx,ShaderDataUniformShadowMap,2,ShaderFX.UNIFORM_SHADOWMAP);
-        this.m_uniformLight = new ShaderUniformBuffer(glctx,ShaderDataUniformLight,3,ShaderFX.UNIFORM_LIGHT);
+        // this.m_uniformObj = new ShaderUniformBuffer(glctx,ShaderDataUniformObj,0,ShaderFX.UNIFORM_OBJ);
+        // this.m_uniformBasis = new ShaderUniformBuffer(glctx,ShaderDataBasis,1,ShaderFX.UNIFORM_BASIS);
+        // this.m_uniformShadowMap = new ShaderUniformBuffer(glctx,ShaderDataUniformShadowMap,2,ShaderFX.UNIFORM_SHADOWMAP);
+        // this.m_uniformLight = new ShaderUniformBuffer(glctx,ShaderDataUniformLight,3,ShaderFX.UNIFORM_LIGHT);
     
-        this.m_matFullscreen = new Material(pipeline.graphicRender.shaderLib.shaderBlit);
+        let shaderblit= ShaderFX.findShader("iris","@shaderfx/blit");
+
+        this.m_matFullscreen = new Material(shaderblit);
         this.m_renderFullscreen = new MeshRender(Mesh.Quad,this.m_matFullscreen);
 
-        this.m_matScreenRect = new Material(pipeline.graphicRender.shaderLib.shaderScreenRect);
+        let shaderScreenRect = ShaderFX.findShader("iris","@shaderfx/screenRect");
+        this.m_matScreenRect = new Material(shaderScreenRect);
 
     }
 
@@ -71,74 +74,74 @@ export class RenderModel implements IGraphicObj{
         const glp = program.Program;
         let ublock = program.UniformBlock;
 
-        let uniformBasis = this.m_uniformBasis;
-        let indexBasis = ublock[uniformBasis.name];
-        if(indexBasis != null) glctx.uniformBlockBinding(glp,indexBasis,uniformBasis.uniformIndex);
+        // let uniformBasis = this.m_uniformBasis;
+        // let indexBasis = ublock[uniformBasis.name];
+        // if(indexBasis != null) glctx.uniformBlockBinding(glp,indexBasis,uniformBasis.uniformIndex);
 
-        let uniformObj = this.m_uniformObj;
-        let indexObj = ublock[uniformObj.name];
-        if(indexObj != null) glctx.uniformBlockBinding(glp,indexObj,uniformObj.uniformIndex);
+        // let uniformObj = this.m_uniformObj;
+        // let indexObj = ublock[uniformObj.name];
+        // if(indexObj != null) glctx.uniformBlockBinding(glp,indexObj,uniformObj.uniformIndex);
 
-        let uniformLight = this.m_uniformLight;
-        let indexLight = ublock[uniformLight.name];
-        if(indexLight != null) glctx.uniformBlockBinding(glp,indexLight,uniformLight.uniformIndex);
+        // let uniformLight = this.m_uniformLight;
+        // let indexLight = ublock[uniformLight.name];
+        // if(indexLight != null) glctx.uniformBlockBinding(glp,indexLight,uniformLight.uniformIndex);
 
-        //ShadowMap todo
-        let uniformSM  =this.m_uniformShadowMap;
-        let indexSM = ublock[uniformSM.name];
-        if(indexSM != null) glctx.uniformBlockBinding(glp,indexSM,uniformSM.uniformIndex);
+        // //ShadowMap todo
+        // let uniformSM  =this.m_uniformShadowMap;
+        // let indexSM = ublock[uniformSM.name];
+        // if(indexSM != null) glctx.uniformBlockBinding(glp,indexSM,uniformSM.uniformIndex);
     }
 
     public updateUnifromScreenParam(w:number,h:number){
-        let uniformBasis = this.m_uniformBasis;
-        let data = uniformBasis.data;
-        data.render.setScreenParam(w,h);
-        this.m_screenAspect =w*1.0 / h;
+        // let uniformBasis = this.m_uniformBasis;
+        // let data = uniformBasis.data;
+        // data.render.setScreenParam(w,h);
+        // this.m_screenAspect =w*1.0 / h;
     }
 
     public updateUniformBasis(cam:Camera){
-        let uniformBasis = this.m_uniformBasis;
-        let data = uniformBasis.data;
+        // let uniformBasis = this.m_uniformBasis;
+        // let data = uniformBasis.data;
 
-        let datacamera = data.camrea;
-        if(cam.isDataTrsDirty){
-            datacamera.setCameraMtxView(cam.WorldMatrix);
-            datacamera.setCameraPos(cam.transform.position);
-            cam.isDataTrsDirty = false;
-        }
+        // let datacamera = data.camrea;
+        // if(cam.isDataTrsDirty){
+        //     datacamera.setCameraMtxView(cam.WorldMatrix);
+        //     datacamera.setCameraPos(cam.transform.position);
+        //     cam.isDataTrsDirty = false;
+        // }
 
-        if(cam.aspect != this.m_screenAspect) cam.aspect= this.m_screenAspect;
-        if(cam.isDataProjDirty){
-            datacamera.setCameraMtxProj(cam.ProjMatrix);
-            datacamera.setProjParam(cam.near,cam.far);
-            cam.isDataProjDirty = false;
-        }
+        // if(cam.aspect != this.m_screenAspect) cam.aspect= this.m_screenAspect;
+        // if(cam.isDataProjDirty){
+        //     datacamera.setCameraMtxProj(cam.ProjMatrix);
+        //     datacamera.setProjParam(cam.near,cam.far);
+        //     cam.isDataProjDirty = false;
+        // }
     }
 
     public updateUniformLightData(scene:Scene):boolean{
-        if(!scene.lightDataDirty) return false;
+        // if(!scene.lightDataDirty) return false;
 
-        let uniformLight =this.m_uniformLight;
+        // let uniformLight =this.m_uniformLight;
         
-        let data = uniformLight.data;
+        // let data = uniformLight.data;
         
-        const lightNum = scene.lightCount;
-        const alllights = scene.lightDataList;
-        data.setLightCount(lightNum);
+        // const lightNum = scene.lightCount;
+        // const alllights = scene.lightDataList;
+        // data.setLightCount(lightNum);
         
-        data.setPointLights(alllights,lightNum);
-        data.setMainLight(scene.lightPrime);
+        // data.setPointLights(alllights,lightNum);
+        // data.setMainLight(scene.lightPrime);
 
-        uniformLight.uploadBufferData(this.m_glctx);
-        scene.lightDataDirty = false;
+        // uniformLight.uploadBufferData(this.m_glctx);
+        // scene.lightDataDirty = false;
 
-        console.log("upload light data");
+        // console.log("upload light data");
         return true;
     }
 
     public updateUniformShadowMap(){
-        let uniformSM = this.m_uniformShadowMap;
-        uniformSM.uploadBufferData(this.m_glctx);
+        // let uniformSM = this.m_uniformShadowMap;
+        // uniformSM.uploadBufferData(this.m_glctx);
     }
 
     public setShadowMapTex(tex:ITexture,index:number){
@@ -151,15 +154,15 @@ export class RenderModel implements IGraphicObj{
     }
 
     public updateUniformObjMtx(objmtx:mat4){
-        let uniformObj = this.m_uniformObj;
-        uniformObj.data.setMtxModel(objmtx);
-        uniformObj.uploadBufferData(this.m_glctx);
+        // let uniformObj = this.m_uniformObj;
+        // uniformObj.data.setMtxModel(objmtx);
+        // uniformObj.uploadBufferData(this.m_glctx);
     }
 
     public drawFullScreen(tex:ITexture,setState:boolean = true){
-        const mat = this.m_matFullscreen;
-        mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
-        this.drawMeshRender(this.m_renderFullscreen,null,null,setState);
+        // const mat = this.m_matFullscreen;
+        // mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
+        // this.drawMeshRender(this.m_renderFullscreen,null,null,setState);
     }
 
     public drawMeshRender(meshrender:MeshRender,objmtx?:mat4,matReplace?:Material,setState:boolean = false){
@@ -203,10 +206,10 @@ export class RenderModel implements IGraphicObj{
     }
 
     public drawsScreenTex(tex:WebGLTexture,rect:vec4){
-        const mat = this.m_matScreenRect;
-        mat.setVec4("uRect",rect);
-        mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
-        this.drawMeshRender(this.m_renderFullscreen,null,mat);
+        // const mat = this.m_matScreenRect;
+        // mat.setVec4("uRect",rect);
+        // mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
+        // this.drawMeshRender(this.m_renderFullscreen,null,mat);
     }
 
     public clearFrameBufferTarget(clearinfo:PipelineClearInfo,fb:FrameBuffer){
@@ -237,10 +240,10 @@ export class RenderModel implements IGraphicObj{
 
     public release(glctx:GLContext){
         this.m_glctx = null;
-        this.m_uniformObj = ReleaseGraphicObj(this.m_uniformObj,glctx);
-        this.m_uniformBasis = ReleaseGraphicObj(this.m_uniformBasis,glctx);
-        this.m_uniformLight = ReleaseGraphicObj(this.m_uniformLight,glctx);
-        this.m_uniformShadowMap = ReleaseGraphicObj(this.m_uniformShadowMap,glctx);
+        // this.m_uniformObj = ReleaseGraphicObj(this.m_uniformObj,glctx);
+        // this.m_uniformBasis = ReleaseGraphicObj(this.m_uniformBasis,glctx);
+        // this.m_uniformLight = ReleaseGraphicObj(this.m_uniformLight,glctx);
+        // this.m_uniformShadowMap = ReleaseGraphicObj(this.m_uniformShadowMap,glctx);
     }
 
 }

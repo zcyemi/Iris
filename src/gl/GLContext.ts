@@ -3,10 +3,10 @@ import { GLFenceSync } from "./GLFenceSync";
 import { FrameBuffer } from "./FrameBuffer";
 import { GL, GLSizeOrData } from "./GL";
 import { MeshIndicesDesc, Mesh, Material, Camera } from "../core/index";
-import { ShaderTags, BlendOperator, BlendFactor } from "../shaderfx/Shader";
 import { Utility } from "../core/Utility";
 import { i32, f32, mat4 } from "../math/GLMath";
 import { GLVertexArray } from "./GLVertexArray";
+import { ShaderTags, BlendFactor, BlendOperator } from "../core/ShaderFX";
 
 export class GLContext {
     private m_glFenceSynces:GLFenceSync[] = [];

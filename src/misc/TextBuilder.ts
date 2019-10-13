@@ -3,7 +3,7 @@ import { vec4 } from "../math";
 import { FontInfo } from "./FontInfo";
 import { DynamicMesh, Material, MeshBufferUtility, MeshTopology, GraphicsRender, MeshRender, TextureDescUtility, Texture2D } from "../core";
 import { GLVertexArray, GLConst, GLContext, GL } from "../gl";
-import { ShaderFX } from "../shaderfx";
+import { ShaderFX } from "../core/ShaderFX";
 
 export class TextBuilder {
 
@@ -33,7 +33,9 @@ export class TextBuilder {
 
         let mat = this.material;
         if (mat == null) {
-            mat = new Material(grender.shaderLib.shaderText);
+
+            let shader = ShaderFX.findShader("iris","@shaderfx/text");
+            mat = new Material(shader);
             
 
             var tex = Texture2D.createTexture2DImage(FontInfo.image,{
@@ -41,7 +43,7 @@ export class TextBuilder {
                 format:GL.RGBA,
                 mipmap:true,
             },grender.glctx);
-            mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
+            mat.setTexture("MainTexture",tex);
             this.material = mat;
         }
 

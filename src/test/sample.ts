@@ -1,7 +1,7 @@
 import { Scene } from '../core/Scene';
 import { MeshRender } from '../core/MeshRender';
 import { Material } from '../core/Material';
-import { Mesh, Color, Utility } from '../core/index';
+import { Mesh, Color, Utility, Shader } from '../core/index';
 import { Camera, ClearType } from '../core/Camera';
 import { Light } from '../core/Light';
 import { DebugEntry } from '../DebugEntry';
@@ -12,7 +12,6 @@ import { vec3, glmath, quat, vec4 } from '../math/GLMath';
 import { GL } from '../gl/GL';
 import { StackedPipeline } from '../pipeline/StackedPipeline';
 import { SceneBuilder } from '../core/SceneBuilder';
-import { ShaderFX } from '../shaderfx/ShaderFX';
 import { PassOpaque,PassSkybox,PassGizmos,PassDebug,PassShadow } from '../rendering/index';
 import { GLTFSceneBuilder } from '../misc/GLTFSceneBuilder';
 import { GLTFtool } from '../gl/GLTFtool';
@@ -24,6 +23,7 @@ import { UIRender } from '../core/UIRender';
 import { MultiViewPipeline } from '../pipeline/MultiViewPipeline';
 import { IRenderPipeline } from '../pipeline';
 import { AssetsDataBase } from '../core/AssetsDatabase';
+import { ShaderFX } from '../core/ShaderFX';
 
 export class SampleGame extends ProgramBase{
     private static Instance:SampleGame;
@@ -85,8 +85,9 @@ export class SampleGame extends ProgramBase{
                     trs: {pos:[2,1,-5]},
                     oncreate:(g)=>{
                         g.transform.applyRotate(quat.Random());
-                        let cmat =new Material(grender.shaderLib.shaderUnlitColor);
-                        cmat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(0.5,0.5,0.5,1));
+
+                        let cmat =new Material(ShaderFX.findShader("iris","@shaderfx/unlit_color"));
+                        cmat.setColor("Color",glmath.vec4(0.5,0.5,0.5,1));
                         g.render = new MeshRender(Mesh.Cube,cmat)
                     }
                 },
@@ -161,6 +162,8 @@ export class SampleGame extends ProgramBase{
 
         let bundle = await AssetsDataBase.loadBundle('res/iris.resbundle');
         console.log(bundle);
+
+
     }
 
 

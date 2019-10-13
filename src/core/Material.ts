@@ -1,14 +1,13 @@
 import { vec4, vec3, mat4 } from "../math/GLMath";
-import { Shader, ShaderTags } from "../shaderfx/Shader";
-import { ShaderOptionsConfig, ShaderOptions } from "../shaderfx/ShaderVariant";
 import { Utility } from "./Utility";
 import { Texture2D } from "./Texture2D";
-import { ShaderFX } from "../shaderfx/ShaderFX";
 import { GLProgram } from "../gl/GLProgram";
 import { TextureSampler } from "./TextureSampler";
 import { GL } from "../gl/GL";
 import { ITexture } from "./Texture";
 import { GLContext } from "../gl/GLContext";
+import { Shader } from "./Shader";
+import { ShaderTags } from "./ShaderFX";
 
 export type MaterialProperty = {type:number,value:any,extra?:TextureSampler};
 
@@ -82,7 +81,8 @@ export class MaterialPorpertyBlock{
         }
 
         for(let bname in uniformBlock){
-            if(ShaderFX.isInternalUniformBlockName(bname)) continue;
+            //TODO
+            // if(ShaderFX.isInternalUniformBlockName(bname)) continue;
 
             let info = selfprogrm.UniformBlock[bname];
             if(info != null){
@@ -124,7 +124,6 @@ export class Material{
     private m_program:GLProgram;
     private m_shader:Shader;
     private m_propertyBlock:MaterialPorpertyBlock;
-    private m_optConfig:ShaderOptionsConfig;
     private m_useVariants:boolean =false;
     
 
@@ -136,14 +135,15 @@ export class Material{
 
     public get program():GLProgram{
         if(this.m_program == null){
-            let newprogram = this.m_shader.getVariantProgram(this.m_optConfig);
+            let newprogram = this.m_shader.compile();
             this.m_propertyBlock.setProgram(newprogram);
             this.m_program = newprogram;
         }
         return this.m_program;
     }
     public get shaderTags():ShaderTags{
-        if(this.m_shadertags == null) return this.m_shader.tags;
+        //TODO
+        // if(this.m_shadertags == null) return this.m_shader.tags;
         return this.m_shadertags;
     }
 
@@ -168,8 +168,7 @@ export class Material{
             return;
         }
         this.m_shader = shader;
-        this.m_program = shader.defaultProgram;
-        this.m_optConfig = shader.m_defaultOptionsConfig;
+        this.m_program = shader.compile();
         this.m_propertyBlock =new MaterialPorpertyBlock(this.m_program);
     }
 
@@ -179,7 +178,6 @@ export class Material{
         mat.m_program = this.program;
         mat.m_propertyBlock = this.m_propertyBlock.clone();
         mat.m_useVariants = this.m_useVariants;
-        mat.m_optConfig = this.m_optConfig.clone();
         return mat;
     }
 
@@ -311,24 +309,25 @@ export class Material{
      * @param refresh
      */
     public setFlag(key:string,value:string,refresh:boolean = false){
-        let defOptCfg = this.m_shader.m_defaultOptionsConfig;
-        let verified = this.m_shader.m_defaultOptionsConfig.verifyFlag(key,value);
-        if(!verified){
-            console.warn(`set shader flag verify failed: ${key}:${value}`);
-            return;
-        }
-        if(!this.m_useVariants){
-            this.m_optConfig = defOptCfg.clone();
-        }
-        if(this.m_optConfig.setFlag(key,value)){
-            this.m_program = null;
-            this.m_useVariants = true;
-        }
-        else{
-            console.warn("set shader flag: value not changed");
-        }
+        //TODO
+        // let defOptCfg = this.m_shader.m_defaultOptionsConfig;
+        // let verified = this.m_shader.m_defaultOptionsConfig.verifyFlag(key,value);
+        // if(!verified){
+        //     console.warn(`set shader flag verify failed: ${key}:${value}`);
+        //     return;
+        // }
+        // if(!this.m_useVariants){
+        //     this.m_optConfig = defOptCfg.clone();
+        // }
+        // if(this.m_optConfig.setFlag(key,value)){
+        //     this.m_program = null;
+        //     this.m_useVariants = true;
+        // }
+        // else{
+        //     console.warn("set shader flag: value not changed");
+        // }
 
-        if(refresh) this.refreshProgram();
+        // if(refresh) this.refreshProgram();
     }
 
     /**
@@ -338,27 +337,27 @@ export class Material{
         return this.program;
     }
 
-    public setFlagNoVerify(options:ShaderOptions){
-        let useVariants = this.m_useVariants;
+    // public setFlagNoVerify(options:ShaderOptions){
+    //     let useVariants = this.m_useVariants;
 
-        let cfg = useVariants? this.m_optConfig : this.m_shader.m_defaultOptionsConfig;
-        let val = cfg.getFlag(options.flag);
-        if(val == null) return;
-        if(val == options.default) return;
+    //     let cfg = useVariants? this.m_optConfig : this.m_shader.m_defaultOptionsConfig;
+    //     let val = cfg.getFlag(options.flag);
+    //     if(val == null) return;
+    //     if(val == options.default) return;
         
-        if(!useVariants){
-            this.m_optConfig = cfg.clone();
-            this.m_useVariants = true;
-        }
-        this.m_optConfig.setFlag(options.flag,options.default);
-        this.m_program = null;
-    }
+    //     if(!useVariants){
+    //         this.m_optConfig = cfg.clone();
+    //         this.m_useVariants = true;
+    //     }
+    //     this.m_optConfig.setFlag(options.flag,options.default);
+    //     this.m_program = null;
+    // }
 
 
-    public getFlag(key:string):string{
-        let optCfg = this.m_useVariants ? this.m_shader.m_defaultOptionsConfig : this.m_optConfig;
-        return optCfg.getFlag(key);
-    }
+    // public getFlag(key:string):string{
+    //     let optCfg = this.m_useVariants ? this.m_shader.m_defaultOptionsConfig : this.m_optConfig;
+    //     return optCfg.getFlag(key);
+    // }
     
     private m_applyTexCount = 0;
 
@@ -371,7 +370,8 @@ export class Material{
         for(var key in pu){
             let u = pu[key];
             if(key === "uShadowMap"){
-                glctx.uniform1i(program.Uniforms[key],ShaderFX.GL_SHADOWMAP_TEX0_ID);
+                //TODO
+                // glctx.uniform1i(program.Uniforms[key],ShaderFX.GL_SHADOWMAP_TEX0_ID);
             }
             else{
                 this.setUniform(glctx,program.Uniforms[key],u);

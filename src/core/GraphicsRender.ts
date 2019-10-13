@@ -1,4 +1,3 @@
-import { ShaderFXLibs } from "../shaderfx/ShaderFXLibs";
 import { ShadowConfig } from "../rendering/Shadow";
 import { Delayter } from "./Utility";
 import { Texture2D } from "./Texture2D";
@@ -32,7 +31,6 @@ export class GraphicsRender{
     public static readonly TEXID_SHADOW_MAP:number[] = [15,16,17,18];
 
     private m_renderPipeline:IRenderPipeline;
-    private m_shaderFXlib:ShaderFXLibs;
     public shadowConfig:ShadowConfig = new ShadowConfig();
 
     public pause:boolean = false;
@@ -58,9 +56,6 @@ export class GraphicsRender{
         return this.m_renderPipeline;
     }
 
-    public get shaderLib():ShaderFXLibs{
-        return this.m_shaderFXlib;
-    }
 
     public get glctx():GLContext{
         return this.m_glctx;
@@ -90,7 +85,6 @@ export class GraphicsRender{
             stencil:false
         });
         this.m_glctx = glctx;
-        this.m_shaderFXlib = new ShaderFXLibs(glctx);
 
         //default texture
         Material.DEF_TEXID_NUM = GraphicsRender.TEXID_DEFAULT_TEX;
@@ -118,8 +112,6 @@ export class GraphicsRender{
     }
 
     public reload(){
-        let shaderfxlib = this.m_shaderFXlib;
-        if(shaderfxlib != null) shaderfxlib.reload();
         let renderpipeline = this.m_renderPipeline;
         if(renderpipeline != null) renderpipeline.reload();
     }
@@ -130,7 +122,6 @@ export class GraphicsRender{
             renderpipe.release();
             this.m_renderPipeline = null;
         }
-        this.m_shaderFXlib.release();
         this.m_time = 0.0;
         this.m_valid = false;
     }

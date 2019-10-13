@@ -1,13 +1,12 @@
-import { ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
 import { Scene } from "../core/Scene";
 import { MeshRender } from "../core/MeshRender";
 import { ClearType } from "../core/Camera";
 import { Material } from "../core/Material";
 import { Mesh } from "../core/index";
-import { ShaderFX } from "../shaderfx/ShaderFX";
 import { RenderPass } from "./RenderPass";
 import { SkyboxType } from "../core/Skybox";
 import { IRenderPipeline } from "../pipeline/IRenderPipeline";
+import { ShaderFX, Comparison, CullingMode, ShaderTags } from "../core/ShaderFX";
 
 export class PassSkybox extends RenderPass{
     private m_tags:ShaderTags;
@@ -27,7 +26,10 @@ export class PassSkybox extends RenderPass{
         deftags.fillDefaultVal();
         this.m_tags =deftags;
 
-        let mat= new Material(pipeline.graphicRender.shaderLib.shaderSkybox);
+
+        let shader = ShaderFX.findShader("iris","@shaderfx/skybox");
+
+        let mat= new Material(shader);
         mat.setFlag("ENVMAP_TYPE","TEX",true);
 
         let skyrender = new MeshRender(Mesh.Quad,mat);
@@ -60,14 +62,14 @@ export class PassSkybox extends RenderPass{
             mat.setFlag("ENVMAP_TYPE",newtype,true);
 
             let rawtex = texskybox.rawTex;
-            mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,rawtex);
+            mat.setTexture("MainTexture",rawtex);
         }
 
         let rawtex = texskybox.rawTex;
         if(rawtex != null && rawtex != this.m_lastTex){
             let tex =texskybox.rawTex;
             this.m_lastTex = tex;
-            mat.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,tex);
+            mat.setTexture("MainTexture",tex);
         }
 
         pipeline.model.drawMeshRender(skyboxrender);

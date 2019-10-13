@@ -3,9 +3,9 @@ import { Mesh } from "./Mesh";
 import { Material } from "./Material";
 import { GraphicsRender } from "./GraphicsRender";
 import { Texture2D } from "./Texture2D";
-import { ShaderFX } from "../shaderfx/ShaderFX";
 import { vec4 } from "../math/GLMath";
 import { GLContext } from "../gl/GLContext";
+import { ShaderFX } from "./ShaderFX";
 
 
 export class SpriteRender extends MeshRender{
@@ -26,18 +26,20 @@ export class SpriteRender extends MeshRender{
     public constructor(){
         super();
         this.mesh = Mesh.Quad;
-        this.material = new Material(GraphicsRender.globalRender.shaderLib.shaderSprite);
+
+        let shader = ShaderFX.findShader("iris","@shaderfx/sprite");
+        this.material = new Material(shader);
     }
 
     public refreshData(glctx:GLContext){
         super.refreshData(glctx);
         if(this.m_imageDirty){
-            this.material.setTexture(ShaderFX.UNIFORM_MAIN_TEXTURE,this.m_image);
+            this.material.setTexture("MainTexture",this.m_image);
             this.m_imageDirty = false;
         }
         if(this.m_colorDirty){
             this.m_colorDirty = false;
-            this.material.setColor(ShaderFX.UNIFORM_MAIN_COLOR,this.m_color);
+            this.material.setColor("MainColor",this.m_color);
         }
     }
 }

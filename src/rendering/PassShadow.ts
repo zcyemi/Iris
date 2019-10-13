@@ -8,6 +8,7 @@ import { mat4, glmath, vec3 } from "../math/GLMath";
 import { Material, MaterialProperty } from "../core/Material";
 import { MeshRender } from "../core/MeshRender";
 import { BufferDebugInfo } from "./BufferDebugInfo";
+import { ShaderFX } from "../core/ShaderFX";
 
 
 const SM_SIZE = 1024;
@@ -35,7 +36,9 @@ export class PassShadow extends RenderPass{
             depthTex: tex
         });
 
-        let matSMgather= new Material(pipeline.graphicRender.shaderLib.shaderShadowMap);
+        let shader = ShaderFX.findShader("iris","@shaderfx/shadowmap");
+
+        let matSMgather= new Material(shader);
         this.m_uniformLightVP = matSMgather.propertyBlock.getUniform("uLightVP");
         this.m_matShadowGather = matSMgather;
 
@@ -86,7 +89,8 @@ export class PassShadow extends RenderPass{
 
             uniformLightVP.value = lightmtx;
 
-            const uniformSM = model.uniformShadowMap;
+            //TODO
+            const uniformSM = null;// model.uniformShadowMap;
             uniformSM.data.setLightMtx(lightmtx,0);
             model.updateUniformShadowMap();
 

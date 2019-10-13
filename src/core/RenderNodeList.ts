@@ -1,7 +1,6 @@
-import { RenderQueue } from "../shaderfx/Shader";
 import { BaseRender } from "./BaseRender";
-import { DoubleBuffered } from "../collection";
 import { IndexedBuffer } from "../collection/IndexedBuffer";
+import { RenderQueue } from "../pipeline/RenderQueue";
 
 export class RenderNodeList{
 

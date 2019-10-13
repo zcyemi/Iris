@@ -83,7 +83,8 @@ export class RenderPipeline implements IRenderPipeline{
         const model = this.m_model;
         model.updateUniformBasis(camera);
         const glctx = this.m_glctx;
-        model.uniformBasis.uploadBufferData(glctx);
+        //TODO
+        // model.uniformBasis.uploadBufferData(glctx);
 
         let nodelistback = nodelist.back;
         nodelistback.reset();

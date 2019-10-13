@@ -1,10 +1,10 @@
-import { ShaderTags, Comparison, CullingMode } from "../shaderfx/Shader";
 import { RenderPass } from "./RenderPass";
 import { IRenderPipeline } from "../pipeline/IRenderPipeline";
 import { GL } from "../gl/GL";
 import { pipeline } from "stream";
 import { MeshRender } from "../core/MeshRender";
 import { Scene } from "../core/Scene";
+import { ShaderTags, Comparison } from "../core/ShaderFX";
 
 export class PassOpaque extends RenderPass{
 

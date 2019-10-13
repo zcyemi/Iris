@@ -5,7 +5,7 @@ const fs = require('fs');
 const browsersync = require('browser-sync');
 
 gulp.task('build',()=>{
-    mergeShader();
+    // mergeShader();
     build();
 
     child_process.exec('tsc',(error,stdout,stderr)=>{
@@ -21,7 +21,7 @@ gulp.task('build',()=>{
 
 
 gulp.task('watch',()=>{
-    mergeShader();
+    // mergeShader();
     build();
 
     gulp.watch('./src/**/*.ts',null,build);
@@ -32,7 +32,7 @@ gulp.task('watch',()=>{
         if(stderr != null && stderr != '') console.log(stderr);
     });
 
-    gulp.watch('./res/shaders/**/*.glsl',null,mergeShader);
+    // gulp.watch('./res/shaders/**/*.glsl',null,mergeShader);
     browsersync.init({
         server: {
             baseDir: './',
@@ -68,48 +68,48 @@ function build(){
     return gulp.src('src/index.ts');
 }
 
-gulp.task('shader',mergeShader)
+// gulp.task('shader',mergeShader)
 
-function mergeShader(){
-    console.log('[Compile Shader]');
-    let basepath = './res/shaders/';
-    let files =  fs.readdirSync(basepath);
-    let sources = {};
-    files.forEach(f=>{
-        let sta =fs.statSync(basepath + f);
-        if(sta.isFile && f.endsWith('.glsl')){
-            let fname = f.substr(0,f.length - 5);
-            fname = fname.replace('.','_');
+// function mergeShader(){
+//     console.log('[Compile Shader]');
+//     let basepath = './res/shaders/';
+//     let files =  fs.readdirSync(basepath);
+//     let sources = {};
+//     files.forEach(f=>{
+//         let sta =fs.statSync(basepath + f);
+//         if(sta.isFile && f.endsWith('.glsl')){
+//             let fname = f.substr(0,f.length - 5);
+//             fname = fname.replace('.','_');
 
-            let src =  fs.readFileSync(basepath + f).toString();
-            src= src.replace('\n',"\\n");
-            sources[fname] =src;
-        }
-    })
-    let includepath = basepath +'includes/';
-    let fileIncludes = fs.readdirSync(includepath);
-    let includes = {};
-    fileIncludes.forEach(f=>{
-        let sta = fs.statSync(includepath + f);
-        if(sta.isFile && f.endsWith('.inc.glsl')){
-            let fname = f.substr(0,f.length - '.inc.glsl'.length);
+//             let src =  fs.readFileSync(basepath + f).toString();
+//             src= src.replace('\n',"\\n");
+//             sources[fname] =src;
+//         }
+//     })
+//     let includepath = basepath +'includes/';
+//     let fileIncludes = fs.readdirSync(includepath);
+//     let includes = {};
+//     fileIncludes.forEach(f=>{
+//         let sta = fs.statSync(includepath + f);
+//         if(sta.isFile && f.endsWith('.inc.glsl')){
+//             let fname = f.substr(0,f.length - '.inc.glsl'.length);
 
-            fname = fname.toUpperCase();
+//             fname = fname.toUpperCase();
 
-            let src = fs.readFileSync(includepath + f).toString();
-            includes[fname] = src;
-        }
-    })
+//             let src = fs.readFileSync(includepath + f).toString();
+//             includes[fname] = src;
+//         }
+//     })
 
-    let shadergen = 'export class ShaderGen{ \n';
-    for(k in includes){
-        shadergen += `\tpublic static readonly ${k}:string = \`${includes[k]}\`;\n`;
-    }
-    for(k in sources){
-        shadergen += `\tpublic static readonly ${k}:string = \`${sources[k]}\`;\n`;
-    }
-    shadergen += '}'
-    fs.writeFileSync('src/shaderfx/ShaderGenerated.ts',shadergen);
+//     let shadergen = 'export class ShaderGen{ \n';
+//     for(k in includes){
+//         shadergen += `\tpublic static readonly ${k}:string = \`${includes[k]}\`;\n`;
+//     }
+//     for(k in sources){
+//         shadergen += `\tpublic static readonly ${k}:string = \`${sources[k]}\`;\n`;
+//     }
+//     shadergen += '}'
+//     fs.writeFileSync('src/shaderfx/ShaderGenerated.ts',shadergen);
 
-    return gulp.src('./src/index.ts');
-}
+//     return gulp.src('./src/index.ts');
+// }

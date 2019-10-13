@@ -1,16 +1,14 @@
 import { Scene } from "../core/Scene";
-import { Shader, ShaderTags, Comparison } from "../shaderfx/Shader";
 import { Material } from "../core/Material";
-import { Mesh, MeshTopology } from "../core/index";
+import { Mesh, MeshTopology, Shader } from "../core/index";
 import { mat4, glmath, vec3 } from "../math/GLMath";
 import { MeshRender } from "../core/MeshRender";
-import { ShaderSource } from "../shaderfx/ShaderSource";
-import { ShaderFile, ShaderFX } from "../shaderfx/ShaderFX";
 import { MeshBuilder } from "../core/MeshBuilder";
 import { RenderPass } from "./RenderPass";
 import { IRenderPipeline } from "../pipeline/IRenderPipeline";
 import { GLVertexArray } from "../gl/GLVertexArray";
 import { GizmosCmdType } from "../core/Gizmos";
+import { ShaderFX, ShaderTags, Comparison } from "../core/ShaderFX";
 
 export class PassGizmos extends RenderPass{
     protected m_material:Material;
@@ -25,8 +23,6 @@ export class PassGizmos extends RenderPass{
 
     private m_vao:GLVertexArray;
 
-    @ShaderFile("gizmos")
-    public static SH_gizmos:ShaderSource;
     private static s_shader:Shader;
 
     public enable:boolean = true;
@@ -39,7 +35,7 @@ export class PassGizmos extends RenderPass{
         const glctx =pipe.glctx;
 
         if(PassGizmos.s_shader == null){
-            let shader = ShaderFX.compileShaders(pipe.glctx,PassGizmos.SH_gizmos);
+            let shader = ShaderFX.findShader("iris","@shaderfx/gizmos");
             PassGizmos.s_shader = shader;
         }
 
@@ -111,7 +107,7 @@ export class PassGizmos extends RenderPass{
             
             switch(cmd.type){
                 case GizmosCmdType.box:
-                matcolor.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1.0,0,0,1));
+                matcolor.setColor("Color",glmath.vec4(1.0,0,0,1));
 
                 let mtx = mat4.TRS(cmd.param0.vec3(),cmd.extra,vec3.one);
                 model.drawMeshWithMat(this.m_meshBoxWire,matcolor,this.m_meshBoxWireVAO,mtx);
@@ -160,7 +156,7 @@ export class PassGizmos extends RenderPass{
 
         let lightPrime = scene.lightPrime;
         if(lightPrime != null){
-            mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,lightPrime.lightColor.vec4(1.0));
+            mat.setColor("Color",lightPrime.lightColor.vec4(1.0));
             model.drawMeshWithMat(mesh,mat,meshvao,lightPrime.transform.objMatrix);
         }
 
@@ -171,7 +167,7 @@ export class PassGizmos extends RenderPass{
         for(var t=0;t<lightcount;t++){
             let light = lights[t];
             
-            mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,light.lightColor.vec4(1.0));
+            mat.setColor("Color",light.lightColor.vec4(1.0));
             model.drawMeshWithMat(mesh,mat,meshvao,light.transform.objMatrix);
         }
 
@@ -186,9 +182,11 @@ export class PassGizmos extends RenderPass{
         this.m_meshcross =crossbuilder.genMesh();
 
         const pipe = this.pipeline;
-        let mat = new Material(pipe.graphicRender.shaderLib.shaderUnlitColor);
+
+        let shader =ShaderFX.findShader("iris","@shaderfx/unlit_color");
+        let mat = new Material(shader);
         this.m_matColor = mat;
-        mat.setColor(ShaderFX.UNIFORM_MAIN_COLOR,glmath.vec4(1.0,0,0,1.0));
+        mat.setColor("Color",glmath.vec4(1.0,0,0,1.0));
         this.m_meshvao = MeshRender.CreateVertexArrayObj(pipe.glctx,this.m_meshcross,mat.program);
     }
 
