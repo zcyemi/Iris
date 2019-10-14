@@ -43,7 +43,7 @@ export class PassShadow extends RenderPass{
         this.m_matShadowGather = matSMgather;
 
         const model =this.pipeline.model;
-        model.addBufferDebugInfo(new BufferDebugInfo(this.m_fbShadow.depthtex,glmath.vec4(0,0,128,128)));
+        //model.addBufferDebugInfo(new BufferDebugInfo(this.m_fbShadow.depthtex,glmath.vec4(0,0,128,128)));
 
 
         model.setShadowMapTex(tex,0);
@@ -92,7 +92,7 @@ export class PassShadow extends RenderPass{
             //TODO
             const uniformSM = null;// model.uniformShadowMap;
             uniformSM.data.setLightMtx(lightmtx,0);
-            model.updateUniformShadowMap();
+            //model.updateUniformShadowMap();
 
             const queuelen = queue.size;
             const queueary = queue.array;

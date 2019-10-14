@@ -3,6 +3,7 @@ import { GLContext } from "../gl/GLContext";
 import { RenderModel } from "./RenderModel";
 import { FrameBuffer } from "../gl/FrameBuffer";
 import { RenderNodeList } from "../core/RenderNodeList";
+import { IRenderModel } from "./IRenderModel";
 
 
 
@@ -38,7 +39,7 @@ export interface IRenderPipeline{
     graphicRender:GraphicsRender;
     glctx:GLContext;
     nodeList:RenderNodeList;
-    model:RenderModel;
+    model:IRenderModel;
     mainFrameBuffer:FrameBuffer;
 
     resizeFrameBuffer(width:number,height:number);

@@ -1,4 +1,4 @@
-import { AssetsDataBase } from "./AssetsDatabase";
+import { AssetsDataBase, AssetsBundle } from "./AssetsDatabase";
 import { BinaryBuffer } from "ts-binary-serializer/dist/src/BinaryBuffer";
 import { RenderQueue } from "../pipeline/RenderQueue";
 import { Shader } from "./Shader";
@@ -153,22 +153,34 @@ export class ShaderFX{
 
     private static s_shaderCache:Map<string,Shader> = new Map();
 
-    public static findShaderSource(bundleName:string,shaderName:string): ShaderFXSource|null{
+    public static findShaderSource(bundle:string|AssetsBundle,shaderName:string): ShaderFXSource|null{
 
-        let bundle = AssetsDataBase.getLoadedBundle(bundleName);
-        if(bundle == null ) return null;
-
-        let entry = bundle.getResource(shaderName);
+        let bundleObj:AssetsBundle = null;
+        if(bundle instanceof AssetsBundle){
+            bundleObj = bundle;
+        }
+        else{
+            bundleObj = AssetsDataBase.getLoadedBundle(bundle);
+        }
+        
+        if(bundleObj == null ) return null;
+        let entry = bundleObj.getResource(shaderName);
         if(entry == null) return null;
         
-        let bianrbuffer = BinaryBuffer.createWithView(bundle.data,entry.data_offset,entry.data_size);
+        let bianrbuffer = BinaryBuffer.createWithView(bundleObj.data,entry.data_offset,entry.data_size);
         let shaderjson = bianrbuffer.readString();
         return JSON.parse(shaderjson);
     }
 
-    public static findShader(bundle:string,shaderName:string): Shader|null{
 
-        let shadername = `${bundle}/${shaderName}`;
+    public static findShader(bundle:string|AssetsBundle,shaderName:string): Shader|null{
+        let shadername:string = null;
+        if(bundle instanceof AssetsBundle){
+            shadername = `${bundle.bundlename}/${shaderName}`
+        }
+        else{
+            shadername = `${bundle}/${shaderName}`;
+        }
         let sh = this.s_shaderCache.get(shadername);
         if(sh !=null) return sh;
 

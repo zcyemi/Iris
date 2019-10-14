@@ -3,6 +3,7 @@ import { Material } from "./Material";
 import { GLContext } from "../gl/GLContext";
 import { RenderModel } from "../pipeline";
 import { RenderQueue } from "../pipeline/RenderQueue";
+import { IRenderModel } from "../pipeline/IRenderModel";
 
 export abstract class BaseRender{
 
@@ -20,6 +21,6 @@ export abstract class BaseRender{
 
     public abstract refreshData(glctx:GLContext)
     public abstract release(glctx:GLContext);
-    public abstract draw(gl:GLContext,model:RenderModel);
+    public abstract draw(gl:GLContext,model:IRenderModel);
 
 }

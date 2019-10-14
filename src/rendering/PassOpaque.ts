@@ -58,7 +58,8 @@ export class PassOpaque extends RenderPass{
         for(let t=0;t<len;t++){
             const node = queueary[t];
             if(node instanceof MeshRender){
-                model.drawMeshRender(node,node.object.transform.objMatrix,node.material,true);
+                //TODO
+                //model.drawMeshRender(node,node.object.transform.objMatrix,node.material,true);
             }
             else{
                 node.draw(glctx,model);

@@ -1,8 +1,10 @@
 import { GraphicsContext } from '../core/GraphicsContext';
-import { FrameTimer, GraphicsRender, WindowUtility } from '../core/index';
-import { GLUtility } from '../gl';
+import { FrameTimer, GraphicsRender, WindowUtility, Color } from '../core/index';
+import { GLUtility, GL, GLContext } from '../gl';
 import { Input } from '../misc/index';
 import { AssetsDataBase } from '../core/AssetsDatabase';
+import { ShaderFX } from '../core/ShaderFX';
+import { vec4 } from '../math';
 
 export class SampleGame{
     private m_canvas:HTMLCanvasElement;
@@ -30,7 +32,13 @@ export class SampleGame{
 
         let bundle = await AssetsDataBase.loadBundle('resource/iris.resbundle');
 
-        //setup scene
+        let shader = ShaderFX.findShader("iris","@shaderfx/skybox");
+
+        const grender = this.m_graphicsRender;
+
+        // var pipeline = new RenderPipeline({clearinfo:{color:new vec4(Color.RED),depth:0,clearMask:GL.COLOR_BUFFER_BIT}});
+        // //setup scene
+        // grender.setPipeline(pipeline);
 
         this.m_resoruceLoaded = true;
     }
