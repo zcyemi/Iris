@@ -1,22 +1,20 @@
-import { GLProgram } from "../gl/GLProgram";
-import { mat4, vec4 } from "../math/GLMath";
-// import { ShaderDataBasis, ShaderDataUniformObj, ShaderDataUniformShadowMap, ShaderDataUniformLight } from "../shaderfx/ShaderFXLibs";
-import { FrameBuffer } from "../gl/FrameBuffer";
-import { GLContext } from "../gl/GLContext";
-import { IGraphicObj, ReleaseGraphicObj } from "../core/IGraphicObj";
-import { IRenderPipeline } from "./IRenderPipeline";
-import { ShaderUniformBuffer } from "../core/ShaderUniformBuffer";
-import { MeshRender } from "../core/MeshRender";
-import { Material } from "../core/Material";
-import { Mesh } from "../core/index";
-import { ITexture } from "../core/Texture";
 import { Camera } from "../core/Camera";
-import { PipelineClearInfo } from "./RenderPipeline";
+import { IGraphicObj } from "../core/IGraphicObj";
+import { Mesh } from "../core/index";
+import { Material } from "../core/Material";
+import { MeshRender } from "../core/MeshRender";
 import { Scene } from "../core/Scene";
-import { BufferDebugInfo } from "../rendering/index";
-import { GLVertexArray } from "../gl/GLVertexArray";
-import { GL } from "../gl/GL";
 import { ShaderFX } from "../core/ShaderFX";
+import { ITexture } from "../core/Texture";
+import { FrameBuffer } from "../gl/FrameBuffer";
+import { GL } from "../gl/GL";
+import { GLContext } from "../gl/GLContext";
+import { GLProgram } from "../gl/GLProgram";
+import { GLVertexArray } from "../gl/GLVertexArray";
+import { mat4, vec4 } from "../math/GLMath";
+import { BufferDebugInfo } from "../rendering/index";
+import { IRenderPipeline } from "./IRenderPipeline";
+import { PipelineClearInfo } from "./InternalPipeline";
 
 
 /**

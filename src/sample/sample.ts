@@ -5,6 +5,7 @@ import { Input } from '../misc/index';
 import { AssetsDataBase } from '../core/AssetsDatabase';
 import { ShaderFX } from '../core/ShaderFX';
 import { vec4 } from '../math';
+import { InternalPipeline } from '../pipeline/InternalPipeline';
 
 export class SampleGame{
     private m_canvas:HTMLCanvasElement;
@@ -34,11 +35,12 @@ export class SampleGame{
 
         let shader = ShaderFX.findShader("iris","@shaderfx/skybox");
 
+
         const grender = this.m_graphicsRender;
 
-        // var pipeline = new RenderPipeline({clearinfo:{color:new vec4(Color.RED),depth:0,clearMask:GL.COLOR_BUFFER_BIT}});
-        // //setup scene
-        // grender.setPipeline(pipeline);
+        var pipeline = new InternalPipeline();
+
+        grender.setPipeline(pipeline);
 
         this.m_resoruceLoaded = true;
     }
@@ -55,6 +57,11 @@ export class SampleGame{
         let delta = this.m_timer.tick(ts);
         let dt = delta/ 1000;
         Input.onFrame(dt);
+
+        if(!this.m_resoruceLoaded) return;
+
+        const grender =this.m_graphicsRender;
+        grender.render(null,dt);
     }
 }
 

@@ -65,7 +65,6 @@
 //         this.m_renderPass = renderpasses;
 //     };
 
-
 //     resizeFrameBuffer(width: number, height: number) {
 //         if (this.m_mainfb.resize(this.m_glctx, width, height)) {
 //             this.m_glctx.viewport(0, 0, width, height);

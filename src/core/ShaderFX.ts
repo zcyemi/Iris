@@ -9,6 +9,8 @@ export class ShaderFXTechnique {
     public meta_pipeline: { [key: string]: string | string[] } = {};
     public meta_multicompile: string[];
     public meta_es_ver: string = "300 es";
+    public attr_vs:{[key:string]:string} = {};
+    public attr_ps:{[key:string]:string} = {};
     public entry_vs: string;
     public entry_ps: string;
 }

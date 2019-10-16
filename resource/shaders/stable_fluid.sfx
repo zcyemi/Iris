@@ -1,0 +1,169 @@
+#file stable_fluid.sfx
+
+#GLSL
+uniform sampler2D uSampler;
+uniform sampler2D uSampler1;
+uniform float uDeltaTime;
+
+uniform float uAlpha;
+uniform float uBeta;
+
+inout vec2 vUV;
+
+in vec2 aPosition : POSITION_0;
+in vec2 aUV : TEXCOORD_0;
+
+void vertex(){
+    gl_Position = vec4(aPosition *2.0 -1.0,0.,1.);
+    vUV = aUV;
+}
+
+#END
+
+#GLSL
+out vec2 fragAdvect : TARGET_0;
+void frag_advect(){
+    vec4 col = texture(uSampler,vUV);
+    ivec2 texsize = textureSize(uSampler,1);
+    vec2 duv = col.xy * vec2(texsize.y/texsize.x,1.0) * uDeltaTime; 
+    fragAdvect = texture(uSampler,vUV - duv).xy;
+}
+#END
+
+#GLSL
+out vec4 fragFluid :TARGET_0;
+void frag_fluid(){
+    vec2 delta = texture(uSampler1,vUV).xy * uDeltaTime;
+    vec3 color = texture(uSampler,vUV - delta).xyz;
+
+    fragFluid = vec4(color,1.0);
+}
+#END
+
+#GLSL
+out vec2 fragForce:TARGET_0;
+uniform vec2 uForceOrigin;
+uniform vec2 uForceVector;
+uniform float uForceExponent;
+void frag_force(){
+    vec4 col = texture(uSampler,vUV);
+    ivec2 texsize = textureSize(uSampler,0);
+    vec2 pos = vUV;
+    float amp = exp(-uForceExponent * distance(uForceOrigin,pos));
+    fragForce = col.xy + uForceVector * amp;
+}
+#END
+
+
+#GLSL
+
+
+out float fragJacobi1d:TARGET_0;
+void frag_jacobi1d(){
+    ivec2 texsize = textureSize(uSampler,0);
+    float uoff = 1.0 / float(texsize.x);
+    float voff = 1.0 / float(texsize.y);
+
+    float x1 = texture(uSampler,vUV - vec2(uoff,0)).x;
+    float x2 = texture(uSampler,vUV + vec2(uoff,0)).x;
+    float y1 = texture(uSampler,vUV - vec2(0,voff)).x;
+    float y2 = texture(uSampler,vUV + vec2(0,voff)).x;
+
+    float b1 = texture(uSampler1,vUV).x;
+    fragJacobi1d = (x1+ x2+ y1+ y2 + uAlpha *b1) / uBeta;
+}
+#END
+
+#GLSL
+
+out vec2 fragJacobi2D:TARGET_0;
+
+void frag_jacobi2d(){
+    ivec2 texsize = textureSize(uSampler,0);
+    float uoff = 1.0/ float(texsize.x);
+    float voff = 1.0 / float(texsize.y);
+
+    vec2 x1 = texture(uSampler,vUV - vec2(uoff,0)).xy;
+    vec2 x2 = texture(uSampler,vUV + vec2(uoff,0)).xy;
+    vec2 y1 = texture(uSampler,vUV - vec2(0,voff)).xy;
+    vec2 y2 = texture(uSampler,vUV + vec2(0,voff)).xy;
+
+    vec2 b1 = texture(uSampler1,vUV).xy;
+
+    fragJacobi2D = (x1 + x2 +y1+y2 + uAlpha *b1) / uBeta;
+}
+#END
+
+#GLSL
+out vec2 fragProjFinish:TARGET_0;
+void frag_projfinish(){
+    ivec2 texsize = textureSize(uSampler,0);
+    float uoff = 1.0 / float(texsize.x);
+    float voff = 1.0 / float(texsize.y);
+
+    float p1 = texture(uSampler,vUV - vec2(uoff,0)).x;
+    float p2 = texture(uSampler,vUV + vec2(uoff,0)).x;
+    float p3 = texture(uSampler,vUV - vec2(0,voff)).x;
+    float p4 = texture(uSampler,vUV + vec2(0,voff)).x;
+
+    vec2 u = texture(uSampler1,vUV).xy - vec2(p2-p1,p4-p3) /(2.0 * voff);
+    fragProjFinish = u;
+}
+#END
+
+#GLSL
+
+out vec2 fragProjSetup:TARGET_0;    //DivW_out 1D
+void frag_projsetup(){
+    ivec2 texsize = textureSize(uSampler,0);
+    float uoff = 1.0/ float(texsize.x);
+    float voff = 1.0 / float(texsize.y);
+
+    float x1 = texture(uSampler,vUV + vec2(uoff,0)).x;
+    float x2 = texture(uSampler,vUV - vec2(uoff,0)).x;
+
+    float y1 = texture(uSampler,vUV + vec2(0,voff)).y;
+    float y2 = texture(uSampler,vUV - vec2(0,voff)).y;
+
+    float v =  (x1 - x2 + y1 - y2) / (2.0 * uoff);
+    fragProjSetup = vec2(v,v);
+}
+
+
+#END
+
+technique stableFluid/projSetup{
+    #param vs vertex
+    #param ps frag_projsetup
+}
+
+
+technique stableFluid/projFinish{
+    #param vs vertex
+    #param ps frag_projfinish
+}
+
+technique stableFluid/jacobi1d{
+    #param vs vertex
+    #param ps frag_jacobi1d
+}
+
+technique stableFluid/jacobi2d{
+    #param vs vertex
+    #param ps frag_jacobi2d
+}
+
+technique stableFluid/advect{
+    #param vs vertex
+    #param ps frag_advect
+}
+
+technique stableFluid/force{
+    #param vs vertex
+    #param ps frag_force
+}
+
+technique stableFluid/fluid{
+    #param vs vertex
+    #param ps frag_fluid
+}

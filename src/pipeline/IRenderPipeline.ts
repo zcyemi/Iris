@@ -49,7 +49,6 @@ export interface IRenderPipeline{
 
     
     onSetupRender(glctx:GLContext,info:GraphicsRenderCreateInfo);
-    onInitGL();
     reload();
     release();
 }

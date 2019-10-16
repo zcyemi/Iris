@@ -1,6 +1,6 @@
 import { IRenderPipeline } from "./IRenderPipeline";
 import { RenderModel } from "./RenderModel";
-import { GLContext, FrameBuffer } from "../gl";
+import { GLContext, FrameBuffer, FrameBufferTexDesc } from "../gl";
 import { GraphicsRender, RenderNodeList, GraphicsRenderCreateInfo } from "../core";
 import { IRenderModel } from "./IRenderModel";
 
@@ -12,27 +12,39 @@ export abstract class RenderPipelineBase<T extends IRenderModel> implements IRen
     public nodeList: RenderNodeList;
     public model: IRenderModel;
     public mainFrameBuffer:FrameBuffer;
-    resizeFrameBuffer(width: number, height: number) {
-        throw new Error("Method not implemented.");
-    }
-    exec(data: any) {
-        throw new Error("Method not implemented.");
-    }
-    onRenderToCanvas() {
-        throw new Error("Method not implemented.");
-    }
-    onSetupRender(glctx: GLContext, info: GraphicsRenderCreateInfo) {
-        throw new Error("Method not implemented.");
-    }
-    onInitGL() {
-        throw new Error("Method not implemented.");
-    }
-    reload() {
-        throw new Error("Method not implemented.");
-    }
-    release() {
-        throw new Error("Method not implemented.");
+
+    abstract exec(data: any);
+
+    
+    abstract reload();
+    abstract release();
+
+    onSetupRender(glctx: GLContext, info: GraphicsRenderCreateInfo){
+
+        let desc:FrameBufferTexDesc = {
+            colFmt: info.colorFormat,
+            depthFmt: info.depthFormat,
+        };
+        this.mainFrameBuffer = FrameBuffer.create(glctx,glctx.canvasWidth,glctx.canvasHeight,desc);
+        this.glctx= glctx;
     }
 
+    onRenderToCanvas() {
+        this.glctx.bindGLFramebuffer(null);
+        const mainfb = this.mainFrameBuffer;
+        if(mainfb == null) return;
+        this.glctx.viewport(0,0,mainfb.width,mainfb.height);
+        this.model.drawFullScreen(mainfb.coltex);
+    }
+
+    resizeFrameBuffer(width: number, height: number){
+        let glctx= this.glctx;
+        let mainfb = this.mainFrameBuffer;
+        if(mainfb== null) return;
+        mainfb.resize(glctx,width,height);
+        glctx.viewport(0,0,width,height);
+    }
+
+    
 
 }
