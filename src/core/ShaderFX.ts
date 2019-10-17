@@ -13,6 +13,7 @@ export class ShaderFXTechnique {
     public attr_ps:{[key:string]:string} = {};
     public entry_vs: string;
     public entry_ps: string;
+    public property_value:{[key:string]:any} = {};
 }
 
 export class ShaderFXSource{
