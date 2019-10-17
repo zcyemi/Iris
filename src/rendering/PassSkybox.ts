@@ -7,6 +7,7 @@ import { RenderPass } from "./RenderPass";
 import { SkyboxType } from "../core/Skybox";
 import { IRenderPipeline } from "../pipeline/IRenderPipeline";
 import { ShaderFX, Comparison, CullingMode, ShaderTags } from "../core/ShaderFX";
+import { MeshPrimitive } from "../core/MeshPrimitive";
 
 export class PassSkybox extends RenderPass{
     private m_tags:ShaderTags;
@@ -32,7 +33,7 @@ export class PassSkybox extends RenderPass{
         let mat= new Material(shader);
         mat.setFlag("ENVMAP_TYPE","TEX",true);
 
-        let skyrender = new MeshRender(Mesh.Quad,mat);
+        let skyrender = new MeshRender(MeshPrimitive.Quad,mat);
         this.m_skyrender = skyrender;
     }
 

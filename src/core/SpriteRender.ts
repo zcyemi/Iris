@@ -6,6 +6,7 @@ import { Texture2D } from "./Texture2D";
 import { vec4 } from "../math/GLMath";
 import { GLContext } from "../gl/GLContext";
 import { ShaderFX } from "./ShaderFX";
+import { MeshPrimitive } from "./MeshPrimitive";
 
 
 export class SpriteRender extends MeshRender{
@@ -25,7 +26,7 @@ export class SpriteRender extends MeshRender{
 
     public constructor(){
         super();
-        this.mesh = Mesh.Quad;
+        this.mesh = MeshPrimitive.Quad;
 
         let shader = ShaderFX.findShader("iris","@shaderfx/sprite");
         this.material = new Material(shader);
