@@ -2,7 +2,7 @@ import { IRenderPipeline } from "./IRenderPipeline";
 import { GLProgram, GLVertexArray, FrameBuffer } from "../gl";
 import { ITexture, MeshRender, Material, Mesh, IGraphicObj } from "../core";
 import { mat4, vec4 } from "../math";
-import { PipelineClearInfo } from "./RenderPipeline";
+import { PipelineClearInfo } from "./InternalPipeline";
 
 
 

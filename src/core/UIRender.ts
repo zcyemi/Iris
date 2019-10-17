@@ -1,11 +1,11 @@
-import { BaseRender } from "./BaseRender";
 import { GLContext } from "../gl";
-import { GraphicsRender } from "./GraphicsRender";
-import { RenderModel } from "../pipeline";
-import { TextBuilder } from "../misc/TextBuilder";
 import { SpriteBatch } from "../misc/SpriteBatch";
-import { Color } from "./Color";
+import { TextBuilder } from "../misc/TextBuilder";
+import { IRenderModel } from "../pipeline/IRenderModel";
 import { RenderQueue } from "../pipeline/RenderQueue";
+import { BaseRender } from "./BaseRender";
+import { Color } from "./Color";
+import { GraphicsRender } from "./GraphicsRender";
 
 export class UIRender extends BaseRender {
     private m_sprBatch: SpriteBatch;
@@ -32,11 +32,11 @@ export class UIRender extends BaseRender {
     public release(glctx: GLContext) {
     }
 
-    public draw(gl: GLContext, model: RenderModel) {
+    public draw(gl:GLContext,model:IRenderModel) {
         this.refreshData(gl);
         let sb = this.m_sprBatch;
-        model.drawMeshWithMat(sb.mesh, sb.material, sb.vao, null, true);
+        model.drawMeshWithMat(sb.mesh, sb.material, sb.vao, null);
         let text = this.m_text;
-        model.drawMeshWithMat(text.mesh, text.material, text.vao, null, true);
+        model.drawMeshWithMat(text.mesh, text.material, text.vao, null);
     }
 }

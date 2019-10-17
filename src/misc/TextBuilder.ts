@@ -3,7 +3,7 @@ import { vec4 } from "../math";
 import { FontInfo } from "./FontInfo";
 import { DynamicMesh, Material, MeshBufferUtility, MeshTopology, GraphicsRender, MeshRender, TextureDescUtility, Texture2D } from "../core";
 import { GLVertexArray, GLConst, GLContext, GL } from "../gl";
-import { ShaderFX } from "../core/ShaderFX";
+import { ShaderFX, AttrSemantic } from "../core/ShaderFX";
 
 export class TextBuilder {
 
@@ -27,8 +27,8 @@ export class TextBuilder {
         let mesh = new DynamicMesh('textbatch');
 
         mesh.setIndices(indicesArray, GLConst.UNSIGNED_SHORT, MeshTopology.Triangles);
-        mesh.setPosition(this.textPosBuffer.array, GLConst.FLOAT, 3);
-        mesh.setUV(this.textUVBuffer.array, GLConst.FLOAT, 2);
+        mesh.setPosition(0,this.textPosBuffer.array, GLConst.FLOAT, 3);
+        mesh.setUV(0,this.textUVBuffer.array, GLConst.FLOAT, 2);
         mesh.refreshMeshBuffer(grender.glctx);
 
         let mat = this.material;
@@ -61,8 +61,8 @@ export class TextBuilder {
         let mesh = this.mesh;
         let posbuffer = this.textPosBuffer;
         let uvbuffer = this.textUVBuffer;
-        mesh.uploadDataBufferPosition(glctx, posbuffer.array, posbuffer.size * 4);
-        mesh.uploadDataBufferUV(glctx, uvbuffer.array, uvbuffer.size * 4);
+        mesh.updateDataBufferVertices(AttrSemantic.POSITION_0,glctx, posbuffer.array, posbuffer.size * 4);
+        mesh.updateDataBufferVertices(AttrSemantic.TEXCOORD_0, glctx,uvbuffer.array, uvbuffer.size * 4);
         mesh.setIndicesCount(posbuffer.size / 4 * 3);
     }
 

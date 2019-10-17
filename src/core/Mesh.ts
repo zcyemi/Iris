@@ -1,6 +1,7 @@
-import { GL, GLDataType, GLConst } from "../gl/GL";
-import { vec3 } from "../math/GLMath";
+import { GL, GLConst, GLDataType } from "../gl/GL";
 import { GLContext } from "../gl/GLContext";
+import { vec3 } from "../math/GLMath";
+import { AttrSemantic } from "./ShaderFX";
 
 export enum MeshTopology{
     Triangles = 4,
@@ -40,20 +41,19 @@ export class MeshVertexAttrDesc{
 }
 
 export class MeshVertexDesc{
-    public position : MeshVertexAttrDesc;
-    public uv: MeshVertexAttrDesc;
-    public normal: MeshVertexAttrDesc;
-    public color:MeshVertexAttrDesc;
+    public POSITION_0 : MeshVertexAttrDesc;
+    public TEXCOORD_0: MeshVertexAttrDesc;
+    public TEXCOORD_1:MeshVertexAttrDesc;
+    public NORMAL_0: MeshVertexAttrDesc;
+    public COLOR_0:MeshVertexAttrDesc;
+    public COLOR_1:MeshVertexAttrDesc;
     public get totalByteSize(){
-        let bytes = this.position.totalbytes;
-        if(this.uv != null){
-            bytes += this.uv.totalbytes;
-        }
-        if(this.normal != null){
-            bytes += this.normal.totalbytes;
-        }
-        if(this.color != null){
-            bytes += this.color.totalbytes;
+        let bytes = 0;
+        for (const key in this) {
+            if (this.hasOwnProperty(key)) {
+                const desc:any = this[key];
+                bytes += (<MeshVertexAttrDesc>desc).totalbytes;
+            }
         }
         return bytes;
     }
@@ -93,6 +93,10 @@ export class Mesh{
     public bufferNormal:WebGLBuffer;
     public bufferColor:WebGLBuffer;
 
+    public bufferSeperated:{[attr:string]:WebGLBuffer} = {};
+    private dataVertices:{[attr:string]:MeshDataBuffer} = {};
+    protected m_dataIndices:MeshDataBufferIndices;
+
     public name:string;
     public readonly vertexDesc:MeshVertexDesc = new MeshVertexDesc();
     public readonly indiceDesc:MeshIndicesDesc = new MeshIndicesDesc();
@@ -101,17 +105,17 @@ export class Mesh{
     private static s_cube:Mesh;
     private static s_sphere:Mesh;
 
-    protected m_dataPosition:MeshDataBuffer;
-    protected m_dataUV:MeshDataBuffer;
-    protected m_dataNormal:MeshDataBuffer;
-    protected m_dataIndices:MeshDataBufferIndices;
-    protected m_dataColor:MeshDataBuffer;
+    // protected m_dataPosition:MeshDataBuffer;
+    // protected m_dataUV:MeshDataBuffer;
+    // protected m_dataNormal:MeshDataBuffer;
+    // protected m_dataIndices:MeshDataBufferIndices;
+    // protected m_dataColor:MeshDataBuffer;
 
-    public get dataPosition():MeshDataBuffer{ return this.m_dataPosition;}
-    public get dataUV():MeshDataBuffer{ return this.m_dataUV;}
-    public get dataNormal():MeshDataBuffer{ return this.m_dataNormal;}
-    public get dataIndices():MeshDataBufferIndices{ return this.m_dataIndices;}
-    public get dataColor():MeshDataBuffer{return this.m_dataColor;}
+    // public get dataPosition():MeshDataBuffer{ return this.m_dataPosition;}
+    // public get dataUV():MeshDataBuffer{ return this.m_dataUV;}
+    // public get dataNormal():MeshDataBuffer{ return this.m_dataNormal;}
+    // public get dataIndices():MeshDataBufferIndices{ return this.m_dataIndices;}
+    // public get dataColor():MeshDataBuffer{return this.m_dataColor;}
 
     protected m_bufferInited:boolean =false;
     protected m_seperatedBuffer:boolean = false;
@@ -128,9 +132,22 @@ export class Mesh{
         return this.m_bufferInited;
     }
 
-    public setNormal(data:MeshDataBuffer,type:GLDataType,size:number,bufferByteLen:number = undefined){
-        this.m_dataNormal = data;
-        this.vertexDesc.normal = new MeshVertexAttrDesc(type,size,bufferByteLen == undefined? data.byteLength: bufferByteLen);
+    public setVerticesData(attr:AttrSemantic |string,databuffer:MeshDataBuffer){
+        this.dataVertices[attr] = databuffer;
+    }
+    public getVerticesData(attr:AttrSemantic){
+        return this.dataVertices[attr]
+    }
+
+    private setDataBuffer(semantic:string,index:number,data:MeshDataBuffer,type:GLDataType,size:number,bufferByteLen:number = undefined){
+        let indexstr = `${semantic}_${index}`;
+        this.setVerticesData(indexstr,data);
+        this.vertexDesc[indexstr] = new MeshVertexAttrDesc(type,size,bufferByteLen == undefined? data.byteLength: bufferByteLen);
+    }
+
+
+    public setNormal(index:number,data:MeshDataBuffer,type:GLDataType,size:number,bufferByteLen:number= undefined){
+        this.setDataBuffer("NORMAL",index,data,type,size,bufferByteLen);
     }
 
     /**
@@ -140,9 +157,8 @@ export class Mesh{
      * @param size component size [1,2,3,4]
      * @param bufferByteLen 
      */
-    public setUV(data:MeshDataBuffer,type:GLDataType,size:number,bufferByteLen:number = undefined){
-        this.m_dataUV = data;
-        this.vertexDesc.uv = new MeshVertexAttrDesc(type,size,bufferByteLen == undefined ? data.byteLength : bufferByteLen);
+    public setUV(index:number,data:MeshDataBuffer,type:GLDataType,size:number,bufferByteLen:number = undefined){
+        this.setDataBuffer("TEXCOORD",index,data,type,size,bufferByteLen);
     }
 
     /**
@@ -152,9 +168,8 @@ export class Mesh{
      * @param size component size [1,2,3,4]
      * @param bufferByteLen 
      */
-    public setColor(data:MeshDataBuffer,type:GLDataType,size:number,bufferByteLen:number = undefined){
-        this.m_dataColor = data;
-        this.vertexDesc.color= new MeshVertexAttrDesc(type,size,bufferByteLen == undefined ? data.byteLength : bufferByteLen);
+    public setColor(index:number,data:MeshDataBuffer,type:GLDataType,size:number,bufferByteLen:number = undefined){
+        this.setDataBuffer("COLOR",index,data,type,size,bufferByteLen);
     }
 
     /**
@@ -163,9 +178,8 @@ export class Mesh{
      * @param type data type
      * @param size component size
      */
-    public setPosition(data:MeshDataBuffer,type:GLDataType,size:number,bufferByteLen:number = undefined){
-        this.m_dataPosition = data;
-        this.vertexDesc.position = new MeshVertexAttrDesc(type,size,bufferByteLen == undefined ? data.byteLength: bufferByteLen);
+    public setPosition(index:number,data:MeshDataBuffer,type:GLDataType,size:number,bufferByteLen:number = undefined){
+        this.setDataBuffer("POSITION",index,data,type,size,bufferByteLen);
     }
 
     public setIndices(data:MeshDataBufferIndices,type:GLDataType,mode:MeshTopology,indicesCount:number = undefined){
@@ -178,6 +192,8 @@ export class Mesh{
         inddesc.type = type;
         inddesc.totalbytes = data.byteLength;
     }
+
+
 
     public setIndicesCount(indices:number){
         let indicesdesc = this.indiceDesc;
@@ -206,13 +222,13 @@ export class Mesh{
             1.0,0.0
         ]);
 
-        quad.m_dataPosition = dataPosition;
-        quad.m_dataUV = dataUV;
+        quad.dataVertices[AttrSemantic.POSITION_0] = dataPosition;
+        quad.dataVertices[AttrSemantic.TEXCOORD_0] = dataUV;
         quad.m_dataIndices = dataIndices;
         quad.name = "quad";
         let vertexdesc = quad.vertexDesc;
-        vertexdesc.position= new MeshVertexAttrDesc(GL.FLOAT,4,dataPosition.length*4);
-        vertexdesc.uv = new MeshVertexAttrDesc(GL.FLOAT,2,dataUV.length*4);
+        vertexdesc.POSITION_0= new MeshVertexAttrDesc(GL.FLOAT,4,dataPosition.length*4);
+        vertexdesc.TEXCOORD_0 = new MeshVertexAttrDesc(GL.FLOAT,2,dataUV.length*4);
         quad.indiceDesc.set(MeshTopology.Triangles,dataIndices.length,GL.UNSIGNED_SHORT,0);
 
         quad.calculateNormal();
@@ -284,18 +300,17 @@ export class Mesh{
         }
 
         let dataposition = new Float32Array(positions);
-        sphere.m_dataPosition = dataposition;
+        sphere.dataVertices[AttrSemantic.POSITION_0] = dataposition;
         let dataindices = new Uint16Array(indices);
         sphere.m_dataIndices = dataindices;
         let datauv = new Float32Array(uvs);
-        sphere.m_dataUV = datauv;
-
-        sphere.m_dataNormal = dataposition;
+        sphere.dataVertices[AttrSemantic.TEXCOORD_0] = datauv;
+        sphere.dataVertices[AttrSemantic.NORMAL_0] = dataposition;
 
         let vertexdesc =sphere.vertexDesc;
-        vertexdesc.position= new MeshVertexAttrDesc(GL.FLOAT,4,dataposition.byteLength);
-        vertexdesc.normal= new MeshVertexAttrDesc(GL.FLOAT,4,dataposition.byteLength);
-        vertexdesc.uv= new MeshVertexAttrDesc(GL.FLOAT,2,datauv.byteLength);
+        vertexdesc.POSITION_0= new MeshVertexAttrDesc(GL.FLOAT,4,dataposition.byteLength);
+        vertexdesc.NORMAL_0= new MeshVertexAttrDesc(GL.FLOAT,4,dataposition.byteLength);
+        vertexdesc.TEXCOORD_0= new MeshVertexAttrDesc(GL.FLOAT,2,datauv.byteLength);
         sphere.indiceDesc.set(MeshTopology.Triangles,indices.length,GL.UNSIGNED_SHORT,0);
 
         return sphere;
@@ -350,13 +365,13 @@ export class Mesh{
         }
 
         cube.m_dataIndices = new Uint16Array(dataIndices);
-        cube.m_dataPosition = dataPosition;
-        cube.m_dataUV =dataUV;
+        cube.dataVertices[AttrSemantic.POSITION_0] = dataPosition;
+        cube.dataVertices[AttrSemantic.TEXCOORD_0] =dataUV;
         cube.name = "cube";
 
         let vertexdesc = cube.vertexDesc;
-        vertexdesc.position = new MeshVertexAttrDesc(GL.FLOAT,4,dataPosition.length *4);
-        vertexdesc.uv = new MeshVertexAttrDesc(GL.FLOAT,2,dataUV.length*4);
+        vertexdesc.POSITION_0 = new MeshVertexAttrDesc(GL.FLOAT,4,dataPosition.length *4);
+        vertexdesc.TEXCOORD_0 = new MeshVertexAttrDesc(GL.FLOAT,2,dataUV.length*4);
 
         cube.indiceDesc.set(MeshTopology.Triangles,dataIndices.length,GL.UNSIGNED_SHORT,0);
 
@@ -371,8 +386,8 @@ export class Mesh{
             return;
         }
 
-        let normal = this.m_dataNormal;
-        let position = this.m_dataPosition;
+        let normal = this.getVerticesData(AttrSemantic.NORMAL_0);
+        let position = this.getVerticesData(AttrSemantic.POSITION_0);
         if(position == null){
             console.warn('vertices position is needed for normal calculation.');
             return;
@@ -383,7 +398,7 @@ export class Mesh{
             return;
         }
 
-        let positionattr = this.vertexDesc.position;
+        let positionattr = this.vertexDesc.POSITION_0;
         let floatLength = positionattr.totalbytes / MeshBufferUtility.TypeSize(positionattr.type);
         let normaldata = new Float32Array(floatLength);
         let verticesLen =floatLength / positionattr.size;
@@ -423,8 +438,8 @@ export class Mesh{
             normaldata.set([v[0],v[1],v[2],0],i*4);
         }
 
-        this.m_dataNormal = normaldata;
-        this.vertexDesc.normal = new MeshVertexAttrDesc(GL.FLOAT,4,normaldata.length *4);
+        this.setVerticesData(AttrSemantic.NORMAL_0,normaldata);
+        this.vertexDesc.NORMAL_0 = new MeshVertexAttrDesc(GL.FLOAT,4,normaldata.length *4);
     }
 
     public refreshMeshBuffer(glctx:GLContext){
@@ -444,20 +459,15 @@ export class Mesh{
         let vertexDesc = this.vertexDesc;
 
 
-        if (this.m_dataPosition != null) {
-            vertexDesc.position.offset = offset;
-            offset = MeshBufferUtility.copyBuffer(totalDataView,this.m_dataPosition,offset);
-            offset = Math.ceil(offset/4.0)*4;
-        }
-        if (this.m_dataUV != null) {
-            vertexDesc.uv.offset = offset;
-            offset = MeshBufferUtility.copyBuffer(totalDataView,this.m_dataUV,offset);
-            offset = Math.ceil(offset/4.0)*4;
-        }
-        if (this.m_dataNormal != null) {
-            vertexDesc.normal.offset= offset;
-            offset = MeshBufferUtility.copyBuffer(totalDataView,this.m_dataNormal,offset);
-            offset = Math.ceil(offset/4.0)*4;
+        let dataVertices = this.dataVertices;
+        for (const key in dataVertices) {
+            if (dataVertices.hasOwnProperty(key)) {
+                if(AttrSemantic[key] == null) continue;
+                const dataBuffer = this.dataVertices[key];
+                vertexDesc[key].offset = offset;
+                offset = MeshBufferUtility.copyBuffer(totalDataView,dataBuffer,offset);
+                offset = Math.ceil(offset/4.0) *4;
+            }
         }
         glctx.bufferData(GL.ARRAY_BUFFER,totalData,GL.STATIC_DRAW);
         glctx.bindBuffer(GL.ARRAY_BUFFER,null);

@@ -1,6 +1,7 @@
 import { Mesh, MeshDataBuffer } from "./Mesh";
 import { GLContext } from "../gl/GLContext";
 import { GL } from "../gl/GL";
+import { AttrSemantic } from "./ShaderFX";
 
 
 export class DynamicMesh extends Mesh{
@@ -15,42 +16,23 @@ export class DynamicMesh extends Mesh{
 
         if(this.m_seperatedBuffer){
             let vertexdesc = this.vertexDesc;
-            
-            let posdesc = vertexdesc.position;
-            if(posdesc != null && this.bufferVertices == null){
-                let buffer = glctx.createBufferAndBind(GL.ARRAY_BUFFER);
-                let datapos = this.m_dataPosition;
-                if(datapos) glctx.bufferData(GL.ARRAY_BUFFER,datapos,GL.DYNAMIC_DRAW);
-                this.bufferVertices = buffer;
-                posdesc.offset = 0;
-            }
 
-            let uvdesc = vertexdesc.uv;
-            if(uvdesc !=null && this.bufferUV == null){
-                let buffer = glctx.createBufferAndBind(GL.ARRAY_BUFFER);
-                let datauv = this.m_dataUV;
-                if(datauv) glctx.bufferData(GL.ARRAY_BUFFER,datauv,GL.DYNAMIC_DRAW);
-                this.bufferUV = buffer;
-                uvdesc.offset = 0;
+            for (const key in vertexdesc) {
+                if (vertexdesc.hasOwnProperty(key)) {
+                    let attr:AttrSemantic = AttrSemantic[key];
+                    if(attr == null) continue;
+                    const desc = vertexdesc[attr];
+                    
+                    if(desc != null && this.bufferVertices[attr] ==null){
+                        let glbuffer = glctx.createBufferAndBind(GL.ARRAY_BUFFER);
+                        let databuffer = this.getVerticesData(attr);
+                        if(databuffer) glctx.bufferData(GL.ARRAY_BUFFER,databuffer,GL.DYNAMIC_DRAW);
+                        this.bufferVertices = glbuffer;
+                        desc.offset = 0;
+                    }
+                }
             }
-
-            let normaldesc = vertexdesc.normal;
-            if(normaldesc != null && this.bufferNormal == null){
-                let buffer = glctx.createBufferAndBind(GL.ARRAY_BUFFER);
-                let datanormal = this.m_dataNormal;
-                if(datanormal) glctx.bufferData(GL.ARRAY_BUFFER,datanormal,GL.DYNAMIC_DRAW);
-                this.bufferNormal = buffer;
-                normaldesc.offset = 0;
-            }
-
-            let colordesc = vertexdesc.color;
-            if(colordesc != null && this.bufferColor == null){
-                let buffer = glctx.createBufferAndBind(GL.ARRAY_BUFFER);
-                let datacolor = this.m_dataColor;
-                if(datacolor) glctx.bufferData(GL.ARRAY_BUFFER,datacolor,GL.DYNAMIC_DRAW);
-                this.bufferColor = buffer;
-                colordesc.offset = 0;
-            }
+    
             glctx.bindBuffer(GL.ARRAY_BUFFER,null);
             
             //indices
@@ -72,19 +54,21 @@ export class DynamicMesh extends Mesh{
         return true;
     }
 
-    public uploadDataBufferPosition(gl:GLContext,databuffer:MeshDataBuffer = null,databytes:number = undefined){
+    public updateDataBufferVertices(attr:AttrSemantic,gl:GLContext,databuffer:MeshDataBuffer = null,databytes:number = undefined){
         let data:MeshDataBuffer = null;
-        if(databuffer!=null && databuffer != this.m_dataPosition){
+
+        let curdatabuffer = this.getVerticesData(attr);
+        if(databuffer!=null && databuffer != curdatabuffer){
             data = databuffer;
         }
         else{
-            data = this.m_dataPosition;
+            data = curdatabuffer;
         }
 
-        let posdesc =this.vertexDesc.position;
+        let posdesc =this.vertexDesc[attr];
         if(databytes != undefined){
             if(databytes > data.byteLength){
-                throw new Error('specific positionbuffer databytes overflow!');
+                throw new Error(`specific ${attr} databytes overflow!`);
             }else{
                 posdesc.totalbytes = databytes;
             }
@@ -95,96 +79,6 @@ export class DynamicMesh extends Mesh{
         if(buffer == null){
             buffer = gl.createBuffer();
             this.bufferVertices = buffer;
-        }
-
-        gl.bindBuffer(GL.ARRAY_BUFFER,buffer);
-        gl.bufferData(GL.ARRAY_BUFFER,data,GL.DYNAMIC_DRAW);
-        gl.bindBuffer(GL.ARRAY_BUFFER,null);
-    }
-
-    public uploadDataBufferUV(gl:GLContext,databuffer:MeshDataBuffer = null,databytes:number = undefined){
-        let data:MeshDataBuffer = null;
-        if(databuffer!=null && databuffer != this.m_dataUV){
-            data = databuffer;
-        }
-        else{
-            data = this.m_dataUV;
-        }
-
-        let uvdesc = this.vertexDesc.uv;
-        if(databytes != undefined){
-            if(databytes > data.byteLength){
-                throw new Error("specific uv buffer databytes overflow!");
-            }else{
-                uvdesc.totalbytes = databytes;
-            }
-        }else{
-            uvdesc.totalbytes = data.byteLength;
-        }
-
-        let buffer = this.bufferUV;
-        if(buffer == null){
-            buffer = gl.createBuffer();
-            this.bufferUV = buffer;
-        }
-        gl.bindBuffer(GL.ARRAY_BUFFER,buffer);
-        gl.bufferData(GL.ARRAY_BUFFER,data,GL.DYNAMIC_DRAW);
-        gl.bindBuffer(GL.ARRAY_BUFFER,null);
-    }
-
-    public uploadDataBufferNormal(gl:GLContext,databuffer:MeshDataBuffer = null,databytes:number = undefined){
-        let data:MeshDataBuffer = null;
-        if(databuffer!=null && databuffer != this.m_dataNormal){
-            data = databuffer;
-        }
-        else{
-            data = this.m_dataNormal;
-        }
-
-        let nordesc =this.vertexDesc.normal;
-        if(databytes != undefined){
-            if(databytes > data.byteLength){
-                throw new Error('specific normal buffer databytes overflow!');
-            }else{
-                nordesc.totalbytes = databytes;
-            }
-        }else{
-            nordesc.totalbytes = data.byteLength;
-        }
-        let buffer = this.bufferNormal;
-        if(buffer == null){
-            buffer = gl.createBuffer();
-            this.bufferNormal = buffer;
-        }
-        gl.bindBuffer(GL.ARRAY_BUFFER,buffer);
-        gl.bufferData(GL.ARRAY_BUFFER,data,GL.DYNAMIC_DRAW);
-        gl.bindBuffer(GL.ARRAY_BUFFER,null);
-    }
-
-    public uploadDataBufferColor(gl:GLContext,databuffer:MeshDataBuffer = null,databytes:number = undefined){
-        
-        let data:MeshDataBuffer = null;
-        if(databuffer!=null && databuffer != this.m_dataColor){
-            data = databuffer;
-        }
-        else{
-            data = this.m_dataColor;
-        }
-
-        let colordesc =this.vertexDesc.color;
-        if(databytes != undefined){
-            if(databytes > data.byteLength){
-                throw new Error('specific colorbuffer databytes overflow!');
-            }else{
-                colordesc.totalbytes = databytes;
-            }
-        }else{
-            colordesc.totalbytes = data.byteLength;
-        }
-        let buffer = this.bufferColor;
-        if(buffer == null){
-            buffer = gl.createBuffer();
-            this.bufferColor = buffer;
         }
 
         gl.bindBuffer(GL.ARRAY_BUFFER,buffer);

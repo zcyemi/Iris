@@ -3,7 +3,7 @@ import { IndexedTypedBuffer } from "../collection";
 import { float } from "../core/Types";
 import { DynamicMesh, MeshDataBufferIndices, MeshBufferUtility, MeshTopology, Mesh, MeshRender, Material, GraphicsRender, Color } from "../core";
 import { GLConst, GLContext, GLVertexArray } from "../gl";
-import { ShaderFX } from "../core/ShaderFX";
+import { ShaderFX, AttrSemantic } from "../core/ShaderFX";
 
 export class SpriteBatch{
     public rectPosBuffer:IndexedTypedBuffer<Float32Array>;
@@ -32,8 +32,8 @@ export class SpriteBatch{
         let mesh = new DynamicMesh("spritebatch");
 
         mesh.setIndices(indicesArray,GLConst.UNSIGNED_SHORT,MeshTopology.Triangles);
-        mesh.setPosition(this.rectPosBuffer.array,GLConst.FLOAT,3);
-        mesh.setColor(this.rectColorBuffer.array,GLConst.FLOAT,4);
+        mesh.setPosition(0,this.rectPosBuffer.array,GLConst.FLOAT,3);
+        mesh.setColor(0,this.rectColorBuffer.array,GLConst.FLOAT,4);
         mesh.refreshMeshBuffer(grender.glctx);
 
         let mat = this.m_matRect;
@@ -57,9 +57,9 @@ export class SpriteBatch{
         let mesh = this.mesh;
         
         let posbuffer = this.rectPosBuffer;
-        mesh.uploadDataBufferPosition(glctx,posbuffer.array,posbuffer.size *4);
+        mesh.updateDataBufferVertices(AttrSemantic.POSITION_0,glctx,posbuffer.array,posbuffer.size *4);
         let colbuffer = this.rectColorBuffer;
-        mesh.uploadDataBufferColor(glctx,colbuffer.array,colbuffer.size*4);
+        mesh.updateDataBufferVertices(AttrSemantic.COLOR_0,glctx,colbuffer.array,colbuffer.size*4);
         mesh.setIndicesCount(posbuffer.size /8 *6);
 
         this.m_isdirty = false;

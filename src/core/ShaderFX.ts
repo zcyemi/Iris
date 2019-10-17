@@ -21,6 +21,17 @@ export class ShaderFXSource{
     public fragment:string;
 }
 
+export enum AttrSemantic{
+    POSITION_0 = "POSITION_0",
+    POSITION_1 = "POSITION_1",
+    TEXCOORD_0 = "TEXCOORD_0",
+    TEXCOORD_1 = "TEXCOORD_1",
+    TEXCOORD_2 = "TEXCOORD_2",
+    COLOR_0 = "COLOR_0",
+    COLOR_1 = "COLOR_1",
+    NORMAL_0 = "NORMAL_0",
+    TANGENT_0 = "TANGENT_0",
+}
 
 
 export enum Comparison{

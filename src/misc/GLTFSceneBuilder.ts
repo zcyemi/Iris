@@ -132,21 +132,21 @@ export class GLTFSceneBuilder{
             let index=  _attribute['NORMAL'];
             let buffer = this.getBuffer(index);
             let desc = this.buffersDesc[index];
-            mesh.setNormal(buffer,desc.type,desc.size);
+            mesh.setNormal(0,buffer,desc.type,desc.size);
         }
 
         if(_attribute['POSITION']!= null){
             let index = _attribute['POSITION'];
             let buffer = this.getBuffer(index);
             let desc = this.buffersDesc[index];
-            mesh.setPosition(buffer,desc.type,desc.size);
+            mesh.setPosition(0,buffer,desc.type,desc.size);
         }
 
         if(_attribute['TEXCOORD_0']!= null){
             let index = _attribute['TEXCOORD_0'];
             let buffer = this.getBuffer(index);
             let desc = this.buffersDesc[index];
-            mesh.setUV(buffer,desc.type,desc.size);
+            mesh.setUV(0,buffer,desc.type,desc.size);
         }
 
         if(_attribute['TANGENT'] !=null){

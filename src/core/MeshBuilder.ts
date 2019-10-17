@@ -85,7 +85,7 @@ export class MeshBuilder{
         let topo = this.m_topology;
         let mesh =new Mesh();
         
-        mesh.setPosition(new Float32Array(this.m_positions),GLConst.FLOAT,4);
+        mesh.setPosition(0,new Float32Array(this.m_positions),GLConst.FLOAT,4);
         mesh.setIndices(new Uint16Array(this.m_indiecs),GLConst.UNSIGNED_SHORT,topo);
 
         return mesh;
