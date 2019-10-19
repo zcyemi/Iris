@@ -1,10 +1,11 @@
 import { AssetsDataBase } from '../core/AssetsDatabase';
 import { GraphicsContext } from '../core/GraphicsContext';
-import { Camera, FrameTimer, GameObject, GraphicsRender, SceneManager, WindowUtility } from '../core/index';
+import { Camera, FrameTimer, GameObject, GraphicsRender, SceneManager, WindowUtility, ClearType, Color } from '../core/index';
 import { ShaderFX } from '../core/ShaderFX';
 import { GLUtility } from '../gl';
 import { Input } from '../misc/index';
 import { InternalPipeline } from '../pipeline/InternalPipeline';
+import { vec4 } from '../math';
 
 export class SampleGame{
     private m_canvas:HTMLCanvasElement;
@@ -35,8 +36,9 @@ export class SampleGame{
 
         SceneManager.Init();
         var cam = new GameObject("camera");
-        cam.addComponent(new Camera());
-
+        let camera = cam.addComponent(new Camera());
+        camera.clearType = ClearType.Background;
+        camera.background = new vec4(Color.BLACK);
         
     }
 

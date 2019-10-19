@@ -1,4 +1,4 @@
-import { Component,Scene,GraphicsContext } from "../core/index";
+import { Component,Scene,GraphicsContext, Camera } from "../core/index";
 import { Input } from "./Input";
 import { glmath, vec3, quat } from "../math/index";
 
@@ -6,15 +6,18 @@ import { glmath, vec3, quat } from "../math/index";
 export class ControlHandlerComponent extends Component{
 
     private m_selected:boolean = false;
+
     
-    private static s_globalSel
+    
+    private m_targetCam:Camera;
+    
 
     public onStart(){
-
+        this.m_targetCam = this.gameobject.getComponent(Camera);
     }
 
-    public onUpdate(scene:Scene){
-        let camera = scene.mainCamera;
+    public onUpdate(){
+        let camera = this.m_targetCam;
         if(camera == null) return;
 
         let grender = GraphicsContext.currentRender;

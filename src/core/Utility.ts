@@ -193,11 +193,11 @@ export class PropertyUpdater{
 	private m_target:any;
 	private m_updatefn:Function;
 
-	private m_isdirty:boolean = false;
+	private m_isdirty:boolean = true;
 
 	public get isDirty():boolean{ return this.m_isdirty;}
 
-	public static create<T>(target:T,updatefn:()=>void):PropertyUpdater{
+	public static create<T>(target:T,updatefn:()=>void,defDirty:boolean = true):PropertyUpdater{
 		let updater = new PropertyUpdater();
 		updater.m_target = target;
 		updater.m_updatefn = updatefn;

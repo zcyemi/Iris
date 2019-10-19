@@ -70,8 +70,7 @@ export class Light extends Component{
         light.castShadow = true;
         return light;
     }
-    public onUpdate(scene:Scene){
-        scene.addLight(this);
+    public onUpdate(){
     }
 
     public getShaderLightPosData():vec4{

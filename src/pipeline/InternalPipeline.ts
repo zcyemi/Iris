@@ -5,6 +5,7 @@ import { FrameBuffer, GL, GLContext, GLProgram, GLVertexArray } from "../gl";
 import { mat4, vec4 } from "../math";
 import { IRenderModel } from "./IRenderModel";
 import { RenderPipelineBase } from "./RenderPipelineBase";
+import { CommandBuffer, CommandType } from "../core/CommandBuffer";
 
 export interface PipelineClearInfo {
     color?: vec4;
@@ -66,6 +67,25 @@ export class InternalRenderModel implements IRenderModel {
         throw new Error("Method not implemented.");
     }
 
+    execCommand(cmdbufer:CommandBuffer){
+
+        let items = cmdbufer.commandList;
+        let len = items.length;
+
+        const glctx= this.m_pipeline.glctx;
+        for(let t=0;t< len;t++){
+            let cmd = items[t];
+
+
+            switch(cmd.type){
+                case CommandType.ClearColor:
+                glctx.clearColorAry(cmd.args[0].raw);
+                glctx.clear(GL.COLOR_BUFFER_BIT);
+                break;
+            }
+        }
+    }
+
 }
 
 
@@ -94,6 +114,7 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
 
     exec(data: any) {
         const glctx = this.glctx;
+        const model = this.model;
 
         //loop all camera
 
@@ -101,10 +122,15 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
 
         cameras.forEach(cam=>{
 
+
             //render
             if(!cam.enabled) return;
 
-            
+            let cmdbuffer  = cam.cmdbufferClear;
+            if(cmdbuffer.valid){
+
+                model.execCommand(cmdbuffer);
+            }
             
 
         });

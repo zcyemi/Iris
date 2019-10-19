@@ -8,6 +8,6 @@ export class Component{
     public get transform():Transform{
         return this.gameobject.transform;
     }
-    public onUpdate?(scene:Scene):void;
+    public onUpdate?():void;
     public onStart?():void;
 }

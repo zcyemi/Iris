@@ -30,7 +30,11 @@ export class SceneManager{
     }
 
     public static onFrame(dt:number){
+        let rootTRS = SceneManager.s_rootTRS;
 
+        for(let t=0;t<rootTRS.length;t++){
+            rootTRS[t].gameobject.update();
+        }
     }
     
     

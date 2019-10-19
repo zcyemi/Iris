@@ -1,8 +1,7 @@
 import { Component } from "../core/Component";
 import { Transform } from "../core/Transform";
+import { glmath, quat, vec4 } from "../math/GLMath";
 import { Input } from "./Input";
-import { quat, glmath, vec4 } from "../math/GLMath";
-import { Scene } from "../core/Scene";
 
 
 export class CameraFreeFly extends Component{
@@ -14,7 +13,7 @@ export class CameraFreeFly extends Component{
     public onStart(){
         this.m_trs = this.gameobject.transform;
     }
-    public onUpdate(scene:Scene){
+    public onUpdate(){
         let trs = this.m_trs;
         let snapshot = Input.snapshot;
 

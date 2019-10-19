@@ -3,6 +3,7 @@ import { GLProgram, GLVertexArray, FrameBuffer } from "../gl";
 import { ITexture, MeshRender, Material, Mesh, IGraphicObj } from "../core";
 import { mat4, vec4 } from "../math";
 import { PipelineClearInfo } from "./InternalPipeline";
+import { CommandBuffer } from "../core/CommandBuffer";
 
 
 
@@ -25,4 +26,6 @@ export interface IRenderModel{
     drawMeshWithMat(mesh:Mesh,mat:Material,vao:GLVertexArray,objmtx?:mat4);
 
     clearFrameBufferTarget(clearinfo:PipelineClearInfo,fb:FrameBuffer);
+
+    execCommand(cmdbufer:CommandBuffer);
 }

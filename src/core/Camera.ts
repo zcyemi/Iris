@@ -250,6 +250,8 @@ export class Camera extends Component{
 
     
     private updateClearCommandBuffer(){
+
+
         let clearType =this.clearType;
 
         let cmdbuffer = this.cmdbufferClear;
@@ -274,10 +276,15 @@ export class Camera extends Component{
                 }
             break;
         }
+
+        cmdbuffer.submit();
     }
 
-    public onUpdate(scene:Scene){
+    public onUpdate(){
+
+        
         this.m_worldToCamMtxCalculated = false;
+
 
         this.cmdbufferClearUpdater.update();
     }
