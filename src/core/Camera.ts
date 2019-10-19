@@ -4,6 +4,8 @@ import { Scene } from "./Scene";
 import { Skybox } from "./Skybox";
 import { mat4, vec4, glmath, f32, vec3 } from "../math/GLMath";
 import { Ray } from "../math/Ray";
+import { CommandBuffer } from "./CommandBuffer";
+import { PropertyUpdater } from "./Utility";
 
 
 export enum AmbientType{
@@ -14,7 +16,9 @@ export enum AmbientType{
 export enum ClearType{
     Background,
     Skybox,
+    None,
 }
+
 
 export enum ProjectionType{
     perspective,
@@ -47,10 +51,16 @@ export class Camera extends Component{
     private m_ambientColor:vec4 = glmath.vec4(0.1,0.1,0.1,1.0);
     private m_ambientType:AmbientType = AmbientType.AmbientColor;
     private m_clearType:ClearType = ClearType.Background;
+    private m_clearDpethValue:number = 0;
+    private m_clearDepth:boolean = false;
 
     private m_skybox:Skybox;
 
     private m_dataTrsDirty:boolean = true;
+
+    public cmdbufferClear:CommandBuffer;
+    private cmdbufferClearUpdater:PropertyUpdater;
+
     public get isDataTrsDirty():boolean{
         return this.m_dataTrsDirty || this.transform.isDirty;
     }
@@ -116,16 +126,16 @@ export class Camera extends Component{
     }
     public set background(v:vec4){
         this.m_background = v;
-        if(this.m_ambientType == AmbientType.Background){
-            this.ambientDataDirty = true;
-        }
+        this.cmdbufferClearUpdater.setDirty();
     }
 
     public get skybox():Skybox{
         return this.m_skybox;
     }
     public set skybox(skybox:Skybox){
+        if(this.m_skybox ==skybox) return;
         this.m_skybox = skybox;
+        this.cmdbufferClearUpdater.setDirty();
     }
 
     public get clearType():ClearType{
@@ -133,7 +143,9 @@ export class Camera extends Component{
     }
 
     public set clearType(t:ClearType){
+        if(this.m_clearType == t) return;
         this.m_clearType = t;
+        this.cmdbufferClearUpdater.setDirty();
     }
 
     public get ambientType():AmbientType{
@@ -143,6 +155,20 @@ export class Camera extends Component{
         if(this.m_ambientType == t) return;
         this.m_ambientType = t;
         this.ambientDataDirty =true;
+    }
+
+    public get clearDepth():boolean { return this.m_clearDepth;}
+    public set clearDepth(clear:boolean){ 
+        if(this.m_clearDepth == clear) return;
+        this.m_clearDepth = clear;
+        this.cmdbufferClearUpdater.setDirty();
+    }
+
+    public get depthValue():number{  return this.depthValue;}
+    public set depthValue(depth:number){
+        if(this.m_clearDpethValue == depth) return;
+        this.m_clearDpethValue = depth;
+        this.cmdbufferClearUpdater.setDirty();
     }
 
 
@@ -217,11 +243,43 @@ export class Camera extends Component{
         this.m_projMtx = mat4.perspectiveFoV(60,1,0.01,100);
         this.m_projMtxInv = null;
         this.m_projectionType = ProjectionType.perspective;
+
+        this.cmdbufferClear = new CommandBuffer("camera clear");
+        this.cmdbufferClearUpdater = PropertyUpdater.create(this,this.updateClearCommandBuffer.bind(this));
+    }
+
+    
+    private updateClearCommandBuffer(){
+        let clearType =this.clearType;
+
+        let cmdbuffer = this.cmdbufferClear;
+        cmdbuffer.clear();
+
+        let clearDpeth =this.m_clearDepth;
+        switch(clearType){
+            case ClearType.None:
+            break;
+            case ClearType.Background:
+            if(clearDpeth){
+                cmdbuffer.clearColorDepth(this.background,this.m_clearDpethValue);
+            }
+            else{
+                cmdbuffer.clearColor(this.background);
+            }
+            break;
+            case ClearType.Skybox:
+                cmdbuffer.drawSkybox(this.m_skybox);
+                if(clearDpeth){
+                    cmdbuffer.clearDepthStencil(this.m_clearDpethValue);
+                }
+            break;
+        }
     }
 
     public onUpdate(scene:Scene){
-        scene.mainCamera = this;
         this.m_worldToCamMtxCalculated = false;
+
+        this.cmdbufferClearUpdater.update();
     }
 
     public static persepctive(gobj:GameObject | null,fov:number,aspectratio:number,near:number,far:number):Camera{

@@ -2,6 +2,7 @@ import { Camera } from "../core/Camera";
 import { IGraphicObj } from "../core/IGraphicObj";
 import { Mesh } from "../core/index";
 import { Material } from "../core/Material";
+import { MeshPrimitive } from "../core/MeshPrimitive";
 import { MeshRender } from "../core/MeshRender";
 import { Scene } from "../core/Scene";
 import { ShaderFX } from "../core/ShaderFX";
@@ -13,8 +14,8 @@ import { GLProgram } from "../gl/GLProgram";
 import { GLVertexArray } from "../gl/GLVertexArray";
 import { mat4, vec4 } from "../math/GLMath";
 import { BufferDebugInfo } from "../rendering/index";
-import { IRenderPipeline } from "./IRenderPipeline";
 import { PipelineClearInfo } from "./InternalPipeline";
+import { IRenderPipeline } from "./IRenderPipeline";
 
 
 /**
@@ -59,11 +60,10 @@ export class RenderModel implements IGraphicObj{
         let shaderblit= ShaderFX.findShader("iris","@shaderfx/blit");
 
         this.m_matFullscreen = new Material(shaderblit);
-        this.m_renderFullscreen = new MeshRender(Mesh.Quad,this.m_matFullscreen);
+        this.m_renderFullscreen = new MeshRender(MeshPrimitive.Quad,this.m_matFullscreen);
 
         let shaderScreenRect = ShaderFX.findShader("iris","@shaderfx/screenRect");
         this.m_matScreenRect = new Material(shaderScreenRect);
-
     }
 
 

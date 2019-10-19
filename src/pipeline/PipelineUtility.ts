@@ -24,9 +24,8 @@ export class PipelineUtility{
      */
     public static generateDrawList(scene: Scene,nodelist:RenderNodeList) {
         nodelist.reset();
-        PipelineUtility.traversalRenderNode(nodelist, scene.transform);
+        PipelineUtility.traversalRenderNode(nodelist, scene.root.transform);
         nodelist.sort();
     }
-
 
 }

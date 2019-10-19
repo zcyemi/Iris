@@ -187,3 +187,30 @@ export class WindowUtility{
 export function undefinedOr(x:any,y:any){
 	return x == undefined ? y: x;
 }
+
+export class PropertyUpdater{
+
+	private m_target:any;
+	private m_updatefn:Function;
+
+	private m_isdirty:boolean = false;
+
+	public get isDirty():boolean{ return this.m_isdirty;}
+
+	public static create<T>(target:T,updatefn:()=>void):PropertyUpdater{
+		let updater = new PropertyUpdater();
+		updater.m_target = target;
+		updater.m_updatefn = updatefn;
+		return updater;
+	}
+
+	public setDirty(){
+		this.m_isdirty =true;
+	}
+
+	public update(){
+		if(!this.m_isdirty) return;
+		this.m_updatefn();
+		this.m_isdirty = false;
+	}
+}

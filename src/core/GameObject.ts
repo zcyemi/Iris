@@ -3,6 +3,10 @@ import { MeshRender } from "./MeshRender";
 import { Component } from "./Component";
 import { Scene } from "./Scene";
 import { BaseRender } from "./BaseRender";
+import { Camera } from "./Camera";
+import { SceneManager } from "./SceneManager";
+import { Light } from "./Light";
+import { setMaxListeners } from "cluster";
 
 export class GameObject{
 
@@ -61,6 +65,10 @@ export class GameObject{
     }
 
     public addComponent(c:Component){
+        if(c.gameobject !=null){
+            throw new Error("can not add single component to multiple objects");
+        }
+
         let comps = this.components;
         if(comps == null){
             comps = [];
@@ -69,6 +77,12 @@ export class GameObject{
 
         let index= comps.indexOf(c);
         if(index >=0) return;
+
+        if(c instanceof Camera){
+            SceneManager.addCamera(c);
+        }else if(c instanceof Light){
+            SceneManager.addLight(c);
+        }
 
         c.gameobject = this;
         if(c.onStart != null) c.onStart();

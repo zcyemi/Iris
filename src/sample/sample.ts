@@ -1,10 +1,9 @@
-import { GraphicsContext } from '../core/GraphicsContext';
-import { FrameTimer, GraphicsRender, WindowUtility, Color } from '../core/index';
-import { GLUtility, GL, GLContext } from '../gl';
-import { Input } from '../misc/index';
 import { AssetsDataBase } from '../core/AssetsDatabase';
+import { GraphicsContext } from '../core/GraphicsContext';
+import { Camera, FrameTimer, GameObject, GraphicsRender, SceneManager, WindowUtility } from '../core/index';
 import { ShaderFX } from '../core/ShaderFX';
-import { vec4 } from '../math';
+import { GLUtility } from '../gl';
+import { Input } from '../misc/index';
 import { InternalPipeline } from '../pipeline/InternalPipeline';
 
 export class SampleGame{
@@ -27,6 +26,18 @@ export class SampleGame{
         WindowUtility.setOnResizeFunc(this.onResize.bind(this));
 
         this.loadResource();
+
+        this.setupScene();
+    }
+
+
+    private setupScene(){
+
+        SceneManager.Init();
+        var cam = new GameObject("camera");
+        cam.addComponent(new Camera());
+
+        
     }
 
     private async loadResource(){
@@ -39,6 +50,8 @@ export class SampleGame{
         const grender = this.m_graphicsRender;
 
         var pipeline = new InternalPipeline();
+
+        SceneManager.Init();
 
         grender.setPipeline(pipeline);
 
@@ -59,6 +72,8 @@ export class SampleGame{
         Input.onFrame(dt);
 
         if(!this.m_resoruceLoaded) return;
+
+        SceneManager.onFrame(dt);
 
         const grender =this.m_graphicsRender;
         grender.render(null,dt);

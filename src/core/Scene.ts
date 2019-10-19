@@ -2,7 +2,10 @@ import { GameObject } from "./GameObject";
 import { Camera } from "./Camera";
 import { Light, LightType } from "./Light";
 
-export class Scene extends GameObject{
+export class Scene{
+
+    public root:GameObject;
+
     public mainCamera:Camera;
 
     private m_lightList:Light[] = new Array<Light>(4);
@@ -26,7 +29,6 @@ export class Scene extends GameObject{
     }
 
     public constructor(){
-        super();
     }
 
     public onFrameStart(){
@@ -67,4 +69,6 @@ export class Scene extends GameObject{
             this.m_lightCount = lightcount + 1;
         }
     }
+
+
 }

@@ -44,8 +44,8 @@ export class SceneBuilder{
         }
     }
 
-    private static ParseNode(node:SceneBuildNodeBase,gobj?:GameObject){
-        if(gobj == null) gobj = new GameObject();
+    private static ParseNode(node:SceneBuildNodeBase):GameObject{
+        let gobj = new GameObject();
         
         let comp = node.comp;
         if(comp != null)comp.forEach(c=>gobj.addComponent(c));
@@ -69,13 +69,15 @@ export class SceneBuilder{
                 }
             }
         }
+
         return gobj;
     }
 
     public static Build(rootnode:SceneBuildNodeBase):Scene{
+        if(rootnode == null) return null;
+
         let scene = new Scene();
-        if(rootnode == null) return scene;
-        SceneBuilder.ParseNode(rootnode,scene);
+        scene.root = SceneBuilder.ParseNode(rootnode);
         return scene;
     }
 }

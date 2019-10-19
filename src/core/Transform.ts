@@ -1,5 +1,6 @@
 import { vec3, quat, mat4, mat3 } from "../math/GLMath";
 import { GameObject } from "./GameObject";
+import { SceneManager } from "./SceneManager";
 
 export class Transform{
     private m_localPosition:vec3 = vec3.zero;
@@ -34,6 +35,7 @@ export class Transform{
     private m_gameobj:GameObject;
 
     public constructor(gobj:GameObject){
+        if(gobj == null) throw new Error('show always create transform from gameobj')
         this.m_gameobj = gobj;
     }
 
@@ -45,15 +47,7 @@ export class Transform{
         return this.m_parent;
     }
     public set parent(p:Transform){
-        if(p == null){
-            let curp = this.m_parent;
-            if(curp != null){
-                curp.removeChild(this);
-            }
-        }
-        else{
-            p.addChild(this);
-        }
+        SceneManager.resolveTransformModify(this,p);
     }
 
     public set localMatrix(mat:mat4){

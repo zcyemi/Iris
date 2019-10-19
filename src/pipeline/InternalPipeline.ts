@@ -1,4 +1,4 @@
-import { GraphicsRenderCreateInfo, ITexture, Material, Mesh, MeshRender } from "../core";
+import { GraphicsRenderCreateInfo, ITexture, Material, Mesh, MeshRender, SceneManager } from "../core";
 import { AssetsBundle, AssetsDataBase } from "../core/AssetsDatabase";
 import { ShaderFX } from "../core/ShaderFX";
 import { FrameBuffer, GL, GLContext, GLProgram, GLVertexArray } from "../gl";
@@ -93,10 +93,24 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
     }
 
     exec(data: any) {
-
         const glctx = this.glctx;
 
-        glctx.clear(GL.COLOR_BUFFER_BIT);
+        //loop all camera
+
+        let cameras = SceneManager.allCameras;
+
+        cameras.forEach(cam=>{
+
+            //render
+            if(!cam.enabled) return;
+
+            
+            
+
+        });
+
+
+        
     }
 
     reload() {
