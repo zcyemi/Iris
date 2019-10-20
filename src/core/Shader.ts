@@ -21,7 +21,9 @@ export class Shader{
         let ctx = GraphicsContext.currentRender.glctx;
 
         let source = this.m_source;
-        this.m_defProgram = ctx.createGLProgram(source.vertex,source.fragment);
+        let program = ctx.createGLProgram(source.vertex,source.fragment);
+        program.MarkAttributeSemantic(source.technique.attr_vs);
+        this.m_defProgram = program;
         return this.m_defProgram;
     }
 

@@ -1,36 +1,47 @@
-
-
-
-    
-
-export class GLProgram{
+export class GLProgram {
 
     public Program: WebGLProgram;
 
     public Attributes: { [key: string]: number } = {};
     public Uniforms: { [key: string]: WebGLUniformLocation | null } = {};
-    public UniformsInfo:{[key:string]:WebGLActiveInfo} = {};
+    public UniformsInfo: { [key: string]: WebGLActiveInfo } = {};
 
-    public UniformBlock:{[key:string]:number} = {};
-    public UniformSemantic:{[key:string]:number} = {};
+    public UniformBlock: { [key: string]: number } = {};
+    public UniformSemantic: { [key: string]: number } = {};
 
-    public extras?:any;
+    public extras?: any;
 
-    private m_id?:number;
-    private static s_id:number = 0;
-    public get id():number{
-        if(this.m_id == null){
+    private m_id?: number;
+    private static s_id: number = 0;
+    public get id(): number {
+        if (this.m_id == null) {
             GLProgram.s_id++;
             this.m_id = GLProgram.s_id;
         }
         return this.m_id;
     }
 
-    public GetUniform(key:string):WebGLUniformLocation | null{
+    public MarkAttributeSemantic(semantics: { [key: string]: string }) {
+        let result = {};
+
+        const attrs = this.Attributes;
+        for (const key in attrs) {
+            if (attrs.hasOwnProperty(key)) {
+                const element = attrs[key];
+                let semantic = semantics[<string>key];
+                if (semantic) {
+                    result[semantic] = element;
+                }
+            }
+        }
+        this.UniformSemantic = result;
+    }
+
+    public GetUniform(key: string): WebGLUniformLocation | null {
         return this.Uniforms[key];
     }
 
-    public GetAttribute(key:string):any{
+    public GetAttribute(key: string): any {
         return this.Attributes[key];
     }
 
@@ -56,10 +67,10 @@ export class GLProgram{
             this.Uniforms[uname] = uniformLoca;
         }
 
-        const numublock = gl.getProgramParameter(program,gl.ACTIVE_UNIFORM_BLOCKS);
-        for(let i=0;i<numublock;i++){
-            let ublockName = gl.getActiveUniformBlockName(program,i);
-            if(ublockName != null){
+        const numublock = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
+        for (let i = 0; i < numublock; i++) {
+            let ublockName = gl.getActiveUniformBlockName(program, i);
+            if (ublockName != null) {
                 this.UniformBlock[ublockName] = i;
             }
         }

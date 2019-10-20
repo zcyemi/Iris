@@ -2,7 +2,7 @@
 #include include/basis.sfx
 
 #GLSL
-in vec4 aPosition: POSOTION_0;
+in vec4 aPosition: POSITION_0;
 in vec2 aUV : TEXCOORD_0;
 inout vec2 vUV : TEXCOORD_0;
 

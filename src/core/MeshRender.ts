@@ -119,13 +119,14 @@ export class MeshRender extends BaseRender {
     private static bindBuffers(glctx: GLContext, mesh: Mesh, program: GLProgram) {
         const vertdesc = mesh.vertexDesc;
         const attrs = program.Attributes;
+        const semantics = program.UniformSemantic;
 
         if (mesh.seperatedBuffer) {
             for (const attr in vertdesc) {
                 if (vertdesc.hasOwnProperty(attr)) {
                     const desc = vertdesc[attr];
                     if (desc != null && AttrSemantic[attr] == null) continue;
-                    let programAttr = attrs[attr];
+                    let programAttr = semantics[attr];
                     if (programAttr != null) {
                         glctx.bindBuffer(GL.ARRAY_BUFFER, mesh.bufferVertices);
                         glctx.vertexAttribPointer(programAttr, desc.size, GL.FLOAT, false, desc.size * 4, desc.offset);
@@ -138,15 +139,12 @@ export class MeshRender extends BaseRender {
         else {
             glctx.bindBuffer(GL.ARRAY_BUFFER, mesh.bufferVertices);
 
-
-            console.log(attrs,vertdesc);
-
             for (const attr in vertdesc) {
                 if (vertdesc.hasOwnProperty(attr)) {
                     const desc = vertdesc[attr];
 
                     if (desc != null && AttrSemantic[attr] == null) continue;
-                    let programAttr = attrs[attr];
+                    let programAttr = semantics[attr];
 
                     console.log(attr,programAttr);
                     if (programAttr != null) {
@@ -168,9 +166,6 @@ export class MeshRender extends BaseRender {
         if (program == null) throw new Error("program is null");
 
         let vao = glctx.createGLVertexArray();
-
-        console.log('create vao',mesh);
-
         glctx.bindGLVertexArray(vao);
         MeshRender.bindBuffers(glctx, mesh, program);
         glctx.bindGLVertexArray(null);

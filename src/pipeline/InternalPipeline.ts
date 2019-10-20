@@ -58,7 +58,6 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
         this.m_fullscreenMat = new Material(ShaderFX.findShader(resBundle,"@shaderfx/unlit"));
 
-        console.log(this.m_fullscreenMat.program);
         this.m_fullscreenRender = new MeshRender(MeshPrimitive.Quad,this.m_fullscreenMat,false);
     }
 
@@ -147,12 +146,7 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
         if(material == null) material = this.m_matDefault;
 
-
-        glctx.depthMask(false);
-        glctx.disable(glctx.raw.CULL_FACE);
-
         let glp = material.program;
-
 
         glctx.useGLProgram(glp);
         // material.apply(glctx);
