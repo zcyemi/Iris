@@ -119,7 +119,7 @@ export class MeshRender extends BaseRender {
     private static bindBuffers(glctx: GLContext, mesh: Mesh, program: GLProgram) {
         const vertdesc = mesh.vertexDesc;
         const attrs = program.Attributes;
-        const semantics = program.UniformSemantic;
+        const semantics = program.AttributeSemantic;
 
         if (mesh.seperatedBuffer) {
             for (const attr in vertdesc) {
@@ -146,7 +146,6 @@ export class MeshRender extends BaseRender {
                     if (desc != null && AttrSemantic[attr] == null) continue;
                     let programAttr = semantics[attr];
 
-                    console.log(attr,programAttr);
                     if (programAttr != null) {
 
                         glctx.vertexAttribPointer(programAttr, desc.size, GL.FLOAT, false, desc.size * 4, desc.offset);

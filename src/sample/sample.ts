@@ -90,6 +90,7 @@ export class SampleGame{
 
         const grender =this.m_graphicsRender;
         grender.render();
+        grender.renderToCanvas();
     }
 }
 

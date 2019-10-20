@@ -13,8 +13,10 @@ export class ShaderFXTechnique {
     public attr_ps:{[key:string]:string} = {};
     public entry_vs: string;
     public entry_ps: string;
+    public uniform_semantic:{[key:string]:string} = {};
     public property_value:{[key:string]:any} = {};
 }
+
 
 export class ShaderFXSource{
     public technique:ShaderFXTechnique;
@@ -32,6 +34,11 @@ export enum AttrSemantic{
     COLOR_1 = "COLOR_1",
     NORMAL_0 = "NORMAL_0",
     TANGENT_0 = "TANGENT_0",
+}
+
+export enum UniformSemantic{
+    MAIN_TEXTURE = "MAIN_TEXTURE",
+    MAIN_COLOR = "MAIN_COLOR",
 }
 
 

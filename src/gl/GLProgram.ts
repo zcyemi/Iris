@@ -2,12 +2,17 @@ export class GLProgram {
 
     public Program: WebGLProgram;
 
+    public name:string;
+
     public Attributes: { [key: string]: number } = {};
     public Uniforms: { [key: string]: WebGLUniformLocation | null } = {};
     public UniformsInfo: { [key: string]: WebGLActiveInfo } = {};
 
     public UniformBlock: { [key: string]: number } = {};
-    public UniformSemantic: { [key: string]: number } = {};
+    /* POSITION_0: aPos  */
+    public AttributeSemantic: { [key: string]: number } = {};
+    /* MAIN_TEXTURE:uSampler */
+    public UniformSemantic:{[key:string]:string} = {};
 
     public extras?: any;
 
@@ -19,6 +24,10 @@ export class GLProgram {
             this.m_id = GLProgram.s_id;
         }
         return this.m_id;
+    }
+
+    public MarkUniformSemantic(semantics:{[key:string]:string}){
+        this.UniformSemantic = semantics;
     }
 
     public MarkAttributeSemantic(semantics: { [key: string]: string }) {
@@ -34,7 +43,7 @@ export class GLProgram {
                 }
             }
         }
-        this.UniformSemantic = result;
+        this.AttributeSemantic = result;
     }
 
     public GetUniform(key: string): WebGLUniformLocation | null {

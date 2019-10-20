@@ -161,6 +161,10 @@ export class vec2 {
 
     public static get zero(): vec2 { return new vec2() };
     public static get one(): vec2 { return new vec2([1, 1]) };
+
+    public static Random():vec2{
+        return new vec2([Math.random(),Math.random()]);
+    }
 }
 
 export class vec4 {

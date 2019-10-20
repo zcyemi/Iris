@@ -23,6 +23,8 @@ export class Shader{
         let source = this.m_source;
         let program = ctx.createGLProgram(source.vertex,source.fragment);
         program.MarkAttributeSemantic(source.technique.attr_vs);
+        program.MarkUniformSemantic(source.technique.uniform_semantic);
+        program.name = this.m_source.technique.name;
         this.m_defProgram = program;
         return this.m_defProgram;
     }

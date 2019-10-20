@@ -132,6 +132,12 @@ export class Texture2D implements ITexture {
         this.m_height = height;
     }
 
+    public static SwapContent(tex1:Texture2D,tex2:Texture2D){
+        let temp = tex1.m_raw;
+        tex1.m_raw = tex2.m_raw;
+        tex2.m_raw= temp;
+    }
+
     public static crateEmptyTexture(width: number, height: number, glctx: GLContext): Texture2D {
         if (width < 2 || height < 2) {
             throw new Error('invalid texture size');

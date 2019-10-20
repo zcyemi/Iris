@@ -1,6 +1,7 @@
 import { vec4 } from "../math";
 import { ITexture } from "./Texture";
 import { Skybox } from "./Skybox";
+import { Material } from "./Material";
 
 
 
@@ -74,8 +75,8 @@ export class CommandBuffer{
 
     }
 
-    public blit(src:ITexture,dest:ITexture){
-
+    public blit(src:ITexture,dest:ITexture,material?:Material){
+        this.commandList.push(new CommandItem(CommandType.Blit,[src,dest,material]));
     }
 
     public draw(){
@@ -84,6 +85,7 @@ export class CommandBuffer{
 
     public drawScreenTexture(tex:ITexture){
         if(tex == null) return;
+
         this.commandList.push(new CommandItem(CommandType.DrawScreenTex,[tex]));
     }
 

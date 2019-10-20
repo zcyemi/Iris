@@ -21,7 +21,7 @@ export class GLContext {
 
     private gl: WebGL2RenderingContext;
 
-    public get raw():WebGLRenderingContext{
+    public get raw():WebGL2RenderingContext{
         return this.gl;
     }
 
@@ -521,7 +521,7 @@ export class GLContext {
     }
     public uniform2fv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
         srcLength?: number){
-        this.gl.uniform1fv(loc,data,srcOffset,srcLength);
+        this.gl.uniform2fv(loc,data,srcOffset,srcLength);
     }
     public uniform2uiv(loc:WebGLUniformLocation, data: Float32Array| ArrayLike<number>, srcOffset?: number,
         srcLength?: number){
@@ -601,6 +601,14 @@ export class GLContext {
 
     public getError():number{
         return this.gl.getError();
+    }
+
+    public getSupportExtensions():string[]{
+        return this.gl.getSupportedExtensions();
+    }
+
+    public getExtension(ext:string){
+        return this.gl.getExtension(ext);
     }
 
 }

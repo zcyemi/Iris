@@ -32,6 +32,7 @@ export abstract class RenderPipelineBase<T extends IRenderModel> implements IRen
         this.glctx.bindGLFramebuffer(null);
         const mainfb = this.mainFrameBuffer;
         if(mainfb == null) return;
+
         this.glctx.viewport(0,0,mainfb.width,mainfb.height);
         this.model.drawFullScreen(mainfb.coltex);
     }
@@ -42,6 +43,8 @@ export abstract class RenderPipelineBase<T extends IRenderModel> implements IRen
         if(mainfb== null) return;
         mainfb.resize(glctx,width,height);
         glctx.viewport(0,0,width,height);
+
+        console.log('resize',width,height);
     }
 
     

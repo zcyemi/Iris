@@ -7,7 +7,7 @@ import { GL } from "../gl/GL";
 import { ITexture } from "./Texture";
 import { GLContext } from "../gl/GLContext";
 import { Shader } from "./Shader";
-import { ShaderTags } from "./ShaderFX";
+import { ShaderTags, AttrSemantic, UniformSemantic } from "./ShaderFX";
 
 export type MaterialProperty = {type:number,value:any,extra?:TextureSampler};
 
@@ -16,6 +16,9 @@ export class MaterialPorpertyBlock{
     /** default is null, perperty might be set with @function <setUniformBlock> or @function <setUniformBlockwitName> */
     public uniformsBlock:{[slot:number]:number};
     private m_program:GLProgram;
+
+    private m_uniformMainTex:MaterialProperty;
+    private m_uniformMainColor:MaterialProperty;
 
     public constructor(program?:GLProgram){
         if(program == null) return;
@@ -35,6 +38,7 @@ export class MaterialPorpertyBlock{
                 let info = uinfo[uname];
                 selfu[uname] = {type:info.type,value:null};
             }
+            this.updateSemantic(program);
             this.m_program = program;
             return;
         }
@@ -94,8 +98,25 @@ export class MaterialPorpertyBlock{
         }
         this.uniformsBlock = newblocks;
 
+
+        this.updateSemantic(program);
+        
+
         //sync program
         this.m_program = program;
+    }
+
+
+    private updateSemantic(program:GLProgram){
+        // //semantic
+        let uniformSemantic = program.UniformSemantic;
+        let main_tex = uniformSemantic['MAIN_TEXTURE'];
+        if (main_tex){
+            this.m_uniformMainTex = this.uniforms[main_tex];
+        }
+        let main_color = uniformSemantic['MAIN_COLOR'];
+        if (main_color) this.m_uniformMainColor = this.uniforms[main_color];
+
     }
 
     public clone():MaterialPorpertyBlock{
@@ -112,6 +133,15 @@ export class MaterialPorpertyBlock{
 
     public getUniform(name:string): MaterialProperty{
         return this.uniforms[name];
+    }
+
+    public getUniformMainTexture():MaterialProperty{
+        this.updateSemantic(this.m_program);
+        return this.m_uniformMainTex;
+    }
+
+    public getUniformMainColor():MaterialProperty{
+        return this.m_uniformMainColor;
     }
 
     public release(){
@@ -169,6 +199,7 @@ export class Material{
         }
         this.m_shader = shader;
         this.m_program = shader.compile();
+
         this.m_propertyBlock =new MaterialPorpertyBlock(this.m_program);
     }
 
@@ -191,6 +222,23 @@ export class Material{
         let p = this.m_propertyBlock.getUniform(name);
         if(p == null) return;
         p.value = tex;
+    }
+
+    public setMainTexture(tex:WebGLTexture|ITexture){
+        let p = this.m_propertyBlock.getUniformMainTexture();
+        if(p == null){
+            throw new Error(`can not find uniform MAIN_TEXTURE ${this.program.name}`);
+            return;
+        }
+        p.value = tex;   
+    }
+
+    public setMainColor(color:vec4){
+        let p = this.m_propertyBlock.getUniformMainColor();
+        if(p == null){
+            throw new Error(`can not find uniform MAIN_COLOR ${this.program.name}`);
+        }
+        p.value = color;
     }
 
     public setSampler(name:string,texsampler?:TextureSampler){

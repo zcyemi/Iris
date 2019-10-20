@@ -54,6 +54,9 @@ export class FrameBuffer implements IGraphicObj{
         let glfb = glctx.createFramebuffer();
         let fb = new FrameBuffer();
         fb.m_rawobj = glfb;
+
+        fb.m_width = width;
+        fb.m_height = height;
         glctx.bindFramebuffer(GL.FRAMEBUFFER,glfb);
 
         glctx.activeTexture(ShaderFX.GL_TEXTURE_TEMP);
@@ -128,7 +131,7 @@ export class FrameBuffer implements IGraphicObj{
     }
 
 
-    private bindTexutre(glctx:GLContext,tex:Texture2D,attatch:number){
+    public bindTexutre(glctx:GLContext,tex:Texture2D,attatch:number){
         if(tex ==null) return;
         glctx.framebufferTexture2D(GL.FRAMEBUFFER,attatch,GL.TEXTURE_2D,tex.getRawTexture(),0);
         this.m_texbinding[attatch] = tex;

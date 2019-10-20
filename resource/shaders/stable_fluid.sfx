@@ -1,7 +1,7 @@
 #file stable_fluid.sfx
 
 #GLSL
-uniform sampler2D uSampler;
+uniform sampler2D uSampler: MAIN_TEXTURE;
 uniform sampler2D uSampler1;
 uniform float uDeltaTime;
 
