@@ -2,6 +2,7 @@ import { GLContext } from "../gl/GLContext";
 import { ITexture, TextureCreationDesc, TextureDescUtility } from "./Texture";
 import { GL } from "../gl/GL";
 import { ShaderFX } from "./ShaderFX";
+import { GraphicsContext } from "./GraphicsContext";
 
 export class Texture2D implements ITexture {
     public static TEMP_TEXID: number;
@@ -83,17 +84,18 @@ export class Texture2D implements ITexture {
         }
     }
 
-    public static loadTexture2D(url: string, glctx: GLContext, alpha: boolean = true): Promise<Texture2D> {
+    public static loadTexture2D(url: string,alpha: boolean = true): Promise<Texture2D> {
+        let glctx = GraphicsContext.currentRender.glctx;
         return new Promise<Texture2D>((res, rej) => {
             var img = new Image();
             img.onload = () => {
                 try {
                     let desc = alpha? TextureDescUtility.DefaultRGBA: TextureDescUtility.DefaultRGB;
                     var tex = Texture2D.createTexture2DImage(img,desc,glctx);
-                    res(new Texture2D(tex, img.width, img.height, desc));
+                    res(tex);
                 }
                 catch (e) {
-                    glctx.deleteTexture(tex);
+                    glctx.deleteTexture(tex.m_raw);
                     rej(e);
                 }
 

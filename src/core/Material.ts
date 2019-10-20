@@ -378,14 +378,14 @@ export class Material{
             }
         }
 
-        let puniformblocks = propertyblock.uniformsBlock;
-        if(puniformblocks != null){
-            const glp = program.Program;
-            for(var key in puniformblocks){
-                let ind = Number(key);
-                glctx.uniformBlockBinding(glp,ind,puniformblocks[ind]);
-            }
-        }
+        // let puniformblocks = propertyblock.uniformsBlock;
+        // if(puniformblocks != null){
+        //     const glp = program.Program;
+        //     for(var key in puniformblocks){
+        //         let ind = Number(key);
+        //         glctx.uniformBlockBinding(glp,ind,puniformblocks[ind]);
+        //     }
+        // }
     }
     
     /**

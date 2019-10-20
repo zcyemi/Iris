@@ -157,6 +157,10 @@ export class Utility {
         return str.split('\n').map((line, index) => `${index + 1}. ${line}`).join('\n');
     }
 
+
+	public static nameCapitalized(name:string):string{
+		return `${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+	}
 }
 
 
@@ -197,7 +201,9 @@ export class PropertyUpdater{
 
 	public get isDirty():boolean{ return this.m_isdirty;}
 
-	public static create<T>(target:T,updatefn:()=>void,defDirty:boolean = true):PropertyUpdater{
+	private constructor(){}
+
+	public static create<T>(target?:T,updatefn?:()=>void,defDirty:boolean = true):PropertyUpdater{
 		let updater = new PropertyUpdater();
 		updater.m_target = target;
 		updater.m_updatefn = updatefn;
@@ -208,9 +214,12 @@ export class PropertyUpdater{
 		this.m_isdirty =true;
 	}
 
-	public update(){
-		if(!this.m_isdirty) return;
-		this.m_updatefn();
+	public update():boolean{
+		if(!this.m_isdirty) return false;
+
+		let fn = this.m_updatefn;
+		if(fn) fn();
 		this.m_isdirty = false;
+		return true;
 	}
 }

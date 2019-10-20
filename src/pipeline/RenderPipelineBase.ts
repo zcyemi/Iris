@@ -13,9 +13,8 @@ export abstract class RenderPipelineBase<T extends IRenderModel> implements IRen
     public model: IRenderModel;
     public mainFrameBuffer:FrameBuffer;
 
-    abstract exec(data: any);
+    abstract exec();
 
-    
     abstract reload();
     abstract release();
 

@@ -1,6 +1,6 @@
 import { Camera } from "../core/Camera";
 import { IGraphicObj } from "../core/IGraphicObj";
-import { Mesh } from "../core/index";
+import { Mesh, GraphicsContext } from "../core/index";
 import { Material } from "../core/Material";
 import { MeshPrimitive } from "../core/MeshPrimitive";
 import { MeshRender } from "../core/MeshRender";
@@ -167,8 +167,8 @@ export class RenderModel implements IGraphicObj{
         let mat = matReplace != null? matReplace: meshrender.material;
         let mesh = meshrender.mesh;
 
-        const glctx = this.m_glctx;
-        meshrender.refreshData(glctx);
+        const glctx = GraphicsContext.glctx;;
+        meshrender.refreshData();
         let glp = mat.program;
         glctx.useGLProgram(glp);
         this.bindDefaultUniform(glp);

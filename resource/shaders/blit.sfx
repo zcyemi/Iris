@@ -8,7 +8,7 @@ inout vec2 vUV : TEXCOORD_0;
 
 void vertex(){
     vec4 pos = aPosition;
-    pos.xy *=2.0;
+    // pos.xy *=2.0;
     vUV = vec2(aUV.x,1.0 -aUV.y);
     gl_Position = pos;
 }
@@ -17,7 +17,7 @@ uniform sampler2D uSampler;
 out vec4 fragColor: TARGET_0;
 
 void fragment(){
-    fragColor = texture(uSampler,vUV);
+    fragColor = vec4(1.0,1.0,0,1.0);
 }
 
 #END

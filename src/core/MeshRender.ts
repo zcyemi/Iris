@@ -4,6 +4,7 @@ import { GameObject } from "./GameObject";
 import { Material } from "./Material";
 import { Mesh } from "./Mesh";
 import { AttrSemantic } from "./ShaderFX";
+import { GraphicsContext } from "./GraphicsContext";
 
 export class MeshRender extends BaseRender {
     public mesh: Mesh;
@@ -48,7 +49,9 @@ export class MeshRender extends BaseRender {
         gl.drawElements(desc.topology, desc.indiceCount, desc.type, desc.offset);
     }
 
-    public refreshData(glctx: GLContext) {
+    public refreshData() {
+
+        let glctx = GraphicsContext.glctx;
         let mesh = this.mesh;
         let mat = this.material;
         if (mat == null || mat.program == null) {
@@ -135,12 +138,19 @@ export class MeshRender extends BaseRender {
         else {
             glctx.bindBuffer(GL.ARRAY_BUFFER, mesh.bufferVertices);
 
+
+            console.log(attrs,vertdesc);
+
             for (const attr in vertdesc) {
                 if (vertdesc.hasOwnProperty(attr)) {
                     const desc = vertdesc[attr];
+
                     if (desc != null && AttrSemantic[attr] == null) continue;
                     let programAttr = attrs[attr];
+
+                    console.log(attr,programAttr);
                     if (programAttr != null) {
+
                         glctx.vertexAttribPointer(programAttr, desc.size, GL.FLOAT, false, desc.size * 4, desc.offset);
                         glctx.enableVertexAttribArray(programAttr);
                     }
@@ -158,6 +168,8 @@ export class MeshRender extends BaseRender {
         if (program == null) throw new Error("program is null");
 
         let vao = glctx.createGLVertexArray();
+
+        console.log('create vao',mesh);
 
         glctx.bindGLVertexArray(vao);
         MeshRender.bindBuffers(glctx, mesh, program);

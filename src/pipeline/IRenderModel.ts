@@ -1,6 +1,6 @@
 import { IRenderPipeline } from "./IRenderPipeline";
 import { GLProgram, GLVertexArray, FrameBuffer } from "../gl";
-import { ITexture, MeshRender, Material, Mesh, IGraphicObj } from "../core";
+import { ITexture, MeshRender, Material, Mesh, IGraphicObj, Camera } from "../core";
 import { mat4, vec4 } from "../math";
 import { PipelineClearInfo } from "./InternalPipeline";
 import { CommandBuffer } from "../core/CommandBuffer";
@@ -15,6 +15,7 @@ export interface IRenderModel{
 
     bindDefaultUniform(program:GLProgram);
     updateDefaultUniform();
+    updateCameraUnifomrm(camera:Camera);
 
     setShadowMapTex(tex:ITexture,index:number);
 

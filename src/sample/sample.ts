@@ -6,6 +6,8 @@ import { GLUtility } from '../gl';
 import { Input } from '../misc/index';
 import { InternalPipeline } from '../pipeline/InternalPipeline';
 import { vec4 } from '../math';
+import { SampleTextureRendering } from './sample_textureRendering';
+import { GameTime } from '../core/GameTime';
 
 export class SampleGame{
     private m_canvas:HTMLCanvasElement;
@@ -28,18 +30,18 @@ export class SampleGame{
 
         this.loadResource();
 
-        this.setupScene();
     }
 
 
     private setupScene(){
 
         SceneManager.Init();
-        var cam = new GameObject("camera");
-        let camera = cam.addComponent(new Camera());
+        var camobj = new GameObject("camera");
+        let camera = camobj.addComponent(new Camera());
         camera.clearType = ClearType.Background;
         camera.background = new vec4(Color.BLACK);
-        
+
+        camobj.addComponent(new SampleTextureRendering());
     }
 
     private async loadResource(){
@@ -57,6 +59,10 @@ export class SampleGame{
 
         grender.setPipeline(pipeline);
 
+
+        this.setupScene();
+
+
         this.m_resoruceLoaded = true;
     }
 
@@ -71,14 +77,19 @@ export class SampleGame{
     private onFrame(ts:number){
         let delta = this.m_timer.tick(ts);
         let dt = delta/ 1000;
+
+        GameTime.deltaTime =dt;
+        GameTime.time = ts/1000;
+
         Input.onFrame(dt);
+        
 
         if(!this.m_resoruceLoaded) return;
 
         SceneManager.onFrame(dt);
 
         const grender =this.m_graphicsRender;
-        grender.render(null,dt);
+        grender.render();
     }
 }
 

@@ -20,6 +20,11 @@ export class GLContext {
     private m_pipelineState:ShaderTags;
 
     private gl: WebGL2RenderingContext;
+
+    public get raw():WebGLRenderingContext{
+        return this.gl;
+    }
+
     private constructor(wgl: WebGL2RenderingContext) {
         this.gl = wgl;
         this.viewport(0,0,wgl.canvas.width,wgl.canvas.height);
@@ -591,6 +596,11 @@ export class GLContext {
         if(!mesh.bufferInited){
             mesh.refreshMeshBuffer(this);
         }
+    }
+
+
+    public getError():number{
+        return this.gl.getError();
     }
 
 }

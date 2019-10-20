@@ -4,7 +4,7 @@ import { Scene } from "./Scene";
 import { Skybox } from "./Skybox";
 import { mat4, vec4, glmath, f32, vec3 } from "../math/GLMath";
 import { Ray } from "../math/Ray";
-import { CommandBuffer } from "./CommandBuffer";
+import { CommandBuffer, CommandBufferEvent } from "./CommandBuffer";
 import { PropertyUpdater } from "./Utility";
 
 
@@ -24,6 +24,38 @@ export enum ProjectionType{
     perspective,
     orthographic,
 }
+
+
+export class CameraCommandList{
+    public beforeOpaque:CommandBuffer[] = [];
+    public afterOpaque:CommandBuffer[] = [];
+    public beforeTransparent:CommandBuffer[] = [];
+    public afterTransparent:CommandBuffer[] = [];
+    public beforePostProcess:CommandBuffer[] = [];
+    public afterPostProcess:CommandBuffer[] = [];
+    
+    public beforeGBuffer:CommandBuffer[] = [];
+    public afterGBuffer:CommandBuffer[] = [];
+
+    public add(evt:CommandBufferEvent,cmdbuf:CommandBuffer){
+        let cmdlist:CommandBuffer[] = this[CommandBufferEvent[evt]];
+        if(cmdlist.includes(cmdbuf)) return;
+        cmdlist.push(cmdbuf);
+    }
+
+    public remove(evt:CommandBufferEvent,cmdbuf:CommandBuffer){
+        let cmdlist:CommandBuffer[] = this[CommandBufferEvent[evt]];
+        let index = cmdlist.indexOf(cmdbuf);
+        if(index >=0){
+            this[CommandBufferEvent[evt]] = cmdlist.splice(index,1);
+        }
+    }
+
+    public clear(evt:CommandBufferEvent){
+        this[CommandBufferEvent[evt]] = [];
+    }
+}
+
 
 export class Camera extends Component{
 
@@ -48,11 +80,11 @@ export class Camera extends Component{
     private m_worldToCamMtxCalculated:boolean = false;
 
     private m_background:vec4 = vec4.zero;
-    private m_ambientColor:vec4 = glmath.vec4(0.1,0.1,0.1,1.0);
-    private m_ambientType:AmbientType = AmbientType.AmbientColor;
     private m_clearType:ClearType = ClearType.Background;
     private m_clearDpethValue:number = 0;
     private m_clearDepth:boolean = false;
+
+    private m_projParam:vec4 = vec4.zero;
 
     private m_skybox:Skybox;
 
@@ -60,6 +92,8 @@ export class Camera extends Component{
 
     public cmdbufferClear:CommandBuffer;
     private cmdbufferClearUpdater:PropertyUpdater;
+
+    public cmdList:CameraCommandList;
 
     public get isDataTrsDirty():boolean{
         return this.m_dataTrsDirty || this.transform.isDirty;
@@ -83,6 +117,7 @@ export class Camera extends Component{
         if(this.m_far == v) return;
         this.m_far = v;
         this.m_projDirty = true;
+        this.m_projParam = null;
         this.m_dataProjDirty = true;
     }
     public get near():number{
@@ -92,6 +127,7 @@ export class Camera extends Component{
         if(this.m_near == v) return;
         this.m_near = v;
         this.m_projDirty =true;
+        this.m_projParam = null;
         this.m_dataProjDirty = true;
     }
     public get fov():number{
@@ -113,14 +149,6 @@ export class Camera extends Component{
         this.m_dataProjDirty = true;
     }
 
-    public ambientDataDirty:boolean = true;
-    public get ambientColor():vec4{
-        return this.m_ambientColor;
-    }
-    public set ambientColor(v:vec4){
-        this.m_ambientColor = v;
-        this.ambientDataDirty = true;
-    }
     public get background():vec4{
         return this.m_background;
     }
@@ -146,15 +174,6 @@ export class Camera extends Component{
         if(this.m_clearType == t) return;
         this.m_clearType = t;
         this.cmdbufferClearUpdater.setDirty();
-    }
-
-    public get ambientType():AmbientType{
-        return this.m_ambientType;
-    }
-    public set ambientType(t:AmbientType){
-        if(this.m_ambientType == t) return;
-        this.m_ambientType = t;
-        this.ambientDataDirty =true;
     }
 
     public get clearDepth():boolean { return this.m_clearDepth;}
@@ -194,6 +213,16 @@ export class Camera extends Component{
             this.m_camToWorldMtx = camToWorld;
         }
         return camToWorld;
+    }
+
+    public get ProjParam():vec4{
+        if(this.m_projParam == null){
+
+            let near =this.near;
+            let far = this.far;
+            this.m_projParam = new vec4( [near,far,1.0/near,1.0/far]);
+        }
+        return this.m_projParam;
     }
 
     public get ScreenToWorldMatrix():mat4{
@@ -246,12 +275,12 @@ export class Camera extends Component{
 
         this.cmdbufferClear = new CommandBuffer("camera clear");
         this.cmdbufferClearUpdater = PropertyUpdater.create(this,this.updateClearCommandBuffer.bind(this));
+
+        this.cmdList = new CameraCommandList();
     }
 
     
     private updateClearCommandBuffer(){
-
-
         let clearType =this.clearType;
 
         let cmdbuffer = this.cmdbufferClear;
@@ -281,7 +310,6 @@ export class Camera extends Component{
     }
 
     public onUpdate(){
-
         
         this.m_worldToCamMtxCalculated = false;
 

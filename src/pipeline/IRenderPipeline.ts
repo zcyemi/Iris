@@ -44,7 +44,7 @@ export interface IRenderPipeline{
 
     resizeFrameBuffer(width:number,height:number);
     
-    exec(data:any);
+    exec();
     onRenderToCanvas();
 
     

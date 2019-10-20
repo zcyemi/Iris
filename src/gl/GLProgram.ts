@@ -12,6 +12,7 @@ export class GLProgram{
     public UniformsInfo:{[key:string]:WebGLActiveInfo} = {};
 
     public UniformBlock:{[key:string]:number} = {};
+    public UniformSemantic:{[key:string]:number} = {};
 
     public extras?:any;
 

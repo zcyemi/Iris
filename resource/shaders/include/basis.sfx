@@ -10,21 +10,25 @@ uniform UNIFORM_OBJ{
     mat4 _obj2world_;
 };
 #define MATRIX_M _obj2world_
+
 uniform UNIFORM_BASIS{
     //basic region
     vec4 _screenparam_;//[width,height,1/wdith,1/height]
     highp vec4 _time_;//[Time,deltaTime,sinTime,cosTime]
-    //camera
-    vec4 _camera_pos_;
-    mat4 _camera_mtx_view_;
-    vec4 _camera_projparam_;//[near,far,1/near,1/far]
-    mat4 _camera_mtx_proj_;
-    mat4 _camera_mtx_invproj_;
     //Ambient And Fog
     lowp vec4 _ambientcolor_;
     vec4 _fogcolor_;
     vec4 _fogparam_;
 };
+
+uniform UNIFORM_CAMERA{
+    vec4 _camera_pos_;
+    mat4 _camera_mtx_view_;
+    vec4 _camera_projparam_;//[near,far,1/near,1/far]
+    mat4 _camera_mtx_proj_;
+    mat4 _camera_mtx_invproj_;
+};
+
 #define TIME _time_
 #define SCREEN _screenparam_
 

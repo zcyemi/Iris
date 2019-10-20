@@ -3,14 +3,28 @@ import { ITexture } from "./Texture";
 import { Skybox } from "./Skybox";
 
 
+
 export enum CommandType{
     ClearColor,
     ClearDepth,
     ClearColorDepth,
     Blit,
     Draw,
+    DrawScreenTex,
 
 }
+
+export enum CommandBufferEvent{
+    beforeOpaque,
+    afterOpaque,
+    beforeTransparent,
+    afterTransparent,
+    beforePostProcess,
+    afterPostProcess,
+    beforeGBuffer,
+    afterGBuffer,
+}
+
 
 export class CommandItem{
     public type:CommandType;
@@ -66,6 +80,11 @@ export class CommandBuffer{
 
     public draw(){
 
+    }
+
+    public drawScreenTexture(tex:ITexture){
+        if(tex == null) return;
+        this.commandList.push(new CommandItem(CommandType.DrawScreenTex,[tex]));
     }
 
     public setRenderTarget(){

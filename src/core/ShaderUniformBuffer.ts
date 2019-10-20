@@ -1,10 +1,10 @@
 import { ShaderData } from "./ShaderBuffer";
 import { GLContext } from "../gl/GLContext";
-import { IGraphicObj } from "./IGraphicObj";
+import { IGraphicObj, GraphicsObj } from "./IGraphicObj";
 import { GL } from "../gl/GL";
 
 
-export class ShaderUniformBuffer<T extends ShaderData> implements IGraphicObj{
+export class ShaderUniformBuffer<T extends ShaderData> extends GraphicsObj{
 
     private m_glbuffer:WebGLBuffer;
     private m_data:T;
@@ -17,7 +17,10 @@ export class ShaderUniformBuffer<T extends ShaderData> implements IGraphicObj{
     public get buffer():WebGLBuffer{ return this.m_glbuffer;}
     public get uniformIndex():number { return this.m_uniformIndex;}
 
-    public constructor(glctx:GLContext,datatype:new()=>T,uniformIndex:number,uniform_name:string){
+    public constructor(datatype:new()=>T,uniformIndex:number,uniform_name:string){
+        super();
+        
+        const glctx =this.glctx;
         let data =new datatype();
         let buffer = glctx.createBufferAndBind(GL.UNIFORM_BUFFER);
         glctx.bufferData(GL.UNIFORM_BUFFER,data.fxbuffer.raw,GL.DYNAMIC_DRAW);
@@ -28,8 +31,8 @@ export class ShaderUniformBuffer<T extends ShaderData> implements IGraphicObj{
         this.name = uniform_name;
     }
     
-    public uploadBufferData(glctx:GLContext):boolean{
-        return this.m_data.submitBuffer(glctx.getWebGLRenderingContext(),this.m_glbuffer);
+    public uploadBufferData():boolean{
+        return this.m_data.submitBuffer(this.glctx.getWebGLRenderingContext(),this.m_glbuffer);
     }
 
     public release(glctx:GLContext){

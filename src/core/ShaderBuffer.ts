@@ -1,6 +1,7 @@
-import { vec3, vec4, mat4, mat3 } from "../math/GLMath";
+import { mat3, mat4, vec3, vec4 } from "../math/GLMath";
+import { PropertyUpdater, Utility } from "./Utility";
 
-class ShaderBuffer{
+export class ShaderBuffer{
     private minoff:number =0;
     private maxoff:number =0;
     private m_isdirty:boolean = false;
@@ -168,17 +169,104 @@ export class ShaderSubData{
     }
 }
 
+
+
+export class ShaderProperty<T>{
+    private val:T;
+    private updater:PropertyUpdater;
+    private dataSize:number = 0;
+    private datapos:number = 0;
+    public buffer: ShaderBuffer;
+
+    private m_type:{new():T};
+    private m_setFunc:Function;
+
+    public get value():T{
+        return this.val;
+    }
+
+    constructor(size:number,type:{new ():T},uniform:string,val?:T,) {
+        this.val = val;
+        this.dataSize =size;
+        this.m_type = type;
+
+        let fname = type.prototype.constructor.name;
+        fname =`set${ Utility.nameCapitalized(fname)}`;
+        this.m_setFunc = ShaderBuffer.prototype[fname];
+        if(!this.m_setFunc){
+            throw new Error(`can not find setprop func: ${fname}`);
+        }
+    }
+
+    public setValue(val:T){
+        this.val =val;
+        this.m_setFunc.call(this.buffer,this.datapos,val);
+        this.updater.setDirty();
+    }
+
+    public initProp(data:ShaderData,bytepos:number):number{
+        this.updater =data.m_updater;
+        this.datapos = bytepos;
+        return bytepos + this.dataSize;
+    }
+}
+
+export function InitProp<T>(size:number,type:{new ():T},uniform:string,val?:T):ShaderProperty<T>{
+    return new ShaderProperty(size,type,uniform,val);
+}
+
 export class ShaderData{
-    protected buffer:ShaderBuffer;
+
+    public m_updater:PropertyUpdater = PropertyUpdater.create(this,null,true);
+
+
+    public buffer:ShaderBuffer;
+    private m_byteLenth:number = 0;
     public get fxbuffer():ShaderBuffer{
         return this.buffer;
     }
 
-    public constructor(bytelength:number){
-        this.buffer = new ShaderBuffer(bytelength);
+    public get totalBytes():number{
+        return this.m_byteLenth;
     }
 
+    public constructor(){
+    }
+
+    protected setupProp(){
+        let pos = 0;
+
+        this.foreachProp(p=>{
+            pos = p.initProp(this,pos);
+        })
+
+        let byteLength =pos;
+        this.m_byteLenth = byteLength;
+        let buffer = new ShaderBuffer(byteLength);
+        this.buffer = buffer;
+        this.foreachProp(p=>{
+            p.buffer = buffer;
+        })
+    }
+
+    public foreachProp(fn:(p:ShaderProperty<any>)=>void){
+        for (const key in this) {
+            if (this.hasOwnProperty(key)) {
+                const element = this[key];
+                if(element instanceof ShaderProperty){
+                    fn(element);
+                }
+            }
+        }
+    }
+
+
+
     public submitBuffer(gl:WebGL2RenderingContext,glbuffer:WebGLBuffer):boolean{
+        if(!this.m_updater.update()){
+            return false;
+        }
+        
         const fxbuffer = this.buffer;
         if(!fxbuffer.isDirty) return false;
         let minoff = fxbuffer.offsetMin;

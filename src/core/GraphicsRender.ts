@@ -40,17 +40,12 @@ export class GraphicsRender{
 
     private m_valid:boolean = false;
 
-    private m_time:number = 0;
-    private m_dt:number = 0;
 
     private m_screenWidth:number;
     private m_screenHeight:number;
 
     public get screenWidth():number{ return this.m_screenWidth;}
     public get screenHeight():number{ return this.m_screenHeight;}
-
-    public get time():number {return this.m_time;}
-    public get deltaTime():number{ return this.m_dt;}
 
     public get pipeline():IRenderPipeline{
         return this.m_renderPipeline;
@@ -122,7 +117,6 @@ export class GraphicsRender{
             renderpipe.release();
             this.m_renderPipeline = null;
         }
-        this.m_time = 0.0;
         this.m_valid = false;
     }
 
@@ -168,22 +162,16 @@ export class GraphicsRender{
         this.m_renderPipeline.resizeFrameBuffer(w,h);
     }
 
-    /**
-     * 
-     * @param scene 
-     * @param dt deltaTime /s
-     */
-    public render(scene:any,dt:number){
+
+    public render(){
         if(this.pause || this.m_frameBufferInvalid) return;
-        this.m_time += dt;
-        this.m_dt = dt;
 
         // gl.clearColor(0,0,0,1);
         // gl.clear(gl.COLOR_BUFFER_BIT);
 
         let p = this.pipeline;
         if(p == null) return;
-        p.exec(scene);
+        p.exec();
 
         this.lateRender();
     }

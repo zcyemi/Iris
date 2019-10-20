@@ -32,8 +32,8 @@ export class SpriteRender extends MeshRender{
         this.material = new Material(shader);
     }
 
-    public refreshData(glctx:GLContext){
-        super.refreshData(glctx);
+    public refreshData(){
+        super.refreshData();
         if(this.m_imageDirty){
             this.material.setTexture("MainTexture",this.m_image);
             this.m_imageDirty = false;
