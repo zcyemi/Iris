@@ -1,4 +1,4 @@
-import { GraphicsRenderCreateInfo, ITexture, Material, Mesh, MeshRender, SceneManager, GraphicsObj, Camera } from "../core";
+import { GraphicsRenderCreateInfo, ITexture, Material, Mesh, MeshRender, SceneManager, GraphicsObj, Camera, Texture2D } from "../core";
 import { AssetsBundle, AssetsDataBase } from "../core/AssetsDatabase";
 import { ShaderFX, CullingMode } from "../core/ShaderFX";
 import { FrameBuffer, GL, GLContext, GLProgram, GLVertexArray } from "../gl";
@@ -166,6 +166,13 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
     }
 
+    bindFrameBuffer(fb:FrameBuffer){
+        let glctx=  this.glctx;
+        if(glctx.bindGLFramebuffer(fb)){
+            glctx.viewport(0,0,fb.width,fb.height);
+        }
+    }
+
     blit(src:ITexture,dest:ITexture,mat?:Material){
         if(dest ==null) return;
         let material:Material = mat || this.m_fullscreenMat;
@@ -178,6 +185,9 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
         glctx.bindGLFramebuffer(tempfb);
         glctx.framebufferTexture2D(GL.FRAMEBUFFER,GL.COLOR_ATTACHMENT0,GL.TEXTURE_2D,dest.getRawTexture(),0);
+
+        let tex2d:Texture2D = <Texture2D>dest;
+        glctx.viewport(0,0,tex2d.width,tex2d.height);
 
         this.drawMeshRender(this.m_fullscreenRender, null, material);
 
