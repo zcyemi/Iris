@@ -173,7 +173,7 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         }
     }
 
-    blit(src:ITexture,dest:ITexture,mat?:Material){
+    blit(src:Texture2D,dest:Texture2D,mat?:Material){
         if(dest ==null) return;
         let material:Material = mat || this.m_fullscreenMat;
 
@@ -184,6 +184,7 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         let tempfb = this.m_tempFramebuffer;
 
         glctx.bindGLFramebuffer(tempfb);
+        glctx.viewport(0,0,dest.width,dest.height);
         glctx.framebufferTexture2D(GL.FRAMEBUFFER,GL.COLOR_ATTACHMENT0,GL.TEXTURE_2D,dest.getRawTexture(),0);
 
         let tex2d:Texture2D = <Texture2D>dest;

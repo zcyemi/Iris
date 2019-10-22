@@ -115,34 +115,34 @@ export class SampleTextureRendering  extends Component{
         //advect
         cmdbuffer.blit(this.texV1,this.texV2,this.matAdvect);
 
-        //diffuse
-        cmdbuffer.blit(this.texV2,this.texV1);
+        // //diffuse
+        // cmdbuffer.blit(this.texV2,this.texV1);
 
-        for(let t=0;t<20;t++){
-            cmdbuffer.blit(this.texV2,this.texV3,this.matJacobi2D);
-            cmdbuffer.blit(this.texV3,this.texV2,this.matJacobi2D);
-        }
+        // for(let t=0;t<20;t++){
+        //     cmdbuffer.blit(this.texV2,this.texV3,this.matJacobi2D);
+        //     cmdbuffer.blit(this.texV3,this.texV2,this.matJacobi2D);
+        // }
 
-        //force
-        cmdbuffer.blit(this.texV2,this.texV3,this.matForce);
-        cmdbuffer.blit(this.texV3,this.texV1);
+        // //force
+        // cmdbuffer.blit(this.texV2,this.texV3,this.matForce);
+        // cmdbuffer.blit(this.texV3,this.texV1);
         
-        //PROJECT
-        cmdbuffer.blit(this.texV3,this.texV2,this.matProjSetup);
-        //clear P1 to 0
-        cmdbuffer.blit(null,this.texP1,null);
-        //jacobi 1D
-        for(let t=0;t<20;t++){
-            cmdbuffer.blit(this.texP1,this.texP2,this.matJacobi1D);
-            cmdbuffer.blit(this.texP2,this.texP1,this.matJacobi1D);
-        }
+        // //PROJECT
+        // cmdbuffer.blit(this.texV3,this.texV2,this.matProjSetup);
+        // //clear P1 to 0
+        // cmdbuffer.blit(null,this.texP1,null);
+        // //jacobi 1D
+        // for(let t=0;t<20;t++){
+        //     cmdbuffer.blit(this.texP1,this.texP2,this.matJacobi1D);
+        //     cmdbuffer.blit(this.texP2,this.texP1,this.matJacobi1D);
+        // }
 
-        //projFinish
-        cmdbuffer.blit(this.texP1,this.texV1,this.matProjFinish);
+        // //projFinish
+        // cmdbuffer.blit(this.texP1,this.texV1,this.matProjFinish);
 
-        //fluid
-        cmdbuffer.blit(this.colRT1,this.colRT2,this.matFluid);
-        cmdbuffer.drawScreenTexture(this.colRT2);
+        // // //fluid
+        cmdbuffer.blit(this.colRT2,this.colRT1);
+        cmdbuffer.drawScreenTexture(this.colRT1);
 
 
         //submit
@@ -158,7 +158,8 @@ export class SampleTextureRendering  extends Component{
 
         if(!this.m_inited) return;
 
-        //Texture2D.SwapContent(this.colRT2,this.colRT1)
+        Texture2D.SwapContent(this.colRT2,this.colRT1);
+
 
         this.processInput();
 

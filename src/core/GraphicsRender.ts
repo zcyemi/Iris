@@ -102,6 +102,8 @@ export class GraphicsRender{
         pipeline.graphicRender = this;
         pipeline.onSetupRender(this.glctx,this.m_creationInfo);
         this.m_renderPipeline = pipeline;
+        this.resizeCanvas(this.glctx.canvasWidth,this.glctx.canvasHeight);
+
 
         this.m_valid = true;
     }

@@ -9,7 +9,7 @@ inout vec2 vUV : TEXCOORD_0;
 void vertex(){
     vec4 pos = aPosition;
     pos.xy *=2.0;
-    vUV = aUV;
+    vUV = vec2(aUV.x,1.0-aUV.y);
     gl_Position = pos;
 }
 
