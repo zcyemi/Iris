@@ -63,6 +63,13 @@ export class GraphicsRender{
 
     public constructor(canvas:HTMLCanvasElement,pipeline?:IRenderPipeline,creationInfo?:GraphicsRenderCreateInfo){
         GraphicsRender.globalRender = this;
+
+        let canvas_parent = canvas.parentElement;
+        if(canvas_parent!=null){
+            canvas.width = canvas_parent.clientWidth;
+            canvas.height= canvas_parent.clientHeight;
+        }
+        
         this.canvas = canvas;
         this.gizmos = new Gizmos();
 
@@ -103,7 +110,6 @@ export class GraphicsRender{
         pipeline.onSetupRender(this.glctx,this.m_creationInfo);
         this.m_renderPipeline = pipeline;
         this.resizeCanvas(this.glctx.canvasWidth,this.glctx.canvasHeight);
-
 
         this.m_valid = true;
     }
