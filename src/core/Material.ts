@@ -155,11 +155,19 @@ export class Material{
     private m_shader:Shader;
     private m_propertyBlock:MaterialPorpertyBlock;
     private m_useVariants:boolean =false;
-    
 
     public name:string;
 
     private m_shadertags:ShaderTags = null;
+
+    public get isValid():boolean{
+        return this.m_shader !=null;
+    }
+
+    public verify():Material{
+        if(!this.isValid) throw new Error("material invalid");
+        return this;
+    }
 
     public static DEF_TEXID_NUM:number = 3;
 
@@ -184,8 +192,6 @@ export class Material{
     public get propertyBlock():MaterialPorpertyBlock{
         return this.m_propertyBlock;
     }
-
-
 
     public setShader(shader:Shader){
         this.m_shader = shader;

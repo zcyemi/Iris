@@ -29,7 +29,10 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
     private static s_defaultScreenRect: vec4 = new vec4([0, 0, 1, 1]);
     private m_fullscreenRender: MeshRender;
-    private m_fullscreenMat: Material;
+
+
+    private m_matBlit: Material;
+    private m_matBlitFlip:Material;
 
 
     private dataBasisBuffer: ShaderUniformBuffer<ShaderDataBasis>;
@@ -60,9 +63,10 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         this.m_matError = new Material(ShaderFX.findShader(resBundle, "@shaderfx/unlit_color"));
 
 
-        this.m_fullscreenMat = new Material(ShaderFX.findShader(resBundle, "@shaderfx/unlit"));
+        this.m_matBlit = new Material(ShaderFX.findShader(resBundle, "@shaderfx/internal/blit_flip"));
+        this.m_matBlitFlip = new Material(ShaderFX.findShader(resBundle,"@shaderfx/internal/blit"));
 
-        this.m_fullscreenRender = new MeshRender(MeshPrimitive.Quad, this.m_fullscreenMat, false);
+        this.m_fullscreenRender = new MeshRender(MeshPrimitive.Quad, this.m_matBlit, false);
     }
 
     public getMaterialDefault(): Material {
@@ -134,14 +138,14 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         throw new Error("Method not implemented.");
     }
     drawFullScreen(tex: ITexture) {
-        let mat = this.m_fullscreenMat;
+        let mat = this.m_matBlitFlip;
         mat.setTexture("uSampler", tex);
         this.drawMeshRender(this.m_fullscreenRender, null, mat);
     }
     drawScreenTex(tex: ITexture, rect?: vec4) {
         rect = rect || InternalRenderModel.s_defaultScreenRect;
 
-        let mat = this.m_fullscreenMat;
+        let mat = this.m_matBlit;
         mat.setTexture("uSampler", tex);
         this.drawMeshRender(this.m_fullscreenRender, null, mat);
     }
@@ -175,7 +179,7 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
     blit(src:Texture2D,dest:Texture2D,mat?:Material){
         if(dest ==null) return;
-        let material:Material = mat || this.m_fullscreenMat;
+        let material:Material = mat || this.m_matBlit;
 
         material.setMainTexture(src);
         

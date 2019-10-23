@@ -206,7 +206,10 @@ export class ShaderFX{
         if(sh !=null) return sh;
 
         let source = ShaderFX.findShaderSource(bundle,shaderName);
-        if(source==null) return null;
+        if(source==null){
+            console.warn(`can not find shader: ${shaderName}`);
+            return null;
+        }
 
         let shader = new Shader(source);
         this.s_shaderCache.set(shadername,shader);
