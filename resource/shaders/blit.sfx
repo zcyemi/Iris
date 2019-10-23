@@ -6,10 +6,17 @@ in vec4 aPosition: POSITION_0;
 in vec2 aUV : TEXCOORD_0;
 inout vec2 vUV : TEXCOORD_0;
 
-void vertex(){
+void vertex_flip(){
     vec4 pos = aPosition;
     pos.xy *=2.0;
     vUV = vec2(aUV.x,1.0-aUV.y);
+    gl_Position = pos;
+}
+
+void vertex(){
+    vec4 pos = aPosition;
+    pos.xy *=2.0;
+    vUV = aUV;
     gl_Position = pos;
 }
 
@@ -27,6 +34,26 @@ technique unlit{
     #pipeline zwrite off
     #pipeline queue opaque
 
+    #param vs vertex_flip;
+    #param ps fragment;
+}
+
+technique internal/blit{
+    #version 300 es
+    #pipeline ztest always
+    #pipeline zwrite off
+    #pipeline queue opaque
+
     #param vs vertex;
+    #param ps fragment;
+}
+
+technique internal/blit_flip{
+    #version 300 es
+    #pipeline ztest always
+    #pipeline zwrite off
+    #pipeline queue opaque
+
+    #param vs vertex_flip;
     #param ps fragment;
 }

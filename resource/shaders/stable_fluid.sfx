@@ -10,12 +10,14 @@ uniform float uBeta;
 
 inout vec2 vUV;
 
-in vec2 aPosition : POSITION_0;
+in vec4 aPosition : POSITION_0;
 in vec2 aUV : TEXCOORD_0;
 
 void vertex(){
-    gl_Position = vec4(aPosition *2.0 -1.0,0.,1.);
-    vUV = aUV;
+    vec4 pos = aPosition;
+    pos.xy *=2.0;
+    vUV = vec2(aUV.x,1.0-aUV.y);
+    gl_Position = pos;
 }
 
 #END
@@ -49,8 +51,9 @@ void frag_force(){
     vec4 col = texture(uSampler,vUV);
     ivec2 texsize = textureSize(uSampler,0);
     vec2 pos = vUV;
-    float amp = exp(-uForceExponent * distance(uForceOrigin,pos));
-    fragForce = col.xy + uForceVector * amp;
+    vec2 originNormalized = uForceOrigin / vec2(texsize);
+    float amp = exp(-uForceExponent * distance(originNormalized,pos));
+    fragForce = vec2(amp);//+ uForceVector;// col.xy + uForceVector * amp;
 }
 #END
 
@@ -132,6 +135,16 @@ void frag_projsetup(){
 
 #END
 
+
+#GLSL
+
+out vec4 fragDebug:TARGET_0;
+void frag_debug(){
+    fragDebug = texture(uSampler,vUV);
+}
+
+#END
+
 technique stableFluid/projSetup{
     #param vs vertex
     #param ps frag_projsetup
@@ -166,4 +179,9 @@ technique stableFluid/force{
 technique stableFluid/fluid{
     #param vs vertex
     #param ps frag_fluid
+}
+
+technique stableFluid/debug{
+    #param vs vertex
+    #param ps frag_debug
 }

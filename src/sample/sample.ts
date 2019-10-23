@@ -27,22 +27,12 @@ export class SampleGame{
         this.m_graphicsRender = new GraphicsRender(canvas);
         GraphicsContext.activeRender(this.m_graphicsRender);
         WindowUtility.setOnResizeFunc(this.onResize.bind(this));
-
         this.loadResource();
 
     }
 
 
-    private setupScene(){
 
-        SceneManager.Init();
-        var camobj = new GameObject("camera");
-        let camera = camobj.addComponent(new Camera());
-        camera.clearType = ClearType.Background;
-        camera.background = new vec4(Color.BLACK);
-
-        camobj.addComponent(new SampleTextureRendering());
-    }
 
     private async loadResource(){
 
@@ -64,6 +54,17 @@ export class SampleGame{
 
 
         this.m_resoruceLoaded = true;
+    }
+
+    private setupScene(){
+
+        SceneManager.Init();
+        var camobj = new GameObject("camera");
+        let camera = camobj.addComponent(new Camera());
+        camera.clearType = ClearType.Background;
+        camera.background = new vec4(Color.BLACK);
+
+        camobj.addComponent(new SampleTextureRendering());
     }
 
     private onResize(){

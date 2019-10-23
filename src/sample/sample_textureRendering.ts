@@ -7,6 +7,7 @@ import { GL } from "../gl";
 import { Graphics } from "../core/Graphics";
 import { GameTime } from "../core/GameTime";
 import { Input } from "../misc";
+import { rootCertificates } from "tls";
 
 
 
@@ -69,13 +70,14 @@ export class SampleTextureRendering  extends Component{
         glctx.getExtension(EXT_color_buffer_float);
         glctx.getExtension(OES_texture_float_linear);
 
-        this.matAdvect = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/advect"));
-        this.matForce = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/force"));
-        this.matJacobi1D = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/jacobi1d"));
-        this.matJacobi2D = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/jacobi2d"));
-        this.matProjFinish = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/projFinish"));
-        this.matProjSetup = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/projSetup"))
-        this.matFluid = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/fluid"));
+        this.matAdvect = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/advect")).verify();
+        this.matForce = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/force")).verify();
+        this.matJacobi1D = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/jacobi1d")).verify();
+        this.matJacobi2D = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/jacobi2d")).verify();
+        this.matProjFinish = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/projFinish")).verify();
+        this.matProjSetup = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/projSetup")).verify();
+        this.matFluid = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/fluid")).verify();
+
 
 
         let size = this.SIM_SIZE;
@@ -113,7 +115,7 @@ export class SampleTextureRendering  extends Component{
         let cmdbuffer = new CommandBuffer("stable fluid");
 
         //advect
-        cmdbuffer.blit(this.texV1,this.texV2,this.matAdvect);
+        // cmdbuffer.blit(this.texV1,this.texV2,this.matAdvect);
 
         // //diffuse
         // cmdbuffer.blit(this.texV2,this.texV1);
@@ -123,11 +125,11 @@ export class SampleTextureRendering  extends Component{
         //     cmdbuffer.blit(this.texV3,this.texV2,this.matJacobi2D);
         // }
 
-        // //force
-        // cmdbuffer.blit(this.texV2,this.texV3,this.matForce);
-        // cmdbuffer.blit(this.texV3,this.texV1);
+        //force
+        cmdbuffer.blit(this.texV2,this.texV3,this.matForce);
+        // cmdbuffer.blit(this.texV3,this.texV2);
         
-        // //PROJECT
+        //PROJECT
         // cmdbuffer.blit(this.texV3,this.texV2,this.matProjSetup);
         // //clear P1 to 0
         // cmdbuffer.blit(null,this.texP1,null);
@@ -140,10 +142,9 @@ export class SampleTextureRendering  extends Component{
         // //projFinish
         // cmdbuffer.blit(this.texP1,this.texV1,this.matProjFinish);
 
-        // // //fluid
+        //fluid
         cmdbuffer.blit(this.colRT2,this.colRT1);
-        cmdbuffer.drawScreenTexture(this.colRT1);
-
+        cmdbuffer.drawScreenTexture(this.texV3);
 
         //submit
         cmdbuffer.submit();
@@ -191,6 +192,7 @@ export class SampleTextureRendering  extends Component{
 
         this.matForce.setFloat("uForceExponent",this.m_exponent);
         this.matForce.setVec2('uForceOrigin',mousepos.x,mousepos.y);
+
         this.matForce.setVec2('uForceVector',force[0],force[1]);
 
         //proj
