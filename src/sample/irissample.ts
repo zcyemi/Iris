@@ -13,13 +13,12 @@ export class IrisSample extends UIContainer{
     
     constructor(){
         super();
-
     }
 
     protected OnGUI() {
-        this.flexBegin();
+        this.flexBegin().style({height:'100%'});
         {
-            this.FlexItemBegin('250px');
+            this.FlexItemBegin('150px');
             this.DrawSampleList();
             this.flexItemEnd();
         }
@@ -37,7 +36,7 @@ export class IrisSample extends UIContainer{
     }
 
     private DrawSampleList(){
-        this.sidebarBegin('sampleList','Iris Samples',item=>this.m_selectSampleId = item);
+        this.sidebarBegin('sampleList','Iris',item=>this.m_selectSampleId = item);
         
         SAMPLE_ENTRY.forEach(item=>{
             this.sidebarItem(item,item);

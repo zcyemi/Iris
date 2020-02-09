@@ -8,7 +8,7 @@ import autoExternal from 'rollup-plugin-auto-external';
 export default{
     input: 'src/sample/irissample.ts',
     output:{
-        file: 'dist/sample/irissample.esm.js',
+        file: 'dist/irissample.esm.js',
         format: 'esm',
     },
     external: [],

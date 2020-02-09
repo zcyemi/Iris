@@ -4,43 +4,48 @@ const fs = require('fs');
 
 const browsersync = require('browser-sync');
 
-gulp.task('build',()=>{
-    // mergeShader();
-    build();
+// gulp.task('build',()=>{
+//     // mergeShader();
+//     build();
 
-    child_process.exec('tsc',(error,stdout,stderr)=>{
-        if(error !=null) console.error(error);
-        if(stdout != null && stdout != '') console.log(stdout);
-        if(stderr != null && stderr != '') console.log(stderr);
-    });
+//     child_process.exec('tsc',(error,stdout,stderr)=>{
+//         if(error !=null) console.error(error);
+//         if(stdout != null && stdout != '') console.log(stdout);
+//         if(stderr != null && stderr != '') console.log(stderr);
+//     });
 
-    return gulp.src('./src/index.ts');
+//     return gulp.src('./src/index.ts');
+// });
+
+gulp.task('sync-static',()=>{
+
+    return gulp.src('static/**').pipe(gulp.dest('dist'));
 });
 
 
-gulp.task('watch',()=>{
+gulp.task('start',()=>{
     // mergeShader();
-    build();
+    // build();
 
-    gulp.watch('./src/**/*.ts',null,build);
+    // gulp.watch('./src/**/*.ts',null,build);
 
-    child_process.exec('tsc --module esnext -w',(error,stdout,stderr)=>{
-        if(error) console.error(error); 
-        if(stdout != null && stdout != '') console.log(stdout);
-        if(stderr != null && stderr != '') console.log(stderr);
-    });
+    // child_process.exec('tsc --module esnext -w',(error,stdout,stderr)=>{
+    //     if(error) console.error(error); 
+    //     if(stdout != null && stdout != '') console.log(stdout);
+    //     if(stderr != null && stderr != '') console.log(stderr);
+    // });
 
     // gulp.watch('./res/shaders/**/*.glsl',null,mergeShader);
     browsersync.init({
         server: {
-            baseDir: './',
+            baseDir: './dist/',
             middleware: function (req, res, next) {
                 res.setHeader('Access-Control-Allow-Origin', '*');
                 next();
             }
         },
         port: 6644,
-        files: ['./res/*.js', './*.html','./res/*.resbundle']
+        files: ['./dist/**.*']
     })
 })
 

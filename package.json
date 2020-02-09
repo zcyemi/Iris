@@ -3,21 +3,21 @@
   "version": "0.0.4",
   "description": "A webgl rendering framework.",
   "main": "./dist/index.js",
-  "module": "./dist/iris.es.js",
+  "module": "./dist/iris.esm.js",
   "typings": "./dist/index.d.ts",
   "scripts": {
     "build": "rollup -c scripts/iris.rollup.config.ts",
-    "build-sample": "rollup -c scripts/irissample.rollup.config.ts",
-    "watch": "gulp watch",
-    "watchdev": "rollup -c ./rollup.config.ts --watch",
-    "test": "mocha -r ts-node/register tests/**/*.test.ts",
+    "build-sample": "gulp sync-static && rollup -c scripts/irissample.rollup.config.ts",
+    "watch-sample": "rollup -c scripts/irissample.rollup.config.ts --watch",
+    "start":"gulp start",
     "packres": "iris-res pack ./resource/iris/iris.respacker.js -l",
-    "packres-sample":"echo none"
+    "packres-sample":"echo none",
+    "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@zcyemi/entangui": "^0.0.35",
+    "@zcyemi/entangui": "^0.0.36",
     "ts-binary-serializer": "^2.1.1"
   },
   "devDependencies": {
