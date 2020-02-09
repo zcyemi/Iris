@@ -1,9 +1,8 @@
-import { Trans } from '../src/Trans';
-import { expectVec3, expectQuat, expectPair, expectMat4, expectVec4, expectTrue } from './testhelper';
 import { expect } from 'chai';
-import { quat, vec3, mat4, glmath } from '../src/math/GLMath';
-import { Plane } from '../src/math/Plane';
-import { Ray } from '../src/math/Ray';
+import { glmath, vec3 } from '../src/iris/math/GLMath';
+import { Plane } from '../src/iris/math/Plane';
+import { Ray } from '../src/iris/math/Ray';
+import { expectTrue, expectVec3, expectVec4 } from './testhelper';
 
 
 describe("plane", () => {

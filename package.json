@@ -6,15 +6,18 @@
   "module": "./dist/iris.es.js",
   "typings": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc --module esnext && gulp build",
+    "build": "rollup -c scripts/iris.rollup.config.ts",
+    "build-sample": "rollup -c scripts/irissample.rollup.config.ts",
     "watch": "gulp watch",
     "watchdev": "rollup -c ./rollup.config.ts --watch",
     "test": "mocha -r ts-node/register tests/**/*.test.ts",
-    "pack-res": "iris-res pack ./resource/iris.respacker.js -l"
+    "packres": "iris-res pack ./resource/iris/iris.respacker.js -l",
+    "packres-sample":"echo none"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@zcyemi/entangui": "^0.0.35",
     "ts-binary-serializer": "^2.1.1"
   },
   "devDependencies": {
@@ -27,8 +30,10 @@
     "gulp": "^4.0.2",
     "mocha": "^6.2.0",
     "rollup": "^1.21.4",
+    "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-browsersync": "^1.0.0",
     "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-multi-input": "^1.0.3",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-typescript2": "^0.24.2",

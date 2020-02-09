@@ -1,5 +1,5 @@
 import * as chai from 'chai';
-import { mat4, vec3, vec4, quat, vec2, mat3 } from '../src/math/GLMath';
+import { mat3, mat4, quat, vec2, vec3, vec4 } from '../src/iris/math/GLMath';
 const expect = chai.expect;
 
 export function pairwise(src:Array<any>,f:(s:any,t:any)=>void,dest:Array<any>){

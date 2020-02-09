@@ -1,7 +1,7 @@
-import { Trans } from '../src/Trans';
-import { expectVec3, expectQuat, expectPair, expectMat4 } from './testhelper';
 import { expect } from 'chai';
-import { quat, vec3, mat4, glmath } from '../src/math/GLMath';
+import { glmath, mat4, quat, vec3 } from '../src/iris/math/GLMath';
+import { Trans } from '../src/iris/Trans';
+import { expectMat4, expectPair, expectQuat, expectVec3 } from './testhelper';
 
 describe("Transform", () => {
 

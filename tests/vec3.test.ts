@@ -1,6 +1,6 @@
 import * as chai from 'chai';
-import { expectVec3, expectQuat, expectPair, expectMat4, expectMat3, pairwise, expectVec4 } from './testhelper';
-import { mat3, quat, vec3, mat4, vec4, glmath } from '../src/math/GLMath';
+import { glmath, vec3 } from '../src/iris/math/GLMath';
+import { expectVec3 } from './testhelper';
 const expect = chai.expect;
 
 describe('vec3',()=>{

@@ -1,12 +1,12 @@
-import { Component, Texture2D, GraphicsContext, Camera, Shader, Material, TextureDescUtility, TextureCreationDesc, MaterialPorpertyBlock, CameraCommandList } from "../core";
-import { AssetsDataBase } from "../core/AssetsDatabase";
-import { CommandBuffer, CommandBufferEvent } from "../core/CommandBuffer";
-import { vec4, vec2 } from "../math";
-import { ShaderFX } from "../core/ShaderFX";
-import { GL } from "../gl";
-import { Graphics } from "../core/Graphics";
-import { GameTime } from "../core/GameTime";
-import { Input } from "../misc";
+import { Component, Texture2D, GraphicsContext, Camera, Shader, Material, TextureDescUtility, TextureCreationDesc, MaterialPorpertyBlock, CameraCommandList } from "../iris/core";
+import { AssetsDataBase } from "../iris/core/AssetsDatabase";
+import { CommandBuffer, CommandBufferEvent } from "../iris/core/CommandBuffer";
+import { vec4, vec2 } from "../iris/math";
+import { ShaderFX } from "../iris/core/ShaderFX";
+import { GL } from "../iris/gl";
+import { Graphics } from "../iris/core/Graphics";
+import { GameTime } from "../iris/core/GameTime";
+import { Input } from "../iris/misc";
 import { rootCertificates } from "tls";
 
 

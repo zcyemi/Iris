@@ -1,13 +1,14 @@
-import { AssetsDataBase } from '../core/AssetsDatabase';
-import { GraphicsContext } from '../core/GraphicsContext';
-import { Camera, FrameTimer, GameObject, GraphicsRender, SceneManager, WindowUtility, ClearType, Color } from '../core/index';
-import { ShaderFX } from '../core/ShaderFX';
-import { GLUtility } from '../gl';
-import { Input } from '../misc/index';
-import { InternalPipeline } from '../pipeline/InternalPipeline';
-import { vec4 } from '../math';
+import { AssetsDataBase } from '../iris/core/AssetsDatabase';
+import { GraphicsContext } from '../iris/core/GraphicsContext';
+import { Camera, FrameTimer, GameObject, GraphicsRender, SceneManager, WindowUtility, ClearType, Color } from '../iris/core/index';
+import { ShaderFX } from '../iris/core/ShaderFX';
+import { GLUtility } from '../iris/gl';
+import { Input, CameraFreeFly } from '../iris/misc/index';
+import { InternalPipeline } from '../iris/pipeline/InternalPipeline';
+import { vec4 } from '../iris/math';
 import { SampleTextureRendering } from './sample_textureRendering';
-import { GameTime } from '../core/GameTime';
+import { GameTime } from '../iris/core/GameTime';
+import { SampleBasicCube } from './sample_basic_cube';
 
 export class SampleGame{
     private m_canvas:HTMLCanvasElement;
@@ -28,11 +29,7 @@ export class SampleGame{
         GraphicsContext.activeRender(this.m_graphicsRender);
         WindowUtility.setOnResizeFunc(this.onResize.bind(this));
         this.loadResource();
-
     }
-
-
-
 
     private async loadResource(){
 
@@ -62,9 +59,10 @@ export class SampleGame{
         var camobj = new GameObject("camera");
         let camera = camobj.addComponent(new Camera());
         camera.clearType = ClearType.Background;
-        camera.background = new vec4(Color.BLACK);
+        camera.background = new vec4(Color.RED);
 
-        camobj.addComponent(new SampleTextureRendering());
+        camobj.addComponent(new SampleBasicCube());
+        camobj.addComponent(new CameraFreeFly());
     }
 
     private onResize(){
@@ -83,7 +81,6 @@ export class SampleGame{
         GameTime.time = ts/1000;
 
         Input.onFrame(dt);
-        
 
         if(!this.m_resoruceLoaded) return;
 

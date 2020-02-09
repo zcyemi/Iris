@@ -1,0 +1,29 @@
+#file default.sfx
+
+#include include/basis.sfx
+
+#GLSL
+precision mediump float;
+
+in vec4 aPosition : POSITION_0;
+void vertex(){
+    vec4 pos = aPosition;
+    gl_Position = MATRIX_MVP * pos;
+}
+
+uniform vec4 uColor;
+
+out vec4 fragColor: TARGET_0;
+void fragment(){
+    fragColor = uColor;
+}
+
+#END
+
+technique default{
+#version 300 es
+#pipeline queue opaque
+
+#param vs vertex
+#param ps fragment
+}

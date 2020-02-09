@@ -1,6 +1,6 @@
-import { expectPair } from './testhelper';
-import { mat3, quat, vec3, mat4, vec4 } from '../src/math/index';
 import * as chai from 'chai';
+import { mat3, mat4, quat, vec3, vec4 } from '../src/iris/math/index';
+import { expectPair } from './testhelper';
 const expect = chai.expect;
 
 
