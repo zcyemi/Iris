@@ -174,9 +174,6 @@ export class GraphicsRender{
     public render(){
         if(this.pause || this.m_frameBufferInvalid) return;
 
-        this.glctx.clearColor(1,0,0,1);
-        this.glctx.clear(GL.COLOR_BUFFER_BIT);
-
         let p = this.pipeline;
         if(p == null) return;
         p.exec();
