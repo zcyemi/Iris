@@ -1,5 +1,8 @@
 import { UIContainer, UIRenderer, UIRenderingBind, UISourceLocal } from '@zcyemi/entangui';
-import { FrameTimer, GLUtility, GraphicsContext, GraphicsRender, Input, WindowUtility, GL, vec3 } from '../iris';
+import { FrameTimer, GLUtility, GraphicsContext, GraphicsRender, Input, WindowUtility, GL, vec3, Color, vec4, GLContext } from '../iris';
+import { InternalPipeline } from '../iris/pipeline/InternalPipeline';
+import { AssetsDataBase } from '../iris/core/AssetsDatabase';
+import { GLCmdType } from '../iris/gl/GLCmdRecord';
 
 
 const SAMPLE_ENTRY:string[] = [
@@ -10,11 +13,16 @@ const SAMPLE_ENTRY:string[] = [
 export class IrisSample extends UIContainer{
     private m_selectSampleId:string = SAMPLE_ENTRY[0];
 
-    public canvas:IrisCanvas;
-
+    private canvas:IrisCanvas;
+    private grender:GraphicsRender;
     
     constructor(){
         super();
+    }
+
+    public setIrisCanvas(canvas:IrisCanvas){
+        this.canvas = canvas;
+        this.grender = canvas.graphicsRender;
     }
 
     protected OnGUI() {
@@ -48,12 +56,16 @@ export class IrisSample extends UIContainer{
 
     private m_showDrawCall:boolean = false;
     private m_renderPause:boolean = true;
+    
 
     private DrawToolKit(){
 
         this.buttonGroupBegin();
 
-        this.button('Draw',()=>this.m_showDrawCall = true);
+        this.button('Draw',()=>{
+            this.grender.debugNextFrameGL();
+            this.m_showDrawCall = true;
+        });
         this.button(this.m_renderPause?"Start":"Pause",()=>{
             let newstatus = !this.m_renderPause;
             this.m_renderPause = newstatus;
@@ -72,12 +84,28 @@ export class IrisSample extends UIContainer{
     private DrawDrawCallView(){
         this.contextBegin('view-drawcall',"mask");
 
-        this.cardBegin('DrawCall View').classes('center');
+        this.cardBegin('DrawCall View').classes('center').style({height:'70%',width:'80%'});
 
+        this.button('Close',()=>this.m_showDrawCall = false);
 
         this.divider();
 
-        this.button('Close',()=>this.m_showDrawCall = false);
+        let data = this.grender.lastGLCmdRecord;
+        if(data == null){
+            this.alert('No FrameData');
+            this.button('Refresh',()=>{});
+        }
+        else{
+
+            this.listBegin(false);
+
+            data.commands.forEach(cmd=>{
+                this.bandage(GLCmdType[cmd.type]);
+                this.text(cmd.parameter,'span');
+                this.listItemNext();
+            })
+            this.listEnd();
+        }
 
         this.cardEnd();
 
@@ -105,6 +133,7 @@ export class IrisCanvas{
     public get graphicsRender():GraphicsRender{return this.m_graphicsRender;}
 
 
+
     public constructor(canvas:HTMLCanvasElement){
         this.m_cavnas = canvas;
         this.m_timer = new FrameTimer(false);
@@ -113,8 +142,24 @@ export class IrisCanvas{
         GLUtility.setTargetFPS(60);
         GLUtility.registerOnFrame(this.onFrame.bind(this));
 
+
         this.m_graphicsRender = new GraphicsRender(canvas);
+        GraphicsContext.activeRender(this.m_graphicsRender);
         this.m_graphicsRender.pause = true;
+
+        this.initGL();        
+    }
+
+    private async initGL(){
+
+        await AssetsDataBase.loadBundle('iris.resbundle');
+
+        let pipeline = new InternalPipeline({
+            color:new vec4(Color.RED),
+        });
+
+        this.m_graphicsRender.setPipeline(pipeline);
+
         GraphicsContext.activeRender(this.m_graphicsRender);
         WindowUtility.setOnResizeFunc(this.onResize.bind(this));
     }
@@ -142,7 +187,7 @@ function IrisSampleInit(){
     //init iris
     let canvas = <HTMLCanvasElement>document.getElementById('iris-canvas');
     let iriscanvas = new IrisCanvas(canvas);
-    irissample.canvas = iriscanvas;
+    irissample.setIrisCanvas(iriscanvas);;
     
 }
 

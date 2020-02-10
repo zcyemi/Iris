@@ -7,6 +7,7 @@ import { Utility } from "../core/Utility";
 import { i32, f32, mat4 } from "../math/GLMath";
 import { GLVertexArray } from "./GLVertexArray";
 import { ShaderTags, BlendFactor, BlendOperator } from "../core/ShaderFX";
+import { GLCmdRecord, GLCmdType } from "./GLCmdRecord";
 
 export class GLContext {
     private m_glFenceSynces:GLFenceSync[] = [];
@@ -48,6 +49,20 @@ export class GLContext {
         }
         if (g == null) return null;
         return new GLContext(g);
+    }
+
+    private cmdRecord:GLCmdRecord;
+    private m_debug= false;
+    public beginDebug(){
+        this.cmdRecord = new GLCmdRecord();
+        this.m_debug= true;
+    }
+
+    public endDebug():GLCmdRecord{
+        let ret = this.cmdRecord;
+        this.cmdRecord = null;
+        this.m_debug = false;
+        return ret;
     }
 
     public getWebGLRenderingContext():WebGL2RenderingContext{
@@ -335,6 +350,7 @@ export class GLContext {
     }
 
     public clear(mask:number){
+        if(this.m_debug) this.cmdRecord.Record(GLCmdType.clear,'Clear',mask);
         this.gl.clear(mask);
     }
     public clearColor(r:number,g:number,b:number,a:number){

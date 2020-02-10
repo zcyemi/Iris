@@ -7,6 +7,7 @@ import { GLContext } from "../gl/GLContext";
 import { GL } from "../gl/GL";
 import { vec2 } from "../math/GLMath";
 import { Gizmos } from "./Gizmos";
+import { GLCmdData, GLCmdRecord } from "../gl/GLCmdRecord";
 
 export class GraphicsRenderCreateInfo{
     public colorFormat:number = 0x8058;
@@ -46,6 +47,10 @@ export class GraphicsRender{
 
     public get screenWidth():number{ return this.m_screenWidth;}
     public get screenHeight():number{ return this.m_screenHeight;}
+
+    private m_glCmdRecord:GLCmdRecord;
+    private m_glCmdDebug:boolean = false;
+    public get lastGLCmdRecord():GLCmdRecord{ return this.m_glCmdRecord;}
 
     public get pipeline():IRenderPipeline{
         return this.m_renderPipeline;
@@ -98,6 +103,13 @@ export class GraphicsRender{
         glctx.frontFace(GL.CCW);
         this.setPipeline(pipeline);
     }
+
+    public debugNextFrameGL(){
+        this.m_glCmdDebug = true;
+
+        console.log('start debug');
+    }
+
 
     public setPipeline(pipeline:IRenderPipeline){
         if(pipeline == null) return;
@@ -174,11 +186,19 @@ export class GraphicsRender{
     public render(){
         if(this.pause || this.m_frameBufferInvalid) return;
 
+        if(this.m_glCmdDebug) this.glctx.beginDebug();
+
         let p = this.pipeline;
-        if(p == null) return;
-        p.exec();
+        if(p != null){
+            p.exec();
+        }
 
         //this.lateRender();
+
+        if(this.m_glCmdDebug){
+            this.m_glCmdRecord = this.glctx.endDebug();
+            this.m_glCmdDebug = false;
+        }
     }
 
     private lateRender(){
