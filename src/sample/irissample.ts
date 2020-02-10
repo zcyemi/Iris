@@ -1,18 +1,17 @@
 import { UIContainer, UIRenderer, UIRenderingBind, UISourceLocal } from '@zcyemi/entangui';
-import { FrameTimer, GLUtility, GraphicsContext, GraphicsRender, Input, WindowUtility, GL, vec3, Color, vec4, GLContext } from '../iris';
+import { FrameTimer, GLUtility, GraphicsContext, GraphicsRender, Input, WindowUtility, GL, vec3, Color, vec4, GLContext, SceneManager, GameObject, CameraFreeFly, Camera, ClearType, Skybox } from '../iris';
 import { InternalPipeline } from '../iris/pipeline/InternalPipeline';
 import { AssetsDataBase } from '../iris/core/AssetsDatabase';
 import { GLCmdType } from '../iris/gl/GLCmdRecord';
+import { SampleBasicCube } from './sample_basic_cube';
+import { SampleBase } from './sampleBase';
+import { GameTime } from '../iris/core/GameTime';
 
 
-const SAMPLE_ENTRY:string[] = [
-    'basic_cube',
-    'point_light',
-]
+
 
 export class IrisSample extends UIContainer{
-    private m_selectSampleId:string = SAMPLE_ENTRY[0];
-
+    private m_selectSampleId:string;
     private canvas:IrisCanvas;
     private grender:GraphicsRender;
     
@@ -46,10 +45,14 @@ export class IrisSample extends UIContainer{
     }
 
     private DrawSampleList(){
-        this.sidebarBegin('sampleList','Iris',item=>this.m_selectSampleId = item);
+        this.sidebarBegin('sampleList','Iris',item=>{
+            if(this.m_selectSampleId == item) return;
+            this.m_selectSampleId = item;
+            this.canvas.loadSample(item);
+        });
         
-        SAMPLE_ENTRY.forEach(item=>{
-            this.sidebarItem(item,item);
+        SampleBase.sampleEntry.forEach((val,key)=>{
+            this.sidebarItem(key,key);
         });
         this.sidebarEnd();
     }
@@ -133,6 +136,7 @@ export class IrisCanvas{
     public get graphicsRender():GraphicsRender{return this.m_graphicsRender;}
 
 
+    private m_currenSample:SampleBase;
 
     public constructor(canvas:HTMLCanvasElement){
         this.m_cavnas = canvas;
@@ -150,7 +154,30 @@ export class IrisCanvas{
         this.initGL();        
     }
 
+    public loadSample(name:string){
+        let sample = SampleBase.getSample(name);
+        if(sample!=null){
+            let cursample = this.m_currenSample;
+            if(cursample != null){
+                cursample.onDestroy();
+            }
+
+            console.log('load sample',name);
+            sample.onInit();
+            this.m_currenSample = sample;
+        }
+    }
+
+    private m_resLoaded:boolean = false;
+
     private async initGL(){
+
+        SceneManager.Init();
+        var camObj = new GameObject('camera');
+        let camera = camObj.addComponent(new Camera());
+        camera.clearType = ClearType.Skybox;
+        camera.skybox = Skybox.createFromProcedural();
+
 
         await AssetsDataBase.loadBundle('iris.resbundle');
 
@@ -162,6 +189,8 @@ export class IrisCanvas{
 
         GraphicsContext.activeRender(this.m_graphicsRender);
         WindowUtility.setOnResizeFunc(this.onResize.bind(this));
+
+        this.m_resLoaded  =true;
     }
 
     private onResize(){
@@ -169,8 +198,24 @@ export class IrisCanvas{
 
 
     private onFrame(ts:number){
+
+        if(!this.m_resLoaded) return;
+
+        let delta = this.m_timer.tick(ts);
+        let dt = delta/ 1000;
+
+
+        GameTime.deltaTime =dt;
+        GameTime.time = ts/1000;
+
+
+        Input.onFrame(dt);
+
         const grender = this.m_graphicsRender;
+
+        SceneManager.onFrame(dt);
         grender.render();
+        grender.renderToCanvas();
     }
 }
 
@@ -194,9 +239,4 @@ function IrisSampleInit(){
 window['IrisSampleInit'] = IrisSampleInit;
 
 
-export class SampleBase{
-
-    public onInit(){
-        
-    }
-}
+SampleBase.registerSample('basic_cube',SampleBasicCube);

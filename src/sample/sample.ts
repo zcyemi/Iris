@@ -61,8 +61,8 @@ export class SampleGame{
         camera.clearType = ClearType.Background;
         camera.background = new vec4(Color.RED);
 
-        camobj.addComponent(new SampleBasicCube());
-        camobj.addComponent(new CameraFreeFly());
+        // camobj.addComponent(new SampleBasicCube());
+        // camobj.addComponent(new CameraFreeFly());
     }
 
     private onResize(){
