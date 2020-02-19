@@ -12,14 +12,20 @@ export function ReleaseGraphicObj(gobj:IGraphicObj,glctx:GLContext){
     return null;
 }
 
-export class GraphicsObj implements IGraphicObj {
+export abstract class GraphicsObj implements IGraphicObj {
 
+    private static s_objId:number = 1;
+
+    public objId:number;
 
     protected glctx:GLContext;
     constructor() {
+
+        this.objId= GraphicsObj.s_objId;
+        GraphicsObj.s_objId++;
+
         this.glctx = GraphicsContext.glctx;
     }
 
-    release(glctx?: GLContext) {
-    }
+    public abstract release(glctx?: GLContext);
 }

@@ -70,6 +70,9 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         this.m_fullscreenRender = new MeshRender(MeshPrimitive.Quad, this.m_matBlit, false);
     }
 
+    public release(){
+    }
+
     public getMaterialDefault(): Material {
         return this.m_matDefault;
     }
@@ -339,7 +342,9 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
 
     reload() {
     }
-    release() {
+    
+    release(){
+        
     }
 
 

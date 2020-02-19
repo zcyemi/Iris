@@ -1,6 +1,7 @@
 import { Camera } from "./Camera";
 import { Light } from "./Light";
 import { GraphicsRender } from "./GraphicsRender";
+import { GameObject } from "./GameObject";
 
 export class GameContext{
     private static s_current:GameContext = new GameContext();
@@ -34,6 +35,10 @@ export class GameContext{
     }
 
     public unregisterCamera(camera:Camera){
+        throw new Error('not impl');
+    }
 
+    public destroy(gameobj:GameObject){
+        throw new Error('not impl');
     }
 }

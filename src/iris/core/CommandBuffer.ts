@@ -6,10 +6,15 @@ import { Mesh } from "./Mesh";
 import { GLVertexArray } from "../gl";
 import { MeshRender } from "./MeshRender";
 import { GameContext } from "./GameContext";
+import { GraphicsObj } from "./IGraphicObj";
+import { GraphicsRender } from "./GraphicsRender";
+import { GraphicsContext } from "./GraphicsContext";
+import { basename } from "path";
 
 
 
 export enum CommandType{
+    Invalid,
     ClearColor,
     ClearDepth,
     ClearColorDepth,
@@ -42,10 +47,20 @@ export class CommandItem{
         this.type = type;
         this.args =args;
     }
+
+    public release(gr:GraphicsRender){
+        let tempvao = this.temp_vao;
+        if(tempvao!=null){
+            gr.glctx.deleteGLVertexArray(tempvao);
+            this.temp_vao = null;
+        }
+        this.args = null;
+        this.type = CommandType.Invalid;
+    }
 }
 
 
-export class CommandBuffer{
+export class CommandBuffer extends GraphicsObj{
 
     public name:string;
     public commandList:CommandItem[] = [];
@@ -55,10 +70,20 @@ export class CommandBuffer{
     public get valid():boolean{ return this.m_valid;}
 
     public constructor(name:string){
+        super();
         this.name = name;
     }
 
+    public release(){
+        this.clear();
+    }
+
     public clear(){
+
+        this.commandList.forEach(cmd=>{
+            cmd.release(GraphicsContext.currentRender);
+        });
+
         this.commandList = [];
         this.m_valid = false;
     }

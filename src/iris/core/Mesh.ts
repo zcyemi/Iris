@@ -117,6 +117,7 @@ export class Mesh {
     public setVerticesData(attr: AttrSemantic | string, databuffer: MeshDataBuffer) {
         this.dataVertices[attr] = databuffer;
     }
+
     public getVerticesData(attr: AttrSemantic) {
         return this.dataVertices[attr]
     }
@@ -130,8 +131,6 @@ export class Mesh {
     public setNormal(index: number, data: MeshDataBuffer, type: GLDataType, size: number, bufferByteLen: number = undefined) {
         this.setDataBuffer("NORMAL", index, data, type, size, bufferByteLen);
     }
-
-
 
     /**
      * 

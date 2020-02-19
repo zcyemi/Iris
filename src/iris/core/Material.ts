@@ -8,6 +8,7 @@ import { ITexture } from "./Texture";
 import { GLContext } from "../gl/GLContext";
 import { Shader } from "./Shader";
 import { ShaderTags, AttrSemantic, UniformSemantic } from "./ShaderFX";
+import { GraphicsObj } from "./IGraphicObj";
 
 export type MaterialProperty = {type:number,value:any,extra?:TextureSampler};
 
@@ -150,7 +151,7 @@ export class MaterialPorpertyBlock{
     }
 }
 
-export class Material{
+export class Material extends GraphicsObj{
     private m_program:GLProgram;
     private m_shader:Shader;
     private m_propertyBlock:MaterialPorpertyBlock;
@@ -184,15 +185,12 @@ export class Material{
         // if(this.m_shadertags == null) return this.m_shader.tags;
         return this.m_shadertags;
     }
-
     public set shaderTags(tags:ShaderTags){
         this.m_shadertags = tags;
     }
-
     public get propertyBlock():MaterialPorpertyBlock{
         return this.m_propertyBlock;
     }
-
     public setShader(shader:Shader){
         this.m_shader = shader;
         this.m_program = null;
@@ -200,6 +198,7 @@ export class Material{
     }
 
     public constructor(shader?:Shader){
+        super();
         if(shader == null){
             return;
         }
@@ -207,6 +206,13 @@ export class Material{
         this.m_program = shader.compile();
 
         this.m_propertyBlock =new MaterialPorpertyBlock(this.m_program);
+    }
+
+    public release(){
+        this.m_program = null;
+        this.m_shader = null;
+        this.m_propertyBlock = null;
+        this.m_useVariants = false;
     }
 
     public clone():Material{

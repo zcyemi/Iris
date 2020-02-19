@@ -1,7 +1,7 @@
-import { ShaderData } from "./ShaderBuffer";
-import { GLContext } from "../gl/GLContext";
-import { IGraphicObj, GraphicsObj } from "./IGraphicObj";
 import { GL } from "../gl/GL";
+import { GLContext } from "../gl/GLContext";
+import { GraphicsObj } from "./IGraphicObj";
+import { ShaderData } from "./ShaderBuffer";
 
 
 export class ShaderUniformBuffer<T extends ShaderData> extends GraphicsObj{
