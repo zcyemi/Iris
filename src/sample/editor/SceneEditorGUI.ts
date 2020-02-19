@@ -1,25 +1,26 @@
-import { UIContainer } from "@zcyemi/entangui";
-import { SceneManager, Transform } from "../../iris";
+import { Transform } from "../../iris";
+import { GameContext } from "../../iris/core/GameContext";
 import { BaseEditorGUI } from "./BaseEditorGUI";
 
 
 
 export class SceneEditorGUI extends BaseEditorGUI{
     public onInit(){
-
-        SceneManager.onSceneUpdate = ()=>{
+        GameContext.current.evtOnSceneUpdate.register(()=>{
             this.ui.setDirty();
             console.log('changed');
-        };
+        }); 
     }
 
     public onGUI(){
         const ui = this.ui;
 
+        const gamectx = GameContext.current;
+
         ui.cardBegin("Scene");
 
         ui.bandage("Cameras");
-        let cameras = SceneManager.allCameras;
+        let cameras = gamectx.sceneCameras;
 
         cameras.forEach(item => {
             ui.button(item.gameobject.name,()=>this.msgSelectionObj(item.gameobject));
@@ -29,12 +30,12 @@ export class SceneEditorGUI extends BaseEditorGUI{
 
         ui.bandage("Lights");
 
-        SceneManager.allLights.forEach(item=>{
+        gamectx.sceneLight.forEach(item=>{
             ui.text(item.gameobject.name,'p');
         })
 
         ui.divider();
-        this.DrawTRS(SceneManager.rootTRS);
+        this.DrawTRS(gamectx.sceneTRS);
         ui.cardEnd();
         
     }

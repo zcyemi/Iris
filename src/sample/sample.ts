@@ -1,14 +1,12 @@
 import { AssetsDataBase } from '../iris/core/AssetsDatabase';
+import { GameTime } from '../iris/core/GameTime';
 import { GraphicsContext } from '../iris/core/GraphicsContext';
-import { Camera, FrameTimer, GameObject, GraphicsRender, SceneManager, WindowUtility, ClearType, Color } from '../iris/core/index';
+import { Camera, ClearType, Color, FrameTimer, GameObject, GraphicsRender, WindowUtility } from '../iris/core/index';
 import { ShaderFX } from '../iris/core/ShaderFX';
 import { GLUtility } from '../iris/gl';
-import { Input, CameraFreeFly } from '../iris/misc/index';
-import { InternalPipeline } from '../iris/pipeline/InternalPipeline';
 import { vec4 } from '../iris/math';
-import { SampleTextureRendering } from './sample_textureRendering';
-import { GameTime } from '../iris/core/GameTime';
-import { SampleBasicCube } from './sample_basic_cube';
+import { Input } from '../iris/misc/index';
+import { InternalPipeline } from '../iris/pipeline/InternalPipeline';
 
 export class SampleGame{
     private m_canvas:HTMLCanvasElement;
@@ -42,7 +40,6 @@ export class SampleGame{
 
         var pipeline = new InternalPipeline();
 
-        SceneManager.Init();
 
         grender.setPipeline(pipeline);
 
@@ -55,7 +52,6 @@ export class SampleGame{
 
     private setupScene(){
 
-        SceneManager.Init();
         var camobj = new GameObject("camera");
         let camera = camobj.addComponent(new Camera());
         camera.clearType = ClearType.Background;
@@ -84,7 +80,7 @@ export class SampleGame{
 
         if(!this.m_resoruceLoaded) return;
 
-        SceneManager.onFrame(dt);
+        // SceneManager.onFrame(dt);
 
         const grender =this.m_graphicsRender;
         grender.render();

@@ -1,6 +1,6 @@
-import { vec3, quat, mat4, mat3 } from "../math/GLMath";
+import { mat3, mat4, quat, vec3 } from "../math/GLMath";
+import { GameContext } from "./GameContext";
 import { GameObject } from "./GameObject";
-import { SceneManager } from "./SceneManager";
 
 export class Transform{
     private m_localPosition:vec3 = vec3.zero;
@@ -47,7 +47,7 @@ export class Transform{
         return this.m_parent;
     }
     public set parent(p:Transform){
-        SceneManager.resolveTransformModify(this,p);
+        GameContext.current.resolveTransformModify(this,p);
     }
 
     public set localMatrix(mat:mat4){

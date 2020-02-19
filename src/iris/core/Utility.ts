@@ -70,6 +70,26 @@ export class Utility {
 		return str == null || str == '';
 	}
 
+
+	public static ListAdd<T>(ary:T[],obj:T):boolean{
+		if(ary == null) {
+			throw new Error('array is null');
+		}
+		let ind = ary.indexOf(obj);
+		if(ind < 0){
+			ary.push(obj);
+			return true;
+		}
+		return false;
+	}
+
+	public static ListRemove<T>(ary:T[],obj:T):T[]{
+		if(ary == null) return null;
+		let ind = ary.indexOf(obj);
+		if(ind <0) return ary;
+		return ary.splice(ind,1);
+	}
+
 	/**
 	 * Deep clone map object
 	 * @param map 

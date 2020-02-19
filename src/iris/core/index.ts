@@ -16,7 +16,6 @@ export * from './RenderNodeList';
 export * from './RenderTexture';
 export * from './Scene';
 export * from './SceneBuilder';
-export * from './SceneManager';
 export * from './Skybox';
 export * from './SpriteRender';
 

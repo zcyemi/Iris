@@ -1,12 +1,7 @@
-import { Transform } from "./Transform";
-import { MeshRender } from "./MeshRender";
-import { Component } from "./Component";
-import { Scene } from "./Scene";
 import { BaseRender } from "./BaseRender";
-import { Camera } from "./Camera";
-import { SceneManager } from "./SceneManager";
-import { Light } from "./Light";
-import { setMaxListeners } from "cluster";
+import { Component } from "./Component";
+import { GameContext } from "./GameContext";
+import { Transform } from "./Transform";
 
 export class GameObject{
 
@@ -39,7 +34,7 @@ export class GameObject{
         this.name = name;
         this.transform = new Transform(this);
         
-        SceneManager.resolveNewGameObject(this);
+        GameContext.current.registerNewGameObject(this);
     }
 
     public update(){
@@ -79,12 +74,6 @@ export class GameObject{
 
         let index= comps.indexOf(c);
         if(index >=0) return c;
-
-        if(c instanceof Camera){
-            SceneManager.addCamera(c);
-        }else if(c instanceof Light){
-            SceneManager.addLight(c);
-        }
 
         c.gameobject = this;
         if(c.onStart != null) c.onStart();

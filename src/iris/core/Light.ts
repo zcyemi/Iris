@@ -2,6 +2,7 @@ import { GameObject } from "./GameObject";
 import { vec3, vec4, glmath } from "../math/GLMath";
 import { Component } from "./Component";
 import { Scene } from "./Scene";
+import { GameContext } from "./GameContext";
 
 
 export enum LightType{
@@ -53,6 +54,8 @@ export class Light extends Component{
         this.lightType = type;
         if(intensity) this.intensity = intensity;
         if(color) this.lightColor = color;
+
+        GameContext.current.registerLight(this);
     }
 
     public static createPointLight(gobj:GameObject,range:number = 10,position?:vec3,intensity?:number,color?:vec3){

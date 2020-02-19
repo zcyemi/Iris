@@ -1,10 +1,10 @@
-import { Component, GameObject, MeshRender, Mesh, Material, Color, Camera, SceneManager, ClearType } from "../iris/core";
-import { MeshPrimitive } from "../iris/core/MeshPrimitive";
-import { vec4 } from "../iris/math";
-import { ShaderFX } from "../iris/core/ShaderFX";
+import { GameObject, Material, MeshRender } from "../iris/core";
 import { AssetsDataBase } from "../iris/core/AssetsDatabase";
-import { SampleBase } from "./sampleBase";
 import { GameContext } from "../iris/core/GameContext";
+import { MeshPrimitive } from "../iris/core/MeshPrimitive";
+import { ShaderFX } from "../iris/core/ShaderFX";
+import { vec4 } from "../iris/math";
+import { SampleBase } from "./sampleBase";
 
 export class SampleBasicCube extends SampleBase{
 
@@ -12,20 +12,20 @@ export class SampleBasicCube extends SampleBase{
 
     onInit(){
         var g = new GameObject("Cube");
+        this.m_cube = g;
 
         let camera = GameContext.current.mainCamera;
 
-        camera.background = new vec4(Color.RED);
-        camera.clearType = ClearType.Background;
-        // let bundle = AssetsDataBase.getLoadedBundle("iris");
-        // let shader = ShaderFX.findShader(bundle,'@shaderfx/default');
 
-        // let mat = new Material(shader);
-        // mat.setColor('uColor',vec4.one);
+        let bundle = AssetsDataBase.getLoadedBundle("iris");
+        let shader = ShaderFX.findShader(bundle,'@shaderfx/default');
 
-        // let meshrender = new MeshRender(MeshPrimitive.Cube,mat);
-        // g.render = meshrender;
-        // this.m_cube = g;
+        let mat = new Material(shader);
+        mat.setColor('uColor',vec4.one);
+
+        let mesh = MeshPrimitive.Cube;
+        let meshRender = new MeshRender(mesh,mat);
+        g.render = meshRender;
     }
 
     onDestroy(){

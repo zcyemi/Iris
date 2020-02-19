@@ -1,6 +1,7 @@
 import { UIContainer, UIRenderer, UIRenderingBind, UISourceLocal } from '@zcyemi/entangui';
-import { Camera, ClearType, Color, FrameTimer, GameObject, GLUtility, GraphicsContext, GraphicsRender, Input, SceneManager, Skybox, vec4, WindowUtility } from '../iris';
+import { Camera, ClearType, FrameTimer, GameObject, GLUtility, GraphicsContext, GraphicsRender, Input, Skybox, WindowUtility } from '../iris';
 import { AssetsDataBase } from '../iris/core/AssetsDatabase';
+import { GameContext } from '../iris/core/GameContext';
 import { GameTime } from '../iris/core/GameTime';
 import { GLCmdType } from '../iris/gl/GLCmdRecord';
 import { InternalPipeline } from '../iris/pipeline/InternalPipeline';
@@ -97,6 +98,7 @@ export class IrisSample extends UIContainer{
         });
         this.button(this.m_renderPause?"Start":"Pause",()=>{
             let newstatus = !this.m_renderPause;
+            GameContext.current.gamePause = newstatus;
             this.m_renderPause = newstatus;
             this.canvas.graphicsRender.pause = newstatus;
         });
@@ -203,7 +205,6 @@ export class IrisCanvas{
     private m_resLoaded:boolean = false;
 
     private async initGL(){
-        SceneManager.Init();
         var camObj = new GameObject('camera');
         let camera = camObj.addComponent(new Camera());
         camera.clearType = ClearType.Skybox;
@@ -229,21 +230,23 @@ export class IrisCanvas{
 
         if(!this.m_resLoaded) return;
 
-        let delta = this.m_timer.tick(ts);
-        let dt = delta/ 1000;
+        let gamectx = GameContext.current;
 
-
-        GameTime.deltaTime =dt;
-        GameTime.time = ts/1000;
-
-
-        Input.onFrame(dt);
-
-        const grender = this.m_graphicsRender;
-
-        SceneManager.onFrame(dt);
-        grender.render();
-        grender.renderToCanvas();
+        if(!gamectx.gamePause){
+            let delta = this.m_timer.tick(ts);
+            let dt = delta/ 1000;
+    
+            GameTime.deltaTime =dt;
+            GameTime.time = ts/1000;
+    
+            Input.onFrame(dt);
+    
+            const grender = this.m_graphicsRender;
+    
+            GameContext.current.onFrame(dt);
+            grender.render();
+            grender.renderToCanvas();
+        }
     }
 }
 
