@@ -2,6 +2,8 @@ import { GL, GLConst, GLDataType } from "../gl/GL";
 import { GLContext } from "../gl/GLContext";
 import { vec3 } from "../math/GLMath";
 import { AttrSemantic } from "./ShaderFX";
+import { GraphicsContext } from "./GraphicsContext";
+import { GameContext } from "./GameContext";
 
 export enum MeshTopology {
     Triangles = 4,
@@ -129,6 +131,8 @@ export class Mesh {
         this.setDataBuffer("NORMAL", index, data, type, size, bufferByteLen);
     }
 
+
+
     /**
      * 
      * @param data 
@@ -239,6 +243,10 @@ export class Mesh {
         this.vertexDesc.NORMAL_0 = new MeshVertexAttrDesc(GL.FLOAT, 4, normaldata.length * 4);
     }
 
+    public apply(){
+        this.refreshMeshBuffer(GameContext.current.graphicsRender.glctx);
+    }
+
     public refreshMeshBuffer(glctx: GLContext) {
         if (this.m_bufferInited) return;
 
@@ -277,6 +285,9 @@ export class Mesh {
             glctx.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, null);
 
             this.bufferIndices = bufferIndices;
+        }
+        else{
+            throw new Error(`indices not setup for mesh '${this.name}'`);
         }
         this.m_bufferInited = true;
     }

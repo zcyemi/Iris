@@ -1,23 +1,48 @@
 import { UIContainer, UIRenderer, UIRenderingBind, UISourceLocal } from '@zcyemi/entangui';
-import { FrameTimer, GLUtility, GraphicsContext, GraphicsRender, Input, WindowUtility, GL, vec3, Color, vec4, GLContext, SceneManager, GameObject, CameraFreeFly, Camera, ClearType, Skybox } from '../iris';
-import { InternalPipeline } from '../iris/pipeline/InternalPipeline';
+import { Camera, ClearType, Color, FrameTimer, GameObject, GLUtility, GraphicsContext, GraphicsRender, Input, SceneManager, Skybox, vec4, WindowUtility } from '../iris';
 import { AssetsDataBase } from '../iris/core/AssetsDatabase';
-import { GLCmdType } from '../iris/gl/GLCmdRecord';
-import { SampleBasicCube } from './sample_basic_cube';
-import { SampleBase } from './sampleBase';
 import { GameTime } from '../iris/core/GameTime';
-
-
-
+import { GLCmdType } from '../iris/gl/GLCmdRecord';
+import { InternalPipeline } from '../iris/pipeline/InternalPipeline';
+import { EditorGUIEvent } from './editor/BaseEditorGUI';
+import { InspectorEditorGUI } from './editor/InspectorEditorGUI';
+import { SceneEditorGUI } from './editor/SceneEditorGUI';
+import { SampleBase } from './sampleBase';
+import { SampleBasicCube } from './sample_basic_cube';
+import { SampleTriangle } from './sample_triangle';
 
 export class IrisSample extends UIContainer{
     private m_selectSampleId:string;
     private canvas:IrisCanvas;
     private grender:GraphicsRender;
+
+    private m_sceneGUI:SceneEditorGUI;
+    private m_inspectorGUI:InspectorEditorGUI;
+
     
     constructor(){
         super();
+
+        EditorGUIEvent.register(this.onEditorGUIMessage.bind(this));
+        this.setupSubGUI();
     }
+
+    private onEditorGUIMessage(cmd:string,data:any){
+        switch(cmd){
+            case 'sel':
+            this.m_inspectorGUI.setTargetGameObj(data);
+            break;
+        }
+    }
+
+    private setupSubGUI(){
+        this.m_sceneGUI = new SceneEditorGUI(this);
+        this.m_sceneGUI.onInit();
+
+        this.m_inspectorGUI = new InspectorEditorGUI(this);
+        this.m_inspectorGUI.onInit();
+    }
+
 
     public setIrisCanvas(canvas:IrisCanvas){
         this.canvas = canvas;
@@ -59,6 +84,7 @@ export class IrisSample extends UIContainer{
 
     private m_showDrawCall:boolean = false;
     private m_renderPause:boolean = true;
+
     
 
     private DrawToolKit(){
@@ -78,6 +104,12 @@ export class IrisSample extends UIContainer{
         this.buttonGroupEnd();
 
         this.divider();
+
+        //InspectorGUI
+        this.m_sceneGUI.onGUI();
+
+        this.m_inspectorGUI.onGUI();
+
 
         if(this.m_showDrawCall){
             this.DrawDrawCallView();
@@ -171,19 +203,15 @@ export class IrisCanvas{
     private m_resLoaded:boolean = false;
 
     private async initGL(){
-
         SceneManager.Init();
         var camObj = new GameObject('camera');
         let camera = camObj.addComponent(new Camera());
         camera.clearType = ClearType.Skybox;
         camera.skybox = Skybox.createFromProcedural();
 
-
         await AssetsDataBase.loadBundle('iris.resbundle');
 
-        let pipeline = new InternalPipeline({
-            color:new vec4(Color.RED),
-        });
+        let pipeline = new InternalPipeline();
 
         this.m_graphicsRender.setPipeline(pipeline);
 
@@ -194,8 +222,8 @@ export class IrisCanvas{
     }
 
     private onResize(){
-    }
 
+    }
 
     private onFrame(ts:number){
 
@@ -239,4 +267,5 @@ function IrisSampleInit(){
 window['IrisSampleInit'] = IrisSampleInit;
 
 
+SampleBase.registerSample('basic_triangle',SampleTriangle);
 SampleBase.registerSample('basic_cube',SampleBasicCube);

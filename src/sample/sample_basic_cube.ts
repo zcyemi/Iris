@@ -1,4 +1,4 @@
-import { Component, GameObject, MeshRender, Mesh, Material, Color } from "../iris/core";
+import { Component, GameObject, MeshRender, Mesh, Material, Color, Camera, SceneManager } from "../iris/core";
 import { MeshPrimitive } from "../iris/core/MeshPrimitive";
 import { vec4 } from "../iris/math";
 import { ShaderFX } from "../iris/core/ShaderFX";
@@ -12,9 +12,9 @@ export class SampleBasicCube extends SampleBase{
     onInit(){
         var g = new GameObject("Cube");
 
+        let camera = SceneManager.currentScene.mainCamera;
         let bundle = AssetsDataBase.getLoadedBundle("iris");
         let shader = ShaderFX.findShader(bundle,'@shaderfx/default');
-
 
         let mat = new Material(shader);
         mat.setColor('uColor',vec4.one);

@@ -1,0 +1,47 @@
+#file vertexColor.sfx
+#include include/basis.sfx
+
+#GLSL
+precision mediump float;
+
+in vec4 aPosition : POSITION_0;
+in vec4 aColor: COLOR_0;
+
+inout vec4 vColor;
+
+void vertex(){
+    vec4 pos = aPosition;
+    gl_Position = MATRIX_MVP * pos;
+    vColor = aColor;
+}
+
+void vertex_raw(){
+    vec4 pos = aPosition;
+    pos.w = 1.0;
+    gl_Position = pos;
+    vColor = aColor;
+}
+
+
+out vec4 fragColor: TARGET_0;
+void fragment(){
+    fragColor = vColor;
+}
+
+#END
+
+technique vertex_color{
+#version 300 es
+#pipeline queue opaque
+
+#param vs vertex
+#param ps fragment
+}
+
+technique vertex_color_raw{
+#version 300 es
+#pipeline queue opaque
+
+#param vs vertex_raw
+#param ps fragment
+}

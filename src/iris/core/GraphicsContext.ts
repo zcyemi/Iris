@@ -1,5 +1,6 @@
 import { GraphicsRender } from "./GraphicsRender";
 import { GLContext } from "../gl";
+import { GameContext } from "./GameContext";
 
 export class GraphicsContext{
 
@@ -12,5 +13,7 @@ export class GraphicsContext{
     public static activeRender(g:GraphicsRender){
         GraphicsContext.m_currentRender =g;
         GraphicsContext.m_glctx = g.glctx;
+
+        GameContext.current.graphicsRender = g;
     }
 }

@@ -7,6 +7,8 @@ import { Transform } from "./Transform";
 export class SceneManager{
 
 
+    public static onSceneUpdate:()=>void;
+
     private static s_cameras:Camera[] = [];
     private static s_lights:Light[] = [];
 
@@ -14,6 +16,7 @@ export class SceneManager{
 
 
     private static s_currentScene:Scene;
+    private static s_sceneChanged:boolean = false;
 
     public static get currentScene():Scene{
         return SceneManager.s_currentScene;
@@ -23,7 +26,17 @@ export class SceneManager{
         return SceneManager.s_cameras;
     }
 
+    public static get allLights():Light[]{
+        return SceneManager.s_lights;
+    }
 
+    public static get rootTRS():Transform[]{
+        return SceneManager.s_rootTRS;
+    }
+
+    private static setChanged(){
+        SceneManager.s_sceneChanged = true;
+    }
 
     public static Init(){
         this.s_currentScene = new Scene();
@@ -35,9 +48,17 @@ export class SceneManager{
         for(let t=0;t<rootTRS.length;t++){
             rootTRS[t].gameobject.update();
         }
+
+        if(SceneManager.s_sceneChanged){
+            SceneManager.s_sceneChanged = false;
+
+            let cb =  SceneManager.onSceneUpdate;
+            if(cb !=null){
+                cb();
+            }
+        }
     }
-    
-    
+
     // public onFrame(scene:Scene){
     //     scene.onFrameStart();
     //     let strs = scene.transform;
@@ -57,6 +78,7 @@ export class SceneManager{
         let cameras = SceneManager.s_cameras;
         if(cameras.includes(cam)) return;
         cameras.push(cam);
+        SceneManager.setChanged();
     }
 
     public static removeCamera(cam:Camera){
@@ -64,6 +86,7 @@ export class SceneManager{
         let index = cameras.indexOf(cam);
         if(index >=0){
             SceneManager.s_cameras = cameras.splice(index,1);
+            SceneManager.setChanged();
         }
     }
 
@@ -71,6 +94,7 @@ export class SceneManager{
         let lights = SceneManager.s_lights;
         if(lights.includes(light)) return;
         lights.push(light);
+        SceneManager.setChanged();
     }
 
     public static removeLight(light:Light){
@@ -78,13 +102,13 @@ export class SceneManager{
         let index=  lights.indexOf(light);
         if(index >=0){
             SceneManager.s_lights = lights.splice(index,1);
+            SceneManager.setChanged();
         }
     }
 
-    
-
     public static resolveNewGameObject(g:GameObject){
         SceneManager.s_rootTRS.push(g.transform);
+        SceneManager.setChanged();
     }
 
     public static resolveTransformModify(trs:Transform,target:Transform){
@@ -108,6 +132,7 @@ export class SceneManager{
                 target.addChild(trs);
             }
         }
+        SceneManager.setChanged();
     }
 
 }

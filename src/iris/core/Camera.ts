@@ -6,6 +6,7 @@ import { mat4, vec4, glmath, f32, vec3 } from "../math/GLMath";
 import { Ray } from "../math/Ray";
 import { CommandBuffer, CommandBufferEvent } from "./CommandBuffer";
 import { PropertyUpdater } from "./Utility";
+import { GameContext } from "./GameContext";
 
 
 export enum AmbientType{
@@ -277,6 +278,8 @@ export class Camera extends Component{
         this.cmdbufferClearUpdater = PropertyUpdater.create(this,this.updateClearCommandBuffer.bind(this));
 
         this.cmdList = new CameraCommandList();
+
+        GameContext.current.registerCamera(this);
     }
 
     

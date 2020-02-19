@@ -56,7 +56,6 @@ export class GraphicsRender{
         return this.m_renderPipeline;
     }
 
-
     public get glctx():GLContext{
         return this.m_glctx;
     }
@@ -156,7 +155,6 @@ export class GraphicsRender{
         if(!this.m_valid) return;
 
         const self =this;
-
         
         let delay = this.m_creationInfo.frameBufferResizeDelay;
         if(delay == 0){
@@ -181,7 +179,6 @@ export class GraphicsRender{
         this.m_screenHeight = h;
         this.m_renderPipeline.resizeFrameBuffer(w,h);
     }
-
 
     public render(){
         if(this.pause || this.m_frameBufferInvalid) return;

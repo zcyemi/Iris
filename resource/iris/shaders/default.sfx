@@ -11,6 +11,13 @@ void vertex(){
     gl_Position = MATRIX_MVP * pos;
 }
 
+
+void vertex_raw(){
+    vec4 pos = aPosition;
+    pos.w = 1.0;
+    gl_Position = pos;
+}
+
 uniform vec4 uColor;
 
 out vec4 fragColor: TARGET_0;
@@ -21,9 +28,9 @@ void fragment(){
 #END
 
 technique default{
-#version 300 es
-#pipeline queue opaque
+    #version 300 es
+    #pipeline queue opaque
 
-#param vs vertex
-#param ps fragment
+    #param vs vertex
+    #param ps fragment
 }

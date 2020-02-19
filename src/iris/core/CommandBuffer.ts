@@ -1,7 +1,11 @@
-import { vec4 } from "../math";
+import { vec4, mat4 } from "../math";
 import { ITexture } from "./Texture";
 import { Skybox } from "./Skybox";
 import { Material } from "./Material";
+import { Mesh } from "./Mesh";
+import { GLVertexArray } from "../gl";
+import { MeshRender } from "./MeshRender";
+import { GameContext } from "./GameContext";
 
 
 
@@ -30,6 +34,9 @@ export enum CommandBufferEvent{
 export class CommandItem{
     public type:CommandType;
     public args:any[];
+
+
+    public temp_vao:GLVertexArray;
 
     public constructor(type:CommandType,args?:any[]){
         this.type = type;
@@ -79,8 +86,10 @@ export class CommandBuffer{
         this.commandList.push(new CommandItem(CommandType.Blit,[src,dest,material]));
     }
 
-    public draw(){
-
+    public drawMesh(mesh:Mesh,material:Material,mtx?:mat4){
+        let cmditem = new CommandItem(CommandType.Draw,[mesh,material,mtx]);
+        cmditem.temp_vao = MeshRender.CreateVertexArrayObj(GameContext.current.graphicsRender.glctx,mesh,material.program);
+        this.commandList.push(cmditem);
     }
 
     public drawScreenTexture(tex:ITexture){

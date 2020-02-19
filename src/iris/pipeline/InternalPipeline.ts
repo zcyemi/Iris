@@ -12,6 +12,7 @@ import { ShaderUniformBuffer } from "../core/ShaderUniformBuffer";
 import { GraphicsSettings } from "../core/GraphicsSettings";
 import { GameTime } from "../core/GameTime";
 import { Graphics } from "../core/Graphics";
+import { GameContext } from "../core/GameContext";
 
 export interface PipelineClearInfo {
     color?: vec4;
@@ -200,7 +201,21 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
     }
 
     drawMeshWithMat(mesh: Mesh, mat: Material, vao: GLVertexArray, objmtx?: mat4) {
-        throw new Error("Method not implemented.");
+
+        const glctx= this.glctx;
+
+        mesh.refreshMeshBuffer(glctx);
+        let glp = mat.program;
+        glctx.useGLProgram(glp);
+        this.bindDefaultUniform(glp);
+        this.bindCameraUniform(glp);
+        mat.apply(glctx);
+
+        glctx.bindGLVertexArray(vao);
+        glctx.drawElementIndices(mesh.indiceDesc);
+        glctx.bindVertexArray(null);
+        mat.clean(glctx);
+
     }
     clearFrameBufferTarget(clearinfo: PipelineClearInfo, fb: FrameBuffer) {
         throw new Error("Method not implemented.");
@@ -224,8 +239,16 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
                     this.drawScreenTex(cmd.args[0], null);
                     break;
                 case CommandType.Blit:
-                    let args =cmd.args;
-                    this.blit(args[0],args[1],args[2]);
+                    {
+                        let args =cmd.args;
+                        this.blit(args[0],args[1],args[2]);
+                    }
+                    break;
+                case CommandType.Draw:
+                    {
+                        let args = cmd.args;
+                        this.drawMeshWithMat(args[0],args[1],cmd.temp_vao);
+                    }
                     break;
             }
         }
@@ -240,10 +263,7 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
 
     public constructor(clearInfo?: PipelineClearInfo) {
         super();
-
-        if (clearInfo == null) clearInfo = { color: vec4.one, depth: 0, clearMask: GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT };
         this.clearInfo = clearInfo;
-
     }
 
     onSetupRender(glctx: GLContext, info: GraphicsRenderCreateInfo) {
@@ -259,9 +279,14 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
         const model = this.model;
 
 
+
         glctx.bindGLFramebuffer(this.mainFrameBuffer);
-        glctx.clearColor(1.0,1.0,0,1.0);
-        glctx.clear(GL.COLOR_BUFFER_BIT);
+
+        if(this.clearInfo!=null){
+            glctx.clearColorAry(this.clearInfo.color.raw);
+            glctx.clear(GL.COLOR_BUFFER_BIT);
+        }
+
 
         model.updateDefaultUniform();
 
@@ -272,39 +297,37 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
 
         //loop all camera
 
-        let cameras = SceneManager.allCameras;
+        let cam = GameContext.current.mainCamera;
 
-        cameras.forEach(cam => {
-            //render
-            if (!cam.enabled) return;
+        //render
+        if (!cam.enabled) return;
 
-            model.updateCameraUnifomrm(cam);
+        model.updateDefaultUniform();
+        model.updateCameraUnifomrm(cam);
 
-            let cmdbuffer = cam.cmdbufferClear;
-            //clar
-            if (cmdbuffer.valid) {
-                model.execCommand(cmdbuffer);
-            }
+        let cmdbuffer = cam.cmdbufferClear;
+        //clear
+        if (cmdbuffer.valid) {
+            model.execCommand(cmdbuffer);
+        }
 
-            let cameraCmdList = cam.cmdList;
+        let cameraCmdList = cam.cmdList;
 
-            //opaque
-            this.execCmdBuffers(cameraCmdList.beforeOpaque);
+        //opaque
+        this.execCmdBuffers(cameraCmdList.beforeOpaque);
 
-            this.execCmdBuffers(cameraCmdList.afterOpaque);
-            //transparent
+        this.execCmdBuffers(cameraCmdList.afterOpaque);
+        //transparent
 
-            this.execCmdBuffers(cameraCmdList.beforeTransparent);
+        this.execCmdBuffers(cameraCmdList.beforeTransparent);
 
-            this.execCmdBuffers(cameraCmdList.afterTransparent);
+        this.execCmdBuffers(cameraCmdList.afterTransparent);
 
-            //postprocess
-            this.execCmdBuffers(cameraCmdList.beforePostProcess);
+        //postprocess
+        this.execCmdBuffers(cameraCmdList.beforePostProcess);
 
-            this.execCmdBuffers(cameraCmdList.afterPostProcess);
-            //final
-        });
-
+        this.execCmdBuffers(cameraCmdList.afterPostProcess);
+        //final
 
         let error = glctx.getError();
         this.m_hasError = error != 0;
@@ -321,8 +344,10 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
 
 
     private execCmdBuffers(cmdlist: CommandBuffer[]) {
+
         let len = cmdlist.length;
         if (len == 0) return;
+
 
         const model = this.model;
         for (let t = 0; t < len; t++) {
