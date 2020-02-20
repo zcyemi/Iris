@@ -1,5 +1,5 @@
 import { UIContainer, UIRenderer, UIRenderingBind, UISourceLocal } from '@zcyemi/entangui';
-import { Camera, ClearType, FrameTimer, GameObject, GLUtility, GraphicsContext, GraphicsRender, Input, Skybox, WindowUtility } from '../iris';
+import iris, { Camera, ClearType, FrameTimer, GameObject, GLUtility, GraphicsContext, GraphicsRender, Input, Skybox, WindowUtility, Delayter } from '../iris';
 import { AssetsDataBase } from '../iris/core/AssetsDatabase';
 import { GameContext } from '../iris/core/GameContext';
 import { GameTime } from '../iris/core/GameTime';
@@ -12,6 +12,7 @@ import { SampleBase } from './sampleBase';
 import { SampleBasicCube } from './sample_basic_cube';
 import { SampleTriangle } from './sample_triangle';
 import { DrawCallViewEditorGUI } from './editor/DrawcallViewEditorGUI';
+import { SampleBasisSkybox } from './basis/SampleBasisSkybox';
 
 export class IrisSample extends UIContainer{
     private m_selectSampleId:string;
@@ -68,7 +69,10 @@ export class IrisSample extends UIContainer{
             this.flexItemEnd();
         }
         {
-            this.FlexItemBegin(null,1);
+            this.FlexItemBegin(null,1).style({
+                overflow:'hidden',
+                position:'relative'
+            });
             this.DrawMainCanvas();
             this.flexItemEnd();
         }
@@ -123,9 +127,9 @@ export class IrisSample extends UIContainer{
 
     private DrawMainCanvas(){
         this.element('canvas').id('iris-canvas').style({
-            width:'100%',
-            height:'100%',
-            'background':'#FFF'
+            'background':'#FFF',
+            width:'auto 400px',
+            height:'auto 300px'
         });
     }
 }
@@ -191,7 +195,22 @@ export class IrisCanvas{
         this.m_resLoaded  =true;
     }
 
+    private m_resizeDelayter = new Delayter()
+
     private onResize(){
+
+        const canvas = this.m_cavnas;
+        const canvasParent = canvas.parentElement;
+        const grender = this.m_graphicsRender;
+        var width = canvasParent.clientWidth;
+        var height = canvasParent.clientHeight;
+
+        this.m_resizeDelayter.emit(()=>{
+            console.log(width,height);
+            canvas.width = width;
+            canvas.height= height;
+            grender.resizeCanvas(width,height);
+        })
 
     }
 
@@ -239,5 +258,8 @@ function IrisSampleInit(){
 window['IrisSampleInit'] = IrisSampleInit;
 
 
-SampleBase.registerSample('basic_triangle',SampleTriangle);
-SampleBase.registerSample('basic_cube',SampleBasicCube);
+SampleBase.registerSample('basic/triangle',SampleTriangle);
+SampleBase.registerSample('basic/skybox',SampleBasisSkybox);
+SampleBase.registerSample('basic/cube',SampleBasicCube);
+
+

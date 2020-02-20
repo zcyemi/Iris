@@ -30,7 +30,6 @@ void fragment(){
 technique default{
     #version 300 es
     #pipeline queue opaque
-
     #param vs vertex
     #param ps fragment
 }

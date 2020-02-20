@@ -1171,6 +1171,12 @@ export class mat4 {
             0, 0, 0, 1]);
     }
 
+    public static IdentityCache:mat4 = new mat4([
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1]);
+
     public static lookAt(eye: vec3, target: vec3, up: vec3) {
         let vz = eye.subToRef(target).normalized;
         let vx = up.cross(vz).normalized;

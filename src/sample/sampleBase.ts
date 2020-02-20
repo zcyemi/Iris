@@ -1,6 +1,6 @@
 import { GraphicsRender, GLContext, GraphicsContext } from "../iris";
 
-export class SampleBase{
+export abstract class SampleBase{
 
     protected glrender:GraphicsRender;
     protected glctx:GLContext;
@@ -12,14 +12,10 @@ export class SampleBase{
         this.glctx = GraphicsContext.glctx;
     }
 
-    public onInit(){
-        
-    }
+    public abstract onInit();
 
 
-    public onDestroy(){
-
-    }
+    public abstract onDestroy();
 
     public static registerSample(name:string,type:new()=>SampleBase){
         SampleBase.sampleEntry.set(name,type);

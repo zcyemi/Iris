@@ -10,10 +10,15 @@ export abstract class BaseRender{
     public material:Material;
     protected m_object:GameObject;
     public get object():GameObject{return this.m_object;}
+    public set object(obj:GameObject){
+        this.m_object = obj;
+    }
     public castShadow:boolean = false;
 
     public constructor(){
     }
+
+
 
     public get renderQueue():RenderQueue{
         return this.material.shaderTags.queue;

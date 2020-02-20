@@ -1,4 +1,4 @@
-import { GameObject } from "../../iris";
+import { GameObject, vec3, quat } from "../../iris";
 import { BaseEditorGUI } from "./BaseEditorGUI";
 
 
@@ -25,6 +25,8 @@ export class InspectorEditorGUI extends BaseEditorGUI{
         ui.cardEnd();
     }
 
+    private m_trsOutput:string;
+
     private drawTarget(){
         let tar = this.target;
         if(tar == null){
@@ -42,9 +44,17 @@ export class InspectorEditorGUI extends BaseEditorGUI{
 
         trs.position;
 
-        ui.text("Pos:"+trs.position.raw);
-        ui.text("Rot:"+trs.localRotation.raw);
-        ui.text("Sca:"+trs.localScale.raw);
+        ui.formVec3("Pos",trs.position.raw,val=>{
+            trs.setPosition(new vec3(val));
+            console.log(trs.gameobject.name,val);
+        });
+        ui.formVec3("Rota:",trs.localRotation.raw);
+        ui.formVec3("Scale:",trs.localScale.raw,val=>trs.setScale(new vec3(val)));
+
+        
+        ui.button("objMtx",()=>this.m_trsOutput = trs.objMatrix.raw+"");
+
+        ui.formTextArea("Output",this.m_trsOutput,3);
 
         ui.divider();
 

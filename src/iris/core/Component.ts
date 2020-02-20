@@ -17,4 +17,5 @@ export class Component{
 
     public onUpdate?():void;
     public onStart?():void;
+    public onDestroy?():void;
 }

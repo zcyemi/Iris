@@ -15,7 +15,7 @@ export class SampleTriangle extends SampleBase{
         var cam = GameContext.current.mainCamera;
 
         cam.clearType = ClearType.Background;
-        cam.background= vec4.zero;
+        cam.background= vec4.one;
 
         var cmdbuffer:CommandBuffer = new CommandBuffer("Draw Triangle");
 

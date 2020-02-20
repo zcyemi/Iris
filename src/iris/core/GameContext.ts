@@ -9,7 +9,7 @@ import { Utility } from "./Utility";
 
 export class GameContext{
 
-    public gamePause:boolean = false;
+    public gamePause:boolean = true;
 
     public evtOnSceneUpdate:EventListener = new EventListener();
 

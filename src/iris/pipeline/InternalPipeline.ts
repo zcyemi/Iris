@@ -89,7 +89,7 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
         const uniformBasis = this.dataBasisBuffer;
         let indBasis = ublocks[uniformBasis.name];
-        if (indBasis) this.glctx.uniformBlockBinding(program.Program, indBasis, uniformBasis.uniformIndex);
+        if (indBasis !=null) this.glctx.uniformBlockBinding(program.Program, indBasis, uniformBasis.uniformIndex);
     }
 
     bindCameraUniform(program: GLProgram) {
@@ -97,15 +97,18 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         const uniformCamera = this.dataCameraBuffer;
 
         let indCamera = ublocks[uniformCamera.name];
-        if (indCamera) this.glctx.uniformBlockBinding(program.Program, indCamera, uniformCamera.uniformIndex);
+        if (indCamera !=null) this.glctx.uniformBlockBinding(program.Program, indCamera, uniformCamera.uniformIndex);
     }
 
     bindObjectUniform(program:GLProgram){
         let ublocks = program.UniformBlock;
-        const uniformObject = this.dataCameraBuffer;
+        const uniformObject = this.dataObjBuffer;
 
         let indObj = ublocks[uniformObject.name];
-        if (indObj) this.glctx.uniformBlockBinding(program.Program, indObj, uniformObject.uniformIndex);
+
+        if (indObj != null){
+            this.glctx.uniformBlockBinding(program.Program, indObj, uniformObject.uniformIndex);
+        }
     }
 
     updateDefaultUniform() {
@@ -135,7 +138,17 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         const objData = objBuffer.data;
         
         objData.obj2world.setValue(obj.transform.objMatrix);
+        objBuffer.uploadBufferData();
+    }
 
+    updateObjectUniformMTX(obj:mat4){
+        if(obj == null) return;
+
+        const objBuffer = this.dataObjBuffer;
+        const objData = objBuffer.data;
+
+        
+        objData.obj2world.setValue(obj);
         objBuffer.uploadBufferData();
     }
 
@@ -148,6 +161,8 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
         if (camera.isDataTrsDirty) {
             cameraData.cameraPos.setValue(camera.transform.position.vec4(0));
+
+            // console.log(camera.transform.position.raw);
             cameraData.cameraMtxView.setValue(camera.WorldMatrix);
         }
 
@@ -179,14 +194,16 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
     drawMeshRender(meshrender: MeshRender, objmtx?: mat4, material?: Material) {
         const glctx = this.glctx;
         meshrender.refreshData();
+        let mtx = objmtx || mat4.IdentityCache;
+        
+        this.updateObjectUniformMTX(mtx);
 
-        this.updateObjectUniform(meshrender.object);
-
-        if (material == null) material = this.m_matDefault;
+        material =material || meshrender.material;
         let glp = material.program;
         glctx.useGLProgram(glp);
         material.apply(glctx);
 
+        this.bindObjectUniform(glp);
         this.bindDefaultUniform(glp);
         this.bindCameraUniform(glp);
 
@@ -196,7 +213,6 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
     }
 
     drawBaseRender(meshrender:BaseRender,objmtx?:mat4,material?:Material){
-
         if(meshrender instanceof MeshRender){
             this.drawMeshRender(meshrender,objmtx,material);
         }
@@ -236,9 +252,15 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
         const glctx= this.glctx;
 
+        let mtx = objmtx || mat4.Identity;
+
+        this.updateObjectUniformMTX(mtx);
+
         mesh.refreshMeshBuffer(glctx);
         let glp = mat.program;
         glctx.useGLProgram(glp);
+
+        this.bindObjectUniform(glp);
         this.bindDefaultUniform(glp);
         this.bindCameraUniform(glp);
         mat.apply(glctx);
@@ -347,7 +369,6 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
         //render
         if (!cam.enabled) return;
 
-        model.updateDefaultUniform();
         model.updateCameraUnifomrm(cam);
 
         let cmdbuffer = cam.cmdbufferClear;

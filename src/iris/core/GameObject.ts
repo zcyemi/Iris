@@ -2,6 +2,7 @@ import { BaseRender } from "./BaseRender";
 import { Component } from "./Component";
 import { GameContext } from "./GameContext";
 import { Transform } from "./Transform";
+import { Utility } from "./Utility";
 
 export class GameObject{
 
@@ -18,6 +19,7 @@ export class GameObject{
     public set render(v:BaseRender){
         v['m_object'] = this;
         this.m_render = v;
+        v.object = this;
     }
 
     public addRender<T extends BaseRender>(t:new()=>T):T{
@@ -78,6 +80,23 @@ export class GameObject{
         c.gameobject = this;
         if(c.onStart != null) c.onStart();
         comps.push(c);
+
+        return c;
+    }
+
+    public removeComponent<T extends Component>(c:T):T{
+ 
+        let comps = this.components;
+        if(comps == null){
+            comps = [];
+            this.components = comps;
+        }
+
+        let ondestroy =c.onDestroy;
+        if(ondestroy) ondestroy();
+        c.gameobject = null;
+        
+        this.components = Utility.ListRemove(comps,c);
 
         return c;
     }
