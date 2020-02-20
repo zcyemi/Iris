@@ -203,6 +203,7 @@ export class Material extends GraphicsObj{
             return;
         }
         this.m_shader = shader;
+        this.m_shadertags = shader.tags;
         this.m_program = shader.compile();
 
         this.m_propertyBlock =new MaterialPorpertyBlock(this.m_program);

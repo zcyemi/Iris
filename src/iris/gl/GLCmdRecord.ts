@@ -27,6 +27,8 @@ export enum GLCmdType{
     drawElements,
 
     useProgram,
+
+    bufferData,
 }
 
 export class GLCmdData{

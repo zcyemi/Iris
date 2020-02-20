@@ -8,12 +8,18 @@ import { GL } from "../gl/GL";
 import { vec2 } from "../math/GLMath";
 import { Gizmos } from "./Gizmos";
 import { GLCmdData, GLCmdRecord } from "../gl/GLCmdRecord";
+import { type } from "os";
+import { GraphicsObj } from "./IGraphicObj";
+import { ShaderFX } from "./ShaderFX";
 
 export class GraphicsRenderCreateInfo{
     public colorFormat:number = 0x8058;
     public depthFormat:number = 0x81A6;
     public frameBufferResizeDelay:number = 250;
 }
+
+type resCacheObjID = {[key:number]:GraphicsObj};
+type resCacheName = {[key:string]:GraphicsObj};
 
 export class GraphicsRender{
     private m_glctx:GLContext;
@@ -214,4 +220,20 @@ export class GraphicsRender{
     public renderToCanvas(){
         this.pipeline.onRenderToCanvas();
     }
+
+
+    ///////////// ResourceCaches
+
+    public resSkyboxMat:resCacheObjID = {};
+    public resShader:resCacheName = {};
+
+    public getInternalShader(shaderName:string){
+        let shader = ShaderFX.findShader("iris",shaderName);
+        if(shader == null){
+            throw new Error(`can not find internal shader: ${shaderName}`);
+        }
+        return shader;
+    }
+
+    //////////// Resource Caches End
 }

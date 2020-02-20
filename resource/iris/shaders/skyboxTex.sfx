@@ -1,0 +1,37 @@
+#file skyboxTex.sfx
+#include include/basis.sfx
+
+#GLSL
+precision mediump float;
+
+inout vec3 vWorldDir: TEXCOORD_0;
+uniform sampler2D uSampler: MAIN_TEXTURE;
+
+in vec4 aPosition :POSITION_0;
+void vertex(){
+    vec4 pos = aPosition;
+    pos.xy*=2.0;
+    pos.z = 1.0;
+    gl_Position = pos;
+    vec4 wpos =  inverse(MATRIX_VP) * pos;
+    wpos.xyz = wpos.xyz / wpos.w - CAMERA_POS.xyz;
+    vWorldDir = wpos.xyz;
+}
+
+out lowp vec4 fragColor : TARGET_0;
+void fragment(){
+    vec3 dir = vWorldDir.xyz;
+    dir = normalize(dir);
+    float y = 1.0 - 0.5 *(1.0 + dir.y);
+    float x = atan(dir.z,dir.x) / PI_2 + 0.5;
+    fragColor = texture(uSampler,vec2(x,y));
+}
+
+#END
+
+technique skyboxTex{
+#pipeline queue skybox
+
+#param vs vertex
+#param ps fragment
+}

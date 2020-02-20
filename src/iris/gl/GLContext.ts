@@ -211,6 +211,7 @@ export class GLContext {
     }
 
     public bufferData(target:number,sizeOrData:GLSizeOrData,usage:number){
+        if(this.m_debug) this.cmdRecord.Record(GLCmdType.bufferData,"bufferData",target);
         this.gl.bufferData(target,sizeOrData,usage);
     }
 
@@ -406,6 +407,7 @@ export class GLContext {
     }
     
     public drawElementIndices(desc:MeshIndicesDesc){
+        if(this.m_debug) this.cmdRecord.Record(GLCmdType.drawElements,'DrawIndices',desc.type);
         this.gl.drawElements(desc.topology,desc.indiceCount,desc.type,desc.offset);
     }
 

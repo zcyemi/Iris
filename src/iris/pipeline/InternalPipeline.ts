@@ -1,4 +1,4 @@
-import { Camera, GraphicsObj, GraphicsRenderCreateInfo, ITexture, Material, Mesh, MeshRender, Texture2D } from "../core";
+import { Camera, GraphicsObj, GraphicsRenderCreateInfo, ITexture, Material, Mesh, MeshRender, Texture2D, BaseRender, GameObject, Skybox } from "../core";
 import { AssetsBundle, AssetsDataBase } from "../core/AssetsDatabase";
 import { CommandBuffer, CommandType } from "../core/CommandBuffer";
 import { GameContext } from "../core/GameContext";
@@ -13,6 +13,7 @@ import { mat4, vec4 } from "../math";
 import { ShaderDataBasis, ShaderDataCamera, ShaderDataLight, ShaderDataObj } from "./InternalPipelineUniform";
 import { IRenderModel } from "./IRenderModel";
 import { RenderPipelineBase } from "./RenderPipelineBase";
+import { IndexedBuffer } from "../collection";
 
 export interface PipelineClearInfo {
     color?: vec4;
@@ -54,6 +55,7 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         this.dataCameraBuffer = new ShaderUniformBuffer(ShaderDataCamera, 1, 'UNIFORM_CAMERA');
         this.dataObjBuffer = new ShaderUniformBuffer(ShaderDataObj, 2, 'UNIFORM_OBJ');
         this.dataLightBuffer = new ShaderUniformBuffer(ShaderDataLight, 3, 'UNIFORM_LIGHT');
+
 
         let resBundle = AssetsDataBase.getLoadedBundle("iris");
         if (resBundle == null) {
@@ -98,6 +100,14 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         if (indCamera) this.glctx.uniformBlockBinding(program.Program, indCamera, uniformCamera.uniformIndex);
     }
 
+    bindObjectUniform(program:GLProgram){
+        let ublocks = program.UniformBlock;
+        const uniformObject = this.dataCameraBuffer;
+
+        let indObj = ublocks[uniformObject.name];
+        if (indObj) this.glctx.uniformBlockBinding(program.Program, indObj, uniformObject.uniformIndex);
+    }
+
     updateDefaultUniform() {
 
         const basisBuffer = this.dataBasisBuffer;
@@ -118,6 +128,17 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         this.dataBasisBuffer.uploadBufferData();
     }
 
+    updateObjectUniform(obj:GameObject){
+        if(obj == null) return;
+
+        const objBuffer = this.dataObjBuffer;
+        const objData = objBuffer.data;
+        
+        objData.obj2world.setValue(obj.transform.objMatrix);
+
+        objBuffer.uploadBufferData();
+    }
+
 
     updateCameraUnifomrm(camera: Camera) {
         if (camera == null) return;
@@ -136,6 +157,8 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
             cameraData.cameraMtxInvProj.setValue(camera.ProjMatrixInv);
             cameraData.cameraProjParam.setValue(camera.ProjParam);
         }
+
+        cameraBuffer.uploadBufferData();
     }
 
     setShadowMapTex(tex: ITexture, index: number) {
@@ -154,14 +177,13 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         this.drawMeshRender(this.m_fullscreenRender, null, mat);
     }
     drawMeshRender(meshrender: MeshRender, objmtx?: mat4, material?: Material) {
-
         const glctx = this.glctx;
         meshrender.refreshData();
 
+        this.updateObjectUniform(meshrender.object);
+
         if (material == null) material = this.m_matDefault;
-
         let glp = material.program;
-
         glctx.useGLProgram(glp);
         material.apply(glctx);
 
@@ -171,6 +193,13 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         meshrender.bindVertexArray(glctx);
         glctx.drawElementIndices(meshrender.mesh.indiceDesc);
         meshrender.unbindVertexArray(glctx);
+    }
+
+    drawBaseRender(meshrender:BaseRender,objmtx?:mat4,material?:Material){
+
+        if(meshrender instanceof MeshRender){
+            this.drawMeshRender(meshrender,objmtx,material);
+        }
 
     }
 
@@ -224,6 +253,12 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         throw new Error("Method not implemented.");
     }
 
+    private m_skyboxRender:MeshRender;
+
+    drawSkyBox(skyboxMat:Material){
+        this.drawMeshRender(this.m_fullscreenRender, null, skyboxMat);
+    }
+
     execCommand(cmdbufer: CommandBuffer) {
 
         let items = cmdbufer.commandList;
@@ -251,6 +286,11 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
                     {
                         let args = cmd.args;
                         this.drawMeshWithMat(args[0],args[1],cmd.temp_vao);
+                    }
+                    break;
+                case CommandType.DrawSkybox:
+                    {
+                        this.drawSkyBox(cmd.args[0]);
                     }
                     break;
             }
@@ -300,7 +340,9 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
 
         //loop all camera
 
-        let cam = GameContext.current.mainCamera;
+        const gamectx = GameContext.current;
+
+        let cam = gamectx.mainCamera;
 
         //render
         if (!cam.enabled) return;
@@ -316,19 +358,21 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
 
         let cameraCmdList = cam.cmdList;
 
+        const renderNodeList = gamectx.nodeList;
+
         //opaque
         this.execCmdBuffers(cameraCmdList.beforeOpaque);
-
+        this.drawNodeList(renderNodeList.nodeOpaque);
         this.execCmdBuffers(cameraCmdList.afterOpaque);
         //transparent
 
         this.execCmdBuffers(cameraCmdList.beforeTransparent);
-
+        this.drawNodeList(renderNodeList.nodeTransparent);
         this.execCmdBuffers(cameraCmdList.afterTransparent);
 
         //postprocess
         this.execCmdBuffers(cameraCmdList.beforePostProcess);
-
+        this.drawNodeList(renderNodeList.nodeImage);
         this.execCmdBuffers(cameraCmdList.afterPostProcess);
         //final
 
@@ -337,6 +381,20 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
         if (this.m_hasError) {
             console.error("Get GLError: " + error);
         }
+    }
+
+    private drawNodeList(list:IndexedBuffer<BaseRender>){
+        const size = list.size;
+        if(size ==0) return;
+        
+        const ary = list.array;
+
+        for(let t=0;t<size;t++){
+            let render:BaseRender = ary[t];
+            this.model.drawBaseRender(render);
+        }
+
+
 
     }
 

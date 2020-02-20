@@ -19,7 +19,7 @@ export abstract class BaseRender{
         return this.material.shaderTags.queue;
     }
 
-    public abstract refreshData(glctx:GLContext)
+    public abstract refreshData()
     public abstract release(glctx:GLContext);
     public abstract draw(gl:GLContext,model:IRenderModel);
 

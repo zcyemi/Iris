@@ -286,6 +286,9 @@ export class Camera extends Component{
     private updateClearCommandBuffer(){
         let clearType =this.clearType;
 
+
+        console.log("update camera cmdbuffer clear");
+
         let cmdbuffer = this.cmdbufferClear;
         cmdbuffer.clear();
 

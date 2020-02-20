@@ -1,9 +1,9 @@
 
 export enum RenderQueue{
-    Opaque,
-    Transparent,
-    Skybox,
-    Image,
-    Overlay,
-    Other
+    opaque,
+    transparent,
+    skybox,
+    image,
+    overlay,
+    other
 }

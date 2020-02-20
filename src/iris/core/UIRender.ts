@@ -22,7 +22,7 @@ export class UIRender extends BaseRender {
         this.m_text = text;
     }
 
-    public get renderQueue(): RenderQueue { return RenderQueue.Overlay; }
+    public get renderQueue(): RenderQueue { return RenderQueue.overlay; }
 
     public refreshData(glctx: GLContext) {
         this.m_sprBatch.refreshData(glctx);

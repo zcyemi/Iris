@@ -1,6 +1,7 @@
 import { Texture2D } from "./Texture2D";
 import { TextureCubeMap } from "./TextureCubeMap";
 import { ITexture } from "./Texture";
+import { GraphicsObj } from "./IGraphicObj";
 
 
 
@@ -12,7 +13,7 @@ export enum SkyboxType{
 }
 
 
-export class Skybox {
+export class Skybox extends GraphicsObj {
 
     private m_rawtex:ITexture;
     private m_type:SkyboxType;
@@ -21,7 +22,11 @@ export class Skybox {
     public get rawTex():ITexture{return this.m_rawtex;}
 
     protected constructor(type:SkyboxType) {
+        super();
         this.m_type =type;
+    }
+
+    public release(){
     }
 
     public static createFromCubeMap(cubemap: TextureCubeMap): Skybox {

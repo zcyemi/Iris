@@ -1,11 +1,15 @@
 import { AssetsDataBase, BundleFileEntry } from "./AssetsDatabase";
 import { BinaryBuffer } from "ts-binary-serializer/dist/src/BinaryBuffer";
-import { ShaderFXSource } from "./ShaderFX";
+import { ShaderFXSource, ShaderTags, ShaderFXTechnique } from "./ShaderFX";
 import { GLProgram, GLContext } from "../gl";
 import { GraphicsContext } from "./GraphicsContext";
+import { RenderQueue } from "../pipeline/RenderQueue";
 
 
 export class Shader{
+
+
+    public tags:ShaderTags;
 
     private m_source:ShaderFXSource;
 
@@ -13,6 +17,7 @@ export class Shader{
 
     public constructor(source:ShaderFXSource){
         this.m_source = source;
+        this.tags = this.getTags(source.technique);
     }
 
     public compile():GLProgram{
@@ -27,6 +32,22 @@ export class Shader{
         program.name = this.m_source.technique.name;
         this.m_defProgram = program;
         return this.m_defProgram;
+    }
+
+    private getTags(technique:ShaderFXTechnique):ShaderTags{
+        let tag = new ShaderTags();
+
+        let meta = technique.meta_pipeline;
+        tag.queue = RenderQueue[this.getMetaProp(meta['queue'],'opaque')];
+    
+        return tag;
+    }
+
+    private getMetaProp(val:any,def:any):string{
+        if(val == null) return def;
+        if(Array.isArray(val)){
+            return val[0];
+        }
     }
 
     

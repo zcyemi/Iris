@@ -113,7 +113,7 @@ export class ShaderTags{
     }
 
     public fillDefaultVal(){
-        if(this.queue == null) this.queue = RenderQueue.Opaque;
+        if(this.queue == null) this.queue = RenderQueue.opaque;
         if(this.zwrite == null) this.zwrite = true;
         if(this.ztest == null) this.ztest = Comparison.LEQUAL;
         if(this.culling == null) this.culling = CullingMode.Back;

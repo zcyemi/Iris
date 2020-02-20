@@ -273,7 +273,7 @@ export class GLTFSceneBuilder{
         if(alphaMode == "BLEND"){
             if(shadertags == null) shadertags = new ShaderTags();
             shadertags.blendOp = BlendOperator.ADD;
-            shadertags.queue = RenderQueue.Transparent;
+            shadertags.queue = RenderQueue.transparent;
             shadertagsOverride = true;
 
             mat.setShader(this.m_pbrBlendShader);
@@ -281,7 +281,7 @@ export class GLTFSceneBuilder{
 
         if(shadertagsOverride){
 
-            if(shadertags.queue == null) shadertags.queue = RenderQueue.Opaque;
+            if(shadertags.queue == null) shadertags.queue = RenderQueue.opaque;
             mat.shaderTags = shadertags;
         }
 

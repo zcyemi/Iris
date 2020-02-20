@@ -11,6 +11,7 @@ import { SceneEditorGUI } from './editor/SceneEditorGUI';
 import { SampleBase } from './sampleBase';
 import { SampleBasicCube } from './sample_basic_cube';
 import { SampleTriangle } from './sample_triangle';
+import { DrawCallViewEditorGUI } from './editor/DrawcallViewEditorGUI';
 
 export class IrisSample extends UIContainer{
     private m_selectSampleId:string;
@@ -19,6 +20,7 @@ export class IrisSample extends UIContainer{
 
     private m_sceneGUI:SceneEditorGUI;
     private m_inspectorGUI:InspectorEditorGUI;
+    private m_drawCallViewGUI:DrawCallViewEditorGUI;
 
     
     constructor(){
@@ -42,6 +44,9 @@ export class IrisSample extends UIContainer{
 
         this.m_inspectorGUI = new InspectorEditorGUI(this);
         this.m_inspectorGUI.onInit();
+
+        this.m_drawCallViewGUI = new DrawCallViewEditorGUI(this);
+        this.m_drawCallViewGUI.onInit();
     }
 
 
@@ -83,7 +88,7 @@ export class IrisSample extends UIContainer{
         this.sidebarEnd();
     }
 
-    private m_showDrawCall:boolean = false;
+
     private m_renderPause:boolean = true;
 
     
@@ -94,7 +99,7 @@ export class IrisSample extends UIContainer{
 
         this.button('Draw',()=>{
             this.grender.debugNextFrameGL();
-            this.m_showDrawCall = true;
+            this.m_drawCallViewGUI.showDrawCall = true;
         });
         this.button(this.m_renderPause?"Start":"Pause",()=>{
             let newstatus = !this.m_renderPause;
@@ -113,42 +118,8 @@ export class IrisSample extends UIContainer{
         this.m_inspectorGUI.onGUI();
 
 
-        if(this.m_showDrawCall){
-            this.DrawDrawCallView();
-        }
+        this.m_drawCallViewGUI.onGUI();
     }
-
-    private DrawDrawCallView(){
-        this.contextBegin('view-drawcall',"mask");
-
-        this.cardBegin('DrawCall View').classes('center').style({height:'70%',width:'80%'});
-
-        this.button('Close',()=>this.m_showDrawCall = false);
-
-        this.divider();
-
-        let data = this.grender.lastGLCmdRecord;
-        if(data == null){
-            this.alert('No FrameData');
-            this.button('Refresh',()=>{});
-        }
-        else{
-
-            this.listBegin(false);
-
-            data.commands.forEach(cmd=>{
-                this.bandage(GLCmdType[cmd.type]);
-                this.text(cmd.parameter,'span');
-                this.listItemNext();
-            })
-            this.listEnd();
-        }
-
-        this.cardEnd();
-
-        this.contextEnd('view-drawcall');
-    }
-
 
     private DrawMainCanvas(){
         this.element('canvas').id('iris-canvas').style({
@@ -159,7 +130,6 @@ export class IrisSample extends UIContainer{
     }
 }
 
-
 export class IrisCanvas{
     
     private m_cavnas:HTMLCanvasElement;
@@ -168,7 +138,6 @@ export class IrisCanvas{
 
     public get timer():FrameTimer{return this.m_timer;}
     public get graphicsRender():GraphicsRender{return this.m_graphicsRender;}
-
 
     private m_currenSample:SampleBase;
 

@@ -1,9 +1,10 @@
-import { Camera } from "./Camera";
-import { Light } from "./Light";
-import { GraphicsRender } from "./GraphicsRender";
-import { GameObject } from "./GameObject";
-import { Transform } from "./Transform";
 import { EventListener } from "../misc/EventListener";
+import { Camera } from "./Camera";
+import { GameObject } from "./GameObject";
+import { GraphicsRender } from "./GraphicsRender";
+import { Light } from "./Light";
+import { RenderNodeList } from "./RenderNodeList";
+import { Transform } from "./Transform";
 import { Utility } from "./Utility";
 
 export class GameContext{
@@ -28,13 +29,10 @@ export class GameContext{
 
     public mainCamera:Camera;
 
-    public activeContext(){
-        GameContext.s_current = this;
-    }
+    public nodeList:RenderNodeList = new RenderNodeList();
 
-    public inactiveContext(){
-        GameContext.s_current = null;
-    }
+    public activeContext(){ GameContext.s_current = this;}
+    public inactiveContext(){ GameContext.s_current = null;}
 
     public registerCamera(camera:Camera){
         if(this.sceneCameras.length  == 0){
@@ -70,6 +68,10 @@ export class GameContext{
             rootTRS[t].gameobject.update();
         }
 
+        //Generate RenderNodeList
+        this.generateRnederList();
+
+
         if(this.m_sceneChanged){
             this.m_sceneChanged =false;
             this.evtOnSceneUpdate.Invoke();
@@ -100,5 +102,37 @@ export class GameContext{
         }
         this.m_sceneChanged =true;
     } 
+
+    private generateRnederList(){
+        const nodeList= this.nodeList;
+        nodeList.reset();
+        const rootTRS = this.sceneTRS;
+        const len = rootTRS.length;
+        for(let t=0;t<len;t++){
+            let trs = rootTRS[t];
+            if(!trs.gameobject.active) continue;
+            this.traversalRenderNode(nodeList,trs);
+        }
+
+        nodeList.sort();
+    }
+
+    private traversalRenderNode(drawlist: RenderNodeList, obj: Transform) {
+        let cobj = obj.gameobject;
+        if (!cobj.active) return;
+        let crender = cobj.render;
+        if (crender != null) {
+            drawlist.pushRenderNode(crender);
+        }
+
+        let children = obj.children;
+        if (children == null) return;
+        for (let i = 0, len = children.length; i < len; i++) {
+            let c = children[i];
+            
+            this.traversalRenderNode(drawlist, c);
+        }
+    }
+
 
 }

@@ -1,6 +1,6 @@
 import { vec4, mat4 } from "../math";
 import { ITexture } from "./Texture";
-import { Skybox } from "./Skybox";
+import { Skybox, SkyboxType } from "./Skybox";
 import { Material } from "./Material";
 import { Mesh } from "./Mesh";
 import { GLVertexArray } from "../gl";
@@ -10,6 +10,8 @@ import { GraphicsObj } from "./IGraphicObj";
 import { GraphicsRender } from "./GraphicsRender";
 import { GraphicsContext } from "./GraphicsContext";
 import { basename } from "path";
+import { ShaderFX } from "./ShaderFX";
+import { Shader } from "./Shader";
 
 
 
@@ -21,6 +23,7 @@ export enum CommandType{
     Blit,
     Draw,
     DrawScreenTex,
+    DrawSkybox,
 
 }
 
@@ -104,7 +107,39 @@ export class CommandBuffer extends GraphicsObj{
     }
 
     public drawSkybox(skybox:Skybox){
+        if(skybox == null) return;
 
+        if(skybox.type == SkyboxType.Custom){
+            throw new Error('not implemented');
+        }
+        const grender= GameContext.current.graphicsRender;
+
+        let mat =<Material>grender.resSkyboxMat[skybox.objId];
+        if(mat == null){
+            let shader:Shader = null;
+            switch(skybox.type){
+                case SkyboxType.CubeMap:
+                    shader = grender.getInternalShader("@shaderfx/skyboxCube");
+                break;
+                case SkyboxType.Procedural:
+                    shader = grender.getInternalShader("@shaderfx/skyboxPCG");
+                break;
+                case SkyboxType.Tex360:
+                    shader = grender.getInternalShader("@shaderfx/skyboxTex");
+                break;
+            }
+
+            mat = new Material(shader);
+            grender.resSkyboxMat[skybox.objId] = mat;
+        }
+
+        let tex = skybox.rawTex;
+        if(tex!=null){
+            mat.setMainTexture(tex);
+        }
+
+        let drawcmd = new CommandItem(CommandType.DrawSkybox,[mat]);
+        this.commandList.push(drawcmd);
     }
 
     public blit(src:ITexture,dest:ITexture,material?:Material){
