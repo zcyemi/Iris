@@ -1,5 +1,7 @@
 import { mat3, mat4, vec3, vec4 } from "../math/GLMath";
 import { PropertyUpdater, Utility } from "./Utility";
+import { GLContext, GL } from "../gl";
+import { GameContext } from "./GameContext";
 
 export class ShaderBuffer{
     private minoff:number =0;
@@ -271,6 +273,7 @@ export class ShaderData{
         if(!fxbuffer.isDirty) return false;
         let minoff = fxbuffer.offsetMin;
         let maxoff = fxbuffer.offsetMax;
+
         if(minoff>= maxoff){
             fxbuffer.setDirty(false);
             return false;
@@ -284,3 +287,70 @@ export class ShaderData{
 
 }
 
+export class SimpleUniformBuffer{
+
+    public uniformName:string;
+    public uniformIndex:number;
+
+    public glbuffer:WebGLBuffer;
+    public isDirty:boolean = true;
+    public data:ArrayBuffer;
+
+    public dataView:DataView;
+
+    private minoff:number =0;
+    private maxoff:number =0;
+
+    public constructor(unifomr_name:string,uniform_index:number,bytesize:number){
+        this.uniformIndex = uniform_index;
+        this.uniformName = unifomr_name;
+        this.data = new ArrayBuffer(bytesize);
+        this.dataView = new DataView(this.data);
+
+        const glctx = GameContext.current.graphicsRender.glctx;
+        let buffer =glctx.createBufferAndBind(GL.UNIFORM_BUFFER);
+        glctx.bufferData(GL.UNIFORM_BUFFER,this.data,GL.DYNAMIC_DRAW);
+        glctx.bindBufferBase(GL.UNIFORM_BUFFER,uniform_index,buffer);
+        this.glbuffer = buffer;
+
+        this.isDirty = false;
+    }
+
+    public setFloat32(offset:number,val:number){
+        this.dataView.setFloat32(offset,val,true);
+        this.isDirty = false;
+    }
+
+    public setMat4(offset:number,val:mat4){
+        let raw = val.raw;
+
+        const dv = this.dataView;
+
+        this.minoff = Math.min(offset,this.minoff);
+        let off = offset;
+        for(let t=0;t<16;t++){
+
+            dv.setFloat32(off,raw[t],true);
+            off+=4;
+        }
+        this.maxoff = Math.max(this.maxoff,off);
+        this.isDirty = true;
+    }
+
+    public submitData(gl:GLContext){
+
+        if(!this.isDirty) return;
+
+        gl.bindBuffer(GL.UNIFORM_BUFFER,this.glbuffer);
+        let minoff = this.minoff;
+        gl.bufferSubData(GL.UNIFORM_BUFFER,minoff,this.dataView,minoff,this.maxoff - minoff);
+        gl.bindBuffer(GL.UNIFORM_BUFFER,null);
+
+
+        this.isDirty = false;
+
+
+
+    }
+
+}

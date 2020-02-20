@@ -617,6 +617,10 @@ export class GLContext {
         this.gl.getBufferSubData(target,srcByteOffset,dstBuffer,dstOffset,length);
     }
 
+    public bufferSubData(target:number,dstByteOffset:number,srcData:ArrayBufferView,srcOffset:number,length?:number){
+        this.gl.bufferSubData(target,dstByteOffset,srcData,srcOffset,length);
+    }
+
     public darwMesh(mesh:Mesh,mat:Material,mtx:mat4 = null,camera:Camera){
         
         if(!mesh.bufferInited){

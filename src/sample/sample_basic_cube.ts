@@ -14,7 +14,6 @@ export class SampleBasicCube extends SampleBase{
     private m_cube:GameObject;
     private m_mesh:Mesh;
 
-
     private m_skybox:Skybox;
 
     onInit(){
@@ -23,11 +22,9 @@ export class SampleBasicCube extends SampleBase{
             var g = new GameObject("Cube");
             this.m_cube = g;
     
-            g.transform.setPosition(new vec3([0,0,10]));
+            g.transform.setPosition(new vec3([0,0,0]));
             let bundle = AssetsDataBase.getLoadedBundle("iris");
             let shader = ShaderFX.findShader(bundle,'@shaderfx/debug');
-    
-            console.log(shader);
 
             let mat = new Material(shader);
             // mat.setColor('uColor',vec4.one);
@@ -36,7 +33,7 @@ export class SampleBasicCube extends SampleBase{
             if(mesh == null){
                 mesh = new Mesh('TestBox');
                 mesh.setPosition(0,new Float32Array([
-                    -1.0,-0.5,0,
+                    -0.5,-0.5,0,
                     0.5,-0.5,0,
                     0.5,0.5,0,
                     -0.5,0.5,0,
@@ -48,15 +45,14 @@ export class SampleBasicCube extends SampleBase{
 
             
             let meshRender = new MeshRender(mesh,mat);
-    
-            // g.render = meshRender;
+            g.render = meshRender;
 
-            let cmdbuffer = new CommandBuffer("test");
-            cmdbuffer.drawMesh(mesh,mat,g.transform.objMatrix);
-            cmdbuffer.submit();
+            // let cmdbuffer = new CommandBuffer("test");
+            // cmdbuffer.drawMesh(mesh,mat,g.transform.objMatrix);
+            // cmdbuffer.submit();
 
-            let camera = GameContext.current.mainCamera;
-            camera.cmdList.add(CommandBufferEvent.beforeOpaque,cmdbuffer);
+            // let camera = GameContext.current.mainCamera;
+            // camera.cmdList.add(CommandBufferEvent.beforeOpaque,cmdbuffer);
 
             
         }

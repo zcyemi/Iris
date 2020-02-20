@@ -14,6 +14,7 @@ import { ShaderDataBasis, ShaderDataCamera, ShaderDataLight, ShaderDataObj } fro
 import { IRenderModel } from "./IRenderModel";
 import { RenderPipelineBase } from "./RenderPipelineBase";
 import { IndexedBuffer } from "../collection";
+import { SimpleUniformBuffer } from "../core/ShaderBuffer";
 
 export interface PipelineClearInfo {
     color?: vec4;
@@ -32,15 +33,16 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
     private static s_defaultScreenRect: vec4 = new vec4([0, 0, 1, 1]);
     private m_fullscreenRender: MeshRender;
 
-
     private m_matBlit: Material;
     private m_matBlitFlip:Material;
 
-
     private dataBasisBuffer: ShaderUniformBuffer<ShaderDataBasis>;
-    private dataObjBuffer: ShaderUniformBuffer<ShaderDataObj>;
+    // private dataObjBuffer: ShaderUniformBuffer<ShaderDataObj>;
     private dataCameraBuffer: ShaderUniformBuffer<ShaderDataCamera>;
     private dataLightBuffer: ShaderUniformBuffer<ShaderDataLight>;
+
+
+    private uniformObjectBufer:SimpleUniformBuffer;
 
     private m_tempFramebuffer: FrameBuffer;
 
@@ -53,8 +55,10 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
         this.dataBasisBuffer = new ShaderUniformBuffer(ShaderDataBasis, 0, 'UNIFORM_BASIS');
         this.dataCameraBuffer = new ShaderUniformBuffer(ShaderDataCamera, 1, 'UNIFORM_CAMERA');
-        this.dataObjBuffer = new ShaderUniformBuffer(ShaderDataObj, 2, 'UNIFORM_OBJ');
+        // this.dataObjBuffer = new ShaderUniformBuffer(ShaderDataObj, 2, 'UNIFORM_OBJ');
         this.dataLightBuffer = new ShaderUniformBuffer(ShaderDataLight, 3, 'UNIFORM_LIGHT');
+
+        this.uniformObjectBufer = new SimpleUniformBuffer("UNIFORM_OBJ",2,64);
 
 
         let resBundle = AssetsDataBase.getLoadedBundle("iris");
@@ -102,9 +106,9 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
     bindObjectUniform(program:GLProgram){
         let ublocks = program.UniformBlock;
-        const uniformObject = this.dataObjBuffer;
+        const uniformObject = this.uniformObjectBufer;
 
-        let indObj = ublocks[uniformObject.name];
+        let indObj = ublocks[uniformObject.uniformName];
 
         if (indObj != null){
             this.glctx.uniformBlockBinding(program.Program, indObj, uniformObject.uniformIndex);
@@ -134,22 +138,15 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
     updateObjectUniform(obj:GameObject){
         if(obj == null) return;
 
-        const objBuffer = this.dataObjBuffer;
-        const objData = objBuffer.data;
-        
-        objData.obj2world.setValue(obj.transform.objMatrix);
-        objBuffer.uploadBufferData();
+        const objBuffer = this.uniformObjectBufer;
+        objBuffer.setMat4(0,obj.transform.objMatrix);
     }
 
     updateObjectUniformMTX(obj:mat4){
         if(obj == null) return;
 
-        const objBuffer = this.dataObjBuffer;
-        const objData = objBuffer.data;
-
-        
-        objData.obj2world.setValue(obj);
-        objBuffer.uploadBufferData();
+        const objBuffer = this.uniformObjectBufer;
+        objBuffer.setMat4(0,obj);
     }
 
 
@@ -194,7 +191,7 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
     drawMeshRender(meshrender: MeshRender, objmtx?: mat4, material?: Material) {
         const glctx = this.glctx;
         meshrender.refreshData();
-        let mtx = objmtx || mat4.IdentityCache;
+        let mtx = objmtx || mat4.IdentityCached;
         
         this.updateObjectUniformMTX(mtx);
 
@@ -214,7 +211,7 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
     drawBaseRender(meshrender:BaseRender,objmtx?:mat4,material?:Material){
         if(meshrender instanceof MeshRender){
-            this.drawMeshRender(meshrender,objmtx,material);
+            this.drawMeshRenderWithMtx(meshrender,meshrender.object.transform.objMatrix);
         }
 
     }
@@ -248,11 +245,39 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         glctx.bindGLFramebuffer(this.m_pipeline.mainFrameBuffer);
     }
 
+    drawMeshRenderWithMtx(mesh:MeshRender,mtx:mat4){
+        this.drawMeshRenderWithMtxMat(mesh,mtx,mesh.material);
+    }
+
+    drawMeshRenderWithMtxMat(mesh:MeshRender,mtx:mat4,mat:Material){
+        const glctx= this.glctx;
+
+        mtx = mtx || mat4.IdentityCached;
+        this.updateObjectUniformMTX(mtx);
+        this.uniformObjectBufer.submitData(glctx);
+
+        mesh.refreshData();
+
+        let glp = mat.program;
+        glctx.useGLProgram(glp);
+
+        this.bindObjectUniform(glp);
+        this.bindDefaultUniform(glp);
+        this.bindCameraUniform(glp);
+        mat.apply(glctx);
+
+        mesh.bindVertexArray(glctx);
+        glctx.drawElementIndices(mesh.mesh.indiceDesc);
+        mesh.unbindVertexArray(glctx);
+        
+        mat.clean(glctx);
+    }
+
     drawMeshWithMat(mesh: Mesh, mat: Material, vao: GLVertexArray, objmtx?: mat4) {
 
         const glctx= this.glctx;
 
-        let mtx = objmtx || mat4.Identity;
+        let mtx = objmtx || mat4.IdentityCached;
 
         this.updateObjectUniformMTX(mtx);
 

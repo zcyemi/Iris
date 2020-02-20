@@ -26,7 +26,7 @@ export class PassOverlay extends RenderPass{
         for(let t=0;t<len;t++){
             const node = queueary[t];
             if(node instanceof MeshRender){
-                model.drawMeshRenderWithMtx(node,node.object.transform.objMatrix);
+                model.drawMeshRender(node,node.object.transform.objMatrix);
             }
             else{
                 node.draw(glctx,model);

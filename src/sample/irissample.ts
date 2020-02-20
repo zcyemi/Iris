@@ -161,18 +161,23 @@ export class IrisCanvas{
         this.initGL();        
     }
 
-    public loadSample(name:string){
-        let sample = SampleBase.getSample(name);
-        if(sample!=null){
-            let cursample = this.m_currenSample;
-            if(cursample != null){
-                cursample.onDestroy();
-            }
+    private m_sampleCache:{[key:string]:SampleBase} = {};
 
-            console.log('load sample',name);
-            sample.onInit();
-            this.m_currenSample = sample;
+    public loadSample(name:string){
+
+        let sample = this.m_sampleCache[name];
+        if(sample == null){
+            sample = SampleBase.getSample(name);
+            this.m_sampleCache[name] =sample;
         }
+
+        let cursample = this.m_currenSample;
+        if(cursample != null){
+            cursample.onDestroy();
+        }
+
+        sample.onInit();
+        this.m_currenSample = sample;
     }
 
     private m_resLoaded:boolean = false;

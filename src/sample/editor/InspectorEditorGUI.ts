@@ -46,7 +46,6 @@ export class InspectorEditorGUI extends BaseEditorGUI{
 
         ui.formVec3("Pos",trs.position.raw,val=>{
             trs.setPosition(new vec3(val));
-            console.log(trs.gameobject.name,val);
         });
         ui.formVec3("Rota:",trs.localRotation.raw);
         ui.formVec3("Scale:",trs.localScale.raw,val=>trs.setScale(new vec3(val)));

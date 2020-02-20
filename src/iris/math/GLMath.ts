@@ -1171,7 +1171,7 @@ export class mat4 {
             0, 0, 0, 1]);
     }
 
-    public static IdentityCache:mat4 = new mat4([
+    public static IdentityCached:mat4 = new mat4([
         1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,

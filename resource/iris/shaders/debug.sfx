@@ -11,6 +11,7 @@ void vertex(){
     gl_Position = MATRIX_MVP * pos;
 }
 
+inout vec2 vPos;
 
 void vertex_raw(){
 
@@ -29,8 +30,11 @@ void vertex_raw(){
 
     pos.a = 1.0;
 
-    pos =   (pos *MATRIX_M) ;
+    mat4 temp = MATRIX_M;
+    pos =  (MATRIX_MVP* pos );
     pos.a = 1.0;
+
+    vPos = aPosition.xy;
 
     gl_Position = pos;
 }
@@ -38,7 +42,7 @@ void vertex_raw(){
 
 out vec4 fragColor: TARGET_0;
 void fragment(){
-    fragColor = vec4(1.0,1.0,0,1.0);
+    fragColor = vec4(vPos+0.5,0,1.0);
 }
 
 #END

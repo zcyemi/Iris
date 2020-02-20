@@ -13,7 +13,6 @@ export class SampleTriangle extends SampleBase{
 
     onInit(){
         var cam = GameContext.current.mainCamera;
-
         cam.clearType = ClearType.Background;
         cam.background= vec4.one;
 
