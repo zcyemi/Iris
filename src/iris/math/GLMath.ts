@@ -807,6 +807,10 @@ export class quat {
         return v.clone().add(t.mulToRef(this.w)).add(q.cross(t));
     }
 
+    public static fromEulerDegAry(deg:number[]){
+        return this.fromEulerDeg(deg[0],deg[1],deg[2]);
+    }
+
     /**
      * Convert euler angle (degree) to quaternion
      * width order Z-X-Y

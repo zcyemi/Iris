@@ -10,7 +10,7 @@ import { ShaderFX } from "../core/ShaderFX";
 import { ShaderUniformBuffer } from "../core/ShaderUniformBuffer";
 import { FrameBuffer, GL, GLContext, GLProgram, GLVertexArray } from "../gl";
 import { mat4, vec4 } from "../math";
-import { ShaderDataBasis, ShaderDataCamera, ShaderDataLight, ShaderDataObj } from "./InternalPipelineUniform";
+import { ShaderDataBasis, ShaderDataCamera, ShaderDataLight, ShaderDataObj, UniformDataObj, UniformDataBasis, UniformDataCamera } from "./InternalPipelineUniform";
 import { IRenderModel } from "./IRenderModel";
 import { RenderPipelineBase } from "./RenderPipelineBase";
 import { IndexedBuffer } from "../collection";
@@ -36,13 +36,10 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
     private m_matBlit: Material;
     private m_matBlitFlip:Material;
 
-    private dataBasisBuffer: ShaderUniformBuffer<ShaderDataBasis>;
-    // private dataObjBuffer: ShaderUniformBuffer<ShaderDataObj>;
-    private dataCameraBuffer: ShaderUniformBuffer<ShaderDataCamera>;
-    private dataLightBuffer: ShaderUniformBuffer<ShaderDataLight>;
 
-
-    private uniformObjectBufer:SimpleUniformBuffer;
+    private uniformBasisBuffer:UniformDataBasis = new UniformDataBasis("UNIFORM_BASIS",0).init();
+    private uniformCameraBuffer:UniformDataCamera = new UniformDataCamera("UNIFORM_CAMERA",1).init();
+    private uniformObjectBuffer:UniformDataObj =  new UniformDataObj("UNIFORM_OBJ",2).init();
 
     private m_tempFramebuffer: FrameBuffer;
 
@@ -53,14 +50,6 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
         this.m_tempFramebuffer = FrameBuffer.createEmpty(glctx);
 
-        this.dataBasisBuffer = new ShaderUniformBuffer(ShaderDataBasis, 0, 'UNIFORM_BASIS');
-        this.dataCameraBuffer = new ShaderUniformBuffer(ShaderDataCamera, 1, 'UNIFORM_CAMERA');
-        // this.dataObjBuffer = new ShaderUniformBuffer(ShaderDataObj, 2, 'UNIFORM_OBJ');
-        this.dataLightBuffer = new ShaderUniformBuffer(ShaderDataLight, 3, 'UNIFORM_LIGHT');
-
-        this.uniformObjectBufer = new SimpleUniformBuffer("UNIFORM_OBJ",2,64);
-
-
         let resBundle = AssetsDataBase.getLoadedBundle("iris");
         if (resBundle == null) {
             throw new Error("InternalPipeline require iris.resbundle");
@@ -68,7 +57,6 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
         this.m_matDefault = new Material(ShaderFX.findShader(resBundle, "@shaderfx/unlit_color"));
         this.m_matError = new Material(ShaderFX.findShader(resBundle, "@shaderfx/unlit_color"));
-
 
         this.m_matBlit = new Material(ShaderFX.findShader(resBundle, "@shaderfx/internal/blit_flip"));
         this.m_matBlitFlip = new Material(ShaderFX.findShader(resBundle,"@shaderfx/internal/blit"));
@@ -91,22 +79,22 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
         let ublocks = program.UniformBlock;
 
-        const uniformBasis = this.dataBasisBuffer;
-        let indBasis = ublocks[uniformBasis.name];
+        const uniformBasis = this.uniformBasisBuffer;
+        let indBasis = ublocks[uniformBasis.uniformName];
         if (indBasis !=null) this.glctx.uniformBlockBinding(program.Program, indBasis, uniformBasis.uniformIndex);
     }
 
     bindCameraUniform(program: GLProgram) {
         let ublocks = program.UniformBlock;
-        const uniformCamera = this.dataCameraBuffer;
+        const uniformCamera = this.uniformCameraBuffer;
 
-        let indCamera = ublocks[uniformCamera.name];
+        let indCamera = ublocks[uniformCamera.uniformName];
         if (indCamera !=null) this.glctx.uniformBlockBinding(program.Program, indCamera, uniformCamera.uniformIndex);
     }
 
     bindObjectUniform(program:GLProgram){
         let ublocks = program.UniformBlock;
-        const uniformObject = this.uniformObjectBufer;
+        const uniformObject = this.uniformObjectBuffer;
 
         let indObj = ublocks[uniformObject.uniformName];
 
@@ -117,60 +105,59 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
     updateDefaultUniform() {
 
-        const basisBuffer = this.dataBasisBuffer;
-        const basisData = basisBuffer.data;
+        const basisBuffer = this.uniformBasisBuffer;
+        const basisData = basisBuffer;
 
         if (GraphicsSettings.update()) {
-            basisData.fogColor.setValue(GraphicsSettings.fogColor);
-            basisData.fogParam.setValue(GraphicsSettings.fogParam);
-            basisData.ambientColor.setValue(GraphicsSettings.ambientColor);
+            basisData.fogColor = GraphicsSettings.fogColor;
+            basisData.fogParam = GraphicsSettings.fogParam;
+            basisData.ambientColor = GraphicsSettings.ambientColor;
             console.log('update graphicsSettings');
         }
 
         //update time
         let time = GameTime.time;
         let dt = GameTime.deltaTime;
-        basisData.time.setValue(new vec4([time, dt, Math.sin(time), Math.cos(time)]));
+        basisData.time = new vec4([time, dt, Math.sin(time), Math.cos(time)]);
 
-        this.dataBasisBuffer.uploadBufferData();
+        basisBuffer.submitData(this.glctx);
     }
 
     updateObjectUniform(obj:GameObject){
         if(obj == null) return;
 
-        const objBuffer = this.uniformObjectBufer;
-        objBuffer.setMat4(0,obj.transform.objMatrix);
+        const objBuffer = this.uniformObjectBuffer;
+        objBuffer.obj2world = obj.transform.objMatrix;
     }
 
     updateObjectUniformMTX(obj:mat4){
         if(obj == null) return;
 
-        const objBuffer = this.uniformObjectBufer;
-        objBuffer.setMat4(0,obj);
+        const objBuffer = this.uniformObjectBuffer;
+        objBuffer.obj2world =obj;
     }
 
 
     updateCameraUnifomrm(camera: Camera) {
         if (camera == null) return;
 
-        const cameraBuffer = this.dataCameraBuffer;
-        const cameraData = cameraBuffer.data;
+        const cameraBuffer = this.uniformCameraBuffer;
 
         if (camera.isDataTrsDirty) {
-            cameraData.cameraPos.setValue(camera.transform.position.vec4(0));
+            cameraBuffer.cameraPos =camera.transform.position.vec4(0);
 
             // console.log(camera.transform.position.raw);
-            cameraData.cameraMtxView.setValue(camera.WorldMatrix);
+            cameraBuffer.cameraMtxView = camera.WorldMatrix;
         }
 
 
         if (camera.isDataProjDirty) {
-            cameraData.cameraMtxProj.setValue(camera.ProjMatrix);
-            cameraData.cameraMtxInvProj.setValue(camera.ProjMatrixInv);
-            cameraData.cameraProjParam.setValue(camera.ProjParam);
+            cameraBuffer.cameraMtxProj = camera.ProjMatrix;
+            cameraBuffer.cameraMtxProjInv = camera.ProjMatrixInv;
+            cameraBuffer.cameraProjParam = camera.ProjParam;
         }
 
-        cameraBuffer.uploadBufferData();
+        cameraBuffer.submitData(this.glctx);
     }
 
     setShadowMapTex(tex: ITexture, index: number) {
@@ -254,7 +241,7 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
         mtx = mtx || mat4.IdentityCached;
         this.updateObjectUniformMTX(mtx);
-        this.uniformObjectBufer.submitData(glctx);
+        this.uniformObjectBuffer.submitData(glctx);
 
         mesh.refreshData();
 

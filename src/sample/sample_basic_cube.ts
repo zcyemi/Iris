@@ -1,13 +1,25 @@
-import { GameObject, Material, MeshRender, ClearType, Skybox, Mesh, MeshTopology } from "../iris/core";
+import { ClearType, GameObject, Material, Mesh, MeshRender, Skybox, Component } from "../iris/core";
 import { AssetsDataBase } from "../iris/core/AssetsDatabase";
 import { GameContext } from "../iris/core/GameContext";
 import { MeshPrimitive } from "../iris/core/MeshPrimitive";
 import { ShaderFX } from "../iris/core/ShaderFX";
-import { vec4, vec3, mat4 } from "../iris/math";
+import { mat4, vec3, vec4, quat } from "../iris/math";
 import { SampleBase } from "./sampleBase";
-import { GL } from "../iris";
-import { CommandBuffer, CommandBufferEvent } from "../iris/core/CommandBuffer";
-import { compileFunction } from "vm";
+
+
+class SelfRotaComp extends Component{
+
+    private m_rota:quat;
+
+    public onStart(){
+        this.m_rota = quat.fromEulerDeg(1.5,-1,0.8);
+    }
+
+    public onUpdate(){
+        this.gameobject.transform.applyRotate(this.m_rota);
+    }
+}
+
 
 export class SampleBasicCube extends SampleBase{
 
@@ -21,6 +33,12 @@ export class SampleBasicCube extends SampleBase{
         if(this.m_cube == null){
             var g = new GameObject("Cube");
             this.m_cube = g;
+
+            let gtrs = g.transform;
+            gtrs.setScale(vec3.one.mulNum(0.5));
+
+            g.addComponent(new SelfRotaComp());
+
     
             g.transform.setPosition(new vec3([0,0,0]));
             let bundle = AssetsDataBase.getLoadedBundle("iris");
@@ -31,16 +49,19 @@ export class SampleBasicCube extends SampleBase{
     
             let mesh = this.m_mesh;
             if(mesh == null){
-                mesh = new Mesh('TestBox');
-                mesh.setPosition(0,new Float32Array([
-                    -0.5,-0.5,0,
-                    0.5,-0.5,0,
-                    0.5,0.5,0,
-                    -0.5,0.5,0,
-                ]),GL.FLOAT,3);
+                // mesh = new Mesh('TestBox');
+                // mesh.setPosition(0,new Float32Array([
+                //     -0.5,-0.5,0,
+                //     0.5,-0.5,0,
+                //     0.5,0.5,0,
+                //     -0.5,0.5,0,
+                // ]),GL.FLOAT,3);
 
-                mesh.setIndices(new Uint16Array([0,2,1,0,2,3]),GL.UNSIGNED_SHORT,MeshTopology.Triangles);
-                mesh.apply();
+                // mesh.setIndices(new Uint16Array([0,2,1,0,2,3]),GL.UNSIGNED_SHORT,MeshTopology.Triangles);
+                // mesh.apply();
+
+                mesh = MeshPrimitive.Cube;
+                this.m_mesh = mesh;
             }
 
             

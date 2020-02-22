@@ -1,5 +1,7 @@
-import { GameObject, vec3, quat } from "../../iris";
+import { GameObject, vec3, quat, Component } from "../../iris";
 import { BaseEditorGUI } from "./BaseEditorGUI";
+import { ComponentEditor } from "./BaseComponentEditor";
+import { CameraEditor } from "./CameraEditor";
 
 
 export class InspectorEditorGUI extends BaseEditorGUI{
@@ -47,7 +49,7 @@ export class InspectorEditorGUI extends BaseEditorGUI{
         ui.formVec3("Pos",trs.position.raw,val=>{
             trs.setPosition(new vec3(val));
         });
-        ui.formVec3("Rota:",trs.localRotation.raw);
+        ui.formVec3("Rota:",trs.localRotation.toEulerDeg().raw,val=>trs.setRotation(quat.fromEulerDegAry(val)));
         ui.formVec3("Scale:",trs.localScale.raw,val=>trs.setScale(new vec3(val)));
 
         
@@ -75,15 +77,22 @@ export class InspectorEditorGUI extends BaseEditorGUI{
             ui.text("Components: none");   
         }
         else{
-            ui.treeBegin('Components');
-            ui.listBegin(true);
             comp.forEach(item=>{
-                ui.text(item.compType);
+                const comptype = item.compType;
+                ui.treeBegin(comptype);
+                this.drawComponentEditor(comptype,item);
+                ui.treeEnd();
             })
-            ui.listEnd();
-            ui.treeEnd();
         }
     }
 
-
+    private drawComponentEditor(type,item:Component){
+        let comp = ComponentEditor.getEditor(type);
+        if(comp !=null){
+            comp.ui = this.ui;
+            comp.onGUI(item);
+        }
+    }
 }
+
+ComponentEditor.register(CameraEditor);

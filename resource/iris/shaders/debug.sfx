@@ -15,25 +15,9 @@ inout vec2 vPos;
 
 void vertex_raw(){
 
-    mat4 mtxp = mat4(
-        1.7320508075688774, 0, 0, 0, 0, 1.7320508075688774, 0, 0, 0, 0, -1.0002000200020003, -1, 0, 0, -0.020002000200020003, 0
-    );
-
-    // mtxp = mat4(
-    //     1,0,0,0,
-    //     0,1,0,0,
-    //     0,0,1,0,
-    //     0,MATRIX_P[0][0]*0.5,0.5,1
-    // );
-
     vec4 pos = aPosition;
-
     pos.a = 1.0;
-
-    mat4 temp = MATRIX_M;
-    pos =  (MATRIX_MVP* pos );
-    pos.a = 1.0;
-
+    pos = MATRIX_MVP * aPosition;
     vPos = aPosition.xy;
 
     gl_Position = pos;
