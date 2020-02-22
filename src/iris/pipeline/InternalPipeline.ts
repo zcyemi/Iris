@@ -141,18 +141,21 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
         const cameraBuffer = this.uniformCameraBuffer;
 
-        if (camera.isDataTrsDirty) {
+        if (camera.isDataViewChanged) {
             cameraBuffer.cameraPos =camera.transform.position.vec4(0);
-
-            // console.log(camera.transform.position.raw);
             cameraBuffer.cameraMtxView = camera.WorldMatrix;
+
+            console.log("submit camera view data");
+            camera.isDataViewChanged = false;
         }
 
-
-        if (camera.isDataProjDirty) {
+        if (camera.isDataProjChanged) {
             cameraBuffer.cameraMtxProj = camera.ProjMatrix;
             cameraBuffer.cameraMtxProjInv = camera.ProjMatrixInv;
             cameraBuffer.cameraProjParam = camera.ProjParam;
+
+            console.log("submit camera proj data");
+            camera.isDataProjChanged= false;
         }
 
         cameraBuffer.submitData(this.glctx);
@@ -381,7 +384,7 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
 
         model.updateCameraUnifomrm(cam);
 
-        let cmdbuffer = cam.cmdbufferClear;
+        let cmdbuffer = cam.CmdBufferClear;
         //clear
         if (cmdbuffer.valid) {
             model.execCommand(cmdbuffer);
