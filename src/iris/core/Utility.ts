@@ -51,7 +51,6 @@ export class Delayter{
 }
 
 export class Utility {
-
 	/**
 	 * Simple hash function
 	 * @param str 
@@ -177,7 +176,6 @@ export class Utility {
         return str.split('\n').map((line, index) => `${index + 1}. ${line}`).join('\n');
     }
 
-
 	public static nameCapitalized(name:string):string{
 		return `${name.charAt(0).toUpperCase()}${name.slice(1)}`;
 	}
@@ -241,5 +239,53 @@ export class PropertyUpdater{
 		if(fn) fn();
 		this.m_isdirty = false;
 		return true;
+	}
+}
+
+export class ObjectUtil{
+
+	public static initProperty<T>(self:any,name:string,defval:T,flag:string):T{
+		const internalProp = `__${name}`;
+		self[internalProp] = defval;
+		self[flag] = false;
+
+		Object.defineProperty(self,name,{
+			configurable:false,
+			enumerable:false,
+			get:function(){
+				return self[internalProp];
+			},
+			set: function(newval:T){
+				const curval = self[internalProp];
+				if(curval!=newval){
+					self[internalProp] = newval;
+					self[flag] = true;
+				}
+			}
+		});
+
+		return defval;
+	}
+
+	public static initPropertyFn<T>(self:any,name:string,defval:T,flagfn:string):T{
+		const internalProp = `__${name}`;
+		self[internalProp] = defval;
+
+		Object.defineProperty(self,name,{
+			configurable:false,
+			enumerable:false,
+			get:function(){
+				return self[internalProp];
+			},
+			set: function(newval:T){
+				const curval = self[internalProp];
+				if(curval!=newval){
+					self[internalProp] = newval;
+					self[flagfn]();
+				}
+			}
+		});
+		
+		return defval;
 	}
 }

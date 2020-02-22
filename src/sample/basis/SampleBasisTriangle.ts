@@ -1,11 +1,11 @@
-import { GL, Material, Mesh, MeshTopology, ClearType, vec4 } from "../iris";
-import { AssetsDataBase } from "../iris/core/AssetsDatabase";
-import { CommandBuffer, CommandBufferEvent } from "../iris/core/CommandBuffer";
-import { GameContext } from "../iris/core/GameContext";
-import { ShaderFX } from "../iris/core/ShaderFX";
-import { SampleBase } from "./sampleBase";
+import { GL, Material, Mesh, MeshTopology, ClearType, vec4 } from "../../iris";
+import { AssetsDataBase } from "../../iris/core/AssetsDatabase";
+import { CommandBuffer, CommandBufferEvent } from "../../iris/core/CommandBuffer";
+import { GameContext } from "../../iris/core/GameContext";
+import { ShaderFX } from "../../iris/core/ShaderFX";
+import { SampleBase } from "../sampleBase";
 
-export class SampleTriangle extends SampleBase{
+export class SampleBasisTriangle extends SampleBase{
 
     private m_cmdbuffer:CommandBuffer;
     private m_mesh:Mesh;

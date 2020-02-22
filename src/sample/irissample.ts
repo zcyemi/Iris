@@ -1,18 +1,17 @@
 import { UIContainer, UIRenderer, UIRenderingBind, UISourceLocal } from '@zcyemi/entangui';
-import iris, { Camera, ClearType, FrameTimer, GameObject, GLUtility, GraphicsContext, GraphicsRender, Input, Skybox, WindowUtility, Delayter } from '../iris';
+import { Camera, ClearType, Delayter, FrameTimer, GameObject, GLUtility, GraphicsContext, GraphicsRender, Input, Skybox, WindowUtility } from '../iris';
 import { AssetsDataBase } from '../iris/core/AssetsDatabase';
 import { GameContext } from '../iris/core/GameContext';
 import { GameTime } from '../iris/core/GameTime';
-import { GLCmdType } from '../iris/gl/GLCmdRecord';
 import { InternalPipeline } from '../iris/pipeline/InternalPipeline';
+import { SampleBasisSkybox } from './basis/SampleBasisSkybox';
+import { SampleBasisTriangle } from './basis/SampleBasisTriangle';
 import { EditorGUIEvent } from './editor/BaseEditorGUI';
+import { DrawCallViewEditorGUI } from './editor/DrawcallViewEditorGUI';
 import { InspectorEditorGUI } from './editor/InspectorEditorGUI';
 import { SceneEditorGUI } from './editor/SceneEditorGUI';
 import { SampleBase } from './sampleBase';
-import { SampleBasicCube } from './sample_basic_cube';
-import { SampleTriangle } from './sample_triangle';
-import { DrawCallViewEditorGUI } from './editor/DrawcallViewEditorGUI';
-import { SampleBasisSkybox } from './basis/SampleBasisSkybox';
+import { SampleBasisCube } from './basis/SampleBasisCube';
 
 export class IrisSample extends UIContainer{
     private m_selectSampleId:string;
@@ -263,8 +262,8 @@ function IrisSampleInit(){
 window['IrisSampleInit'] = IrisSampleInit;
 
 
-SampleBase.registerSample('basic/triangle',SampleTriangle);
+SampleBase.registerSample('basic/triangle',SampleBasisTriangle);
 SampleBase.registerSample('basic/skybox',SampleBasisSkybox);
-SampleBase.registerSample('basic/cube',SampleBasicCube);
+SampleBase.registerSample('basic/cube',SampleBasisCube);
 
 

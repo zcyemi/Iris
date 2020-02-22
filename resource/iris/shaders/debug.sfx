@@ -17,7 +17,7 @@ void vertex_raw(){
 
     vec4 pos = aPosition;
     pos.a = 1.0;
-    pos = MATRIX_MVP * aPosition;
+    pos = MATRIX_MV * aPosition;
     vPos = aPosition.xy;
 
     gl_Position = pos;
