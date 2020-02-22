@@ -184,7 +184,7 @@ export class IrisCanvas{
 
     private async initGL(){
         var camObj = new GameObject('camera');
-        let camera = camObj.addComponent(new Camera());
+        let camera = Camera.persepctive(camObj,60,1.0,0.01,1000);
         camera.clearType = ClearType.Skybox;
         camera.skybox = Skybox.createFromProcedural();
 

@@ -1,4 +1,5 @@
-import { Camera, GraphicsObj, GraphicsRenderCreateInfo, ITexture, Material, Mesh, MeshRender, Texture2D, BaseRender, GameObject, Skybox } from "../core";
+import { IndexedBuffer } from "../collection";
+import { BaseRender, Camera, GameObject, GraphicsObj, GraphicsRenderCreateInfo, ITexture, Material, Mesh, MeshRender, Texture2D } from "../core";
 import { AssetsBundle, AssetsDataBase } from "../core/AssetsDatabase";
 import { CommandBuffer, CommandType } from "../core/CommandBuffer";
 import { GameContext } from "../core/GameContext";
@@ -7,14 +8,11 @@ import { Graphics } from "../core/Graphics";
 import { GraphicsSettings } from "../core/GraphicsSettings";
 import { MeshPrimitive } from "../core/MeshPrimitive";
 import { ShaderFX } from "../core/ShaderFX";
-import { ShaderUniformBuffer } from "../core/ShaderUniformBuffer";
 import { FrameBuffer, GL, GLContext, GLProgram, GLVertexArray } from "../gl";
 import { mat4, vec4 } from "../math";
-import { ShaderDataBasis, ShaderDataCamera, ShaderDataLight, ShaderDataObj, UniformDataObj, UniformDataBasis, UniformDataCamera } from "./InternalPipelineUniform";
+import { UniformDataBasis, UniformDataCamera, UniformDataObj } from "./InternalPipelineUniform";
 import { IRenderModel } from "./IRenderModel";
 import { RenderPipelineBase } from "./RenderPipelineBase";
-import { IndexedBuffer } from "../collection";
-import { SimpleUniformBuffer } from "../core/ShaderBuffer";
 
 export interface PipelineClearInfo {
     color?: vec4;
