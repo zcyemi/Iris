@@ -3,8 +3,9 @@ import { AssetsDataBase } from "../../iris/core/AssetsDatabase";
 import { GameContext } from "../../iris/core/GameContext";
 import { MeshPrimitive } from "../../iris/core/MeshPrimitive";
 import { ShaderFX } from "../../iris/core/ShaderFX";
-import { mat4, quat, vec4 } from "../../iris/math";
+import { mat4, quat, vec4, vec3 } from "../../iris/math";
 import { SampleBase } from "../sampleBase";
+import { CameraFreeFly } from "../../iris";
 
 
 class SelfRotaComp extends Component{
@@ -52,7 +53,10 @@ export class SampleBasisCube extends SampleBase{
             camera.clearDepth = true;
             camera.depthValue = -1000;
             var camobj = new GameObject("Simpel Camera");
+            camobj.transform.applyTranslate(new vec3([0,0,3]));
+
             camobj.addComponent(camera);
+            camobj.addComponent(new CameraFreeFly());
             this.m_camera = camobj;
         }
     }

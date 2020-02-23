@@ -165,7 +165,7 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
         throw new Error("Method not implemented.");
     }
     drawFullScreen(tex: ITexture) {
-        let mat = this.m_matBlitFlip;
+        let mat = this.m_matBlit;
         mat.setTexture("uSampler", tex);
         this.drawMeshRender(this.m_fullscreenRender, null, mat);
     }

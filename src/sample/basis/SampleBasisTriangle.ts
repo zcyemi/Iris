@@ -46,7 +46,7 @@ export class SampleBasisTriangle extends SampleBase{
         if(this.m_camera == null){
             let camera = Camera.CreatePersepctive(60,1.0,0.1,300);
             camera.clearType = ClearType.Background;
-            camera.background = new vec4(Color.RED);
+            camera.background = new vec4([0.3,0.3,0.3,1.0]);
             camera.cmdList.add(CommandBufferEvent.beforeOpaque,this.m_cmdbuffer);
             let c =new GameObject("Camera");
             c.addComponent(camera);

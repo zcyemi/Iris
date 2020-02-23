@@ -68,7 +68,19 @@ export class Camera extends Component{
     //flag for needs to update camera uniform buffer with proj data
     public isDataProjChanged:boolean = true;
     //flag for needs to update camera uniform buffer with view data
-    public isDataViewChanged:boolean = true;
+
+    private m_isDataViewChanged:boolean = true;
+    public get isDataViewChanged():boolean{
+        let value = this.m_isDataViewChanged;
+        if(!value && this.transform.isDirty){
+            value = true;
+            this.m_isDataViewChanged = true;
+        }
+        return value;
+    }
+    public set isDataViewChanged(val:boolean){
+        this.m_isDataViewChanged = val;
+    }
 
     //Clear Data
     public skybox:Skybox = ObjectUtil.initProperty(this,'skybox',null,KEY_isCmdClearDirty);
@@ -133,22 +145,14 @@ export class Camera extends Component{
         return this.m_projParam;
     }
 
-    private updateWorldMtx(){
-        if(this.isDataViewChanged) return;
-        this.isDataViewChanged = this.transform.isDirty;
-    }
-
     public get ViewMatrix():mat4{
-        this.updateWorldMtx();
         return this.transform.coordWorldToLocal;
     }
     public get WorldToCameraMatrix():mat4{ return this.ViewMatrix;}
     public get CameraToWorldMatrix():mat4{
-        this.updateWorldMtx();
         return this.transform.coordLocalToWorld;
     }
     public get ScreenToWorldMatrix():mat4{
-        this.updateWorldMtx();
         return this.CameraToWorldMatrix.mul(this.ProjMatrixInv);
     }
 

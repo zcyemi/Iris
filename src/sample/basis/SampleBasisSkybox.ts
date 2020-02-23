@@ -19,7 +19,6 @@ export class SampleBasisSkybox extends SampleBase {
         camera.clearType = ClearType.Skybox;
         camera.skybox = this.m_skybox;
         c.addComponent(camera);
-        c.addComponent(new CameraFreeFly());
         this.m_camera = c;
     }    
     
