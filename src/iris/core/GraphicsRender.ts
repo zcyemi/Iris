@@ -11,6 +11,7 @@ import { GLCmdData, GLCmdRecord } from "../gl/GLCmdRecord";
 import { type } from "os";
 import { GraphicsObj } from "./IGraphicObj";
 import { ShaderFX } from "./ShaderFX";
+import { EventListener } from "../misc/EventListener";
 
 export class GraphicsRenderCreateInfo{
     public colorFormat:number = 0x8058;
@@ -22,6 +23,9 @@ type resCacheObjID = {[key:number]:GraphicsObj};
 type resCacheName = {[key:string]:GraphicsObj};
 
 export class GraphicsRender{
+
+    public evtOnScreenResize:EventListener = new EventListener();
+
     private m_glctx:GLContext;
     private canvas:HTMLCanvasElement;
     private m_creationInfo:GraphicsRenderCreateInfo;
@@ -50,9 +54,13 @@ export class GraphicsRender{
 
     private m_screenWidth:number;
     private m_screenHeight:number;
+    private m_screenAspectRatio:number = 1.0;
 
     public get screenWidth():number{ return this.m_screenWidth;}
     public get screenHeight():number{ return this.m_screenHeight;}
+    public get screeenAspectRatio():number{
+        return this.m_screenAspectRatio;
+    }
 
     private m_glCmdRecord:GLCmdRecord;
     private m_glCmdDebug:boolean = false;
@@ -183,6 +191,8 @@ export class GraphicsRender{
     private doResizeFrameBuffer(w:number,h:number){
         this.m_screenWidth = w;
         this.m_screenHeight = h;
+        this.m_screenAspectRatio  = w/ h;
+        this.evtOnScreenResize.Invoke(this.m_screenAspectRatio);
         this.m_renderPipeline.resizeFrameBuffer(w,h);
     }
 

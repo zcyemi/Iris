@@ -46,7 +46,7 @@ export class SampleBasisCube extends SampleBase{
         }
 
         if(this.m_camera == null){
-            let camera = Camera.CreatePersepctive(60,1.0,0.01,1000);
+            let camera = Camera.CreatePersepctive(60,null,0.01,1000);
             camera.clearType = ClearType.Skybox;
             camera.skybox = Skybox.createFromProcedural();
             camera.background = new vec4([0,0,0,1.0]);

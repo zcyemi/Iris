@@ -8,7 +8,6 @@ export class SceneEditorGUI extends BaseEditorGUI{
     public onInit(){
         GameContext.current.evtOnSceneUpdate.register(()=>{
             this.ui.setDirty();
-            console.log('changed');
         }); 
     }
 

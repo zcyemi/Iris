@@ -195,6 +195,7 @@ export class IrisCanvas{
         WindowUtility.setOnResizeFunc(this.onResize.bind(this));
 
         this.m_resLoaded  =true;
+        this.onResize();
     }
 
     private m_resizeDelayter = new Delayter()
@@ -208,7 +209,6 @@ export class IrisCanvas{
         var height = canvasParent.clientHeight;
 
         this.m_resizeDelayter.emit(()=>{
-            console.log(width,height);
             canvas.width = width;
             canvas.height= height;
             grender.resizeCanvas(width,height);

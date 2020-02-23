@@ -43,8 +43,6 @@ export abstract class RenderPipelineBase<T extends IRenderModel> implements IRen
         if(mainfb== null) return;
         mainfb.resize(glctx,width,height);
         glctx.viewport(0,0,width,height);
-
-        console.log('resize',width,height);
     }
 
     

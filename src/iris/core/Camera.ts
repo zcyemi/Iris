@@ -93,9 +93,40 @@ export class Camera extends Component{
     public far:number = ObjectUtil.initProperty(this,'far',500,KEY_isProjDirty);
     public near:number = ObjectUtil.initProperty(this,'near',0.001,KEY_isProjDirty);
     public fov:number = ObjectUtil.initProperty(this,'fov',60,KEY_isProjDirty);
-    public aspect:number = ObjectUtil.initProperty(this,'aspect',undefined,KEY_isProjDirty);
+    
     public projectionType:ProjectionType = ObjectUtil.initProperty(this,'projectionType',ProjectionType.perspective,KEY_isProjDirty);
     public orthoSize:number = ObjectUtil.initProperty(this,'orthoSize',10.0,KEY_isProjDirty);
+
+    private m_aspectValue:number = 1.0;
+    private m_onTraceAspectRatio:boolean = false;
+    public get aspect():number{
+        return this.m_aspectValue;
+    }
+
+    public set aspect(val:number){
+        if(val == null){
+            if(this.m_onTraceAspectRatio) return;
+            this.m_onTraceAspectRatio = true;
+            GameContext.current.graphicsRender.evtOnScreenResize.register(this.onAspectRatioChange.bind(this));
+        }
+        else{
+            if(this.m_onTraceAspectRatio){
+                this.m_onTraceAspectRatio = false;
+                GameContext.current.graphicsRender.evtOnScreenResize.remove(this.onAspectRatioChange);
+            }
+            
+            this.m_aspectValue = val;
+            this.isProjDirty = true;
+        }
+    }
+
+    private onAspectRatioChange(val:number){
+        if(this.m_onTraceAspectRatio){
+            this.m_aspectValue = val;
+            this.isProjDirty = true;
+            this.isDataProjChanged = true;
+        }
+    }
 
 
     //Other
@@ -174,6 +205,7 @@ export class Camera extends Component{
     }
 
     public onDestroy(){
+        GameContext.current.graphicsRender.evtOnScreenResize.remove(this.onAspectRatioChange);
         GameContext.current.unregisterCamera(this);
     }
     

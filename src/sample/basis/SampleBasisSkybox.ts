@@ -15,7 +15,7 @@ export class SampleBasisSkybox extends SampleBase {
 
 
         let c = new GameObject("Camera");
-        let camera = Camera.CreatePersepctive(60,1.0,0.01,1000);
+        let camera = Camera.CreatePersepctive(60,null,0.01,1000);
         camera.clearType = ClearType.Skybox;
         camera.skybox = this.m_skybox;
         c.addComponent(camera);
