@@ -40,6 +40,9 @@ export class Transform{
     private m_worldForward:vec3;
     private m_worldUp:vec3;
 
+    private m_coordWorldToLocal:mat4;
+    private m_coordLocalToWorld:mat4;
+
     private setLocalDirty(){
         this.isLocalTRSDirty = true;
         this.isDataLocalDirty = true;
@@ -104,6 +107,8 @@ export class Transform{
                 this.m_worldTRSneedDecomp = true;
             }
             this.m_objMtxInv = null;
+            this.m_coordWorldToLocal = null;
+            this.m_coordLocalToWorld = null;
         }
     }
 
@@ -112,7 +117,7 @@ export class Transform{
         return this.m_objMtx;
     }
 
-    public get worldToLocalMatrix():mat4{
+    public get objMatrixInv():mat4{
         this.updateObjMtx();
         if(this.m_objMtxInv == null){
             this.m_objMtxInv = this.m_objMtx.inverse();
@@ -153,6 +158,22 @@ export class Transform{
     }
     public get rotation():quat{
         return this.worldRotation;
+    }
+
+    public get coordWorldToLocal():mat4{
+        this.updateObjMtx();
+        if(this.m_coordWorldToLocal == null){
+            this.m_coordWorldToLocal = mat4.coordCvt(this.worldPosition,this.worldForward,this.worldUp);
+        }
+        return this.m_coordWorldToLocal;
+    }
+    
+    public get coordLocalToWorld():mat4{
+        this.updateObjMtx();
+        if(this.m_coordLocalToWorld == null){
+            this.m_coordLocalToWorld = this.coordWorldToLocal.inverse();
+        }
+        return this.m_coordLocalToWorld;
     }
 
     //up forward right vec
@@ -333,7 +354,7 @@ export class Transform{
                 this.localPosition.add(offset);
             }
             else{
-                let m = p.worldToLocalMatrix;
+                let m = p.objMatrixInv;
                 let localoff = m.mulvec(offset.vec4(0));
                 this.localPosition.add(localoff);
             }

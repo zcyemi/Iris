@@ -65,8 +65,6 @@ export class Camera extends Component{
     public isCmdClearDirty:boolean = true;
     //flag for any projmtx parameter changed
     public isProjDirty:boolean = true;
-    //flag for every freeze every frame's camera view mtx
-    private isFrameWorldMtxCaled:boolean = true;
     //flag for needs to update camera uniform buffer with proj data
     public isDataProjChanged:boolean = true;
     //flag for needs to update camera uniform buffer with view data
@@ -96,11 +94,6 @@ export class Camera extends Component{
     private m_projMtx:mat4;
     private m_projMtxInv:mat4;
     private m_projParam:vec4;
-
-    private m_worldToCamMtx:mat4;
-    private m_camToWorldMtx:mat4;
-    private m_screenToWorldMtx:mat4;
-
 
     private updateProj(){
         if(!this.isProjDirty) return;
@@ -141,47 +134,23 @@ export class Camera extends Component{
     }
 
     private updateWorldMtx(){
-        if(this.isFrameWorldMtxCaled) return;
-        const trs = this.transform;
-        if(!trs.isDirty) return;
-
-        this.m_worldToCamMtx =  mat4.coordCvt(trs.position,trs.worldForward,trs.worldUp);
-        this.m_screenToWorldMtx = null;
-        this.m_camToWorldMtx = null;
-
-        this.isDataViewChanged = true;
-        this.isFrameWorldMtxCaled = true;
+        if(this.isDataViewChanged) return;
+        this.isDataViewChanged = this.transform.isDirty;
     }
-    public get WorldMatrix():mat4{
+
+    public get ViewMatrix():mat4{
         this.updateWorldMtx();
-        let trs = this.transform;
-        if(!this.isFrameWorldMtxCaled && trs.isDirty){
-            this.m_worldToCamMtx = mat4.coordCvt(trs.position,trs.worldForward,trs.worldUp);
-            this.m_camToWorldMtx = null;
-            this.m_screenToWorldMtx = null;
-        }
-        return this.m_worldToCamMtx;
+        return this.transform.coordWorldToLocal;
     }
-    public get WorldToCameraMatrix():mat4{ return this.WorldMatrix;}
+    public get WorldToCameraMatrix():mat4{ return this.ViewMatrix;}
     public get CameraToWorldMatrix():mat4{
         this.updateWorldMtx();
-        let camToWorld = this.m_camToWorldMtx;
-        if(camToWorld == null){
-            camToWorld = mat4.inverse(this.WorldMatrix);
-            this.m_camToWorldMtx = camToWorld;
-        }
-        return camToWorld;
+        return this.transform.coordLocalToWorld;
     }
     public get ScreenToWorldMatrix():mat4{
         this.updateWorldMtx();
-        let mtx = this.m_screenToWorldMtx;
-        if(mtx == null){
-            mtx = this.CameraToWorldMatrix.mul(this.ProjMatrixInv);
-            this.m_screenToWorldMtx = mtx;
-        }
-        return mtx;
+        return this.CameraToWorldMatrix.mul(this.ProjMatrixInv);
     }
-
 
     //CommandBuffers
     private m_cmdBufferClear:CommandBuffer;
@@ -231,7 +200,6 @@ export class Camera extends Component{
     }
 
     public onUpdate(){
-        this.isFrameWorldMtxCaled = false;
     }
 
     public static CreatePersepctive(fov:number,aspectratio:number,near:number,far:number):Camera{

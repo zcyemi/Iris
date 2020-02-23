@@ -143,7 +143,7 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
 
         if (camera.isDataViewChanged) {
             cameraBuffer.cameraPos =camera.transform.worldPosition.vec4(0);
-            cameraBuffer.cameraMtxView = camera.WorldMatrix;
+            cameraBuffer.cameraMtxView = camera.ViewMatrix;
 
             console.log("submit camera view data");
             camera.isDataViewChanged = false;

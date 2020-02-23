@@ -1237,7 +1237,7 @@ export class mat4 {
      * @param forward dir
      * @param up dir
      */
-    public static coordCvt(pos: vec3, forward: vec3, up: vec3) {
+    public static coordCvt(pos: vec3, forward: vec3, up: vec3):mat4 {
         let f = forward.Normalize();
         let u = up.Normalize();
         let r = u.crossRevSafe(f).normalized;
