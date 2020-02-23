@@ -84,7 +84,7 @@ export class GLTFSceneBuilder{
         else if(_node.matrix){
             //Set matrix
             //TODO
-            gobj.transform.localMatrix = new mat4( _node.matrix);
+            gobj.transform.localMtx = new mat4( _node.matrix);
         }
 
 

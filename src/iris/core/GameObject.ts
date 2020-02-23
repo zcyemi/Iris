@@ -40,6 +40,11 @@ export class GameObject{
     }
 
     public update(){
+
+        let trs = this.transform;
+        trs.isDataObjDirty = false;
+        trs.isDataLocalDirty = false;
+
         let comp = this.components;
         if(comp != null){
             for(let i=0,len = comp.length;i<len;i++){
@@ -50,17 +55,20 @@ export class GameObject{
             }
         }
 
-        let trs = this.transform;
-        let trsdirty = trs.isDirty;
-        
+        let dataDirty = trs.isDirty;
+
         let children = this.transform.children;
         if(children != null){
             for(let i=0,len = children.length;i<len;i++){
                 let g = children[i].gameobject;
-                g.transform.setObjMatrixDirty(trsdirty);
+                if(dataDirty){
+                    g.transform.setObjDirty();
+                }
                 g.update();
             }
         }
+
+        
     }
 
     public addComponent<T extends Component>(c:T):T{

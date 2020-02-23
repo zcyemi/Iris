@@ -1,30 +1,24 @@
-import { GameObject } from "./GameObject";
-import { vec3, vec4, glmath } from "../math/GLMath";
+import { glmath, vec3, vec4 } from "../math/GLMath";
 import { Component } from "./Component";
-import { Scene } from "./Scene";
 import { GameContext } from "./GameContext";
-
+import { GameObject } from "./GameObject";
+import { ObjectUtil } from './Utility';
 
 export enum LightType{
     direction = 0,
     point = 1
 }
 
+const KEY_m_paramDirty = "m_lightParamDirty";
+
 export class Light extends Component{
-    public lightType:LightType = LightType.point;
-    public intensity:number = 1.0;
-    public lightColor:vec3 = vec3.one;
+    private m_lightParamDirty:boolean = true;
 
-    private m_range:number = 10;
-
-    private m_paramDirty:boolean = true;
-
+    public lightType:LightType = ObjectUtil.initProperty(this,"lightType",LightType.point,KEY_m_paramDirty);
+    public intensity:number = ObjectUtil.initProperty(this,"intensity",1.0,KEY_m_paramDirty);
+    public lightColor:vec3 = ObjectUtil.initProperty(this,"lightColor",vec3.one,KEY_m_paramDirty);
+    public lightRange:number = ObjectUtil.initProperty(this,"lightRange",10.0,KEY_m_paramDirty);
     public castShadow:boolean = false;
-
-    public get range():number{
-        return this.m_range;
-    }
-
 
     public get lightPosData():vec3{
         if(this.lightType == LightType.direction){
@@ -36,16 +30,15 @@ export class Light extends Component{
     }
 
     public get isDirty():boolean{
-        return this.transform.isDirty && this.m_paramDirty;
+        return this.transform.isDirty && this.m_lightParamDirty;
     }
 
     public set isDirty(v:boolean){
         if(v){
-            this.m_paramDirty =true;
+            this.m_lightParamDirty =true;
         }
         else{
-            this.m_paramDirty = false;
-            this.transform.setLocalDirty(false);
+            this.m_lightParamDirty = false;
         }
     }
 
@@ -62,7 +55,7 @@ export class Light extends Component{
         let light = new Light(LightType.point,intensity,color);
         gobj.addComponent(light);
         if(position) light.transform.localPosition = position;
-        light.m_range = range;
+        light.lightRange = range;
         return light;
     }
 

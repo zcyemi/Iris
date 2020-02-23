@@ -42,18 +42,14 @@ export class ControlHandlerComponent extends Component{
             //draw
             if(snapshot.getKey('q')){
                 trs.applyTranslate(glmath.vec3(0.05,0,0));
-                trs.setLocalDirty(true);
             }else if(snapshot.getKey('e')){
                 trs.applyTranslate(glmath.vec3(-0.05,0,0));
-                trs.setLocalDirty(true);
             }
             else if(snapshot.getKey('z')){
                 trs.applyTranslate(glmath.vec3(0,0,0.05));
-                trs.setLocalDirty(true);
             }
             else if(snapshot.getKey('c')){
                 trs.applyTranslate(glmath.vec3(0,0,-0.05));
-                trs.setLocalDirty(true);
             }
             
             

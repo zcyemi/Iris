@@ -44,13 +44,11 @@ export class InspectorEditorGUI extends BaseEditorGUI{
 
         let trs = tar.transform;
 
-        trs.position;
-
-        ui.formVec3("Pos",trs.position.raw,val=>{
-            trs.setPosition(new vec3(val));
+        ui.formVec3("Pos",trs.localPosition.raw,val=>{
+            trs.setPositionRaw(val);
         });
         ui.formVec3("Rota:",trs.localRotation.toEulerDeg().raw,val=>trs.setRotation(quat.fromEulerDegAry(val)));
-        ui.formVec3("Scale:",trs.localScale.raw,val=>trs.setScale(new vec3(val)));
+        ui.formVec3("Scale:",trs.localScale.raw,val=>trs.setScaleRaw(val));
 
         
         ui.button("objMtx",()=>this.m_trsOutput = trs.objMatrix.raw+"");

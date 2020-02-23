@@ -187,7 +187,7 @@ export class IrisCanvas{
         camera.clearType = ClearType.Skybox;
         camera.skybox = Skybox.createFromProcedural();
         camObj.addComponent(camera);
-        
+
 
         await AssetsDataBase.loadBundle('iris.resbundle');
 

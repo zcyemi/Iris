@@ -698,6 +698,12 @@ export class vec3 {
         this.z = v.z;
     }
 
+    public setRaw(raw:number[]){
+        this.raw[0] = raw[0];
+        this.raw[1] = raw[1];
+        this.raw[2] = raw[2];
+    }
+
     public static get zero(): vec3 { return new vec3([0, 0, 0]) };
     public static get one(): vec3 { return new vec3([1, 1, 1]) };
     public static get up(): vec3 { return new vec3([0, 1, 0]) };

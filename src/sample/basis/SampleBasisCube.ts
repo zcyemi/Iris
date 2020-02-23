@@ -3,7 +3,7 @@ import { AssetsDataBase } from "../../iris/core/AssetsDatabase";
 import { GameContext } from "../../iris/core/GameContext";
 import { MeshPrimitive } from "../../iris/core/MeshPrimitive";
 import { ShaderFX } from "../../iris/core/ShaderFX";
-import { mat4, vec3, vec4, quat } from "../../iris/math";
+import { mat4, vec3, vec4, quat, vec2 } from "../../iris/math";
 import { SampleBase } from "../sampleBase";
 
 
@@ -12,7 +12,6 @@ class SelfRotaComp extends Component{
     private m_rota:quat;
 
     public onStart(){
-
         this.m_rota = quat.fromEulerDeg(1.5,-1,0.8);
     }
 
