@@ -35,14 +35,30 @@ export class GameContext{
     public inactiveContext(){ GameContext.s_current = null;}
 
     public registerCamera(camera:Camera){
-        if(this.sceneCameras.length  == 0){
+        if(this.sceneCameras.length == 0){
             this.mainCamera = camera;
         }
         this.sceneCameras.push(camera);
     }
 
     public unregisterCamera(camera:Camera){
-        throw new Error('not impl');
+        if(camera == null) return;
+        if(this.mainCamera == camera){
+            this.mainCamera = null;
+
+            let cameras = this.sceneCameras;
+            Utility.ListRemove(cameras,camera);
+            if(cameras.length >0){
+                this.mainCamera = cameras[0];
+            }
+            else{
+                this.mainCamera = null;
+            }
+        }
+        else{
+            Utility.ListRemove(this.sceneCameras,camera);
+        }
+
     }
     
     public registerLight(light:Light){
@@ -54,16 +70,44 @@ export class GameContext{
         this.m_sceneChanged =true;
     }
 
+
     public setSceneChanged(){
         this.m_sceneChanged = true;
     }
 
     public destroy(gameobj:GameObject){
-        throw new Error('not impl');
+        if(gameobj == null) return;
+
+        console.log("Destroy:" + gameobj.name);
+        const components = gameobj.components;
+        if(components !=null){
+            components.forEach(c=>{
+                if(c.onDestroy) c.onDestroy();
+                c.gameobject = null;
+            });
+        }
+
+        gameobj.components = null;
+        gameobj.active = false;
+
+        const render = gameobj.render;
+        if(render!=null){
+            render.release(this.graphicsRender.glctx);
+            gameobj.render = null;
+        }
+        const transform = gameobj.transform;
+        if(transform.parent!=null){
+            transform.parent.removeChild(transform);
+        }
+
+        Utility.ListRemove(this.sceneTRS,transform);
+        transform.onDestroy();
+
+        gameobj.transform = null;
     }
 
     public onFrame(dt:number){
-        const rootTRS = this.sceneTRS;
+        var rootTRS = this.sceneTRS;
         for(let t= 0;t<rootTRS.length;t++){
             rootTRS[t].gameobject.update();
         }

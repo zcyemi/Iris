@@ -1,30 +1,31 @@
 import { SampleBase } from "../sampleBase";
-import { Skybox, ClearType, vec2, CameraFreeFly } from "../../iris";
+import { Skybox, ClearType, vec2, CameraFreeFly, GameObject, Camera } from "../../iris";
 import { GameContext } from "../../iris/core/GameContext";
 
 export class SampleBasisSkybox extends SampleBase {
 
     private m_skybox:Skybox;
+    private m_camera:GameObject;
+
     public onInit() {
 
         if(this.m_skybox ==null){
             this.m_skybox = Skybox.createFromProcedural();
         }
 
-        let camera = GameContext.current.mainCamera;
+
+        let c = new GameObject("Camera");
+        let camera = Camera.CreatePersepctive(60,1.0,0.01,1000);
         camera.clearType = ClearType.Skybox;
         camera.skybox = this.m_skybox;
-
-        camera.gameobject.addComponent(new CameraFreeFly());
+        c.addComponent(camera);
+        c.addComponent(new CameraFreeFly());
+        this.m_camera = c;
     }    
     
     public onDestroy() {
 
-        let gobj = GameContext.current.mainCamera.gameobject;
-        let comp = gobj.getComponent(CameraFreeFly);
-        if(comp!=null){
-            gobj.removeComponent(comp);
-        }
+        GameContext.current.destroy(this.m_camera);
     }
 
 }

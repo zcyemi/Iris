@@ -296,6 +296,10 @@ export class Transform{
     public update(){
     }
 
+    public onDestroy(){
+        this.m_gameobj = null;
+    }
+
     public get children():Transform[]{
         return this.m_children;
     }

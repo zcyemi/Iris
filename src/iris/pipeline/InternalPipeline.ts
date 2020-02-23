@@ -380,7 +380,7 @@ export class InternalPipeline extends RenderPipelineBase<InternalRenderModel> {
         let cam = gamectx.mainCamera;
 
         //render
-        if (!cam.enabled) return;
+        if (cam == null || !cam.enabled) return;
 
         model.updateCameraUnifomrm(cam);
 

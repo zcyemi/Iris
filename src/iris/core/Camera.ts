@@ -163,11 +163,14 @@ export class Camera extends Component{
 
     public constructor(){
         super();
-
         this.m_cmdBufferClear = new CommandBuffer("camera clear");
         this.cmdList = new CameraCommandList();
 
         GameContext.current.registerCamera(this);
+    }
+
+    public onDestroy(){
+        GameContext.current.unregisterCamera(this);
     }
     
     private updateCommandBufferClear(){

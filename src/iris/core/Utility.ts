@@ -85,8 +85,12 @@ export class Utility {
 	public static ListRemove<T>(ary:T[],obj:T):T[]{
 		if(ary == null) return null;
 		let ind = ary.indexOf(obj);
-		if(ind <0) return ary;
-		return ary.splice(ind,1);
+		if(ind < 0){
+			return ary;
+		}
+		else{
+			return ary.splice(ind,1);
+		}
 	}
 
 	/**

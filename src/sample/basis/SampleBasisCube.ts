@@ -1,9 +1,9 @@
-import { ClearType, GameObject, Material, Mesh, MeshRender, Skybox, Component, Utility, ObjectUtil } from "../../iris/core";
+import { Camera, ClearType, Component, GameObject, Material, MeshRender, Skybox } from "../../iris/core";
 import { AssetsDataBase } from "../../iris/core/AssetsDatabase";
 import { GameContext } from "../../iris/core/GameContext";
 import { MeshPrimitive } from "../../iris/core/MeshPrimitive";
 import { ShaderFX } from "../../iris/core/ShaderFX";
-import { mat4, vec3, vec4, quat, vec2 } from "../../iris/math";
+import { mat4, quat, vec4 } from "../../iris/math";
 import { SampleBase } from "../sampleBase";
 
 
@@ -23,77 +23,44 @@ class SelfRotaComp extends Component{
 
 export class SampleBasisCube extends SampleBase{
     private m_cube:GameObject;
-    private m_mesh:Mesh;
-    private m_skybox:Skybox;
+    private m_camera:GameObject;
 
     onInit(){
-
         if(this.m_cube == null){
-            var g = new GameObject("Cube");
-            this.m_cube = g;
+            let cube = new GameObject("Cube");
+            cube.addComponent(new SelfRotaComp());
+            this.m_cube = cube;
 
-            let gtrs = g.transform;
-            gtrs.setScale(vec3.one.mulNum(0.5));
+            cube.transform.setScaleRaw([0.2,0.2,0.2]);
 
-            g.addComponent(new SelfRotaComp());
-
-    
-            g.transform.setPosition(new vec3([0,0,0]));
             let bundle = AssetsDataBase.getLoadedBundle("iris");
             let shader = ShaderFX.findShader(bundle,'@shaderfx/debug');
-
             let mat = new Material(shader);
-            // mat.setColor('uColor',vec4.one);
-    
-            let mesh = this.m_mesh;
-            if(mesh == null){
-                // mesh = new Mesh('TestBox');
-                // mesh.setPosition(0,new Float32Array([
-                //     -0.5,-0.5,0,
-                //     0.5,-0.5,0,
-                //     0.5,0.5,0,
-                //     -0.5,0.5,0,
-                // ]),GL.FLOAT,3);
-
-                // mesh.setIndices(new Uint16Array([0,2,1,0,2,3]),GL.UNSIGNED_SHORT,MeshTopology.Triangles);
-                // mesh.apply();
-
-                mesh = MeshPrimitive.Cube;
-                this.m_mesh = mesh;
-            }
-
-            
+            let mesh = MeshPrimitive.Cube;
             let meshRender = new MeshRender(mesh,mat);
-            g.render = meshRender;
-
-            // let cmdbuffer = new CommandBuffer("test");
-            // cmdbuffer.drawMesh(mesh,mat,g.transform.objMatrix);
-            // cmdbuffer.submit();
-
-            // let camera = GameContext.current.mainCamera;
-            // camera.cmdList.add(CommandBufferEvent.beforeOpaque,cmdbuffer);
-
-            
+            cube.render = meshRender;
         }
         else{
             this.m_cube.active = true;
         }
 
-        let camera = GameContext.current.mainCamera;
-        camera.clearType = ClearType.Background;
-
-        // if(this.m_skybox == null){
-        //     this.m_skybox = Skybox.createFromProcedural();
-        // }
-        // camera.skybox = this.m_skybox;
-
-
-        //test
-
+        if(this.m_camera == null){
+            let camera = Camera.CreatePersepctive(60,1.0,0.01,1000);
+            camera.clearType = ClearType.Skybox;
+            camera.skybox = Skybox.createFromProcedural();
+            camera.background = new vec4([0,0,0,1.0]);
+            camera.clearDepth = true;
+            camera.depthValue = -1000;
+            var camobj = new GameObject("Simpel Camera");
+            camobj.addComponent(camera);
+            this.m_camera = camobj;
+        }
     }
 
     onDestroy(){
         this.m_cube.active =false;
+        GameContext.current.destroy(this.m_camera);
+        this.m_camera = null;
     }
 }
 

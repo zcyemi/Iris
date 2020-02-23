@@ -82,6 +82,7 @@ export class IrisSample extends UIContainer{
         this.sidebarBegin('sampleList','Iris',item=>{
             if(this.m_selectSampleId == item) return;
             this.m_selectSampleId = item;
+            this.m_inspectorGUI.setTargetGameObj(null);
             this.canvas.loadSample(item);
         });
         
@@ -175,6 +176,8 @@ export class IrisCanvas{
             cursample.onDestroy();
         }
 
+        console.log("-----------");
+        console.log("InitSample",name);
         sample.onInit();
         this.m_currenSample = sample;
     }
@@ -182,13 +185,6 @@ export class IrisCanvas{
     private m_resLoaded:boolean = false;
 
     private async initGL(){
-        var camObj = new GameObject('camera');
-        let camera = Camera.CreatePersepctive(60,1.0,0.01,1000);
-        camera.clearType = ClearType.Skybox;
-        camera.skybox = Skybox.createFromProcedural();
-        camObj.addComponent(camera);
-
-
         await AssetsDataBase.loadBundle('iris.resbundle');
 
         let pipeline = new InternalPipeline();

@@ -19,11 +19,13 @@ export class SceneEditorGUI extends BaseEditorGUI{
 
         ui.cardBegin("Scene");
 
-        ui.bandage("Cameras");
         let cameras = gamectx.sceneCameras;
+        ui.bandage("Cameras: "+ cameras.length);
 
         cameras.forEach(item => {
-            ui.button(item.gameobject.name,()=>this.msgSelectionObj(item.gameobject));
+            let g = item.gameobject;
+            if(g == null) return;
+            ui.button(g.name,()=>this.msgSelectionObj(g));
         });
 
         ui.divider();
@@ -35,6 +37,8 @@ export class SceneEditorGUI extends BaseEditorGUI{
         })
 
         ui.divider();
+
+        ui.bandage("Root: "+ gamectx.sceneTRS.length);
         this.DrawTRS(gamectx.sceneTRS);
         ui.cardEnd();
         
@@ -48,11 +52,13 @@ export class SceneEditorGUI extends BaseEditorGUI{
             let children = item.children;
 
             let gobj = item.gameobject;
+            
+            let gobjName = gobj == null ? "[null]": gobj.name;
             if(children == null || children.length == 0){
-                ui.button(gobj.name,()=>this.msgSelectionObj(gobj));
+                ui.button(gobjName,()=>this.msgSelectionObj(gobj));
             }
             else{
-                ui.cardBegin(gobj.name);
+                ui.cardBegin(gobjName);
                 this.DrawTRS(children);
                 ui.cardEnd();
             }
