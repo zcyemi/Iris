@@ -1,0 +1,338 @@
+#file raymarching.sfx
+
+#GLSL
+precision mediump float;
+
+struct RAY{
+    vec3 origin;
+    vec3 dir;
+    float IOR;
+};
+
+struct GEOM{
+    vec4 pos;
+    float reflective;
+    float reflractive;
+    float reflectivity;
+    float indexOfRefraction;
+
+    vec3 color;
+    float emittance;
+    
+    float type;
+};
+
+struct INTERSECT{
+    vec3 p;
+    vec3 n;
+    vec3 c;
+    GEOM g;
+};
+
+
+uniform GEOMETRY_BUFFER{
+    GEOM[8] geom_buffer;
+};
+
+float getrandom(vec3 noise, float seed)
+{
+	return frac(sin(dot(_initray + seed, noise))* 43758.5453 + seed);
+}
+
+float rand(vec2 co)
+{
+	float a = 12.9898, b = 78.233, c = 43758.5453;
+	float dt = dot(co.xy, vec2(a, b));
+	dt = fmod(dt,3.14);
+	return frac(sin(dt) *c);
+}
+
+vec3 hemiSphereSampling(float seed, vec3 normal)
+{
+	float u = getrandom(vec3(12.9898, 78.233, 151.7182), seed);
+	float v = getrandom(vec3(63.7264, 10.873, 623.6736), seed);
+	float up = sqrt(u);
+	float over = sqrt(1.0 - up*up);
+	float around = v*3.1415926 *2.0;
+
+	vec3 directionNotNormal;
+	if (abs(normal.x) < 0.577350269189)
+		directionNotNormal = vec3(1, 0, 0);
+	else if (abs(normal.y) < 0.577350269189)
+		directionNotNormal = vec3(0, 1, 0);
+	else
+		directionNotNormal = vec3(0, 0, 1);
+
+	vec3 perpendicularDir1 = normalize(cross(normal, directionNotNormal));
+	vec3 perpendicularDir2 = normalize(cross(normal, perpendicularDir1));
+
+	return (up *normal) + cos(around) *over * perpendicularDir1 + sin(around) *over * perpendicularDir2;
+}
+
+vec3 getPointOnRay(RAY r, float t)
+{
+	return r.origin + (t - 0.0001) * normalize(r.dir);
+}
+
+float intersectSphere(RAY r,vec3 center,float radius, out vec3 normal,out vec3 hitpos)
+{
+	float3 rc = center - r.origin;
+	r.dir = normalize(r.dir);
+
+	float rdotv = dot(rc, r.dir);
+	float delta = rdotv*rdotv - (dot(rc, rc) - radius * radius);
+	if (delta < 0)
+	{
+		return -1.0;
+	}
+
+	float t;
+
+	float sqrtdelta = sqrt(delta);
+	float t1 = rdotv + sqrtdelta;
+	float t2 = rdotv - sqrtdelta;
+
+	t = min(t1, t2);
+	hitpos = getPointOnRay(r, t);
+	normal = normalize(hitpos - center);
+	return t;
+}
+
+float intersectPlane(RAY r, float3 center, float3 dir, out float3 normal, out float3 hitpos)
+{
+	dir = normalize(dir);
+	float3 rd = r.origin - center;
+	float ndotd = dot(dir,rd);
+	float len = abs(ndotd);
+
+
+	float ndott = dot(r.dir, -dir);
+	float t = len / ndott;
+
+	normal = dir;
+	hitpos = getPointOnRay(r, t);
+	return t;
+}
+
+
+bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist)
+{
+	vec3 normal, hitpos;
+	float t;
+	float t_max = 10000;
+
+	for (int i = 0; i < _numberOfObjects; i++)
+	{
+		GEOM geom = geom_buffer[i];
+		if (geom.type == 0)
+		{
+			//sphere
+			t = intersectSphere(r, geom.pos, geom.pos.w, normal, hitpos);
+		}
+		else if (geom.type == 1)
+		{
+			t = intersectPlane(r, geom.pos, geom.pos, normal, hitpos);
+		}
+
+		if (t > 0 && t < t_max)
+		{
+			t_max = t;
+			intersect.p = hitpos;
+			intersect.n = normal;
+			intersect.g = geom;
+			intersect.c = geom.pos;
+		}
+	}
+
+	dist = t_max;
+	if (t_max < 10000)
+		return true;
+	return false;
+}
+
+// Rendering Function
+float halfLambert(vec3 v1, vec3 v2)
+{
+	float dotv = dot(v1, v2);
+	return dotv *0.5 + 0.5;
+}
+
+float blinnPhongSpecular(vec3 normal, vec3 lightdir, float power)
+{
+	vec3 halfang = normalize(normal + lightdir);
+	return pow(saturate(dot(normal, halfang)), power);
+}
+
+
+vec3 subScatter(INTERSECT intersect, float seed)
+{
+	vec3 lightPos = float3(0.2, 2.45, 0);
+	float materialThick = 0.5;
+	vec3 extinctionCoef = 0.7;
+	float spec = 15;
+
+	float attenuation = 10 / distance(lightPos, intersect.p);
+	vec3 lvec = normalize(lightPos - intersect.p);
+	vec3 norm = normalize(intersect.n);
+	vec3 evec = normalize(intersect.p - intersect.c);
+
+	vec3 dotLN = attenuation *halfLambert(lvec, norm);
+	dotLN *= intersect.g.color;
+
+	//indirect term
+	vec3 indirectTerm = materialThick * max(0.0, dot(-evec, lvec));
+	indirectTerm += materialThick *halfLambert(lvec, -norm);
+	indirectTerm *= attenuation;
+	indirectTerm *= extinctionCoef;
+
+	vec3 finalColor = dotLN + indirectTerm;
+
+	vec3 specularTerm = blinnPhongSpecular(norm, lvec, spec);
+
+	return finalColor + specularTerm;// +specularTerm;
+}
+
+//Fraction Fresnel
+struct FRESNEL
+{
+	float reflectCoef;
+	float transmitCoef;
+};
+
+FRESNEL caculateFresnel(vec3 normal, vec3 incident, float incidentIOR, float transmittedIOR)
+{
+	FRESNEL fresnel;
+	incident = normalize(incident);
+	normal = normalize(normal);
+	float cosThetaI = abs(dot(normal, incident));
+	float sinIncident = sqrt(1.0 - cosThetaI * cosThetaI);
+	float sinTransmit = incidentIOR / transmittedIOR * sinIncident;
+	float cosThetaT = sqrt(1.0 - sinTransmit*sinTransmit);
+	if (cosThetaT <= 0.0)
+	{
+		fresnel.reflectCoef = 1.0;
+		fresnel.transmitCoef = 0.0;
+		return fresnel;
+	}
+	else
+	{
+		//Wiki pedia https://en.wikipedia.org/wiki/Fresnel_equations
+		float Rs = (incidentIOR *cosThetaI - transmittedIOR * cosThetaT) / (incidentIOR *cosThetaI + transmittedIOR * cosThetaT);
+		Rs *= Rs;
+		float Rp = (incidentIOR* cosThetaT - transmittedIOR * cosThetaI) / (incidentIOR* cosThetaT + transmittedIOR * cosThetaI);
+		Rp *= Rp;
+
+		fresnel.reflectCoef = 0.5*(Rs + Rp);
+		fresnel.transmitCoef = 1.0 - fresnel.reflectCoef;
+		return fresnel;
+	}
+}
+
+
+void pathTracer(inout RAY r, int rayDepth, inout vec3 col)
+{
+
+	vec3 color1 = vec3(1.0, 0.2, 0.3);
+	vec3 color2 = vec3(0.4, 1.0, 0.2);
+	vec3 error = vec3(1.0, 0, 1.0);
+
+
+	float tmax = DIST_MAX;
+	float t = 0;
+
+	vec3 normal, hitpos;
+
+	INTERSECT intersect;
+	intersect.p = 0;
+	intersect.n = 0;
+
+	vec3 colorMask = 1.0;
+
+	float shift = 0.001;
+
+	for (int i = 0; i < depth; i++)
+	{
+		float seed = _Time.x + float(i);
+		if (intersectWorld(r, intersect, t))
+		{
+			GEOM g = intersect.g;
+			float random = rand(intersect.p.xy);
+			if (g.emittance > 0)
+			{
+				//light
+				colorMask = colorMask * g.color * g.emittance;
+				col = colorMask;
+				return;
+			}
+			else if (g.reflective <= 0 && g.refractive <= 0)
+			{
+				colorMask *= g.color;
+				col = colorMask;
+
+				r.dir = normalize(hemiSphereSampling(seed + random, intersect.n));
+				r.origin = intersect.p + r.dir *shift;
+			}
+			else
+			{
+				bool isInsideOut = dot(r.dir, intersect.n) > 0;
+				if (g.refractive > 0)
+				{
+					vec3 random3 = vec3(random,rand(intersect.p.xz), rand(intersect.p.yz));
+					float oldIOR = r.IOR;
+					float newIOR = g.indexOfRefraction;
+
+					float reflect_range = -1.0;
+					float eta = oldIOR / newIOR;
+					vec3 reflectR = reflect(r.dir, intersect.n);
+					vec3 refractR = refract(r.dir, intersect.n, eta);
+					FRESNEL fresnel = caculateFresnel(intersect.n, r.dir, oldIOR, newIOR);
+
+					reflect_range = fresnel.reflectCoef; //reflect rate  reflect+ refract = 1
+
+					float randomnum = getrandom(random, seed);
+					if (randomnum < reflect_range)
+					{
+						r.dir = reflectR;
+						r.origin = intersect.p + shift * r.dir;
+						if (g.material1 > 0) //subsurface scatter
+						{
+							colorMask *= subScatter(intersect, random);
+						}
+					}
+					else
+					{
+						r.dir = refractR;
+						r.origin = intersect.p + shift* r.dir;
+					}
+
+					if (isInsideOut)
+						r.IOR = 1.0;
+					else
+						r.IOR = newIOR;
+
+					colorMask *= g.color;
+					col = colorMask;
+
+				}
+				else
+				{
+					colorMask *= subScatter(intersect, random);
+					colorMask *= g.color;
+					col = colorMask;
+					r.IOR = 1.0;
+					r.dir = reflect(r.dir, intersect.n);
+					r.origin = intersect.p + r.dir *shift;
+				}
+			}
+		}
+		else
+		{
+			//col = error;
+			col = 0;
+			return;
+		}
+	}
+	col = 0;
+}
+
+#END

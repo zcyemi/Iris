@@ -1,7 +1,8 @@
 #file diffuse.sfx
-#include include/basis.sfx
-#include include/light.sfx
-#include include/lighting.sfx
+
+#include "basis.sfx"
+#include "light.sfx"
+#include "lighting.sfx"
 
 #GLSL
 precision mediump float;
@@ -14,9 +15,9 @@ struct V2F{
 inout V2F v2f;
 
 
-in vec4 aPosition: POSITION_0;
-in vec2 aUV : TEXCOORD_0;
-in vec4 aNormal :NORMAL_0;
+in vec4 aPosition;
+in vec2 aUV;
+in vec4 aNormal;
 
 void vertex(){
     vec4 wpos = MATRIX_M * aPosition;
@@ -28,7 +29,7 @@ void vertex(){
 }
 
 
-out lowp vec4 fragColor : TARGET_0;
+out lowp vec4 fragColor;
 uniform vec4 uColor;
 
 void fragment(){
@@ -40,10 +41,14 @@ void fragment(){
 #END
 
 technique diffuse{
-    #version 300 es
-
-    #pipeline queue opaque
-
-    #param vs vertex
-    #param ps fragment
+    vs: vertex;
+    ps: fragment;
+    pipeline:{
+        queue: opaque;
+    }
+    property:{
+        POSITION_0: aPosition;
+        TEXCOORD_0: aUV;
+        NORMAL_0: aNormal;
+    }
 }

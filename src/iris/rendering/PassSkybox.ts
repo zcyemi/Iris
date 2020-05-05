@@ -28,7 +28,7 @@ export class PassSkybox extends RenderPass{
         this.m_tags =deftags;
 
 
-        let shader = ShaderFX.findShader("iris","@shaderfx/skybox");
+        let shader = ShaderFX.findShader("iris","@sfx/skybox");
 
         let mat= new Material(shader);
         mat.setFlag("ENVMAP_TYPE","TEX",true);

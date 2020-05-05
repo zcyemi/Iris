@@ -1,9 +1,7 @@
-import { AssetsDataBase, BundleFileEntry } from "./AssetsDatabase";
-import { BinaryBuffer } from "ts-binary-serializer/dist/src/BinaryBuffer";
-import { ShaderFXSource, ShaderTags, ShaderFXTechnique } from "./ShaderFX";
-import { GLProgram, GLContext } from "../gl";
-import { GraphicsContext } from "./GraphicsContext";
+import { GLProgram } from "../gl";
 import { RenderQueue } from "../pipeline/RenderQueue";
+import { GraphicsContext } from "./GraphicsContext";
+import { SFXShaderTechnique, SFXTechnique, ShaderTags } from "./ShaderFX";
 
 
 export class Shader{
@@ -11,11 +9,11 @@ export class Shader{
 
     public tags:ShaderTags;
 
-    private m_source:ShaderFXSource;
+    private m_source:SFXShaderTechnique;
 
     private m_defProgram:GLProgram;
 
-    public constructor(source:ShaderFXSource){
+    public constructor(source:SFXShaderTechnique){
         this.m_source = source;
         this.tags = this.getTags(source.technique);
     }
@@ -26,31 +24,24 @@ export class Shader{
         let ctx = GraphicsContext.currentRender.glctx;
 
         let source = this.m_source;
-        let program = ctx.createGLProgram(source.vertex,source.fragment);
-        program.MarkAttributeSemantic(source.technique.attr_vs);
-        program.MarkUniformSemantic(source.technique.uniform_semantic);
+
+        const prefixProfile = '#version 300 es\n';
+
+        let program = ctx.createGLProgram(prefixProfile+source.glsl_vs,prefixProfile+source.glsl_ps);
+        program.MarkPropertySemantic(source.technique.properties);
         program.name = this.m_source.technique.name;
         this.m_defProgram = program;
         return this.m_defProgram;
     }
 
-    private getTags(technique:ShaderFXTechnique):ShaderTags{
+    private getTags(technique:SFXTechnique):ShaderTags{
         let tag = new ShaderTags();
 
-        let meta = technique.meta_pipeline;
-        tag.queue = RenderQueue[this.getMetaProp(meta['queue'],'opaque')];
+        let pipeline = technique.pipeline;
+        let queue = pipeline.queue;
+        tag.queue = RenderQueue[queue == null? 'queue':queue];
     
         return tag;
     }
-
-    private getMetaProp(val:any,def:any):string{
-        if(val == null) return def;
-        if(Array.isArray(val)){
-            return val[0];
-        }
-    }
-
-    
-
 
 }

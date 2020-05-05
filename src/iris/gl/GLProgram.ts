@@ -1,3 +1,5 @@
+import { SFXTechniqueProperties } from "../core/ShaderFX";
+
 export class GLProgram {
 
     public Program: WebGLProgram;
@@ -26,24 +28,25 @@ export class GLProgram {
         return this.m_id;
     }
 
-    public MarkUniformSemantic(semantics:{[key:string]:string}){
-        this.UniformSemantic = semantics;
-    }
-
-    public MarkAttributeSemantic(semantics: { [key: string]: string }) {
-        let result = {};
-
+    public MarkPropertySemantic(property:SFXTechniqueProperties){
         const attrs = this.Attributes;
-        for (const key in attrs) {
-            if (attrs.hasOwnProperty(key)) {
-                const element = attrs[key];
-                let semantic = semantics[<string>key];
-                if (semantic) {
-                    result[semantic] = element;
+        let attrSemantics = {};
+        for (const key in property) {
+            if (property.hasOwnProperty(key)) {
+                const tecProp = property[key];
+                const semantic = tecProp.semantic;
+                if(semantic == 'MAIN_TEXTURE' || semantic == 'MAIN_COLOR'){
+                    this.UniformSemantic[semantic] = key;
+                }
+                else{
+                    let attrInd = attrs[key];
+                    if(attrInd!=undefined){
+                        attrSemantics[semantic] = attrInd;
+                    }
                 }
             }
         }
-        this.AttributeSemantic = result;
+        this.AttributeSemantic = this.AttributeSemantic;
     }
 
     public GetUniform(key: string): WebGLUniformLocation | null {

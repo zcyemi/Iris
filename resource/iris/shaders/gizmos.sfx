@@ -1,27 +1,29 @@
 #file gizmos.sfx
-#include include/basis.sfx
+#include "basis.sfx"
 
 #GLSL
 precision mediump float;
 
-in vec4 aPosition: POSITION_0;
+in vec4 aPosition;
 
 void vertex(){
     vec4 vpos = aPosition;
     gl_Position = MATRIX_MVP * vpos;
 }
 
-out vec4 fragColor : TARGET_0;
+out vec4 fragColor;
 void fragment(){
     fragColor = vec4(1.0);
 }
 #END
 
 technique gizmos{
-    #version 300 es
-
-    #pipeline quque other
-
-    #param vs vertex
-    #param ps fragment
+    vs: vertex;
+    ps: fragment;
+    pipeline:{
+        queue: other;
+    }
+    property:{
+        POSITION_0: aPosition;
+    }
 }

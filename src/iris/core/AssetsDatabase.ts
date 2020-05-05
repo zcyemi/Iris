@@ -3,9 +3,7 @@ import { Utility } from './Utility';
 
 export class BundleFileEntry{
     @SerializeField(DataType.String)
-    public path:string;
-    @SerializeField(DataType.String)
-    public hash:string;
+    public resName:string;
     @SerializeField(DataType.String)
     public restype:string;
     @SerializeField(DataType.Int32)
@@ -20,12 +18,12 @@ export class AssetsBundle{
     @SerializeField(DataType.String,true)
     public res_types:string[];
     @SerializeField(DataType.Object,true,BundleFileEntry)
-    public entry:BundleFileEntry[];
+    public entry:BundleFileEntry[] = [];
     @SerializeField(DataType.TypedArray,false,Uint8Array)
     public data:Uint8Array;
 
     public getResource(path:string):BundleFileEntry{
-        return this.entry.find(e=>e.path == path);
+        return this.entry.find(e=>e.resName == path);
     }
 
     public getResourceData(path:string):DataView{

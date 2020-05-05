@@ -1,11 +1,11 @@
 #file debug.sfx
 
-#include include/basis.sfx
+#include "basis.sfx"
 
 #GLSL
 precision mediump float;
 
-in vec4 aPosition : POSITION_0;
+in vec4 aPosition;
 void vertex(){
     vec4 pos = aPosition;
     gl_Position = MATRIX_MVP * pos;
@@ -22,16 +22,23 @@ void vertex_raw(){
 }
 
 
-out vec4 fragColor: TARGET_0;
+uniform vec4 uColor;
+
+out vec4 fragColor;
 void fragment(){
-    fragColor = vec4(vPos+0.5,0,1.0);
+    fragColor = uColor;
 }
 
 #END
 
 technique debug{
-    #version 300 es
-    #pipeline queue opaque
-    #param vs vertex_raw
-    #param ps fragment
+    vs: vertex_raw;
+    ps: fragment;
+    pipeline:{
+        queue: opaque;
+    }
+    property:{
+        POSITION_0: aPosition;
+        MAIN_COLOR: uColor;
+    }
 }

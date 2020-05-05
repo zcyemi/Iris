@@ -1,16 +1,16 @@
 #file shadowGather.sfx
-#include include/basis.sfx
-#include include/shadowmap.sfx
+#include "basis.sfx"
+#include "shadowmap.sfx"
 
 #GLSL
 
 precision mediump float;
 
-inout vec2 vUV :TEXCOORD_0;
-inout vec3 vvdir :TEXCOORD_1;
+inout vec2 vUV;
+inout vec3 vvdir;
 
 
-in vec4 aPosition :POSITION_0;
+in vec4 aPosition;
 void vertex(){
     vec4 pos = aPosition;
     vUV = pos.xy +0.5;
@@ -25,7 +25,7 @@ void vertex(){
 }
 
 
-out vec4 fragColor :TARGET_0;
+out vec4 fragColor;
 uniform sampler2D uDepthTexure;
 
 void fragment(){
@@ -44,8 +44,9 @@ void fragment(){
 
 
 technique shadowGather{
-    #version 300 es
-
-    #param vs vertex
-    #param ps fragment
+    vs: vertex;
+    ps: fragment;
+    property:{
+        POSITION_0: aPosition;
+    }
 }

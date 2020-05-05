@@ -36,7 +36,7 @@ export class PassShadow extends RenderPass{
             depthTex: tex
         });
 
-        let shader = ShaderFX.findShader("iris","@shaderfx/shadowmap");
+        let shader = ShaderFX.findShader("iris","@sfx/shadowmap");
 
         let matSMgather= new Material(shader);
         this.m_uniformLightVP = matSMgather.propertyBlock.getUniform("uLightVP");

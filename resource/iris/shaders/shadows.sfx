@@ -1,0 +1,29 @@
+#file shadows.sfx
+#include "basis.sfx"
+
+#GLSL
+precision mediump float;
+
+uniform mat4 uLightVP;
+
+in vec4 aPosition;
+void vertex(){
+    mat4 lightmtx = uLightVP;
+    gl_Position = lightmtx * MATRIX_M * aPosition; //(uLightVP * MATRIX_M) *
+}
+
+void fragment(){
+}
+
+#END
+
+technique shadows{
+    vs: vertex;
+    ps: fragment;
+    pipeline:{
+        queue: other;
+    }
+    property:{
+        POSITION_0: aPosition;
+    }
+}

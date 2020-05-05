@@ -34,7 +34,7 @@ export class TextBuilder {
         let mat = this.material;
         if (mat == null) {
 
-            let shader = ShaderFX.findShader("iris","@shaderfx/text");
+            let shader = ShaderFX.findShader("iris","@sfx/text");
             mat = new Material(shader);
             
 

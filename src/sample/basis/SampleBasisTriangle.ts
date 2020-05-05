@@ -16,9 +16,9 @@ export class SampleBasisTriangle extends SampleBase{
         if(mesh==null){
             mesh  =new Mesh("Triangle");
             mesh.setPosition(0,new Float32Array([
-                -0.5,0.5,0,
-                0.5,0.5,0,
-                0,-0.5,0
+                -0.5,-0.5,0,
+                0.5,-0.5,0,
+                0,0.5,0
             ]),GL.FLOAT,3);
             mesh.setColor(0,new Float32Array([
                 1,0,0,1,
@@ -34,7 +34,7 @@ export class SampleBasisTriangle extends SampleBase{
         if(this.m_cmdbuffer == null){
             let cmdbuffer:CommandBuffer = new CommandBuffer("Draw Triangle");
             let bundle = AssetsDataBase.getLoadedBundle("iris");
-            let shader = ShaderFX.findShader(bundle,'@shaderfx/vertex_color_raw');
+            let shader = ShaderFX.findShader(bundle,'@sfx/vertex_color_raw');
             let material = new Material(shader);
     
             cmdbuffer.drawMesh(mesh,material);

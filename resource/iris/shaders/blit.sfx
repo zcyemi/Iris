@@ -1,10 +1,10 @@
-#file unlit.sfx
-#include include/basis.sfx
+#file blit.sfx
+#include "basis.sfx"
 
 #GLSL
-in vec4 aPosition: POSITION_0;
-in vec2 aUV : TEXCOORD_0;
-inout vec2 vUV : TEXCOORD_0;
+in vec4 aPosition;
+in vec2 aUV;
+inout vec2 vUV;
 
 void vertex_flip(){
     vec4 pos = aPosition;
@@ -20,8 +20,8 @@ void vertex(){
     gl_Position = pos;
 }
 
-uniform sampler2D uSampler : MAIN_TEXTURE;
-out vec4 fragColor: TARGET_0;
+uniform sampler2D uSampler;
+out vec4 fragColor;
 
 void fragment(){
     fragColor = texture(uSampler,vUV);
@@ -29,31 +29,46 @@ void fragment(){
 #END
 
 technique unlit{
-    #version 300 es
-    #pipeline ztest always
-    #pipeline zwrite off
-    #pipeline queue opaque
-
-    #param vs vertex_flip;
-    #param ps fragment;
+    vs: vertex_flip;
+    ps: fragment;
+    pipeline:{
+        ztest: always;
+        zwrite: off;
+        queue: opaque;
+    }
+    property:{
+        POSITION_0: aPosition;
+        TEXCOORD_0: aUV;
+        MAIN_TEXTURE: uSampler;
+    }
 }
 
-technique internal/blit{
-    #version 300 es
-    #pipeline ztest always
-    #pipeline zwrite off
-    #pipeline queue opaque
-
-    #param vs vertex;
-    #param ps fragment;
+technique internal_blit{
+    vs: vertex;
+    ps: fragment;
+    pipeline:{
+        ztest: always;
+        zwrite: off;
+        queue: opaque;
+    }
+    property:{
+        POSITION_0: aPosition;
+        TEXCOORD_0: aUV;
+        MAIN_TEXTURE: uSampler;
+    }
 }
 
-technique internal/blit_flip{
-    #version 300 es
-    #pipeline ztest always
-    #pipeline zwrite off
-    #pipeline queue opaque
-
-    #param vs vertex_flip;
-    #param ps fragment;
+technique internal_blit_flip{
+    vs: vertex_flip;
+    ps: fragment;
+    pipeline:{
+        ztest: always;
+        zwrite: off;
+        queue: opaque;
+    }
+    property:{
+        POSITION_0: aPosition;
+        TEXCOORD_0: aUV;
+        MAIN_TEXTURE: uSampler;
+    }
 }

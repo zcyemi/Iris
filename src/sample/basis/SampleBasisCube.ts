@@ -35,8 +35,9 @@ export class SampleBasisCube extends SampleBase{
             cube.transform.setScaleRaw([0.2,0.2,0.2]);
 
             let bundle = AssetsDataBase.getLoadedBundle("iris");
-            let shader = ShaderFX.findShader(bundle,'@shaderfx/debug');
+            let shader = ShaderFX.findShader(bundle,'@sfx/debug');
             let mat = new Material(shader);
+            mat.setMainColor(vec4.Random());
             let mesh = MeshPrimitive.Cube;
             let meshRender = new MeshRender(mesh,mat);
             cube.render = meshRender;

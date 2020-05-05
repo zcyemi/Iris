@@ -1,5 +1,5 @@
 import { SampleBase } from "../sampleBase";
-import { Skybox, ClearType, vec2, CameraFreeFly, GameObject, Camera } from "../../iris";
+import { Skybox, ClearType, vec2, CameraFreeFly, GameObject, Camera, Color } from "../../iris";
 import { GameContext } from "../../iris/core/GameContext";
 
 export class SampleBasisSkybox extends SampleBase {
@@ -19,6 +19,7 @@ export class SampleBasisSkybox extends SampleBase {
         camera.clearType = ClearType.Skybox;
         camera.skybox = this.m_skybox;
         c.addComponent(camera);
+        c.addComponent(new CameraFreeFly());
         this.m_camera = c;
     }    
     

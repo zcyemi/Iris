@@ -2,7 +2,6 @@ import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs'
 import typescript from 'rollup-plugin-typescript2';
 import globals from 'rollup-plugin-node-globals';
-import multiInput from 'rollup-plugin-multi-input';
 
 
 export default{

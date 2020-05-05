@@ -1,13 +1,13 @@
 #file sprite.sfx
-#include include/basis.sfx
+#include "basis.sfx"
 
 #GLSL
 precision mediump float;
 
-inout vec2 vUV: TEXCOORD_0;
+inout vec2 vUV;
 
-in vec4 aPosition :POSITION_0;
-in vec2 aUV : TEXCOORD_0;
+in vec4 aPosition;
+in vec2 aUV;
 
 void vertex(){
     gl_Position = MATRIX_MVP * aPosition;
@@ -16,7 +16,7 @@ void vertex(){
 
 uniform sampler2D uSampler;
 uniform vec4 uColor;
-out vec4 fragColor : TARGET_0;
+out vec4 fragColor;
 void fragment(){
     fragColor = texture(uSampler,vUV) * uColor;
 }
@@ -24,10 +24,16 @@ void fragment(){
 #END
 
 technique sprite{
-    #pipeline queue transparent
-    #pipeline zwrite off
-    #pipeline blend src_alpha one_minus_src_alpha
-    
-    #param vs vertex
-    #param ps fragment
+    vs: vertex;
+    ps: fragment;
+    pipeline:{
+        zwrite: off;
+        queue: transparent;
+        blend: src_alpha,one_minus_src_alpha;
+    }
+    property:{
+        POSITION_0: aPosition;
+        TEXCOORD_0: aUV;
+        MAIN_TEXTURE: uSampler;
+    }
 }

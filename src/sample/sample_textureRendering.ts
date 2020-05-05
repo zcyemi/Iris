@@ -70,13 +70,13 @@ export class SampleTextureRendering  extends Component{
         glctx.getExtension(EXT_color_buffer_float);
         glctx.getExtension(OES_texture_float_linear);
 
-        this.matAdvect = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/advect")).verify();
-        this.matForce = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/force")).verify();
-        this.matJacobi1D = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/jacobi1d")).verify();
-        this.matJacobi2D = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/jacobi2d")).verify();
-        this.matProjFinish = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/projFinish")).verify();
-        this.matProjSetup = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/projSetup")).verify();
-        this.matFluid = new Material(ShaderFX.findShader(bundle,"@shaderfx/stableFluid/fluid")).verify();
+        this.matAdvect = new Material(ShaderFX.findShader(bundle,"@sfx/stableFluid_advect")).verify();
+        this.matForce = new Material(ShaderFX.findShader(bundle,"@sfx/stableFluid_force")).verify();
+        this.matJacobi1D = new Material(ShaderFX.findShader(bundle,"@sfx/stableFluid_jacobi1d")).verify();
+        this.matJacobi2D = new Material(ShaderFX.findShader(bundle,"@sfx/stableFluid_jacobi2d")).verify();
+        this.matProjFinish = new Material(ShaderFX.findShader(bundle,"@sfx/stableFluid_projFinish")).verify();
+        this.matProjSetup = new Material(ShaderFX.findShader(bundle,"@sfx/stableFluid_projSetup")).verify();
+        this.matFluid = new Material(ShaderFX.findShader(bundle,"@sfx/stableFluid_fluid")).verify();
 
 
 

@@ -1,16 +1,16 @@
 #file rect.sfx
-#include include/basis.sfx
+#include "basis.sfx"
 
 #GLSL
 precision mediump float;
 
 
-inout vec2 vUV: TEXCOORD_0;
-inout vec4 vColor : COLOR_0;
+inout vec2 vUV;
+inout vec4 vColor;
 
-in vec4 aPosition: POSITION_0;
-in vec2 aUV : TEXCOORD_0;
-in vec4 aColor : COLOR_0;
+in vec4 aPosition;
+in vec2 aUV;
+in vec4 aColor;
 
 void vertex(){
     vec2 pos = 2.0 * (aPosition.xy * _screenparam_.zw) -1.0 ;
@@ -19,7 +19,7 @@ void vertex(){
     vColor = aColor;
 }
 
-out vec4 fragColor : TARGET_0;
+out vec4 fragColor;
 void fragment(){
     fragColor = vColor;
 }
@@ -27,12 +27,16 @@ void fragment(){
 #END
 
 technique rect{
-    #version 300 es
-
-    #pipeline queue overlay
-    #pipeline zwrite off
-    #pipeline ztest always
-
-    #param vs vertex
-    #param ps fragment
+    vs: vertex;
+    ps: fragment;
+    pipeline:{
+        queue: overlay;
+        zwrite: off;
+        ztest: always;
+    }
+    property:{
+        POSITION_0: aPosition;
+        TEXCOORD_0: aUV;
+        COLOR_0: aColor;
+    }
 }

@@ -4,6 +4,38 @@ import { RenderQueue } from "../pipeline/RenderQueue";
 import { Shader } from "./Shader";
 
 
+export class SFXTechniquePipeline{
+    public queue?:string;
+    public zwrite?:string;
+    public blend?:string;
+    public ztest?:string;
+}
+
+export class SFXTechniqueProperty{
+    public type:string;
+    public index:string;
+    public semantic:string;
+    public variable:string;
+}
+
+export type SFXTechniqueProperties = {[key:string]:SFXTechniqueProperty}
+
+export class SFXTechnique{
+    public name:string;
+    public vsEntry:string;
+    public psEntry:string;
+    public pipeline?:SFXTechniquePipeline;
+    public properties?:SFXTechniqueProperties;
+}
+
+export class SFXShaderTechnique extends SFXTechnique{
+    public glsl_vs:string;
+    public glsl_ps:string;
+    public technique:SFXTechnique;
+    public sfxName:string;
+}
+
+
 export class ShaderFXTechnique {
     public name: string;
     public meta_pipeline: { [key: string]: string | string[] } = {};
@@ -174,7 +206,7 @@ export class ShaderFX{
 
     private static s_shaderCache:Map<string,Shader> = new Map();
 
-    public static findShaderSource(bundle:string|AssetsBundle,shaderName:string): ShaderFXSource|null{
+    public static findShaderSource(bundle:string|AssetsBundle,shaderName:string): SFXShaderTechnique|null{
 
         let bundleObj:AssetsBundle = null;
         if(bundle instanceof AssetsBundle){
@@ -188,8 +220,9 @@ export class ShaderFX{
         let entry = bundleObj.getResource(shaderName);
         if(entry == null) return null;
         
-        let bianrbuffer = BinaryBuffer.createWithView(bundleObj.data,entry.data_offset,entry.data_size);
-        let shaderjson = bianrbuffer.readString();
+        let bufferView = new DataView(bundleObj.data.buffer,entry.data_offset,entry.data_size);
+        let utf8decoder = new TextDecoder();
+        let shaderjson = utf8decoder.decode(bufferView);
         return JSON.parse(shaderjson);
     }
 

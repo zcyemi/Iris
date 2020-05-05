@@ -1,13 +1,13 @@
 #file skyboxTex.sfx
-#include include/basis.sfx
+#include "basis.sfx"
 
 #GLSL
 precision mediump float;
 
-inout vec3 vWorldDir: TEXCOORD_0;
-uniform sampler2D uSampler: MAIN_TEXTURE;
+inout vec3 vWorldDir;
+uniform sampler2D uSampler;
 
-in vec4 aPosition :POSITION_0;
+in vec4 aPosition;
 void vertex(){
     vec4 pos = aPosition;
     pos.xy*=2.0;
@@ -18,7 +18,7 @@ void vertex(){
     vWorldDir = wpos.xyz;
 }
 
-out lowp vec4 fragColor : TARGET_0;
+out lowp vec4 fragColor;
 void fragment(){
     vec3 dir = vWorldDir.xyz;
     dir = normalize(dir);
@@ -30,8 +30,14 @@ void fragment(){
 #END
 
 technique skyboxTex{
-#pipeline queue skybox
-
-#param vs vertex
-#param ps fragment
+    vs: vertex;
+    ps: fragment;
+    pipeline:{
+        queue: skybox;
+    }
+    property:{
+        POSITION_0: aPosition;
+        TEXCOORD_0: aUV;
+        MAIN_TEXTURE: uSampler;
+    }
 }

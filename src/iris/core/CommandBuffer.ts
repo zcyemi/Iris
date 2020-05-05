@@ -119,13 +119,13 @@ export class CommandBuffer extends GraphicsObj{
             let shader:Shader = null;
             switch(skybox.type){
                 case SkyboxType.CubeMap:
-                    shader = grender.getInternalShader("@shaderfx/skyboxCube");
+                    shader = grender.getInternalShader("@sfx/skyboxCube");
                 break;
                 case SkyboxType.Procedural:
-                    shader = grender.getInternalShader("@shaderfx/skyboxPCG");
+                    shader = grender.getInternalShader("@sfx/skyboxPCG");
                 break;
                 case SkyboxType.Tex360:
-                    shader = grender.getInternalShader("@shaderfx/skyboxTex");
+                    shader = grender.getInternalShader("@sfx/skyboxTex");
                 break;
             }
 

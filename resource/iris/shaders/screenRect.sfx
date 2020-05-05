@@ -1,15 +1,15 @@
 #file screenRect.sfx
-#include include/basis.sfx
+#include "basis.sfx"
 
 #GLSL
 precision mediump float;
 
 uniform vec4 uRect;
 
-in vec4 aPosition : POSITION_0;
-in vec2 aUV : TEXCOORD_0;
+in vec4 aPosition;
+in vec2 aUV;
 
-inout vec2 vUV : TEXCOORD_0;
+inout vec2 vUV;
 
 void vertex(){
     vec4 pos = aPosition;
@@ -23,7 +23,7 @@ void vertex(){
 
 
 uniform sampler2D uSampler;
-out vec4 fragColor : TARGET_0;
+out vec4 fragColor;
 void fragment(){
     fragColor = texture(uSampler,vUV);
 }
@@ -31,10 +31,13 @@ void fragment(){
 #END
 
 technique screenRect{
-    #version 300 es
-    #pipeline queue opaque
-
-    #param vs vertex
-    #param ps fragment
-
+    vs: vertex;
+    ps: fragment;
+    pipeline:{
+        queue: opaque;
+    }
+    property:{
+        POSITION_0: aPosition;
+        TEXCOORD_0: aUV;
+    }
 }

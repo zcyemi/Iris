@@ -53,11 +53,11 @@ export class InternalRenderModel extends GraphicsObj implements IRenderModel {
             throw new Error("InternalPipeline require iris.resbundle");
         }
 
-        this.m_matDefault = new Material(ShaderFX.findShader(resBundle, "@shaderfx/unlit_color"));
-        this.m_matError = new Material(ShaderFX.findShader(resBundle, "@shaderfx/unlit_color"));
+        this.m_matDefault = new Material(ShaderFX.findShader(resBundle, "@sfx/unlit_color"));
+        this.m_matError = new Material(ShaderFX.findShader(resBundle, "@sfx/unlit_color"));
 
-        this.m_matBlit = new Material(ShaderFX.findShader(resBundle, "@shaderfx/internal/blit_flip"));
-        this.m_matBlitFlip = new Material(ShaderFX.findShader(resBundle,"@shaderfx/internal/blit"));
+        this.m_matBlit = new Material(ShaderFX.findShader(resBundle, "@sfx/internal_blit_flip"));
+        this.m_matBlitFlip = new Material(ShaderFX.findShader(resBundle,"@sfx/internal_blit"));
 
         this.m_fullscreenRender = new MeshRender(MeshPrimitive.Quad, this.m_matBlit, false);
     }

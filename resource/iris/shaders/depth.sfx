@@ -1,12 +1,10 @@
 #file depth.sfx
-#include include/basis.sfx
+#include "basis.sfx"
 
 #GLSL
 precision mediump float;
-#pragma vs vertex
-#pragma ps fragment
 
-in vec4 aPosition : POSITION_0;
+in vec4 aPosition;
 void vertex(){
     gl_Position = MATRIX_MVP * aPosition;
 }
@@ -17,9 +15,12 @@ void fragment(){
 #END
 
 technique depth{
-    #version 300 es
-    #pipeline queue other
-
-    #param vs vertex
-    #param ps fragment
+    vs: vertex;
+    ps: fragment;
+    pipeline:{
+        queue: other;
+    }
+    property:{
+        POSITION_0: aPosition;
+    }
 }

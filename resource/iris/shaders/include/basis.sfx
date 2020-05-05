@@ -1,6 +1,8 @@
-#file include/basis.sfx
+#file basis.sfx
 
 #GLSL
+precision mediump float;
+
 #define PI 3.1415926
 #define PI_2 6.2831852
 #define PI_HALF 1.5707963

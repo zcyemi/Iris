@@ -35,7 +35,7 @@ export class PassGizmos extends RenderPass{
         const glctx =pipe.glctx;
 
         if(PassGizmos.s_shader == null){
-            let shader = ShaderFX.findShader("iris","@shaderfx/gizmos");
+            let shader = ShaderFX.findShader("iris","@@sfx//gizmos");
             PassGizmos.s_shader = shader;
         }
 
@@ -183,7 +183,7 @@ export class PassGizmos extends RenderPass{
 
         const pipe = this.pipeline;
 
-        let shader =ShaderFX.findShader("iris","@shaderfx/unlit_color");
+        let shader =ShaderFX.findShader("iris","@sfx/unlit_color");
         let mat = new Material(shader);
         this.m_matColor = mat;
         mat.setColor("Color",glmath.vec4(1.0,0,0,1.0));

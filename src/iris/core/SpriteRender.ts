@@ -28,7 +28,7 @@ export class SpriteRender extends MeshRender{
         super();
         this.mesh = MeshPrimitive.Quad;
 
-        let shader = ShaderFX.findShader("iris","@shaderfx/sprite");
+        let shader = ShaderFX.findShader("iris","@sfx/sprite");
         this.material = new Material(shader);
     }
 

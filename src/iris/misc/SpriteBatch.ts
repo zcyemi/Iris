@@ -39,7 +39,7 @@ export class SpriteBatch{
         let mat = this.m_matRect;
         if(mat == null){
 
-            let shader = ShaderFX.findShader("iris","@shaderfx/rect");
+            let shader = ShaderFX.findShader("iris","@sfx/rect");
             mat = new Material(shader);
             this.m_matRect = mat;
         }

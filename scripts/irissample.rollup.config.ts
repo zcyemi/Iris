@@ -2,8 +2,6 @@ import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs'
 import typescript from 'rollup-plugin-typescript2';
 import globals from 'rollup-plugin-node-globals';
-import autoExternal from 'rollup-plugin-auto-external';
-
 
 export default{
     input: 'src/sample/irissample.ts',
@@ -20,7 +18,6 @@ export default{
             tsconfig: 'tsconfig.json',
             useTsconfigDeclarationDir:true
         }),
-        // autoExternal(),
         commonjs({
             include: 'node_modules/**'
         }),

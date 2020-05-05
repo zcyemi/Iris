@@ -1,13 +1,13 @@
 #file text.sfx
-#include include/basis.sfx
+#include "basis.sfx"
 
 #GLSL
 precision mediump float;
 
-inout vec2 vUV: TEXCOORD_0;
+inout vec2 vUV;
 
-in vec4 aPosition : POSITION_0;
-in vec2 aUV : TEXCOORD_0;
+in vec4 aPosition;
+in vec2 aUV;
 
 void vertex(){
     vec2 pos = 2.0 * (aPosition.xy * _screenparam_.zw) -1.0 ;
@@ -15,7 +15,7 @@ void vertex(){
     vUV = aUV;
 }
 
-out vec4 fragColor :TARGET_0;
+out vec4 fragColor;
 
 uniform sampler2D uSampler;
 
@@ -28,11 +28,16 @@ void fragment(){
 #END
 
 technique text{
-    #pipeline queue overlay
-    #pipeline zwrite off
-    #pipeline ztest always
-    #pipeline blend src_alpha one_minus_src_alpha
-
-    #param vs vertex
-    #param ps fragment
+    vs: vertex;
+    ps: fragment;
+    pipeline:{
+        queue: overlay;
+        zwrite: off;
+        ztest: always;
+        blend: src_alpha,one_minus_src_alpha;
+    }
+    property:{
+        POSITION_0: aPosition;
+        TEXCOORD_0: aUV;
+    }
 }

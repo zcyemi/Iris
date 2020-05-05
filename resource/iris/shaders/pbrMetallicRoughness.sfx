@@ -1,7 +1,7 @@
 #file pbrmetal.sfx
-#include include/basis.sfx
-#include include/light.sfx
-#include include/shadowmap.sfx
+#include "basis.sfx"
+#include "light.sfx"
+#include "shadowmap.sfx"
 
 #GLSL
 
@@ -11,23 +11,19 @@ struct V2F{
     vec4 wpos;
     vec2 uv;
     vec3 normal;
-    #ifdef SHADOW_ON
     vec4 lpos;
-    #endif
 };
 
 inout V2F v2f;
 
-in vec3 aPosition: POSITION_0;
-in vec3 aNormal : NORMAL_0;
-in vec2 aUV : TEXCOORD_0;
+in vec3 aPosition;
+in vec3 aNormal;
+in vec2 aUV;
 
 void vertex(){
     vec4 wpos = MATRIX_M * vec4(aPosition,1.0);
     v2f.wpos = wpos;
-    #ifdef SHADOW_ON
-    v2f.lpos = uLightMtx[0] * wpos;
-    #endif
+    v2f.lpos = uLightMtx0 * wpos;
     v2f.normal = ObjToWorldDir(aNormal.xyz);
     gl_Position = MATRIX_VP * wpos;
     v2f.uv = aUV;
@@ -45,7 +41,7 @@ uniform sampler2D uSampler;
 uniform sampler2D uTexMetallicRoughness;
 uniform sampler2D uTexEmissive;
 
-out vec4 fragColor: TARGET_0;
+out vec4 fragColor;
 
 vec3 diffuse(vec3 diffcolor){
     return diffcolor / PI;
@@ -103,22 +99,26 @@ void fragment(){
 
     col += ambient;
 
-    #ifdef SHADOW_ON
-    float shadow = computeShadow(v2f.lpos,uShadowMap);
+    vec4 lightpos = v2f.lpos;
+
+    float shadow = computeShadow(lightpos,uShadowMap);
     shadow = clamp(shadow+0.5,0.0,1.0);
     col = mix(min(col,ambient),col,shadow);
-    #endif
     fragColor = vec4(col *1.2,1.0);
 }
 
 #END
 
+//#multicompile SHADOW_ON
 technique pbrMetal{
-    #version 300 es
-    #multicompile SHADOW_ON
-
-    #pipeline queue opaque
-
-    #param vs vertex
-    #param ps fragment
+    vs: vertex;
+    ps: fragment;
+    pipeline:{
+        queue: opaque;
+    }
+    property:{
+        POSITION_0: aPosition;
+        TEXCOORD_0: aUV;
+        NORMAL_0: aNormal;
+    }
 }

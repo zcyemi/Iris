@@ -1,10 +1,11 @@
 #file skyboxPCG.sfx
-#include include/basis.sfx
+
+#include "basis.sfx"
 
 #GLSL
 precision mediump float;
 
-inout vec3 vWorldDir: TEXCOORD_0;
+inout vec3 vWorldDir;
 #define SAMPLES_NUMS 16
 // https://www.shadertoy.com/view/XlBfRD
 // License (MIT) Copyright (C) 2017-2018 Rui. All rights reserved.
@@ -228,7 +229,7 @@ float noise(vec2 uv)
 }
 
 
-in vec4 aPosition :POSITION_0;
+in vec4 aPosition;
 void vertex(){
     vec4 pos = aPosition;
     pos.xy*=2.0;
@@ -239,7 +240,7 @@ void vertex(){
     vWorldDir = wpos.xyz;
 }
 
-out lowp vec4 fragColor : TARGET_0;
+out lowp vec4 fragColor;
 
 void fragment_pcg(){
     vec3 dir = vWorldDir.xyz;
@@ -273,7 +274,12 @@ void fragment_pcg(){
 #END
 
 technique skyboxPCG{
-#pipeline queue skybox
-#param vs vertex
-#param ps fragment_pcg
+	vs: vertex;
+    ps: fragment_pcg;
+    pipeline:{
+        queue: skybox;
+    }
+    property: {
+        POSITION_0: aPosition;
+    }
 }

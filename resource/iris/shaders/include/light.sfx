@@ -1,4 +1,4 @@
-#file include/light.sfx
+#file light.sfx
 
 #GLSL
 layout (std140) uniform UNIFORM_LIGHT{
