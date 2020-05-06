@@ -27,5 +27,6 @@ technique unlit_color{
     }
     property:{
         POSITION_0: aPosition;
+        MAIN_COLOR: uColor;
     }
 }

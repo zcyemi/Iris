@@ -57,8 +57,7 @@ export class RenderModel implements IGraphicObj{
         // this.m_uniformShadowMap = new ShaderUniformBuffer(glctx,ShaderDataUniformShadowMap,2,ShaderFX.UNIFORM_SHADOWMAP);
         // this.m_uniformLight = new ShaderUniformBuffer(glctx,ShaderDataUniformLight,3,ShaderFX.UNIFORM_LIGHT);
     
-        let shaderblit= ShaderFX.findShader("iris","@sfx/blit");
-
+        let shaderblit= ShaderFX.findShader("iris","@sfx/unlit");
         this.m_matFullscreen = new Material(shaderblit);
         this.m_renderFullscreen = new MeshRender(MeshPrimitive.Quad,this.m_matFullscreen);
 

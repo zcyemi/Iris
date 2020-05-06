@@ -32,5 +32,6 @@ technique unlit_texture{
     property:{
         POSITION_0: aPosition;
         TEXCOORD_0: aUV;
+        MAIN_TEXTURE: uSampler;
     }
 }

@@ -1,5 +1,5 @@
 import { UIContainer, UIRenderer, UIRenderingBind, UISourceLocal } from '@zcyemi/entangui';
-import { Camera, ClearType, Delayter, FrameTimer, GameObject, GLUtility, GraphicsContext, GraphicsRender, Input, Skybox, WindowUtility } from '../iris';
+import { Camera, ClearType, Delayter, FrameTimer, GameObject, GLUtility, GraphicsContext, GraphicsRender, Input, Skybox, WindowUtility, vec4 } from '../iris';
 import { AssetsDataBase } from '../iris/core/AssetsDatabase';
 import { GameContext } from '../iris/core/GameContext';
 import { GameTime } from '../iris/core/GameTime';
@@ -12,6 +12,7 @@ import { InspectorEditorGUI } from './editor/InspectorEditorGUI';
 import { SceneEditorGUI } from './editor/SceneEditorGUI';
 import { SampleBase } from './sampleBase';
 import { SampleBasisCube } from './basis/SampleBasisCube';
+import { SampleBasisCmdBuffer } from './basis/SampleBasisCmdBuffer';
 
 export class IrisSample extends UIContainer{
     private m_selectSampleId:string;
@@ -48,7 +49,6 @@ export class IrisSample extends UIContainer{
         this.m_drawCallViewGUI = new DrawCallViewEditorGUI(this);
         this.m_drawCallViewGUI.onInit();
     }
-
 
     public setIrisCanvas(canvas:IrisCanvas){
         this.canvas = canvas;
@@ -259,9 +259,8 @@ function IrisSampleInit(){
 
 window['IrisSampleInit'] = IrisSampleInit;
 
-
+SampleBase.registerSample('basic/cmdbuffer',SampleBasisCmdBuffer);
 SampleBase.registerSample('basic/triangle',SampleBasisTriangle);
 SampleBase.registerSample('basic/skybox',SampleBasisSkybox);
 SampleBase.registerSample('basic/cube',SampleBasisCube);
-
 
