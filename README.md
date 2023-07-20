@@ -5,7 +5,7 @@ The motivation of this project is try to build a well-designed rendering framewo
 This rendering framework is target for doing experiments of real-time rendering and graphics features like shadowing, lighting and simulations.
 If you are searching a WebGL 3D engines for production, Three.js and Babylon.js are more qualified libraries.
 
-I have migrated some rendering [demos](https://yemi.me/Iris-sample/) to WebGL by using Iris. All source codes can be found at this [repo](https://github.com/soyemi/Iris-sample).
+I have migrated some rendering [demos](https://zcyemi.github.io/Iris-sample/) to WebGL by using Iris. All source codes can be found at this [repo](https://github.com/zcyemi/Iris-sample).
 
 ## Core Features
 - Shader systems that supports lots of features.
